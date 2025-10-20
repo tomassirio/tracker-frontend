@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../core/constants/api_endpoints.dart';
+import '../../core/constants/api_endpoints.dart';
 
 /// Base API client for making HTTP requests
 class ApiClient {
