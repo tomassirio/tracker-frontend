@@ -16,6 +16,7 @@ This is a Flutter-based mobile application that provides a comprehensive API cli
 - **Achievements**: Unlock achievements based on travel milestones
 - **Visibility Control**: Set trips as private, protected, or public
 - **Admin Features**: Administrative controls for content moderation
+- **📱 UI Screens**: Complete UI for creating trips and viewing location updates on interactive maps
 
 ## Architecture
 
@@ -28,6 +29,8 @@ lib/
 ├── data/
 │   ├── models/          # Data models for API requests/responses
 │   └── services/        # API client services
+├── presentation/
+│   └── screens/         # UI screens (Home, Create Trip, Trip Detail)
 └── main.dart
 ```
 
@@ -59,6 +62,15 @@ flutter pub get
 ```bash
 flutter run
 ```
+
+### Running the App
+
+Run the application:
+```bash
+flutter run
+```
+
+For detailed UI setup instructions, including Google Maps API configuration, see [UI_SETUP.md](UI_SETUP.md).
 
 ### Running Tests
 
