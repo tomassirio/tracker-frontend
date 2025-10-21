@@ -15,8 +15,6 @@ class TokenStorage {
     required String refreshToken,
     required String tokenType,
     required int expiresIn,
-    required String userId,
-    required String username,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final expiresAt = DateTime.now().millisecondsSinceEpoch + (expiresIn * 1000);
@@ -25,8 +23,6 @@ class TokenStorage {
     await prefs.setString(_refreshTokenKey, refreshToken);
     await prefs.setString(_tokenTypeKey, tokenType);
     await prefs.setInt(_expiresAtKey, expiresAt);
-    await prefs.setString(_userIdKey, userId);
-    await prefs.setString(_usernameKey, username);
   }
 
   /// Get access token

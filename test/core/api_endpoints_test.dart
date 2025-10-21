@@ -30,7 +30,7 @@ void main() {
 
     group('Trip endpoints', () {
       test('trip query endpoints are correct', () {
-        expect(ApiEndpoints.tripsUsersMe, '/trips/users/me');
+        expect(ApiEndpoints.tripsUsersMe, '/trips/me');
         expect(ApiEndpoints.tripPlansMe, '/trips/plans/me');
         expect(ApiEndpoints.tripsPublic, '/trips/public');
       });

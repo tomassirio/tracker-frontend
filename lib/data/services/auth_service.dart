@@ -33,8 +33,6 @@ class AuthService {
       refreshToken: authResponse.refreshToken,
       tokenType: authResponse.tokenType,
       expiresIn: authResponse.expiresIn,
-      userId: authResponse.userId,
-      username: authResponse.username,
     );
 
     return authResponse;
@@ -59,8 +57,6 @@ class AuthService {
       refreshToken: authResponse.refreshToken,
       tokenType: authResponse.tokenType,
       expiresIn: authResponse.expiresIn,
-      userId: authResponse.userId,
-      username: authResponse.username,
     );
 
     return authResponse;

@@ -41,16 +41,12 @@ class AuthResponse {
   final String refreshToken;
   final String tokenType;
   final int expiresIn; // seconds until token expires
-  final String userId;
-  final String username;
 
   AuthResponse({
     required this.accessToken,
     required this.refreshToken,
     required this.tokenType,
     required this.expiresIn,
-    required this.userId,
-    required this.username,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
@@ -59,8 +55,6 @@ class AuthResponse {
       refreshToken: json['refresh_token'] ?? json['refreshToken'],
       tokenType: json['token_type'] ?? json['tokenType'] ?? 'Bearer',
       expiresIn: json['expires_in'] ?? json['expiresIn'] ?? 3600,
-      userId: json['user_id'] ?? json['userId'],
-      username: json['username'],
     );
   }
 
@@ -69,8 +63,6 @@ class AuthResponse {
         'refresh_token': refreshToken,
         'token_type': tokenType,
         'expires_in': expiresIn,
-        'user_id': userId,
-        'username': username,
       };
 }
 

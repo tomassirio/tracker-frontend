@@ -2,7 +2,7 @@
 class ApiEndpoints {
   // Base URL - Update this with your actual API URL
   static const String commandBaseUrl = 'http://localhost:8081/api/1';
-  static const String queryBaseUrl = 'http://localhost:8082/api/';
+  static const String queryBaseUrl = 'http://localhost:8082/api/1';
   static const String authBaseUrl = 'http://localhost:8083/api/1';
 
   // Auth endpoints (use authBaseUrl)
@@ -20,7 +20,7 @@ class ApiEndpoints {
 
   // Trip endpoints
   static const String trips = '/trips';
-  static const String tripsUsersMe = '/trips/users/me';
+  static const String tripsUsersMe = '/trips/me';
   static String tripsUserById(String userId) => '/trips/users/$userId';
   static String tripById(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';

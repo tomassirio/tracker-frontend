@@ -220,8 +220,6 @@ class ApiClient {
           refreshToken: data['refresh_token'] ?? data['refreshToken'] ?? refreshToken,
           tokenType: data['token_type'] ?? data['tokenType'] ?? 'Bearer',
           expiresIn: data['expires_in'] ?? data['expiresIn'] ?? 3600,
-          userId: await _tokenStorage.getUserId() ?? data['user_id'] ?? data['userId'],
-          username: await _tokenStorage.getUsername() ?? data['username'],
         );
         return true;
       } else {
