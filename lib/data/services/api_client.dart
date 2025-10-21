@@ -1,184 +1,284 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_endpoints.dart';
+import 'token_storage.dart';
 
-/// Base API client for making HTTP requests
+/// Base API client with authentication support
 class ApiClient {
-  final http.Client _client;
-  String? _accessToken;
+  final http.Client _httpClient;
+  final TokenStorage _tokenStorage;
 
-  ApiClient({http.Client? client}) : _client = client ?? http.Client();
+  // Flag to prevent infinite refresh loops
+  bool _isRefreshing = false;
 
-  /// Set the access token for authenticated requests
-  void setAccessToken(String token) {
-    _accessToken = token;
+  ApiClient({
+    http.Client? httpClient,
+    TokenStorage? tokenStorage,
+  })  : _httpClient = httpClient ?? http.Client(),
+        _tokenStorage = tokenStorage ?? TokenStorage();
+
+  /// Determine which base URL to use based on endpoint and method
+  String _getBaseUrl(String endpoint, {bool isAuth = false}) {
+    if (isAuth || endpoint.startsWith('/auth')) {
+      return ApiEndpoints.authBaseUrl;
+    }
+    return ApiEndpoints.queryBaseUrl; // Default for GET requests
   }
 
-  /// Clear the access token
-  void clearAccessToken() {
-    _accessToken = null;
+  /// GET request (uses queryBaseUrl)
+  Future<http.Response> get(
+    String endpoint, {
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    final baseUrl = _getBaseUrl(endpoint);
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.get(uri, headers: requestHeaders);
+
+    // If unauthorized and we need auth, try to refresh token
+    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        // Retry the request with new token
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.get(uri, headers: newHeaders);
+      }
+    }
+
+    return response;
   }
 
-  /// Get common headers for requests
-  Map<String, String> _getHeaders({bool includeAuth = true}) {
-    final headers = <String, String>{
+  /// POST request (uses authBaseUrl for auth endpoints, commandBaseUrl for others)
+  Future<http.Response> post(
+    String endpoint, {
+    required Map<String, dynamic> body,
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    final baseUrl = endpoint.startsWith('/auth')
+        ? ApiEndpoints.authBaseUrl
+        : ApiEndpoints.commandBaseUrl;
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.post(
+      uri,
+      headers: requestHeaders,
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.post(
+          uri,
+          headers: newHeaders,
+          body: jsonEncode(body),
+        );
+      }
+    }
+
+    return response;
+  }
+
+  /// PUT request (uses commandBaseUrl)
+  Future<http.Response> put(
+    String endpoint, {
+    required Map<String, dynamic> body,
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    final baseUrl = endpoint.startsWith('/auth')
+        ? ApiEndpoints.authBaseUrl
+        : ApiEndpoints.commandBaseUrl;
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.put(
+      uri,
+      headers: requestHeaders,
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.put(
+          uri,
+          headers: newHeaders,
+          body: jsonEncode(body),
+        );
+      }
+    }
+
+    return response;
+  }
+
+  /// PATCH request (uses commandBaseUrl)
+  Future<http.Response> patch(
+    String endpoint, {
+    required Map<String, dynamic> body,
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    final uri = Uri.parse('${ApiEndpoints.commandBaseUrl}$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.patch(
+      uri,
+      headers: requestHeaders,
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.patch(
+          uri,
+          headers: newHeaders,
+          body: jsonEncode(body),
+        );
+      }
+    }
+
+    return response;
+  }
+
+  /// DELETE request (uses commandBaseUrl)
+  Future<http.Response> delete(
+    String endpoint, {
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    final uri = Uri.parse('${ApiEndpoints.commandBaseUrl}$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.delete(uri, headers: requestHeaders);
+
+    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.delete(uri, headers: newHeaders);
+      }
+    }
+
+    return response;
+  }
+
+  /// Build headers with auth token if required
+  Future<Map<String, String>> _buildHeaders(
+    bool requireAuth,
+    Map<String, String>? additionalHeaders,
+  ) async {
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      ...?additionalHeaders,
     };
 
-    if (includeAuth && _accessToken != null) {
-      headers['Authorization'] = 'Bearer $_accessToken';
+    if (requireAuth) {
+      final accessToken = await _tokenStorage.getAccessToken();
+      final tokenType = await _tokenStorage.getTokenType() ?? 'Bearer';
+
+      if (accessToken != null) {
+        headers['Authorization'] = '$tokenType $accessToken';
+      }
     }
 
     return headers;
   }
 
-  /// Make a GET request
-  Future<http.Response> get(
-    String endpoint, {
-    Map<String, String>? queryParameters,
-    bool requireAuth = true,
-  }) async {
-    final uri = Uri.parse('${ApiEndpoints.baseUrl}$endpoint')
-        .replace(queryParameters: queryParameters);
+  /// Refresh the access token using refresh token
+  Future<bool> _refreshTokenIfNeeded() async {
+    if (_isRefreshing) return false;
 
+    _isRefreshing = true;
     try {
-      final response = await _client.get(
+      final refreshToken = await _tokenStorage.getRefreshToken();
+      if (refreshToken == null) {
+        await _tokenStorage.clearTokens();
+        return false;
+      }
+
+      final uri = Uri.parse('${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}');
+      final response = await _httpClient.post(
         uri,
-        headers: _getHeaders(includeAuth: requireAuth),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refresh_token': refreshToken}),
       );
-      return response;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        await _tokenStorage.saveTokens(
+          accessToken: data['access_token'] ?? data['accessToken'],
+          refreshToken: data['refresh_token'] ?? data['refreshToken'] ?? refreshToken,
+          tokenType: data['token_type'] ?? data['tokenType'] ?? 'Bearer',
+          expiresIn: data['expires_in'] ?? data['expiresIn'] ?? 3600,
+          userId: await _tokenStorage.getUserId() ?? data['user_id'] ?? data['userId'],
+          username: await _tokenStorage.getUsername() ?? data['username'],
+        );
+        return true;
+      } else {
+        // Refresh failed, clear tokens
+        await _tokenStorage.clearTokens();
+        return false;
+      }
     } catch (e) {
-      throw ApiException('GET request failed: $e');
+      await _tokenStorage.clearTokens();
+      return false;
+    } finally {
+      _isRefreshing = false;
     }
   }
 
-  /// Make a POST request
-  Future<http.Response> post(
-    String endpoint, {
-    Map<String, dynamic>? body,
-    bool requireAuth = true,
-  }) async {
-    final uri = Uri.parse('${ApiEndpoints.baseUrl}$endpoint');
-
-    try {
-      final response = await _client.post(
-        uri,
-        headers: _getHeaders(includeAuth: requireAuth),
-        body: body != null ? jsonEncode(body) : null,
-      );
-      return response;
-    } catch (e) {
-      throw ApiException('POST request failed: $e');
-    }
-  }
-
-  /// Make a PUT request
-  Future<http.Response> put(
-    String endpoint, {
-    Map<String, dynamic>? body,
-    bool requireAuth = true,
-  }) async {
-    final uri = Uri.parse('${ApiEndpoints.baseUrl}$endpoint');
-
-    try {
-      final response = await _client.put(
-        uri,
-        headers: _getHeaders(includeAuth: requireAuth),
-        body: body != null ? jsonEncode(body) : null,
-      );
-      return response;
-    } catch (e) {
-      throw ApiException('PUT request failed: $e');
-    }
-  }
-
-  /// Make a PATCH request
-  Future<http.Response> patch(
-    String endpoint, {
-    Map<String, dynamic>? body,
-    bool requireAuth = true,
-  }) async {
-    final uri = Uri.parse('${ApiEndpoints.baseUrl}$endpoint');
-
-    try {
-      final response = await _client.patch(
-        uri,
-        headers: _getHeaders(includeAuth: requireAuth),
-        body: body != null ? jsonEncode(body) : null,
-      );
-      return response;
-    } catch (e) {
-      throw ApiException('PATCH request failed: $e');
-    }
-  }
-
-  /// Make a DELETE request
-  Future<http.Response> delete(
-    String endpoint, {
-    bool requireAuth = true,
-  }) async {
-    final uri = Uri.parse('${ApiEndpoints.baseUrl}$endpoint');
-
-    try {
-      final response = await _client.delete(
-        uri,
-        headers: _getHeaders(includeAuth: requireAuth),
-      );
-      return response;
-    } catch (e) {
-      throw ApiException('DELETE request failed: $e');
-    }
-  }
-
-  /// Handle API response
+  /// Handle API response with type conversion
   T handleResponse<T>(
     http.Response response,
     T Function(Map<String, dynamic>) fromJson,
   ) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
-      return fromJson(jsonData);
+      final data = jsonDecode(response.body);
+      return fromJson(data);
     } else {
-      throw ApiException(
-        'Request failed with status ${response.statusCode}: ${response.body}',
-      );
+      throw _handleError(response);
     }
   }
 
-  /// Handle API response for list data
+  /// Handle list response
   List<T> handleListResponse<T>(
     http.Response response,
     T Function(Map<String, dynamic>) fromJson,
   ) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final jsonData = jsonDecode(response.body) as List;
-      return jsonData
-          .map((item) => fromJson(item as Map<String, dynamic>))
-          .toList();
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => fromJson(item)).toList();
     } else {
-      throw ApiException(
-        'Request failed with status ${response.statusCode}: ${response.body}',
-      );
+      throw _handleError(response);
     }
   }
 
-  /// Handle API response with no content
+  /// Handle no content response (for DELETE operations)
   void handleNoContentResponse(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException(
-        'Request failed with status ${response.statusCode}: ${response.body}',
-      );
+      throw _handleError(response);
+    }
+    // Success - no content to return
+  }
+
+  /// Handle errors from API
+  Exception _handleError(http.Response response) {
+    try {
+      final error = jsonDecode(response.body);
+      final message = error['message'] ?? error['error'] ?? 'Unknown error';
+      return Exception('API Error (${response.statusCode}): $message');
+    } catch (e) {
+      return Exception('API Error (${response.statusCode}): ${response.body}');
     }
   }
-}
-
-/// Custom exception for API errors
-class ApiException implements Exception {
-  final String message;
-
-  ApiException(this.message);
-
-  @override
-  String toString() => 'ApiException: $message';
 }

@@ -52,7 +52,7 @@ class TripService {
   /// Get my trip plans
   Future<List<TripPlan>> getMyTripPlans() async {
     final response = await _apiClient.get(
-      ApiEndpoints.tripsPlansMe,
+      ApiEndpoints.tripPlansMe,
       requireAuth: true,
     );
 
@@ -107,7 +107,7 @@ class TripService {
   /// Update a trip
   Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
     final response = await _apiClient.put(
-      ApiEndpoints.tripUpdate(tripId),
+      ApiEndpoints.tripUpdates(tripId),
       body: request.toJson(),
       requireAuth: true,
     );
@@ -152,7 +152,7 @@ class TripService {
   /// Delete a trip
   Future<void> deleteTrip(String tripId) async {
     final response = await _apiClient.delete(
-      ApiEndpoints.tripDelete(tripId),
+      ApiEndpoints.tripById(tripId),
       requireAuth: true,
     );
 
@@ -181,7 +181,7 @@ class TripService {
   /// Create a trip plan
   Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
     final response = await _apiClient.post(
-      ApiEndpoints.tripsPlans,
+      ApiEndpoints.tripPlans,
       body: request.toJson(),
       requireAuth: true,
     );
@@ -198,7 +198,7 @@ class TripService {
     UpdateTripPlanRequest request,
   ) async {
     final response = await _apiClient.put(
-      ApiEndpoints.tripPlanUpdate(planId),
+      ApiEndpoints.tripUpdates(planId),
       body: request.toJson(),
       requireAuth: true,
     );
@@ -212,7 +212,7 @@ class TripService {
   /// Delete a trip plan
   Future<void> deleteTripPlan(String planId) async {
     final response = await _apiClient.delete(
-      ApiEndpoints.tripPlanDelete(planId),
+      ApiEndpoints.tripById(planId),
       requireAuth: true,
     );
 

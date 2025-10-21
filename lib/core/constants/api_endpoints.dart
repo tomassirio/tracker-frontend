@@ -1,9 +1,11 @@
-/// API endpoint constants for the Tracker application
+/// API endpoint constants
 class ApiEndpoints {
-  // Base URL - should be configured based on environment
-  static const String baseUrl = 'https://api.tracker.com';
+  // Base URL - Update this with your actual API URL
+  static const String commandBaseUrl = 'http://localhost:8081/api/1';
+  static const String queryBaseUrl = 'http://localhost:8082/api/';
+  static const String authBaseUrl = 'http://localhost:8083/api/1';
 
-  // Auth Module Endpoints
+  // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/auth/register';
   static const String authLogin = '/auth/login';
   static const String authLogout = '/auth/logout';
@@ -11,49 +13,44 @@ class ApiEndpoints {
   static const String authPasswordReset = '/auth/password/reset';
   static const String authPasswordChange = '/auth/password/change';
 
-  // User Module Endpoints
+  // User endpoints
   static const String usersMe = '/users/me';
-  static const String usersMeDelete = '/users/me';
-  static const String usersMePassword = '/users/me/password';
+  static String userById(String userId) => '/users/$userId';
   static String userFollow(String userId) => '/users/$userId/follow';
-  static String userUnfollow(String userId) => '/users/$userId/follow';
-  static String userProfile(String userId) => '/users/$userId';
 
-  // Trip Query Module Endpoints
+  // Trip endpoints
+  static const String trips = '/trips';
   static const String tripsUsersMe = '/trips/users/me';
   static String tripsUserById(String userId) => '/trips/users/$userId';
   static String tripById(String tripId) => '/trips/$tripId';
-  static const String tripsPlansMe = '/trips/plans/me';
-  static String tripPlanById(String planId) => '/trips/plans/$planId';
-  static const String tripsPublic = '/trips/public';
-
-  // Trip Command Module Endpoints
-  static const String trips = '/trips';
-  static String tripUpdate(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
-  static String tripDelete(String tripId) => '/trips/$tripId';
   static String tripUpdates(String tripId) => '/trips/$tripId/updates';
-  static const String tripsPlans = '/trips/plans';
-  static String tripPlanUpdate(String planId) => '/trips/plans/$planId';
-  static String tripPlanDelete(String planId) => '/trips/plans/$planId';
 
-  // Comments & Reactions Endpoints
+  // Trip plan endpoints
+  static const String tripPlansMe = '/trips/plans/me';
+  static const String tripPlans = '/trips/plans';
+  static String tripPlanById(String planId) => '/trips/plans/$planId';
+
+  // Public trips
+  static const String tripsPublic = '/trips/public';
+
+  // Comments endpoints
   static String tripComments(String tripId) => '/trips/$tripId/comments';
-  static String commentResponses(String tripId, String commentId) =>
-      '/trips/$tripId/comments/$commentId/responses';
-  static String commentReactions(String tripId, String commentId) =>
-      '/trips/$tripId/comments/$commentId/reactions';
+  static String commentById(String tripId, String commentId) =>
+      '/trips/$tripId/comments/$commentId';
+  static String commentReaction(String tripId, String commentId) =>
+      '/trips/$tripId/comments/$commentId/reaction';
 
-  // Achievements Endpoints
-  static const String achievements = '/achievements';
-  static const String userAchievements = '/users/me/achievements';
+  // Achievements endpoints
+  static const String achievementsMe = '/achievements/me';
+  static String achievementsUser(String userId) => '/achievements/$userId';
 
-  // Admin Module Endpoints
-  static String adminDeleteUser(String userId) => '/admin/users/$userId';
-  static String adminDeleteTrip(String tripId) => '/admin/trips/$tripId';
-  static String adminDeleteComment(String commentId) =>
-      '/admin/comments/$commentId';
-  static String adminGrantAdmin(String userId) =>
-      '/admin/users/$userId/grant-admin';
+  // Admin endpoints
+  static const String adminUsers = '/admin/users';
+  static String adminUserById(String userId) => '/admin/users/$userId';
+  static const String adminTrips = '/admin/trips';
+  static String adminTripById(String tripId) => '/admin/trips/$tripId';
+  static const String adminComments = '/admin/comments';
+  static String adminCommentById(String commentId) => '/admin/comments/$commentId';
 }

@@ -1,82 +1,87 @@
+/// Authentication request and response models
+
 /// Request model for user registration
 class RegisterRequest {
+  final String username;
   final String email;
   final String password;
-  final String username;
-  final String? displayName;
 
   RegisterRequest({
+    required this.username,
     required this.email,
     required this.password,
-    required this.username,
-    this.displayName,
   });
 
   Map<String, dynamic> toJson() => {
+        'username': username,
         'email': email,
         'password': password,
-        'username': username,
-        if (displayName != null) 'displayName': displayName,
       };
 }
 
 /// Request model for user login
 class LoginRequest {
-  final String email;
+  final String username;
   final String password;
 
   LoginRequest({
-    required this.email,
+    required this.username,
     required this.password,
   });
 
   Map<String, dynamic> toJson() => {
-        'email': email,
+        'username': username,
         'password': password,
       };
 }
 
-/// Response model for authentication operations
+/// Response model for authentication (login/register)
 class AuthResponse {
   final String accessToken;
   final String refreshToken;
+  final String tokenType;
+  final int expiresIn; // seconds until token expires
   final String userId;
-  final String email;
   final String username;
 
   AuthResponse({
     required this.accessToken,
     required this.refreshToken,
+    required this.tokenType,
+    required this.expiresIn,
     required this.userId,
-    required this.email,
     required this.username,
   });
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        accessToken: json['accessToken'] as String,
-        refreshToken: json['refreshToken'] as String,
-        userId: json['userId'] as String,
-        email: json['email'] as String,
-        username: json['username'] as String,
-      );
+  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    return AuthResponse(
+      accessToken: json['access_token'] ?? json['accessToken'],
+      refreshToken: json['refresh_token'] ?? json['refreshToken'],
+      tokenType: json['token_type'] ?? json['tokenType'] ?? 'Bearer',
+      expiresIn: json['expires_in'] ?? json['expiresIn'] ?? 3600,
+      userId: json['user_id'] ?? json['userId'],
+      username: json['username'],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'accessToken': accessToken,
-        'refreshToken': refreshToken,
-        'userId': userId,
-        'email': email,
+        'access_token': accessToken,
+        'refresh_token': refreshToken,
+        'token_type': tokenType,
+        'expires_in': expiresIn,
+        'user_id': userId,
         'username': username,
       };
 }
 
-/// Request model for token refresh
+/// Request model for refreshing access token
 class RefreshTokenRequest {
   final String refreshToken;
 
   RefreshTokenRequest({required this.refreshToken});
 
   Map<String, dynamic> toJson() => {
-        'refreshToken': refreshToken,
+        'refresh_token': refreshToken,
       };
 }
 
@@ -91,18 +96,18 @@ class PasswordResetRequest {
       };
 }
 
-/// Request model for password change
+/// Request model for changing password (when logged in)
 class PasswordChangeRequest {
-  final String currentPassword;
+  final String oldPassword;
   final String newPassword;
 
   PasswordChangeRequest({
-    required this.currentPassword,
+    required this.oldPassword,
     required this.newPassword,
   });
 
   Map<String, dynamic> toJson() => {
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
+        'old_password': oldPassword,
+        'new_password': newPassword,
       };
 }

@@ -32,14 +32,14 @@ void main() {
 
     group('TripStatus', () {
       test('toJson converts TripStatus to string correctly', () {
-        expect(TripStatus.created.toJson(), 'PLANNED');
+        expect(TripStatus.created.toJson(), 'CREATED');
         expect(TripStatus.in_progress.toJson(), 'IN_PROGRESS');
         expect(TripStatus.paused.toJson(), 'PAUSED');
         expect(TripStatus.finished.toJson(), 'FINISHED');
       });
 
       test('fromJson parses TripStatus from string correctly', () {
-        expect(TripStatus.fromJson('PLANNED'), TripStatus.created);
+        expect(TripStatus.fromJson('CREATED'), TripStatus.created);
         expect(TripStatus.fromJson('IN_PROGRESS'), TripStatus.in_progress);
         expect(TripStatus.fromJson('PAUSED'), TripStatus.paused);
         expect(TripStatus.fromJson('FINISHED'), TripStatus.finished);

@@ -43,7 +43,7 @@ void main() {
           'title': 'My Trip',
           'description': 'A great adventure',
           'visibility': 'PUBLIC',
-          'status': 'ONGOING',
+          'status': 'IN_PROGRESS',
           'commentsCount': 5,
           'reactionsCount': 10,
           'createdAt': '2024-01-01T00:00:00.000Z',
@@ -80,7 +80,7 @@ void main() {
         expect(json['userId'], 'user456');
         expect(json['title'], 'My Trip');
         expect(json['visibility'], 'PUBLIC');
-        expect(json['status'], 'ONGOING');
+        expect(json['status'], 'IN_PROGRESS');
       });
     });
 

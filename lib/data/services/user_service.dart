@@ -22,58 +22,58 @@ class UserService {
     );
   }
 
-  /// Delete own account
-  Future<void> deleteMyAccount() async {
-    final response = await _apiClient.delete(
-      ApiEndpoints.usersMeDelete,
-      requireAuth: true,
-    );
+  // /// Delete own account
+  // Future<void> deleteMyAccount() async {
+  //   final response = await _apiClient.delete(
+  //     ApiEndpoints.usersMe,
+  //     requireAuth: true,
+  //   );
+  //
+  //   _apiClient.handleNoContentResponse(response);
+  //   _apiClient.clearAccessToken();
+  // }
 
-    _apiClient.handleNoContentResponse(response);
-    _apiClient.clearAccessToken();
-  }
-
-  /// Change own password
-  Future<void> changeMyPassword(PasswordChangeRequest request) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.usersMePassword,
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    _apiClient.handleNoContentResponse(response);
-  }
+  // /// Change own password
+  // Future<void> changeMyPassword(PasswordChangeRequest request) async {
+  //   final response = await _apiClient.put(
+  //     ApiEndpoints.,
+  //     body: request.toJson(),
+  //     requireAuth: true,
+  //   );
+  //
+  //   _apiClient.handleNoContentResponse(response);
+  // }
 
   /// Follow a user
   Future<void> followUser(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.userFollow(userId),
-      requireAuth: true,
+      requireAuth: true, body: {},
     );
 
     _apiClient.handleNoContentResponse(response);
   }
 
-  /// Unfollow a user
-  Future<void> unfollowUser(String userId) async {
-    final response = await _apiClient.delete(
-      ApiEndpoints.userUnfollow(userId),
-      requireAuth: true,
-    );
+  // /// Unfollow a user
+  // Future<void> unfollowUser(String userId) async {
+  //   final response = await _apiClient.delete(
+  //     ApiEndpoints.userUnfollow(userId),
+  //     requireAuth: true,
+  //   );
+  //
+  //   _apiClient.handleNoContentResponse(response);
+  // }
 
-    _apiClient.handleNoContentResponse(response);
-  }
-
-  /// Get another user's public profile
-  Future<UserProfile> getUserProfile(String userId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.userProfile(userId),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => UserProfile.fromJson(json),
-    );
-  }
+  // /// Get another user's public profile
+  // Future<UserProfile> getUserProfile(String userId) async {
+  //   final response = await _apiClient.get(
+  //     ApiEndpoints.userProfile(userId),
+  //     requireAuth: true,
+  //   );
+  //
+  //   return _apiClient.handleResponse(
+  //     response,
+  //     (json) => UserProfile.fromJson(json),
+  //   );
+  // }
 }

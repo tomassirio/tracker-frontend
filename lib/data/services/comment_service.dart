@@ -46,7 +46,7 @@ class CommentService {
     CreateCommentResponseRequest request,
   ) async {
     final response = await _apiClient.post(
-      ApiEndpoints.commentResponses(tripId, commentId),
+      ApiEndpoints.commentById(tripId, commentId),
       body: request.toJson(),
       requireAuth: true,
     );
@@ -63,7 +63,7 @@ class CommentService {
     String commentId,
   ) async {
     final response = await _apiClient.get(
-      ApiEndpoints.commentReactions(tripId, commentId),
+      ApiEndpoints.commentById(tripId, commentId),
       requireAuth: true,
     );
 
@@ -80,7 +80,7 @@ class CommentService {
     AddReactionRequest request,
   ) async {
     final response = await _apiClient.post(
-      ApiEndpoints.commentReactions(tripId, commentId),
+      ApiEndpoints.commentById(tripId, commentId),
       body: request.toJson(),
       requireAuth: true,
     );
@@ -91,13 +91,13 @@ class CommentService {
     );
   }
 
-  /// Remove a reaction from a comment
-  Future<void> removeReaction(String tripId, String commentId) async {
-    final response = await _apiClient.delete(
-      ApiEndpoints.commentReactions(tripId, commentId),
-      requireAuth: true,
-    );
-
-    _apiClient.handleNoContentResponse(response);
-  }
+  // /// Remove a reaction from a comment
+  // Future<void> removeReaction(String tripId, String commentId) async {
+  //   final response = await _apiClient.delete(
+  //     ApiEndpoints.commentById(tripId, commentId),
+  //     requireAuth: true,
+  //   );
+  //
+  //   _apiClient.handleNoContentResponse(response);
+  // }
 }
