@@ -36,6 +36,7 @@ class ApiEndpoints {
   static const String trips = '/trips';
   static const String tripsMe = '/trips/me';
   static const String tripsPublic = '/trips/public';
+  static const String tripsAvailable = '/trips/me/available';
   static String tripsByUser(String userId) => '/trips/users/$userId';
   static String tripById(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';

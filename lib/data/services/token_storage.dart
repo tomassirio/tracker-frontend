@@ -6,7 +6,7 @@ class TokenStorage {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _tokenTypeKey = 'token_type';
   static const String _expiresAtKey = 'expires_at';
-  static const String _userIdKey = 'user_id';
+  static const String _userIdKey = 'userId';
   static const String _usernameKey = 'username';
 
   /// Save authentication tokens
@@ -15,6 +15,8 @@ class TokenStorage {
     required String refreshToken,
     required String tokenType,
     required int expiresIn,
+    String? userId,
+    String? username,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final expiresAt = DateTime.now().millisecondsSinceEpoch + (expiresIn * 1000);
@@ -23,6 +25,14 @@ class TokenStorage {
     await prefs.setString(_refreshTokenKey, refreshToken);
     await prefs.setString(_tokenTypeKey, tokenType);
     await prefs.setInt(_expiresAtKey, expiresAt);
+
+    // Save user info if provided
+    if (userId != null) {
+      await prefs.setString(_userIdKey, userId);
+    }
+    if (username != null) {
+      await prefs.setString(_usernameKey, username);
+    }
   }
 
   /// Get access token
@@ -83,4 +93,3 @@ class TokenStorage {
     await prefs.remove(_usernameKey);
   }
 }
-

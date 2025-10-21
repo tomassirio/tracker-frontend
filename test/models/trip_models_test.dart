@@ -40,7 +40,7 @@ void main() {
         final json = {
           'id': 'trip123',
           'userId': 'user456',
-          'title': 'My Trip',
+          'name': 'My Trip',
           'description': 'A great adventure',
           'visibility': 'PUBLIC',
           'status': 'IN_PROGRESS',
@@ -54,7 +54,7 @@ void main() {
 
         expect(trip.id, 'trip123');
         expect(trip.userId, 'user456');
-        expect(trip.title, 'My Trip');
+        expect(trip.name, 'My Trip');
         expect(trip.description, 'A great adventure');
         expect(trip.visibility, Visibility.public);
         expect(trip.status, TripStatus.in_progress);
@@ -66,7 +66,7 @@ void main() {
         final trip = Trip(
           id: 'trip123',
           userId: 'user456',
-          title: 'My Trip',
+          name: 'My Trip',
           description: 'A great adventure',
           visibility: Visibility.public,
           status: TripStatus.in_progress,
@@ -78,7 +78,7 @@ void main() {
 
         expect(json['id'], 'trip123');
         expect(json['userId'], 'user456');
-        expect(json['title'], 'My Trip');
+        expect(json['name'], 'My Trip');
         expect(json['visibility'], 'PUBLIC');
         expect(json['status'], 'IN_PROGRESS');
       });

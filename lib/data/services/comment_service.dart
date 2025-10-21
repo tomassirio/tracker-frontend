@@ -39,23 +39,39 @@ class CommentService {
     );
   }
 
-  // /// Reply to a comment
-  // Future<Comment> replyToComment(
-  //   String tripId,
-  //   String commentId,
-  //   CreateCommentResponseRequest request,
-  // ) async {
-  //   final response = await _apiClient.post(
-  //     ApiEndpoints.commentById(tripId, commentId),
-  //     body: request.toJson(),
-  //     requireAuth: true,
-  //   );
-  //
-  //   return _apiClient.handleResponse(
-  //     response,
-  //     (json) => Comment.fromJson(json),
-  //   );
-  // }
+  /// Reply to a comment
+  Future<Comment> replyToComment(
+    String tripId,
+    String commentId,
+    CreateCommentResponseRequest request,
+  ) async {
+    final response = await _apiClient.post(
+      '${ApiEndpoints.tripComments(tripId)}/$commentId/responses',
+      body: request.toJson(),
+      requireAuth: true,
+    );
+
+    return _apiClient.handleResponse(
+      response,
+      (json) => Comment.fromJson(json),
+    );
+  }
+
+  /// Get replies for a comment
+  Future<List<Comment>> getCommentReplies(
+    String tripId,
+    String commentId,
+  ) async {
+    final response = await _apiClient.get(
+      '${ApiEndpoints.tripComments(tripId)}/$commentId/responses',
+      requireAuth: true,
+    );
+
+    return _apiClient.handleListResponse(
+      response,
+      (json) => Comment.fromJson(json),
+    );
+  }
 
   /// Get reactions for a comment
   Future<List<Reaction>> getCommentReactions(

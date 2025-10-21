@@ -1,4 +1,5 @@
 import '../models/auth_models.dart';
+import '../models/user_models.dart';
 import '../../core/constants/api_endpoints.dart';
 import 'api_client.dart';
 import 'token_storage.dart';
@@ -27,13 +28,38 @@ class AuthService {
       (json) => AuthResponse.fromJson(json),
     );
 
-    // Save tokens after successful registration
+    // Save tokens first
     await _tokenStorage.saveTokens(
       accessToken: authResponse.accessToken,
       refreshToken: authResponse.refreshToken,
       tokenType: authResponse.tokenType,
       expiresIn: authResponse.expiresIn,
     );
+
+    // Fetch user profile to get userId and username
+    try {
+      final profileResponse = await _apiClient.get(
+        ApiEndpoints.usersMe,
+        requireAuth: true,
+      );
+      final profile = _apiClient.handleResponse(
+        profileResponse,
+        (json) => UserProfile.fromJson(json),
+      );
+
+      // Update tokens with user info
+      await _tokenStorage.saveTokens(
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+        tokenType: authResponse.tokenType,
+        expiresIn: authResponse.expiresIn,
+        userId: profile.id,
+        username: profile.username,
+      );
+    } catch (e) {
+      // If profile fetch fails, continue with just tokens
+      print('Failed to fetch user profile: $e');
+    }
 
     return authResponse;
   }
@@ -51,13 +77,49 @@ class AuthService {
       (json) => AuthResponse.fromJson(json),
     );
 
-    // Save tokens after successful login
+    // Save tokens first
     await _tokenStorage.saveTokens(
       accessToken: authResponse.accessToken,
       refreshToken: authResponse.refreshToken,
       tokenType: authResponse.tokenType,
       expiresIn: authResponse.expiresIn,
     );
+
+    print('Tokens saved, now fetching user profile...');
+
+    // Fetch user profile to get userId and username
+    try {
+      final profileResponse = await _apiClient.get(
+        ApiEndpoints.usersMe,
+        requireAuth: true,
+      );
+
+      print('Profile response status: ${profileResponse.statusCode}');
+      print('Profile response body: ${profileResponse.body}');
+
+      final profile = _apiClient.handleResponse(
+        profileResponse,
+        (json) => UserProfile.fromJson(json),
+      );
+
+      print('Profile fetched successfully - userId: ${profile.id}, username: ${profile.username}');
+
+      // Update tokens with user info
+      await _tokenStorage.saveTokens(
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+        tokenType: authResponse.tokenType,
+        expiresIn: authResponse.expiresIn,
+        userId: profile.id,
+        username: profile.username,
+      );
+
+      print('User info saved to storage successfully');
+    } catch (e, stackTrace) {
+      // If profile fetch fails, continue with just tokens
+      print('Failed to fetch user profile: $e');
+      print('Stack trace: $stackTrace');
+    }
 
     return authResponse;
   }

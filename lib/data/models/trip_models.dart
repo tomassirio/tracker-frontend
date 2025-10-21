@@ -1,16 +1,19 @@
 import '../../core/constants/enums.dart';
+import 'comment_models.dart';
 
 /// Trip model
 class Trip {
   final String id;
   final String userId;
-  final String title;
+  final String name;
+  final String username;
   final String? description;
   final Visibility visibility;
   final TripStatus status;
   final DateTime? startDate;
   final DateTime? endDate;
   final List<TripLocation>? locations;
+  final List<Comment>? comments;
   final int commentsCount;
   final int reactionsCount;
   final DateTime createdAt;
@@ -19,59 +22,84 @@ class Trip {
   Trip({
     required this.id,
     required this.userId,
-    required this.title,
+    required this.name,
+    required this.username,
     this.description,
     required this.visibility,
     required this.status,
     this.startDate,
     this.endDate,
     this.locations,
+    this.comments,
     this.commentsCount = 0,
     this.reactionsCount = 0,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory Trip.fromJson(Map<String, dynamic> json) => Trip(
-        id: json['id'] as String,
-        userId: json['userId'] as String,
-        title: json['title'] as String,
-        description: json['description'] as String?,
-        visibility: Visibility.fromJson(json['visibility'] as String),
-        status: TripStatus.fromJson(json['status'] as String),
-        startDate: json['startDate'] != null
-            ? DateTime.parse(json['startDate'] as String)
-            : null,
-        endDate: json['endDate'] != null
-            ? DateTime.parse(json['endDate'] as String)
-            : null,
-        locations: json['locations'] != null
-            ? (json['locations'] as List)
-                .map((loc) => TripLocation.fromJson(loc as Map<String, dynamic>))
-                .toList()
-            : null,
-        commentsCount: json['commentsCount'] as int? ?? 0,
-        reactionsCount: json['reactionsCount'] as int? ?? 0,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        updatedAt: DateTime.parse(json['updatedAt'] as String),
-      );
+  factory Trip.fromJson(Map<String, dynamic> json) {
+    final tripSettings = json['tripSettings'] as Map<String, dynamic>?;
+
+    return Trip(
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
+      name: json['name'] as String? ?? json['title'] as String? ?? 'Untitled Trip',
+      username: json['username'] as String? ?? '',
+      description: json['description'] as String?,
+      visibility: Visibility.fromJson(
+        ((tripSettings?['visibility'] ?? json['visibility']) as String?) ?? 'PRIVATE',
+      ),
+      status: TripStatus.fromJson(
+        ((tripSettings?['tripStatus'] ?? json['status']) as String?) ?? 'CREATED',
+      ),
+      startDate: json['startDate'] != null
+          ? DateTime.tryParse(json['startDate'] as String)
+          : null,
+      endDate: json['endDate'] != null
+          ? DateTime.tryParse(json['endDate'] as String)
+          : null,
+      locations: json['tripUpdates'] != null && json['tripUpdates'] is List
+          ? (json['tripUpdates'] as List)
+          .where((loc) => loc != null)
+          .map((loc) => TripLocation.fromJson(loc as Map<String, dynamic>))
+          .toList()
+          : null,
+      comments: json['comments'] != null && json['comments'] is List
+          ? (json['comments'] as List)
+          .where((comment) => comment != null)
+          .map((comment) => Comment.fromJson(comment as Map<String, dynamic>))
+          .toList()
+          : null,
+      commentsCount: (json['comments'] as List?)?.length ?? (json['commentsCount'] as int?) ?? 0,
+      reactionsCount: (json['reactionsCount'] as int?) ?? 0,
+      createdAt: DateTime.tryParse(
+          (json['creationTimestamp'] ?? json['createdAt']) as String? ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(
+          (json['updatedAt'] ?? json['creationTimestamp']) as String? ?? '') ??
+          DateTime.now(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'userId': userId,
-        'title': title,
-        if (description != null) 'description': description,
-        'visibility': visibility.toJson(),
-        'status': status.toJson(),
-        if (startDate != null) 'startDate': startDate!.toIso8601String(),
-        if (endDate != null) 'endDate': endDate!.toIso8601String(),
-        if (locations != null)
-          'locations': locations!.map((loc) => loc.toJson()).toList(),
-        'commentsCount': commentsCount,
-        'reactionsCount': reactionsCount,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'userId': userId,
+    'name': name,
+    'username': username,
+    if (description != null) 'description': description,
+    'visibility': visibility.toJson(),
+    'status': status.toJson(),
+    if (startDate != null) 'startDate': startDate!.toIso8601String(),
+    if (endDate != null) 'endDate': endDate!.toIso8601String(),
+    if (locations != null)
+      'locations': locations!.map((loc) => loc.toJson()).toList(),
+    if (comments != null)
+      'comments': comments!.map((comment) => comment.toJson()).toList(),
+    'commentsCount': commentsCount,
+    'reactionsCount': reactionsCount,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }
 
 /// Trip location/update model
@@ -92,23 +120,27 @@ class TripLocation {
     required this.timestamp,
   });
 
-  factory TripLocation.fromJson(Map<String, dynamic> json) => TripLocation(
-        id: json['id'] as String,
-        latitude: (json['latitude'] as num).toDouble(),
-        longitude: (json['longitude'] as num).toDouble(),
-        message: json['message'] as String?,
-        imageUrl: json['imageUrl'] as String?,
-        timestamp: DateTime.parse(json['timestamp'] as String),
-      );
+  factory TripLocation.fromJson(Map<String, dynamic> json) {
+    final location = json['location'] as Map<String, dynamic>?;
+
+    return TripLocation(
+      id: json['id'] as String? ?? '',
+      latitude: (location?['lat'] ?? json['latitude'] ?? 0).toDouble(),
+      longitude: (location?['lon'] ?? json['longitude'] ?? 0).toDouble(),
+      message: json['message'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'latitude': latitude,
-        'longitude': longitude,
-        if (message != null) 'message': message,
-        if (imageUrl != null) 'imageUrl': imageUrl,
-        'timestamp': timestamp.toIso8601String(),
-      };
+    'id': id,
+    'latitude': latitude,
+    'longitude': longitude,
+    if (message != null) 'message': message,
+    if (imageUrl != null) 'imageUrl': imageUrl,
+    'timestamp': timestamp.toIso8601String(),
+  };
 }
 
 /// Request model for creating a trip

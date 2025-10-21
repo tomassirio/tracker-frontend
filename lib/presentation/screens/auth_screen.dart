@@ -65,13 +65,9 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
 
-      // Navigate to home screen on success
+      // Pop back to home screen with success result
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
-          ),
-        );
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       setState(() {

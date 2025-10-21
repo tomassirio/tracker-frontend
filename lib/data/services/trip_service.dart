@@ -76,6 +76,19 @@ class TripService {
   }
 
   /// Get ongoing public trips
+  Future<List<Trip>> getAvailableTrips() async {
+    final response = await _apiClient.get(
+      ApiEndpoints.tripsAvailable,
+      requireAuth: true,
+    );
+
+    return _apiClient.handleListResponse(
+      response,
+      (json) => Trip.fromJson(json),
+    );
+  }
+
+  /// Get ongoing public trips
   Future<List<Trip>> getPublicTrips() async {
     final response = await _apiClient.get(
       ApiEndpoints.tripsPublic,

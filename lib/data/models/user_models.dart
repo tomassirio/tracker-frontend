@@ -26,19 +26,23 @@ class UserProfile {
     required this.createdAt,
   });
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-        id: json['id'] as String,
-        username: json['username'] as String,
-        email: json['email'] as String,
-        displayName: json['displayName'] as String?,
-        bio: json['bio'] as String?,
-        avatarUrl: json['avatarUrl'] as String?,
-        followersCount: json['followersCount'] as int? ?? 0,
-        followingCount: json['followingCount'] as int? ?? 0,
-        tripsCount: json['tripsCount'] as int? ?? 0,
-        isFollowing: json['isFollowing'] as bool? ?? false,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-      );
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    print('Parsing UserProfile from JSON: $json');
+
+    return UserProfile(
+      id: json['id'] as String? ?? json['userId'] as String? ?? '',
+      username: json['username'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      displayName: json['displayName'] as String?,
+      bio: json['bio'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
+      followersCount: json['followersCount'] as int? ?? 0,
+      followingCount: json['followingCount'] as int? ?? 0,
+      tripsCount: json['tripsCount'] as int? ?? 0,
+      isFollowing: json['isFollowing'] as bool? ?? false,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
