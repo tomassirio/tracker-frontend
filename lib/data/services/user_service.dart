@@ -1,5 +1,4 @@
 import '../models/user_models.dart';
-import '../models/auth_models.dart';
 import '../../core/constants/api_endpoints.dart';
 import 'api_client.dart';
 
@@ -47,7 +46,7 @@ class UserService {
   /// Follow a user
   Future<void> followUser(String userId) async {
     final response = await _apiClient.post(
-      ApiEndpoints.userFollow(userId),
+      ApiEndpoints.followUser(userId),
       requireAuth: true, body: {},
     );
 

@@ -16,41 +16,38 @@ class ApiEndpoints {
   // User endpoints
   static const String usersMe = '/users/me';
   static String userById(String userId) => '/users/$userId';
-  static String userFollow(String userId) => '/users/$userId/follow';
+  static String userByUsername(String username) => '/users/username/$username';
+
+  // Friends endpoints
+  static const String friends = '/users/friends';
+  static const String friendRequests = '/users/friends/requests';
+  static const String friendRequestsReceived = '/users/friends/requests/received';
+  static const String friendRequestsSent = '/users/friends/requests/sent';
+  static String friendRequestAccept(String requestId) => '/users/friends/requests/$requestId/accept';
+  static String friendRequestDecline(String requestId) => '/users/friends/requests/$requestId/decline';
+
+  // Follows endpoints
+  static const String follows = '/users/follows';
+  static const String followsFollowing = '/users/follows/following';
+  static const String followsFollowers = '/users/follows/followers';
+  static String followUser(String followedId) => '/users/follows/$followedId';
 
   // Trip endpoints
   static const String trips = '/trips';
-  static const String tripsUsersMe = '/trips/me';
-  static String tripsUserById(String userId) => '/trips/users/$userId';
+  static const String tripsMe = '/trips/me';
+  static const String tripsPublic = '/trips/public';
+  static String tripsByUser(String userId) => '/trips/users/$userId';
   static String tripById(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
   static String tripUpdates(String tripId) => '/trips/$tripId/updates';
+  static String tripComments(String tripId) => '/trips/$tripId/comments';
 
   // Trip plan endpoints
-  static const String tripPlansMe = '/trips/plans/me';
   static const String tripPlans = '/trips/plans';
+  static const String tripPlansMe = '/trips/plans/me';
   static String tripPlanById(String planId) => '/trips/plans/$planId';
 
-  // Public trips
-  static const String tripsPublic = '/trips/public';
-
   // Comments endpoints
-  static String tripComments(String tripId) => '/trips/$tripId/comments';
-  static String commentById(String tripId, String commentId) =>
-      '/trips/$tripId/comments/$commentId';
-  static String commentReaction(String tripId, String commentId) =>
-      '/trips/$tripId/comments/$commentId/reaction';
-
-  // Achievements endpoints
-  static const String achievementsMe = '/achievements/me';
-  static String achievementsUser(String userId) => '/achievements/$userId';
-
-  // Admin endpoints
-  static const String adminUsers = '/admin/users';
-  static String adminUserById(String userId) => '/admin/users/$userId';
-  static const String adminTrips = '/admin/trips';
-  static String adminTripById(String tripId) => '/admin/trips/$tripId';
-  static const String adminComments = '/admin/comments';
-  static String adminCommentById(String commentId) => '/admin/comments/$commentId';
+  static String commentReactions(String commentId) => '/comments/$commentId/reactions';
 }

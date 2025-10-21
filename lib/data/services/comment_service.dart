@@ -39,23 +39,23 @@ class CommentService {
     );
   }
 
-  /// Reply to a comment
-  Future<Comment> replyToComment(
-    String tripId,
-    String commentId,
-    CreateCommentResponseRequest request,
-  ) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.commentById(tripId, commentId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Comment.fromJson(json),
-    );
-  }
+  // /// Reply to a comment
+  // Future<Comment> replyToComment(
+  //   String tripId,
+  //   String commentId,
+  //   CreateCommentResponseRequest request,
+  // ) async {
+  //   final response = await _apiClient.post(
+  //     ApiEndpoints.commentById(tripId, commentId),
+  //     body: request.toJson(),
+  //     requireAuth: true,
+  //   );
+  //
+  //   return _apiClient.handleResponse(
+  //     response,
+  //     (json) => Comment.fromJson(json),
+  //   );
+  // }
 
   /// Get reactions for a comment
   Future<List<Reaction>> getCommentReactions(
@@ -63,7 +63,7 @@ class CommentService {
     String commentId,
   ) async {
     final response = await _apiClient.get(
-      ApiEndpoints.commentById(tripId, commentId),
+      ApiEndpoints.commentReactions(commentId),
       requireAuth: true,
     );
 
@@ -80,7 +80,7 @@ class CommentService {
     AddReactionRequest request,
   ) async {
     final response = await _apiClient.post(
-      ApiEndpoints.commentById(tripId, commentId),
+      ApiEndpoints.commentReactions(commentId),
       body: request.toJson(),
       requireAuth: true,
     );
@@ -94,7 +94,7 @@ class CommentService {
   // /// Remove a reaction from a comment
   // Future<void> removeReaction(String tripId, String commentId) async {
   //   final response = await _apiClient.delete(
-  //     ApiEndpoints.commentById(tripId, commentId),
+  //     ApiEndpoints.commentReactions(commentId),
   //     requireAuth: true,
   //   );
   //

@@ -13,7 +13,7 @@ class TripService {
   /// Get all my trips
   Future<List<Trip>> getMyTrips() async {
     final response = await _apiClient.get(
-      ApiEndpoints.tripsUsersMe,
+      ApiEndpoints.tripsMe,
       requireAuth: true,
     );
 
@@ -26,7 +26,7 @@ class TripService {
   /// Get trips by another user (respecting visibility)
   Future<List<Trip>> getUserTrips(String userId) async {
     final response = await _apiClient.get(
-      ApiEndpoints.tripsUserById(userId),
+      ApiEndpoints.tripsByUser(userId),
       requireAuth: true,
     );
 
