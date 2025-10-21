@@ -75,7 +75,7 @@ void main() async {
     print('  Visibility: ${trip.visibility.toJson()}');
 
     // Start the trip
-    final startRequest = ChangeStatusRequest(status: TripStatus.ongoing);
+    final startRequest = ChangeStatusRequest(status: TripStatus.in_progress);
     final startedTrip = await tripService.changeStatus(trip.id, startRequest);
     print('✓ Trip started! New status: ${startedTrip.status.toJson()}');
 

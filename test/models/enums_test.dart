@@ -32,22 +32,22 @@ void main() {
 
     group('TripStatus', () {
       test('toJson converts TripStatus to string correctly', () {
-        expect(TripStatus.planned.toJson(), 'PLANNED');
-        expect(TripStatus.ongoing.toJson(), 'ONGOING');
+        expect(TripStatus.created.toJson(), 'PLANNED');
+        expect(TripStatus.in_progress.toJson(), 'IN_PROGRESS');
         expect(TripStatus.paused.toJson(), 'PAUSED');
         expect(TripStatus.finished.toJson(), 'FINISHED');
       });
 
       test('fromJson parses TripStatus from string correctly', () {
-        expect(TripStatus.fromJson('PLANNED'), TripStatus.planned);
-        expect(TripStatus.fromJson('ONGOING'), TripStatus.ongoing);
+        expect(TripStatus.fromJson('PLANNED'), TripStatus.created);
+        expect(TripStatus.fromJson('IN_PROGRESS'), TripStatus.in_progress);
         expect(TripStatus.fromJson('PAUSED'), TripStatus.paused);
         expect(TripStatus.fromJson('FINISHED'), TripStatus.finished);
       });
 
       test('fromJson is case-insensitive', () {
-        expect(TripStatus.fromJson('planned'), TripStatus.planned);
-        expect(TripStatus.fromJson('Ongoing'), TripStatus.ongoing);
+        expect(TripStatus.fromJson('created'), TripStatus.created);
+        expect(TripStatus.fromJson('In_progress'), TripStatus.in_progress);
       });
 
       test('fromJson throws on invalid value', () {

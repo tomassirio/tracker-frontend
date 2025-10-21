@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
@@ -235,7 +235,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             onSelected: _changeTripStatus,
             itemBuilder: (context) => [
               const PopupMenuItem(
-                value: TripStatus.ongoing,
+                value: TripStatus.in_progress,
                 child: Row(
                   children: [
                     Icon(Icons.play_arrow, color: Colors.green),
@@ -388,9 +388,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   IconData _getStatusIcon(TripStatus status) {
     switch (status) {
-      case TripStatus.ongoing:
+      case TripStatus.in_progress:
         return Icons.play_arrow;
-      case TripStatus.planned:
+      case TripStatus.created:
         return Icons.schedule;
       case TripStatus.paused:
         return Icons.pause;

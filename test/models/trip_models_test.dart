@@ -57,7 +57,7 @@ void main() {
         expect(trip.title, 'My Trip');
         expect(trip.description, 'A great adventure');
         expect(trip.visibility, Visibility.public);
-        expect(trip.status, TripStatus.ongoing);
+        expect(trip.status, TripStatus.in_progress);
         expect(trip.commentsCount, 5);
         expect(trip.reactionsCount, 10);
       });
@@ -69,7 +69,7 @@ void main() {
           title: 'My Trip',
           description: 'A great adventure',
           visibility: Visibility.public,
-          status: TripStatus.ongoing,
+          status: TripStatus.in_progress,
           createdAt: DateTime(2024, 1, 1),
           updatedAt: DateTime(2024, 1, 2),
         );

@@ -38,11 +38,11 @@ enum Visibility {
 
 /// Status for trips
 enum TripStatus {
-  /// Trip is being planned
-  planned,
+  /// Trip is being created
+  created,
 
   /// Trip is currently ongoing
-  ongoing,
+  in_progress,
 
   /// Trip is paused
   paused,
@@ -53,10 +53,10 @@ enum TripStatus {
   /// Convert status to string for API
   String toJson() {
     switch (this) {
-      case TripStatus.planned:
-        return 'PLANNED';
-      case TripStatus.ongoing:
-        return 'ONGOING';
+      case TripStatus.created:
+        return 'CREATED';
+      case TripStatus.in_progress:
+        return 'IN_PROGRESS';
       case TripStatus.paused:
         return 'PAUSED';
       case TripStatus.finished:
@@ -67,10 +67,10 @@ enum TripStatus {
   /// Parse status from API response
   static TripStatus fromJson(String value) {
     switch (value.toUpperCase()) {
-      case 'PLANNED':
-        return TripStatus.planned;
-      case 'ONGOING':
-        return TripStatus.ongoing;
+      case 'CREATED':
+        return TripStatus.created;
+      case 'IN_PROGRESS':
+        return TripStatus.in_progress;
       case 'PAUSED':
         return TripStatus.paused;
       case 'FINISHED':
