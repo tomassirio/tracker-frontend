@@ -66,6 +66,7 @@ void main() {
         final trip = Trip(
           id: 'trip123',
           userId: 'user456',
+          username: "username",
           name: 'My Trip',
           description: 'A great adventure',
           visibility: Visibility.public,
