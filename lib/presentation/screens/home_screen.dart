@@ -36,9 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = await _authService.getCurrentUserId();
     final isLoggedIn = await _authService.isLoggedIn();
 
-    print(
-        'Loading user info - username: $username, userId: $userId, isLoggedIn: $isLoggedIn');
-
     setState(() {
       _username = username;
       _userId = userId;
