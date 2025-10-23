@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
+import 'package:tracker_frontend/data/repositories/home_repository.dart';
+import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
+import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/widgets/home/home_content.dart';
+import 'package:tracker_frontend/presentation/widgets/home/profile_menu.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
 import 'auth_screen.dart';
@@ -15,8 +18,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TripService _tripService = TripService();
-  final AuthService _authService = AuthService();
+  final HomeRepository _repository = HomeRepository();
   List<Trip> _trips = [];
   bool _isLoading = false;
   String? _error;
@@ -32,9 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserInfo() async {
-    final username = await _authService.getCurrentUsername();
-    final userId = await _authService.getCurrentUserId();
-    final isLoggedIn = await _authService.isLoggedIn();
+    final username = await _repository.getCurrentUsername();
+    final userId = await _repository.getCurrentUserId();
+    final isLoggedIn = await _repository.isLoggedIn();
 
     setState(() {
       _username = username;
@@ -50,15 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      // Check if user is logged in and get userId directly
-      final isLoggedIn = await _authService.isLoggedIn();
-      final userId = await _authService.getCurrentUserId();
-
-      // Load public trips if not logged in, or user's trips if logged in
-      final trips = isLoggedIn && userId != null
-          ? await _tripService.getAvailableTrips()
-          : await _tripService.getPublicTrips();
-
+      final trips = await _repository.loadTrips();
       setState(() {
         _trips = trips;
         _isLoading = false;
@@ -72,32 +66,58 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _logout() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
+    final confirm = await DialogHelper.showLogoutConfirmation(context);
 
-    if (confirm == true) {
-      await _authService.logout();
+    if (confirm) {
+      await _repository.logout();
       if (mounted) {
-        // Reload user info and trips (will show public trips now)
         await _loadUserInfo();
         await _loadTrips();
       }
     }
+  }
+
+  void _handleProfile() {
+    UiHelpers.showSuccessMessage(
+      context,
+      'User Profile coming soon!',
+    );
+  }
+
+  Future<void> _navigateToAuth() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AuthScreen(),
+      ),
+    );
+
+    if (result == true || mounted) {
+      await _loadUserInfo();
+      await _loadTrips();
+    }
+  }
+
+  Future<void> _navigateToCreateTrip() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateTripScreen(),
+      ),
+    );
+
+    if (result == true) {
+      _loadTrips();
+    }
+  }
+
+  void _navigateToTripDetail(Trip trip) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripDetailScreen(trip: trip),
+      ),
+    );
   }
 
   @override
@@ -108,117 +128,15 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           if (_username != null)
-            // Show profile menu for authenticated users
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.account_circle),
-              tooltip: 'Profile',
-              onSelected: (value) {
-                if (value == 'logout') {
-                  _logout();
-                } else if (value == 'profile') {
-                  // Navigate to user profile screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('User Profile coming soon!'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem<String>(
-                  enabled: false,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              child: Text(
-                                _username![0].toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _username!,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  if (_userId != null)
-                                    Text(
-                                      'ID: ${_userId!.substring(0, 8)}...',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                      ],
-                    ),
-                  ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'profile',
-                  child: Row(
-                    children: [
-                      Icon(Icons.person),
-                      SizedBox(width: 12),
-                      Text('User Profile'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'logout',
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.red),
-                      SizedBox(width: 12),
-                      Text('Logout', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-              ],
+            ProfileMenu(
+              username: _username!,
+              userId: _userId,
+              onLogout: _logout,
+              onProfile: _handleProfile,
             )
           else
-            // Show login button for non-authenticated users
             TextButton.icon(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AuthScreen(),
-                  ),
-                );
-                // Reload data if user logged in
-                if (result == true) {
-                  await _loadUserInfo();
-                  await _loadTrips();
-                } else if (mounted) {
-                  // Even if result is not true, check if user is logged in
-                  await _loadUserInfo();
-                  await _loadTrips();
-                }
-              },
+              onPressed: _navigateToAuth,
               icon: const Icon(Icons.login, color: Colors.white),
               label: const Text(
                 'Login',
@@ -227,220 +145,22 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
         ],
       ),
-      body: _buildBody(),
+      body: HomeContent(
+        isLoading: _isLoading,
+        error: _error,
+        trips: _trips,
+        isLoggedIn: _isLoggedIn,
+        onRefresh: _loadTrips,
+        onTripTap: _navigateToTripDetail,
+        onLoginPressed: _navigateToAuth,
+      ),
       floatingActionButton: _username != null
           ? FloatingActionButton.extended(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateTripScreen(),
-                  ),
-                );
-                if (result == true) {
-                  _loadTrips();
-                }
-              },
+              onPressed: _navigateToCreateTrip,
               icon: const Icon(Icons.add),
               label: const Text('Create Trip'),
             )
           : null,
     );
-  }
-
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading trips',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _loadTrips,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_trips.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _isLoggedIn ? Icons.explore_off : Icons.public_off,
-              size: 100,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _isLoggedIn ? 'No trips yet' : 'No public trips available',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _isLoggedIn
-                  ? 'Create your first trip to get started!'
-                  : 'Check back later or login to create your own trips',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            if (!_isLoggedIn) ...[
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AuthScreen(),
-                    ),
-                  );
-                  if (result == true || mounted) {
-                    _loadUserInfo();
-                    _loadTrips();
-                  }
-                },
-                icon: const Icon(Icons.login),
-                label: const Text('Login / Register'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadTrips,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: _trips.length,
-        itemBuilder: (context, index) {
-          final trip = _trips[index];
-          return _buildTripCard(trip);
-        },
-      ),
-    );
-  }
-
-  Card _buildTripCard(Trip trip) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: _getStatusColor(trip.status),
-          child: Icon(
-            _getStatusIcon(trip.status),
-            color: Colors.white,
-          ),
-        ),
-        title: Text(
-          trip.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (trip.description != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                trip.description!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Chip(
-                  label: Text(
-                    trip.status.toJson(),
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                  padding: EdgeInsets.zero,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                const SizedBox(width: 8),
-                Chip(
-                  label: Text(
-                    trip.visibility.toJson(),
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                  padding: EdgeInsets.zero,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ],
-            ),
-          ],
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TripDetailScreen(trip: trip),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Color _getStatusColor(status) {
-    switch (status.toString()) {
-      case 'TripStatus.in_progress':
-        return Colors.green;
-      case 'TripStatus.created':
-        return Colors.blue;
-      case 'TripStatus.paused':
-        return Colors.orange;
-      case 'TripStatus.finished':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(status) {
-    switch (status.toString()) {
-      case 'TripStatus.in_progress':
-        return Icons.play_arrow;
-      case 'TripStatus.created':
-        return Icons.schedule;
-      case 'TripStatus.paused':
-        return Icons.pause;
-      case 'TripStatus.finished':
-        return Icons.check;
-      default:
-        return Icons.help;
-    }
   }
 }
