@@ -12,11 +12,11 @@ import 'package:tracker_frontend/main.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
+    await tester.pump(const Duration(milliseconds: 500));
 
-    // Verify that the app builds without throwing an exception.
-    // The HomeScreen should be present in the widget tree.
     expect(find.byType(MaterialApp), findsOneWidget);
+
+    expect(find.byType(Scaffold), findsOneWidget);
   });
 }
