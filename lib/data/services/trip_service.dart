@@ -1,6 +1,6 @@
 import '../models/trip_models.dart';
 import '../../core/constants/api_endpoints.dart';
-import 'api_client.dart';
+import '../client/api_client.dart';
 
 /// Service for trip operations
 class TripService {

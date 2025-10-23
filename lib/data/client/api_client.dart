@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_endpoints.dart';
-import 'token_storage.dart';
+import '../storage/token_storage.dart';
 
 /// Base API client with authentication support
 class ApiClient {

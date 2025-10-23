@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
-import 'package:tracker_frontend/data/services/token_storage.dart';
+import 'package:tracker_frontend/data/storage/token_storage.dart';
 
 void main() {
   runApp(const MyApp());

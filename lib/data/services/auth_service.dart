@@ -1,8 +1,8 @@
 import '../models/auth_models.dart';
 import '../models/user_models.dart';
 import '../../core/constants/api_endpoints.dart';
-import 'api_client.dart';
-import 'token_storage.dart';
+import '../client/api_client.dart';
+import '../storage/token_storage.dart';
 
 /// Service for authentication operations
 class AuthService {
