@@ -1,38 +1,38 @@
 /// Reaction types
 enum ReactionType {
-  like,
-  love,
-  wow,
-  haha,
-  sad;
+  heart,
+  smiley,
+  sad,
+  laugh,
+  anger;
 
   String toJson() {
     switch (this) {
-      case ReactionType.like:
-        return 'LIKE';
-      case ReactionType.love:
-        return 'LOVE';
-      case ReactionType.wow:
-        return 'WOW';
-      case ReactionType.haha:
-        return 'HAHA';
+      case ReactionType.heart:
+        return 'HEART';
+      case ReactionType.smiley:
+        return 'SMILEY';
       case ReactionType.sad:
         return 'SAD';
+      case ReactionType.laugh:
+        return 'LAUGH';
+      case ReactionType.anger:
+        return 'ANGER';
     }
   }
 
   static ReactionType fromJson(String value) {
     switch (value.toUpperCase()) {
-      case 'LIKE':
-        return ReactionType.like;
-      case 'LOVE':
-        return ReactionType.love;
-      case 'WOW':
-        return ReactionType.wow;
-      case 'HAHA':
-        return ReactionType.haha;
+      case 'HEART':
+        return ReactionType.heart;
+      case 'SMILEY':
+        return ReactionType.smiley;
       case 'SAD':
         return ReactionType.sad;
+      case 'LAUGH':
+        return ReactionType.laugh;
+      case 'ANGER':
+        return ReactionType.anger;
       default:
         throw ArgumentError('Invalid reaction type: $value');
     }

@@ -1,49 +1,24 @@
-import '../../core/constants/api_endpoints.dart';
-import '../client/api_client.dart';
+import '../client/clients.dart';
 
 /// Service for admin operations
 class AdminService {
-  final ApiClient _apiClient;
+  final UserCommandClient _userCommandClient;
+  final TripCommandClient _tripCommandClient;
+  final CommentCommandClient _commentCommandClient;
 
-  AdminService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  AdminService({
+    UserCommandClient? userCommandClient,
+    TripCommandClient? tripCommandClient,
+    CommentCommandClient? commentCommandClient,
+  })  : _userCommandClient = userCommandClient ?? UserCommandClient(),
+        _tripCommandClient = tripCommandClient ?? TripCommandClient(),
+        _commentCommandClient = commentCommandClient ?? CommentCommandClient();
 
-  // /// Delete a user (admin only)
-  // Future<void> deleteUser(String userId) async {
-  //   final response = await _apiClient.delete(
-  //     ApiEndpoints.adminDeleteUser(userId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
+  /// Delete a trip (admin only)
+  Future<void> deleteTrip(String tripId) async {
+    await _tripCommandClient.deleteTrip(tripId);
+  }
 
-  // /// Delete a trip (admin only)
-  // Future<void> deleteTrip(String tripId) async {
-  //   final response = await _apiClient.delete(
-  //     ApiEndpoints.adminDeleteTrip(tripId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
-  //
-  // /// Delete a comment (admin only)
-  // Future<void> deleteComment(String commentId) async {
-  //   final response = await _apiClient.delete(
-  //     ApiEndpoints.adminDeleteComment(commentId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
-  //
-  // /// Grant admin privileges to a user (admin only)
-  // Future<void> grantAdmin(String userId) async {
-  //   final response = await _apiClient.post(
-  //     ApiEndpoints.adminGrantAdmin(userId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
+  // Note: User deletion and comment deletion would need to be added to backend API
+  // and corresponding clients before they can be implemented here
 }

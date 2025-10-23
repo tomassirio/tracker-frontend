@@ -7,31 +7,24 @@ import '../storage/token_storage.dart';
 class ApiClient {
   final http.Client _httpClient;
   final TokenStorage _tokenStorage;
+  final String baseUrl;
 
   // Flag to prevent infinite refresh loops
   bool _isRefreshing = false;
 
   ApiClient({
+    required this.baseUrl,
     http.Client? httpClient,
     TokenStorage? tokenStorage,
   })  : _httpClient = httpClient ?? http.Client(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
-  /// Determine which base URL to use based on endpoint and method
-  String _getBaseUrl(String endpoint, {bool isAuth = false}) {
-    if (isAuth || endpoint.startsWith('/auth')) {
-      return ApiEndpoints.authBaseUrl;
-    }
-    return ApiEndpoints.queryBaseUrl; // Default for GET requests
-  }
-
-  /// GET request (uses queryBaseUrl)
+  /// GET request
   Future<http.Response> get(
     String endpoint, {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
-    final baseUrl = _getBaseUrl(endpoint);
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
@@ -50,16 +43,13 @@ class ApiClient {
     return response;
   }
 
-  /// POST request (uses authBaseUrl for auth endpoints, commandBaseUrl for others)
+  /// POST request
   Future<http.Response> post(
     String endpoint, {
     required Map<String, dynamic> body,
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
-    final baseUrl = endpoint.startsWith('/auth')
-        ? ApiEndpoints.authBaseUrl
-        : ApiEndpoints.commandBaseUrl;
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
@@ -84,16 +74,13 @@ class ApiClient {
     return response;
   }
 
-  /// PUT request (uses commandBaseUrl)
+  /// PUT request
   Future<http.Response> put(
     String endpoint, {
     required Map<String, dynamic> body,
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
-    final baseUrl = endpoint.startsWith('/auth')
-        ? ApiEndpoints.authBaseUrl
-        : ApiEndpoints.commandBaseUrl;
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
@@ -118,14 +105,14 @@ class ApiClient {
     return response;
   }
 
-  /// PATCH request (uses commandBaseUrl)
+  /// PATCH request
   Future<http.Response> patch(
     String endpoint, {
     required Map<String, dynamic> body,
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
-    final uri = Uri.parse('${ApiEndpoints.commandBaseUrl}$endpoint');
+    final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
     var response = await _httpClient.patch(
@@ -149,13 +136,13 @@ class ApiClient {
     return response;
   }
 
-  /// DELETE request (uses commandBaseUrl)
+  /// DELETE request
   Future<http.Response> delete(
     String endpoint, {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
-    final uri = Uri.parse('${ApiEndpoints.commandBaseUrl}$endpoint');
+    final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
     var response = await _httpClient.delete(uri, headers: requestHeaders);

@@ -1,78 +1,79 @@
 import '../models/user_models.dart';
-import '../../core/constants/api_endpoints.dart';
-import '../client/api_client.dart';
+import '../client/clients.dart';
 
 /// Service for user operations
 class UserService {
-  final ApiClient _apiClient;
+  final UserQueryClient _userQueryClient;
+  final UserCommandClient _userCommandClient;
 
-  UserService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  UserService({
+    UserQueryClient? userQueryClient,
+    UserCommandClient? userCommandClient,
+  })  : _userQueryClient = userQueryClient ?? UserQueryClient(),
+        _userCommandClient = userCommandClient ?? UserCommandClient();
 
   /// Get own profile
   Future<UserProfile> getMyProfile() async {
-    final response = await _apiClient.get(
-      ApiEndpoints.usersMe,
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => UserProfile.fromJson(json),
-    );
+    return await _userQueryClient.getCurrentUser();
   }
 
-  // /// Delete own account
-  // Future<void> deleteMyAccount() async {
-  //   final response = await _apiClient.delete(
-  //     ApiEndpoints.usersMe,
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  //   _apiClient.clearAccessToken();
-  // }
+  /// Get user by ID
+  Future<UserProfile> getUserById(String userId) async {
+    return await _userQueryClient.getUserById(userId);
+  }
 
-  // /// Change own password
-  // Future<void> changeMyPassword(PasswordChangeRequest request) async {
-  //   final response = await _apiClient.put(
-  //     ApiEndpoints.,
-  //     body: request.toJson(),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
+  /// Get user by username
+  Future<UserProfile> getUserByUsername(String username) async {
+    return await _userQueryClient.getUserByUsername(username);
+  }
+
+  /// Get user's friends list
+  Future<List<UserProfile>> getFriends() async {
+    return await _userQueryClient.getFriends();
+  }
+
+  /// Get pending received friend requests
+  Future<List<dynamic>> getReceivedFriendRequests() async {
+    return await _userQueryClient.getReceivedFriendRequests();
+  }
+
+  /// Get pending sent friend requests
+  Future<List<dynamic>> getSentFriendRequests() async {
+    return await _userQueryClient.getSentFriendRequests();
+  }
+
+  /// Get users that current user follows
+  Future<List<UserProfile>> getFollowing() async {
+    return await _userQueryClient.getFollowing();
+  }
+
+  /// Get users that follow current user
+  Future<List<UserProfile>> getFollowers() async {
+    return await _userQueryClient.getFollowers();
+  }
+
+  /// Send a friend request
+  Future<void> sendFriendRequest(String userId) async {
+    await _userCommandClient.sendFriendRequest(userId);
+  }
+
+  /// Accept a friend request
+  Future<void> acceptFriendRequest(String requestId) async {
+    await _userCommandClient.acceptFriendRequest(requestId);
+  }
+
+  /// Decline a friend request
+  Future<void> declineFriendRequest(String requestId) async {
+    await _userCommandClient.declineFriendRequest(requestId);
+  }
 
   /// Follow a user
   Future<void> followUser(String userId) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.followUser(userId),
-      requireAuth: true, body: {},
-    );
-
-    _apiClient.handleNoContentResponse(response);
+    await _userCommandClient.followUser(userId);
   }
 
-  // /// Unfollow a user
-  // Future<void> unfollowUser(String userId) async {
-  //   final response = await _apiClient.delete(
-  //     ApiEndpoints.userUnfollow(userId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
-
-  // /// Get another user's public profile
-  // Future<UserProfile> getUserProfile(String userId) async {
-  //   final response = await _apiClient.get(
-  //     ApiEndpoints.userProfile(userId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   return _apiClient.handleResponse(
-  //     response,
-  //     (json) => UserProfile.fromJson(json),
-  //   );
-  // }
+  /// Unfollow a user
+  Future<void> unfollowUser(String userId) async {
+    await _userCommandClient.unfollowUser(userId);
+  }
 }

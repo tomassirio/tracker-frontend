@@ -2,12 +2,12 @@ import '../domain/reaction_type.dart';
 
 /// Request model for adding a reaction
 class AddReactionRequest {
-  final ReactionType type;
+  final ReactionType reactionType;
 
-  AddReactionRequest({required this.type});
+  AddReactionRequest({required this.reactionType});
 
   Map<String, dynamic> toJson() => {
-        'type': type.toJson(),
+        'reactionType': reactionType.toJson(),
       };
 }
 

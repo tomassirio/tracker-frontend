@@ -31,43 +31,43 @@ class ReactionPicker extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _ReactionButton(
-                emoji: '👍',
-                type: ReactionType.like,
-                onTap: () {
-                  Navigator.pop(context);
-                  onReactionSelected(ReactionType.like);
-                },
-              ),
-              _ReactionButton(
                 emoji: '❤️',
-                type: ReactionType.love,
+                type: ReactionType.heart,
                 onTap: () {
                   Navigator.pop(context);
-                  onReactionSelected(ReactionType.love);
+                  onReactionSelected(ReactionType.heart);
                 },
               ),
               _ReactionButton(
-                emoji: '😮',
-                type: ReactionType.wow,
+                emoji: '😊',
+                type: ReactionType.smiley,
                 onTap: () {
                   Navigator.pop(context);
-                  onReactionSelected(ReactionType.wow);
+                  onReactionSelected(ReactionType.smiley);
                 },
               ),
               _ReactionButton(
-                emoji: '😂',
-                type: ReactionType.haha,
-                onTap: () {
-                  Navigator.pop(context);
-                  onReactionSelected(ReactionType.haha);
-                },
-              ),
-              _ReactionButton(
-                emoji: '😢',
+                emoji: '😥',
                 type: ReactionType.sad,
                 onTap: () {
                   Navigator.pop(context);
                   onReactionSelected(ReactionType.sad);
+                },
+              ),
+              _ReactionButton(
+                emoji: '😂',
+                type: ReactionType.laugh,
+                onTap: () {
+                  Navigator.pop(context);
+                  onReactionSelected(ReactionType.laugh);
+                },
+              ),
+              _ReactionButton(
+                emoji: '😠',
+                type: ReactionType.anger,
+                onTap: () {
+                  Navigator.pop(context);
+                  onReactionSelected(ReactionType.anger);
                 },
               ),
             ],

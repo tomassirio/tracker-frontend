@@ -1,32 +1,26 @@
 import '../models/auth_models.dart';
 import '../models/user_models.dart';
 import '../../core/constants/api_endpoints.dart';
-import '../client/api_client.dart';
+import '../client/clients.dart';
 import '../storage/token_storage.dart';
 
 /// Service for authentication operations
 class AuthService {
-  final ApiClient _apiClient;
+  final AuthClient _authClient;
+  final UserQueryClient _userQueryClient;
   final TokenStorage _tokenStorage;
 
   AuthService({
-    ApiClient? apiClient,
+    AuthClient? authClient,
+    UserQueryClient? userQueryClient,
     TokenStorage? tokenStorage,
-  })  : _apiClient = apiClient ?? ApiClient(),
+  })  : _authClient = authClient ?? AuthClient(),
+        _userQueryClient = userQueryClient ?? UserQueryClient(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   /// Register a new user
   Future<AuthResponse> register(RegisterRequest request) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.authRegister,
-      body: request.toJson(),
-      requireAuth: false,
-    );
-
-    final authResponse = _apiClient.handleResponse(
-      response,
-      (json) => AuthResponse.fromJson(json),
-    );
+    final authResponse = await _authClient.register(request);
 
     // Save tokens first
     await _tokenStorage.saveTokens(
@@ -38,14 +32,7 @@ class AuthService {
 
     // Fetch user profile to get userId and username
     try {
-      final profileResponse = await _apiClient.get(
-        ApiEndpoints.usersMe,
-        requireAuth: true,
-      );
-      final profile = _apiClient.handleResponse(
-        profileResponse,
-        (json) => UserProfile.fromJson(json),
-      );
+      final profile = await _userQueryClient.getCurrentUser();
 
       // Update tokens with user info
       await _tokenStorage.saveTokens(
@@ -66,16 +53,7 @@ class AuthService {
 
   /// Login with email and password
   Future<AuthResponse> login(LoginRequest request) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.authLogin,
-      body: request.toJson(),
-      requireAuth: false,
-    );
-
-    final authResponse = _apiClient.handleResponse(
-      response,
-      (json) => AuthResponse.fromJson(json),
-    );
+    final authResponse = await _authClient.login(request);
 
     // Save tokens first
     await _tokenStorage.saveTokens(
@@ -89,18 +67,7 @@ class AuthService {
 
     // Fetch user profile to get userId and username
     try {
-      final profileResponse = await _apiClient.get(
-        ApiEndpoints.usersMe,
-        requireAuth: true,
-      );
-
-      print('Profile response status: ${profileResponse.statusCode}');
-      print('Profile response body: ${profileResponse.body}');
-
-      final profile = _apiClient.handleResponse(
-        profileResponse,
-        (json) => UserProfile.fromJson(json),
-      );
+      final profile = await _userQueryClient.getCurrentUser();
 
       print('Profile fetched successfully - userId: ${profile.id}, username: ${profile.username}');
 
@@ -128,11 +95,7 @@ class AuthService {
   Future<void> logout() async {
     try {
       // Try to call logout endpoint (best effort)
-      await _apiClient.post(
-        ApiEndpoints.authLogout,
-        body: {},
-        requireAuth: true,
-      );
+      await _authClient.logout();
     } catch (e) {
       // Continue even if API call fails
     } finally {
@@ -144,34 +107,12 @@ class AuthService {
   /// Request password reset email
   Future<void> requestPasswordReset(String email) async {
     final request = PasswordResetRequest(email: email);
-    final response = await _apiClient.post(
-      ApiEndpoints.authPasswordReset,
-      body: request.toJson(),
-      requireAuth: false,
-    );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw _apiClient.handleResponse(
-        response,
-        (json) => json,
-      );
-    }
+    await _authClient.initiatePasswordReset(request);
   }
 
   /// Change password (when logged in)
   Future<void> changePassword(PasswordChangeRequest request) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.authPasswordChange,
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw _apiClient.handleResponse(
-        response,
-        (json) => json,
-      );
-    }
+    await _authClient.changePassword(request);
   }
 
   /// Check if user is currently logged in

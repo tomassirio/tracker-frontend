@@ -27,9 +27,13 @@ class TripDetailRepository {
     return comment.replies ?? [];
   }
 
-  /// Loads reactions for a comment
-  Future<List<Reaction>> loadReactions(String tripId, String commentId) async {
-    return await _commentService.getCommentReactions(tripId, commentId);
+  /// Loads reactions for a comment from the comment object itself
+  /// Note: Reactions are stored as a Map<String, int> in the comment model (reaction type -> count)
+  /// This method returns an empty list as reactions are already embedded in the comment
+  Future<List<Reaction>> loadReactions(Comment comment) async {
+    // Reactions are already part of the comment object as a map
+    // Return empty list since the UI should use comment.reactions map directly
+    return [];
   }
 
   /// Adds a new top-level comment
@@ -41,21 +45,26 @@ class TripDetailRepository {
   }
 
   /// Adds a reply to a comment
-  Future<Comment> addReply(String tripId, String commentId, String message) async {
-    return await _commentService.replyToComment(
+  /// Uses parentCommentId in the request body to create a reply
+  Future<Comment> addReply(String tripId, String parentCommentId, String message) async {
+    return await _commentService.addComment(
       tripId,
-      commentId,
-      CreateCommentResponseRequest(message: message),
+      CreateCommentRequest(
+        message: message,
+        parentCommentId: parentCommentId,
+      ),
     );
   }
 
   /// Adds a reaction to a comment
-  Future<void> addReaction(String tripId, String commentId, ReactionType type) async {
-    await _commentService.addReaction(
-      tripId,
-      commentId,
-      AddReactionRequest(type: type),
-    );
+  Future<void> addReaction(String commentId, ReactionType reactionType) async {
+    final request = AddReactionRequest(reactionType: reactionType);
+    await _commentService.addReaction(commentId, request);
+  }
+
+  /// Removes a reaction from a comment
+  Future<void> removeReaction(String commentId) async {
+    await _commentService.removeReaction(commentId);
   }
 
   /// Changes the status of a trip
@@ -64,4 +73,3 @@ class TripDetailRepository {
     return await _tripService.changeStatus(tripId, request);
   }
 }
-

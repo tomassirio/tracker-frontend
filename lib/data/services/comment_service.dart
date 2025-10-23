@@ -1,119 +1,31 @@
 import '../models/comment_models.dart';
-import '../../core/constants/api_endpoints.dart';
-import '../client/api_client.dart';
+import '../client/clients.dart';
 
 /// Service for comment and reaction operations
 class CommentService {
-  final ApiClient _apiClient;
+  final CommentCommandClient _commentCommandClient;
 
-  CommentService({ApiClient? apiClient})
-      : _apiClient = apiClient ?? ApiClient();
-
-  /// Get comments for a trip
-  Future<List<Comment>> getTripComments(String tripId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripComments(tripId),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Comment.fromJson(json),
-    );
-  }
+  CommentService({CommentCommandClient? commentCommandClient})
+      : _commentCommandClient = commentCommandClient ?? CommentCommandClient();
 
   /// Add a comment to a trip
   Future<Comment> addComment(
     String tripId,
     CreateCommentRequest request,
   ) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.tripComments(tripId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Comment.fromJson(json),
-    );
-  }
-
-  /// Reply to a comment
-  Future<Comment> replyToComment(
-    String tripId,
-    String commentId,
-    CreateCommentResponseRequest request,
-  ) async {
-    final response = await _apiClient.post(
-      '${ApiEndpoints.tripComments(tripId)}/$commentId/responses',
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Comment.fromJson(json),
-    );
-  }
-
-  /// Get replies for a comment
-  Future<List<Comment>> getCommentReplies(
-    String tripId,
-    String commentId,
-  ) async {
-    final response = await _apiClient.get(
-      '${ApiEndpoints.tripComments(tripId)}/$commentId/responses',
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Comment.fromJson(json),
-    );
-  }
-
-  /// Get reactions for a comment
-  Future<List<Reaction>> getCommentReactions(
-    String tripId,
-    String commentId,
-  ) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.commentReactions(commentId),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Reaction.fromJson(json),
-    );
+    return await _commentCommandClient.createComment(tripId, request);
   }
 
   /// Add a reaction to a comment
-  Future<Reaction> addReaction(
-    String tripId,
+  Future<void> addReaction(
     String commentId,
     AddReactionRequest request,
   ) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.commentReactions(commentId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Reaction.fromJson(json),
-    );
+    await _commentCommandClient.addReaction(commentId, request);
   }
 
-  // /// Remove a reaction from a comment
-  // Future<void> removeReaction(String tripId, String commentId) async {
-  //   final response = await _apiClient.delete(
-  //     ApiEndpoints.commentReactions(commentId),
-  //     requireAuth: true,
-  //   );
-  //
-  //   _apiClient.handleNoContentResponse(response);
-  // }
+  /// Remove a reaction from a comment
+  Future<void> removeReaction(String commentId) async {
+    await _commentCommandClient.removeReaction(commentId);
+  }
 }

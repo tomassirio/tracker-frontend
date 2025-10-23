@@ -1,134 +1,65 @@
 import '../models/trip_models.dart';
-import '../../core/constants/api_endpoints.dart';
-import '../client/api_client.dart';
+import '../client/clients.dart';
 
 /// Service for trip operations
 class TripService {
-  final ApiClient _apiClient;
+  final TripQueryClient _tripQueryClient;
+  final TripCommandClient _tripCommandClient;
+  final TripPlanCommandClient _tripPlanCommandClient;
+  final TripUpdateCommandClient _tripUpdateCommandClient;
 
-  TripService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  TripService({
+    TripQueryClient? tripQueryClient,
+    TripCommandClient? tripCommandClient,
+    TripPlanCommandClient? tripPlanCommandClient,
+    TripUpdateCommandClient? tripUpdateCommandClient,
+  })  : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
+        _tripCommandClient = tripCommandClient ?? TripCommandClient(),
+        _tripPlanCommandClient = tripPlanCommandClient ?? TripPlanCommandClient(),
+        _tripUpdateCommandClient = tripUpdateCommandClient ?? TripUpdateCommandClient();
 
   // ===== Trip Query Operations =====
 
   /// Get all my trips
   Future<List<Trip>> getMyTrips() async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripsMe,
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
-  }
-
-  /// Get trips by another user (respecting visibility)
-  Future<List<Trip>> getUserTrips(String userId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripsByUser(userId),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+    return await _tripQueryClient.getCurrentUserTrips();
   }
 
   /// Get trip details
   Future<Trip> getTripById(String tripId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripById(tripId),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+    return await _tripQueryClient.getTripById(tripId);
   }
 
-  /// Get my trip plans
-  Future<List<TripPlan>> getMyTripPlans() async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripPlansMe,
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => TripPlan.fromJson(json),
-    );
+  /// Get all trips (admin only)
+  Future<List<Trip>> getAllTrips() async {
+    return await _tripQueryClient.getAllTrips();
   }
 
-  /// Get a specific trip plan
-  Future<TripPlan> getTripPlanById(String planId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripPlanById(planId),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => TripPlan.fromJson(json),
-    );
-  }
-
-  /// Get ongoing public trips
-  Future<List<Trip>> getAvailableTrips() async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripsAvailable,
-      requireAuth: true,
-    );
-
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
-  }
-
-  /// Get ongoing public trips
+  /// Get public trips (no authentication required)
   Future<List<Trip>> getPublicTrips() async {
-    final response = await _apiClient.get(
-      ApiEndpoints.tripsPublic,
-      requireAuth: false,
-    );
+    return await _tripQueryClient.getPublicTrips();
+  }
 
-    return _apiClient.handleListResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+  /// Get available trips
+  Future<List<Trip>> getAvailableTrips() async {
+    return await _tripQueryClient.getAvailableTrips();
+  }
+
+  /// Get trips by user ID (respects visibility)
+  Future<List<Trip>> getUserTrips(String userId) async {
+    return await _tripQueryClient.getTripsByUser(userId);
   }
 
   // ===== Trip Command Operations =====
 
   /// Create a new trip
   Future<Trip> createTrip(CreateTripRequest request) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.trips,
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+    return await _tripCommandClient.createTrip(request);
   }
 
   /// Update a trip
   Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.tripUpdates(tripId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+    return await _tripCommandClient.updateTrip(tripId, request);
   }
 
   /// Change trip visibility
@@ -136,73 +67,32 @@ class TripService {
     String tripId,
     ChangeVisibilityRequest request,
   ) async {
-    final response = await _apiClient.patch(
-      ApiEndpoints.tripVisibility(tripId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+    return await _tripCommandClient.changeVisibility(tripId, request);
   }
 
   /// Change trip status (start/pause/finish)
   Future<Trip> changeStatus(String tripId, ChangeStatusRequest request) async {
-    final response = await _apiClient.patch(
-      ApiEndpoints.tripStatus(tripId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => Trip.fromJson(json),
-    );
+    return await _tripCommandClient.changeStatus(tripId, request);
   }
 
   /// Delete a trip
   Future<void> deleteTrip(String tripId) async {
-    final response = await _apiClient.delete(
-      ApiEndpoints.tripById(tripId),
-      requireAuth: true,
-    );
-
-    _apiClient.handleNoContentResponse(response);
+    await _tripCommandClient.deleteTrip(tripId);
   }
 
   /// Send trip update (location, message)
-  Future<TripLocation> sendTripUpdate(
+  Future<void> sendTripUpdate(
     String tripId,
     TripUpdateRequest request,
   ) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.tripUpdates(tripId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => TripLocation.fromJson(json),
-    );
+    await _tripUpdateCommandClient.createTripUpdate(tripId, request);
   }
 
   // ===== Trip Plan Operations =====
 
   /// Create a trip plan
   Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.tripPlans,
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => TripPlan.fromJson(json),
-    );
+    return await _tripPlanCommandClient.createTripPlan(request);
   }
 
   /// Update a trip plan
@@ -210,25 +100,11 @@ class TripService {
     String planId,
     UpdateTripPlanRequest request,
   ) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.tripUpdates(planId),
-      body: request.toJson(),
-      requireAuth: true,
-    );
-
-    return _apiClient.handleResponse(
-      response,
-      (json) => TripPlan.fromJson(json),
-    );
+    return await _tripPlanCommandClient.updateTripPlan(planId, request);
   }
 
   /// Delete a trip plan
   Future<void> deleteTripPlan(String planId) async {
-    final response = await _apiClient.delete(
-      ApiEndpoints.tripById(planId),
-      requireAuth: true,
-    );
-
-    _apiClient.handleNoContentResponse(response);
+    await _tripPlanCommandClient.deleteTripPlan(planId);
   }
 }

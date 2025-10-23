@@ -1,6 +1,6 @@
 /// API endpoint constants
 class ApiEndpoints {
-  // Base URL - Update this with your actual API URL
+  // Base URLs for different services
   static const String commandBaseUrl = 'http://localhost:8081/api/1';
   static const String queryBaseUrl = 'http://localhost:8082/api/1';
   static const String authBaseUrl = 'http://localhost:8083/api/1';
@@ -13,42 +13,47 @@ class ApiEndpoints {
   static const String authPasswordReset = '/auth/password/reset';
   static const String authPasswordChange = '/auth/password/change';
 
-  // User endpoints
+  // User Query endpoints (use queryBaseUrl)
   static const String usersMe = '/users/me';
   static String userById(String userId) => '/users/$userId';
   static String userByUsername(String username) => '/users/username/$username';
+  static const String usersFriends = '/users/friends';
+  static const String usersFriendRequestsReceived = '/users/friends/requests/received';
+  static const String usersFriendRequestsSent = '/users/friends/requests/sent';
+  static const String usersFollowsFollowing = '/users/follows/following';
+  static const String usersFollowsFollowers = '/users/follows/followers';
 
-  // Friends endpoints
-  static const String friends = '/users/friends';
-  static const String friendRequests = '/users/friends/requests';
-  static const String friendRequestsReceived = '/users/friends/requests/received';
-  static const String friendRequestsSent = '/users/friends/requests/sent';
-  static String friendRequestAccept(String requestId) => '/users/friends/requests/$requestId/accept';
-  static String friendRequestDecline(String requestId) => '/users/friends/requests/$requestId/decline';
+  // User Command endpoints (use commandBaseUrl)
+  static const String usersCreate = '/users';
+  static const String usersFriendRequests = '/users/friends/requests';
+  static String usersFriendRequestAccept(String requestId) => '/users/friends/requests/$requestId/accept';
+  static String usersFriendRequestDecline(String requestId) => '/users/friends/requests/$requestId/decline';
+  static const String usersFollows = '/users/follows';
+  static String usersUnfollow(String followedId) => '/users/follows/$followedId';
 
-  // Follows endpoints
-  static const String follows = '/users/follows';
-  static const String followsFollowing = '/users/follows/following';
-  static const String followsFollowers = '/users/follows/followers';
-  static String followUser(String followedId) => '/users/follows/$followedId';
-
-  // Trip endpoints
+  // Trip Query endpoints (use queryBaseUrl)
+  static String tripById(String tripId) => '/trips/$tripId';
   static const String trips = '/trips';
   static const String tripsMe = '/trips/me';
   static const String tripsPublic = '/trips/public';
   static const String tripsAvailable = '/trips/me/available';
-  static String tripsByUser(String userId) => '/trips/users/$userId';
-  static String tripById(String tripId) => '/trips/$tripId';
+  static String tripsByUser(String userId) => '/trips/user/$userId';
+
+  // Trip Command endpoints (use commandBaseUrl)
+  static const String tripsCreate = '/trips';
+  static String tripUpdate(String tripId) => '/trips/$tripId';
+  static String tripDelete(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
-  static String tripUpdates(String tripId) => '/trips/$tripId/updates';
-  static String tripComments(String tripId) => '/trips/$tripId/comments';
 
-  // Trip plan endpoints
+  // Trip Plan Command endpoints (use commandBaseUrl)
   static const String tripPlans = '/trips/plans';
-  static const String tripPlansMe = '/trips/plans/me';
   static String tripPlanById(String planId) => '/trips/plans/$planId';
 
-  // Comments endpoints
+  // Trip Update Command endpoints (use commandBaseUrl)
+  static String tripUpdates(String tripId) => '/trips/$tripId/updates';
+
+  // Comment Command endpoints (use commandBaseUrl)
+  static String tripComments(String tripId) => '/trips/$tripId/comments';
   static String commentReactions(String commentId) => '/comments/$commentId/reactions';
 }

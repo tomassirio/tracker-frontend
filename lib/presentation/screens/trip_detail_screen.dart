@@ -141,7 +141,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   Future<void> _addReaction(String commentId, ReactionType type) async {
     try {
-      await _repository.addReaction(_trip.id, commentId, type);
+      await _repository.addReaction(commentId, type);
 
       if (mounted) {
         UiHelpers.showSuccessMessage(context, 'Reaction added!');
