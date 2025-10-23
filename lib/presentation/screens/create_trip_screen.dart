@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/repositories/create_trip_repository.dart';
+import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/widgets/create_trip/create_trip_form.dart';
 
 /// Screen for creating a new trip
 class CreateTripScreen extends StatefulWidget {
@@ -12,10 +13,10 @@ class CreateTripScreen extends StatefulWidget {
 }
 
 class _CreateTripScreenState extends State<CreateTripScreen> {
+  final CreateTripRepository _repository = CreateTripRepository();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final TripService _tripService = TripService();
 
   Visibility _selectedVisibility = Visibility.public;
   DateTime? _startDate;
@@ -62,12 +63,10 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final request = CreateTripRequest(
+      await _repository.createTrip(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim().isEmpty
             ? null
@@ -77,31 +76,17 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         endDate: _endDate,
       );
 
-      await _tripService.createTrip(request);
-
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Trip created successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        UiHelpers.showSuccessMessage(context, 'Trip created successfully!');
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error creating trip: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        UiHelpers.showErrorMessage(context, 'Error creating trip: $e');
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -115,154 +100,34 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Trip Title *',
-                  hintText: 'e.g., European Summer Adventure',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.title),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Tell us about your trip...',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.description),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Visibility',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<Visibility>(
-                segments: const [
-                  ButtonSegment(
-                    value: Visibility.private,
-                    label: Text('Private'),
-                    icon: Icon(Icons.lock),
-                  ),
-                  ButtonSegment(
-                    value: Visibility.protected,
-                    label: Text('Protected'),
-                    icon: Icon(Icons.group),
-                  ),
-                  ButtonSegment(
-                    value: Visibility.public,
-                    label: Text('Public'),
-                    icon: Icon(Icons.public),
-                  ),
-                ],
-                selected: {_selectedVisibility},
-                onSelectionChanged: (Set<Visibility> newSelection) {
-                  setState(() {
-                    _selectedVisibility = newSelection.first;
-                  });
-                },
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _getVisibilityDescription(_selectedVisibility),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Dates (Optional)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.calendar_today),
-                  title: const Text('Start Date'),
-                  subtitle: Text(
-                    _startDate != null
-                        ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
-                        : 'Not set',
-                  ),
-                  trailing: _startDate != null
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _startDate = null;
-                            });
-                          },
-                        )
-                      : null,
-                  onTap: _selectStartDate,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.event),
-                  title: const Text('End Date'),
-                  subtitle: Text(
-                    _endDate != null
-                        ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                        : 'Not set',
-                  ),
-                  trailing: _endDate != null
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _endDate = null;
-                            });
-                          },
-                        )
-                      : null,
-                  onTap: _selectEndDate,
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : _createTrip,
-                icon: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.add),
-                label: Text(_isLoading ? 'Creating...' : 'Create Trip'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
-                ),
-              ),
-            ],
-          ),
+        child: CreateTripForm(
+          formKey: _formKey,
+          titleController: _titleController,
+          descriptionController: _descriptionController,
+          selectedVisibility: _selectedVisibility,
+          startDate: _startDate,
+          endDate: _endDate,
+          isLoading: _isLoading,
+          onVisibilityChanged: (visibility) {
+            setState(() {
+              _selectedVisibility = visibility;
+            });
+          },
+          onSelectStartDate: _selectStartDate,
+          onSelectEndDate: _selectEndDate,
+          onClearStartDate: () {
+            setState(() {
+              _startDate = null;
+            });
+          },
+          onClearEndDate: () {
+            setState(() {
+              _endDate = null;
+            });
+          },
+          onSubmit: _createTrip,
         ),
       ),
     );
-  }
-
-  String _getVisibilityDescription(Visibility visibility) {
-    switch (visibility) {
-      case Visibility.private:
-        return 'Only you can see this trip';
-      case Visibility.protected:
-        return 'Followers or users with a shared link can view';
-      case Visibility.public:
-        return 'Everyone can see this trip';
-    }
   }
 }
