@@ -1,34 +1,41 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
 # Build outputs
 build/
 .dart_tool/
 
-# IDE
-.idea/
-.vscode/
-*.iml
-
-# Git
-.git/
-.gitignore
+# Test coverage
+coverage/
 
 # Documentation
 README.md
 *.md
 
-# CI/CD
-.github/
+# Environment files
+.env
+.env.*
 
-# Test coverage
-coverage/
+# OS files
+.DS_Store
+Thumbs.db
 
-# Android and iOS build artifacts
-android/
-ios/
-
-# Misc
-.metadata
+# Flutter/Dart
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
-pubspec.lock
+.pub-cache/
+.pub/
 
+# Android
+android/
+ios/
+
+# Tests
+test/

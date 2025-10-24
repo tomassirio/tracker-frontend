@@ -4,10 +4,10 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 # Set working directory
 WORKDIR /app
 
-# Copy pubspec file
-COPY pubspec.yaml ./
+# Copy pubspec files
+COPY pubspec.yaml pubspec.lock* ./
 
-# Get dependencies (this will generate pubspec.lock)
+# Get dependencies
 RUN flutter pub get
 
 # Copy the rest of the application
@@ -34,4 +34,3 @@ EXPOSE 51538
 
 # Use custom entrypoint
 ENTRYPOINT ["/docker-entrypoint.sh"]
-
