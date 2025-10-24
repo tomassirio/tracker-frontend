@@ -12,14 +12,14 @@ class CreateTripRepository {
 
   /// Creates a new trip
   Future<void> createTrip({
-    required String title,
+    required String name,
     String? description,
     required Visibility visibility,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     final request = CreateTripRequest(
-      title: title,
+      name: name,
       description: description,
       visibility: visibility,
       startDate: startDate,

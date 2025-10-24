@@ -67,7 +67,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
     try {
       await _repository.createTrip(
-        title: _titleController.text.trim(),
+        name: _titleController.text.trim(),
         description: _descriptionController.text.trim().isEmpty
             ? null
             : _descriptionController.text.trim(),
