@@ -9,9 +9,7 @@ void main() {
 
     setUp(() {
       mockTripCommandClient = MockTripCommandClient();
-      adminService = AdminService(
-        tripCommandClient: mockTripCommandClient,
-      );
+      adminService = AdminService(tripCommandClient: mockTripCommandClient);
     });
 
     group('deleteTrip', () {
@@ -52,9 +50,7 @@ void main() {
     group('AdminService initialization', () {
       test('creates with provided client', () {
         final tripClient = MockTripCommandClient();
-        final service = AdminService(
-          tripCommandClient: tripClient,
-        );
+        final service = AdminService(tripCommandClient: tripClient);
 
         expect(service, isNotNull);
       });

@@ -3,4 +3,3 @@
 String getConfigValue(String key, String defaultValue) {
   return defaultValue;
 }
-
