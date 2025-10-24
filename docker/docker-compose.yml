@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  tracker-frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "51538:51538"  # Map container port 51538 to host port 51538
+    environment:
+      # Google Maps API Key
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      # Backend service URLs - customize these for your environment
+      - COMMAND_BASE_URL=${COMMAND_BASE_URL:-http://localhost:8081/api/1}
+      - QUERY_BASE_URL=${QUERY_BASE_URL:-http://localhost:8082/api/1}
+      - AUTH_BASE_URL=${AUTH_BASE_URL:-http://localhost:8083/api/1}
+    networks:
+      - tracker-network
+
+networks:
+  tracker-network:
+    driver: bridge
+

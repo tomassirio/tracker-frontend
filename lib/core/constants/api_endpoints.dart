@@ -1,9 +1,27 @@
+import 'dart:js_interop';
+
 /// API endpoint constants
 class ApiEndpoints {
-  // Base URLs for different services
-  static const String commandBaseUrl = 'http://localhost:8081/api/1';
-  static const String queryBaseUrl = 'http://localhost:8082/api/1';
-  static const String authBaseUrl = 'http://localhost:8083/api/1';
+  // Base URLs - read from window.appConfig (injected by Docker) or use defaults
+  static String get commandBaseUrl => _getConfigValue('commandBaseUrl', 'http://localhost:8081/api/1');
+  static String get queryBaseUrl => _getConfigValue('queryBaseUrl', 'http://localhost:8082/api/1');
+  static String get authBaseUrl => _getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
+
+  // Helper to read from window.appConfig with fallback
+  static String _getConfigValue(String key, String defaultValue) {
+    try {
+      final config = _appConfig;
+      if (config != null) {
+        final value = _getProperty(config, key);
+        if (value != null && value.isNotEmpty) {
+          return value;
+        }
+      }
+    } catch (e) {
+      // Ignore errors, use default
+    }
+    return defaultValue;
+  }
 
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/auth/register';
@@ -56,4 +74,16 @@ class ApiEndpoints {
   // Comment Command endpoints (use commandBaseUrl)
   static String tripComments(String tripId) => '/trips/$tripId/comments';
   static String commentReactions(String commentId) => '/comments/$commentId/reactions';
+}
+
+// JavaScript interop - only for web
+@JS('window.appConfig')
+external JSObject? get _appConfig;
+
+String? _getProperty(JSObject obj, String property) {
+  try {
+    return (obj as dynamic)[property]?.toString();
+  } catch (e) {
+    return null;
+  }
 }

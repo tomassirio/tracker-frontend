@@ -1,0 +1,25 @@
+name: Manual Docker Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: 'Additional tag (e.g., latest, stable, v1.0.0, hotfix-123)'
+        required: false
+        default: 'latest'
+        type: string
+
+jobs:
+  publish-to-ghcr:
+    name: Build and Publish to GHCR
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-build.yml
+    with:
+      push-to-registry: true
+      image-tag: ${{ inputs.image-tag }}
+    secrets:
+      registry-username: ${{ github.actor }}
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+

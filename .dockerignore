@@ -1,0 +1,34 @@
+# Build outputs
+build/
+.dart_tool/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# CI/CD
+.github/
+
+# Test coverage
+coverage/
+
+# Android and iOS build artifacts
+android/
+ios/
+
+# Misc
+.metadata
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
