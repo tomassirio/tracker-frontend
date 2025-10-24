@@ -2,18 +2,22 @@ import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/comment_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/services/auth_service.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 
 /// Repository for managing trip detail data and operations
 class TripDetailRepository {
   final TripService _tripService;
   final CommentService _commentService;
+  final AuthService _authService;
 
   TripDetailRepository({
     TripService? tripService,
     CommentService? commentService,
+    AuthService? authService,
   }) : _tripService = tripService ?? TripService(),
-       _commentService = commentService ?? CommentService();
+       _commentService = commentService ?? CommentService(),
+       _authService = authService ?? AuthService();
 
   /// Loads top-level comments for a trip
   Future<List<Comment>> loadComments(Trip trip) async {
@@ -75,5 +79,31 @@ class TripDetailRepository {
   Future<Trip> changeTripStatus(String tripId, TripStatus newStatus) async {
     final request = ChangeStatusRequest(status: newStatus);
     return await _tripService.changeStatus(tripId, request);
+  }
+
+  /// Checks if user is logged in
+  Future<bool> isLoggedIn() async {
+    return await _authService.isLoggedIn();
+  }
+
+  /// Gets the current user's username
+  Future<String?> getCurrentUsername() async {
+    return await _authService.getCurrentUsername();
+  }
+
+  /// Gets the current user's ID
+  Future<String?> getCurrentUserId() async {
+    return await _authService.getCurrentUserId();
+  }
+
+  /// Logs out the current user
+  Future<void> logout() async {
+    await _authService.logout();
+  }
+
+  /// Loads trip updates for a specific trip
+  Future<List<TripLocation>> loadTripUpdates(String tripId) async {
+    final trip = await _tripService.getTripById(tripId);
+    return trip.locations ?? [];
   }
 }
