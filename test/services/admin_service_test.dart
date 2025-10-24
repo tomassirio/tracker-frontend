@@ -4,19 +4,13 @@ import 'package:tracker_frontend/data/client/clients.dart';
 
 void main() {
   group('AdminService', () {
-    late MockUserCommandClient mockUserCommandClient;
     late MockTripCommandClient mockTripCommandClient;
-    late MockCommentCommandClient mockCommentCommandClient;
     late AdminService adminService;
 
     setUp(() {
-      mockUserCommandClient = MockUserCommandClient();
       mockTripCommandClient = MockTripCommandClient();
-      mockCommentCommandClient = MockCommentCommandClient();
       adminService = AdminService(
-        userCommandClient: mockUserCommandClient,
         tripCommandClient: mockTripCommandClient,
-        commentCommandClient: mockCommentCommandClient,
       );
     });
 
@@ -56,32 +50,22 @@ void main() {
     });
 
     group('AdminService initialization', () {
-      test('creates with provided clients', () {
-        final userClient = MockUserCommandClient();
+      test('creates with provided client', () {
         final tripClient = MockTripCommandClient();
-        final commentClient = MockCommentCommandClient();
         final service = AdminService(
-          userCommandClient: userClient,
           tripCommandClient: tripClient,
-          commentCommandClient: commentClient,
         );
 
         expect(service, isNotNull);
       });
 
-      test('creates with default clients when not provided', () {
+      test('creates with default client when not provided', () {
         final service = AdminService();
 
         expect(service, isNotNull);
       });
     });
   });
-}
-
-// Mock UserCommandClient
-class MockUserCommandClient extends UserCommandClient {
-  bool shouldThrowError = false;
-  String errorMessage = 'User command failed';
 }
 
 // Mock TripCommandClient
@@ -101,7 +85,7 @@ class MockTripCommandClient extends TripCommandClient {
   }
 }
 
-// Mock CommentCommandClient
+// Mock CommentCommandClient (kept for potential future use)
 class MockCommentCommandClient extends CommentCommandClient {
   bool shouldThrowError = false;
   String errorMessage = 'Comment command failed';

@@ -15,11 +15,11 @@ class TripStatusMenu extends StatelessWidget {
       onSelected: onStatusChanged,
       itemBuilder: (context) => [
         PopupMenuItem(
-          value: TripStatus.in_progress,
+          value: TripStatus.inProgress,
           child: Row(
             children: [
               Icon(
-                UiHelpers.getStatusIcon(TripStatus.in_progress),
+                UiHelpers.getStatusIcon(TripStatus.inProgress),
                 color: Colors.green,
               ),
               const SizedBox(width: 8),

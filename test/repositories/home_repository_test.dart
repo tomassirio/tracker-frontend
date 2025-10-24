@@ -119,7 +119,7 @@ void main() {
             createMockTrip('trip-public', 'Public Trip'),
           ];
 
-          final result = await homeRepository.loadTrips();
+          await homeRepository.loadTrips();
 
           expect(mockTripService.getPublicTripsCalled, true);
           expect(mockTripService.getAvailableTripsCalled, false);

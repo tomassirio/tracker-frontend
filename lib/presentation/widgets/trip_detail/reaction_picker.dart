@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
 
 import '../../../data/models/domain/reaction_type.dart';
 

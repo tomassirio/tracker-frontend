@@ -33,21 +33,21 @@ void main() {
     group('TripStatus', () {
       test('toJson converts TripStatus to string correctly', () {
         expect(TripStatus.created.toJson(), 'CREATED');
-        expect(TripStatus.in_progress.toJson(), 'IN_PROGRESS');
+        expect(TripStatus.inProgress.toJson(), 'IN_PROGRESS');
         expect(TripStatus.paused.toJson(), 'PAUSED');
         expect(TripStatus.finished.toJson(), 'FINISHED');
       });
 
       test('fromJson parses TripStatus from string correctly', () {
         expect(TripStatus.fromJson('CREATED'), TripStatus.created);
-        expect(TripStatus.fromJson('IN_PROGRESS'), TripStatus.in_progress);
+        expect(TripStatus.fromJson('IN_PROGRESS'), TripStatus.inProgress);
         expect(TripStatus.fromJson('PAUSED'), TripStatus.paused);
         expect(TripStatus.fromJson('FINISHED'), TripStatus.finished);
       });
 
       test('fromJson is case-insensitive', () {
         expect(TripStatus.fromJson('created'), TripStatus.created);
-        expect(TripStatus.fromJson('In_progress'), TripStatus.in_progress);
+        expect(TripStatus.fromJson('In_progress'), TripStatus.inProgress);
       });
 
       test('fromJson throws on invalid value', () {

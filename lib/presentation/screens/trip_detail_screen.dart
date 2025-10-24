@@ -31,8 +31,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Set<Polyline> _polylines = {};
 
   List<Comment> _comments = [];
-  Map<String, List<Comment>> _replies = {};
-  Map<String, bool> _expandedComments = {};
+  final Map<String, List<Comment>> _replies = {};
+  final Map<String, bool> _expandedComments = {};
 
   bool _isLoadingComments = false;
   bool _isAddingComment = false;

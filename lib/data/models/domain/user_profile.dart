@@ -27,8 +27,6 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
-    print('Parsing UserProfile from JSON: $json');
-
     return UserProfile(
       id: json['id'] as String? ?? json['userId'] as String? ?? '',
       username: json['username'] as String? ?? '',

@@ -6,7 +6,7 @@ class UiHelpers {
   /// Gets the appropriate icon for a trip status
   static IconData getStatusIcon(TripStatus status) {
     switch (status) {
-      case TripStatus.in_progress:
+      case TripStatus.inProgress:
         return Icons.play_arrow;
       case TripStatus.created:
         return Icons.schedule;

@@ -31,7 +31,7 @@ class TripDetailRepository {
   }
 
   /// Loads reactions for a comment from the comment object itself
-  /// Note: Reactions are stored as a Map<String, int> in the comment model (reaction type -> count)
+  /// Note: Reactions are stored as a `Map<String, int>` in the comment model (reaction type -> count)
   /// This method returns an empty list as reactions are already embedded in the comment
   Future<List<Reaction>> loadReactions(Comment comment) async {
     // Reactions are already part of the comment object as a map

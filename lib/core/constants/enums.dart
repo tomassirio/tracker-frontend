@@ -42,7 +42,7 @@ enum TripStatus {
   created,
 
   /// Trip is currently ongoing
-  in_progress,
+  inProgress,
 
   /// Trip is paused
   paused,
@@ -55,7 +55,7 @@ enum TripStatus {
     switch (this) {
       case TripStatus.created:
         return 'CREATED';
-      case TripStatus.in_progress:
+      case TripStatus.inProgress:
         return 'IN_PROGRESS';
       case TripStatus.paused:
         return 'PAUSED';
@@ -70,7 +70,7 @@ enum TripStatus {
       case 'CREATED':
         return TripStatus.created;
       case 'IN_PROGRESS':
-        return TripStatus.in_progress;
+        return TripStatus.inProgress;
       case 'PAUSED':
         return TripStatus.paused;
       case 'FINISHED':

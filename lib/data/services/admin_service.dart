@@ -2,17 +2,11 @@ import '../client/clients.dart';
 
 /// Service for admin operations
 class AdminService {
-  final UserCommandClient _userCommandClient;
   final TripCommandClient _tripCommandClient;
-  final CommentCommandClient _commentCommandClient;
 
   AdminService({
-    UserCommandClient? userCommandClient,
     TripCommandClient? tripCommandClient,
-    CommentCommandClient? commentCommandClient,
-  }) : _userCommandClient = userCommandClient ?? UserCommandClient(),
-       _tripCommandClient = tripCommandClient ?? TripCommandClient(),
-       _commentCommandClient = commentCommandClient ?? CommentCommandClient();
+  }) : _tripCommandClient = tripCommandClient ?? TripCommandClient();
 
   /// Delete a trip (admin only)
   Future<void> deleteTrip(String tripId) async {

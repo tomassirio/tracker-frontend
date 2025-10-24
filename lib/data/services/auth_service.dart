@@ -1,6 +1,4 @@
 import '../models/auth_models.dart';
-import '../models/user_models.dart';
-import '../../core/constants/api_endpoints.dart';
 import '../client/clients.dart';
 import '../storage/token_storage.dart';
 
@@ -45,7 +43,7 @@ class AuthService {
       );
     } catch (e) {
       // If profile fetch fails, continue with just tokens
-      print('Failed to fetch user profile: $e');
+      // Error is silently ignored in production
     }
 
     return authResponse;
@@ -63,15 +61,9 @@ class AuthService {
       expiresIn: authResponse.expiresIn,
     );
 
-    print('Tokens saved, now fetching user profile...');
-
     // Fetch user profile to get userId and username
     try {
       final profile = await _userQueryClient.getCurrentUser();
-
-      print(
-        'Profile fetched successfully - userId: ${profile.id}, username: ${profile.username}',
-      );
 
       // Update tokens with user info
       await _tokenStorage.saveTokens(
@@ -82,12 +74,9 @@ class AuthService {
         userId: profile.id,
         username: profile.username,
       );
-
-      print('User info saved to storage successfully');
-    } catch (e, stackTrace) {
+    } catch (e) {
       // If profile fetch fails, continue with just tokens
-      print('Failed to fetch user profile: $e');
-      print('Stack trace: $stackTrace');
+      // Error is silently ignored in production
     }
 
     return authResponse;

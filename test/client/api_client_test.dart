@@ -320,7 +320,6 @@ class MockTokenStorage extends TokenStorage {
   String? refreshToken;
   String? tokenType;
   bool _isLoggedIn = false;
-  bool _shouldClearTokens = false;
 
   @override
   Future<String?> getAccessToken() async => accessToken;
@@ -355,6 +354,5 @@ class MockTokenStorage extends TokenStorage {
     refreshToken = null;
     tokenType = null;
     _isLoggedIn = false;
-    _shouldClearTokens = true;
   }
 }

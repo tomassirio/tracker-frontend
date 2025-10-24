@@ -250,7 +250,7 @@ void main() {
 
     group('changeStatus', () {
       test('successful status change returns updated Trip', () async {
-        final request = ChangeStatusRequest(status: TripStatus.in_progress);
+        final request = ChangeStatusRequest(status: TripStatus.inProgress);
         final responseBody = {
           'id': 'trip-123',
           'userId': 'user-123',
@@ -272,7 +272,7 @@ void main() {
         );
 
         expect(result.id, 'trip-123');
-        expect(result.status, TripStatus.in_progress);
+        expect(result.status, TripStatus.inProgress);
         expect(mockHttpClient.lastMethod, 'PATCH');
         expect(
           mockHttpClient.lastUri?.path,
