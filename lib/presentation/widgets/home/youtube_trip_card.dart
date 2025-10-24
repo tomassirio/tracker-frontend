@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:intl/intl.dart';
+
+import '../../helpers/trip_map_helper.dart';
 
 /// YouTube-style trip card with static map preview
 class YouTubeTripCard extends StatelessWidget {
   final Trip trip;
   final VoidCallback onTap;
 
-  const YouTubeTripCard({
-    super.key,
-    required this.trip,
-    required this.onTap,
-  });
+  const YouTubeTripCard({super.key, required this.trip, required this.onTap});
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -43,37 +40,39 @@ class YouTubeTripCard extends StatelessWidget {
   String _generateStaticMapUrl() {
     final initialLocation = TripMapHelper.getInitialLocation(trip);
     final zoom = TripMapHelper.getInitialZoom(trip);
-    
+
     // Base URL for Google Maps Static API
     final baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
-    
+
     // Center on the initial location
     final center = '${initialLocation.latitude},${initialLocation.longitude}';
-    
+
     // Build markers parameter for trip locations
     final markers = StringBuffer();
     if (trip.locations != null && trip.locations!.isNotEmpty) {
-      markers.write('&markers=');
+      markers.write('&markers=color:red');
       for (var i = 0; i < trip.locations!.length; i++) {
         final loc = trip.locations![i];
-        if (i > 0) markers.write('|');
-        markers.write('${loc.latitude},${loc.longitude}');
+        markers.write('|${loc.latitude},${loc.longitude}');
       }
     }
-    
+
     // Build path parameter for polyline
     final path = StringBuffer();
     if (trip.locations != null && trip.locations!.length > 1) {
-      path.write('&path=color:0x0000ff|weight:2');
+      path.write('&path=color:0x0000ffff|weight:3');
       for (final loc in trip.locations!) {
         path.write('|${loc.latitude},${loc.longitude}');
       }
     }
-    
+
     // Size for the static map (adjust based on card size)
-    const size = '400x225'; // 16:9 ratio
-    
-    return '$baseUrl?center=$center&zoom=${zoom.toInt()}&size=$size${markers.toString()}${path.toString()}&key=\${GOOGLE_MAPS_API_KEY}';
+    const size = '600x450'; // 4:3 ratio, higher resolution for better quality
+
+    // Use the API key from index.html
+    const apiKey = 'AIzaSyAgtMvCDbR3itDDEdvT3Iw-K2h_g_tyRHs';
+
+    return '$baseUrl?center=$center&zoom=${zoom.toInt()}&size=$size${markers.toString()}${path.toString()}&key=$apiKey';
   }
 
   @override
@@ -85,26 +84,55 @@ class YouTubeTripCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Static map preview (4:3 aspect ratio - smaller than before)
+            // Static map preview (4:3 aspect ratio)
             AspectRatio(
               aspectRatio: 4 / 3,
               child: Stack(
                 children: [
-                  // Static map image
-                  Container(
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Icon(
-                        Icons.map,
-                        size: 48,
-                        color: Colors.grey[500],
+                  // Static map image - now actually loading!
+                  if (trip.locations != null && trip.locations!.isNotEmpty)
+                    Image.network(
+                      _generateStaticMapUrl(),
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: Icon(
+                              Icons.map,
+                              size: 48,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(
+                          Icons.map_outlined,
+                          size: 48,
+                          color: Colors.grey[500],
+                        ),
                       ),
                     ),
-                  ),
-                  // Note: Static map images would require API key injection
-                  // For now showing placeholder. In production, use:
-                  // Image.network(_generateStaticMapUrl(), fit: BoxFit.cover)
-                  
+
                   // Status badge overlay
                   Positioned(
                     bottom: 8,
@@ -151,18 +179,11 @@ class YouTubeTripCard extends StatelessWidget {
                   // Username and date
                   Row(
                     children: [
-                      Icon(
-                        Icons.person,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
+                      Icon(Icons.person, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
                         trip.username,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                       ),
                     ],
                   ),
@@ -172,10 +193,7 @@ class YouTubeTripCard extends StatelessWidget {
                     children: [
                       Text(
                         _formatDate(trip.createdAt),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(width: 8),
                       Container(
@@ -187,18 +205,11 @@ class YouTubeTripCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(
-                        Icons.comment,
-                        size: 14,
-                        color: Colors.grey[600],
-                      ),
+                      Icon(Icons.comment, size: 14, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
                         '${trip.commentsCount}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       if (trip.visibility.toJson() == 'PUBLIC') ...[
                         const SizedBox(width: 8),
@@ -211,11 +222,7 @@ class YouTubeTripCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(
-                          Icons.public,
-                          size: 14,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.public, size: 14, color: Colors.grey[600]),
                       ],
                     ],
                   ),
@@ -223,10 +230,7 @@ class YouTubeTripCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       trip.description!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

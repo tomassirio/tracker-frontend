@@ -183,10 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 12),
             const Text(
               'Wanderer',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 24),
             Expanded(

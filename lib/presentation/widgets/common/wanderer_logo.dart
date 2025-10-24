@@ -14,9 +14,7 @@ class WandererLogo extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _WandererLogoPainter(logoColor),
-      ),
+      child: CustomPaint(painter: _WandererLogoPainter(logoColor)),
     );
   }
 }
@@ -40,7 +38,7 @@ class _WandererLogoPainter extends CustomPainter {
     // Draw earth circle (bottom portion)
     final earthRadius = size.width * 0.35;
     final earthCenter = Offset(size.width / 2, size.height * 0.75);
-    
+
     // Draw earth arc (visible portion)
     final earthRect = Rect.fromCircle(center: earthCenter, radius: earthRadius);
     canvas.drawArc(
@@ -53,7 +51,7 @@ class _WandererLogoPainter extends CustomPainter {
 
     // Draw latitude/longitude lines on earth
     final thinPaint = Paint()
-      ..color = color.withOpacity(0.5)
+      ..color = color.withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.02;
 
@@ -73,18 +71,14 @@ class _WandererLogoPainter extends CustomPainter {
 
     // Draw backpacker silhouette on top of earth
     final backpackerPath = Path();
-    
+
     // Scale factors
     final centerX = size.width / 2;
     final baseY = size.height * 0.75 - earthRadius * 0.3;
     final scale = size.width * 0.08;
 
     // Head
-    canvas.drawCircle(
-      Offset(centerX, baseY - scale * 1.5),
-      scale * 0.4,
-      paint,
-    );
+    canvas.drawCircle(Offset(centerX, baseY - scale * 1.5), scale * 0.4, paint);
 
     // Body
     backpackerPath.moveTo(centerX, baseY - scale);

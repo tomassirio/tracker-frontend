@@ -7,7 +7,7 @@ void main() {
     group('CreateTripRequest', () {
       test('toJson converts CreateTripRequest correctly', () {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           description: 'A great adventure',
           visibility: Visibility.public,
           startDate: DateTime(2024, 1, 1),
@@ -23,7 +23,7 @@ void main() {
 
       test('toJson excludes null values', () {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           visibility: Visibility.private,
         );
 

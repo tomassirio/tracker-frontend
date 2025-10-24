@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
@@ -108,14 +107,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         UiHelpers.showErrorMessage(context, 'Error loading updates: $e');
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    _scrollController.dispose();
-    _mapController?.dispose();
-    super.dispose();
   }
 
   void _updateMapData() {
@@ -239,28 +230,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  Future<void> _changeTripStatus(TripStatus newStatus) async {
-    try {
-      final updatedTrip = await _repository.changeTripStatus(
-        _trip.id,
-        newStatus,
-      );
-
-      setState(() => _trip = updatedTrip);
-
-      if (mounted) {
-        UiHelpers.showSuccessMessage(
-          context,
-          'Trip status changed to ${newStatus.toJson()}',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Error changing status: $e');
-      }
-    }
-  }
-
   void _showReactionPicker(String commentId) {
     showModalBottomSheet(
       context: context,
@@ -339,10 +308,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             const SizedBox(width: 12),
             const Text(
               'Wanderer',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 24),
             Expanded(
@@ -391,11 +357,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     Expanded(
                       flex: 3,
                       child: TripMapView(
-                        initialLocation: TripMapHelper.getInitialLocation(_trip),
+                        initialLocation: TripMapHelper.getInitialLocation(
+                          _trip,
+                        ),
                         initialZoom: TripMapHelper.getInitialZoom(_trip),
                         markers: _markers,
                         polylines: _polylines,
-                        onMapCreated: (controller) => _mapController = controller,
+                        onMapCreated: (controller) =>
+                            _mapController = controller,
                       ),
                     ),
                     // Trip info section
@@ -447,8 +416,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Icon(Icons.comment,
-                                  size: 16, color: Colors.grey[600]),
+                              Icon(
+                                Icons.comment,
+                                size: 16,
+                                color: Colors.grey[600],
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 '${_trip.commentsCount} comments',
@@ -458,8 +430,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Icon(Icons.visibility,
-                                  size: 16, color: Colors.grey[600]),
+                              Icon(
+                                Icons.visibility,
+                                size: 16,
+                                color: Colors.grey[600],
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 _trip.visibility.toJson(),
@@ -483,11 +458,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     // Comments section header with sort options
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
-                        border:
-                            Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey[300]!),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -530,33 +508,33 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       child: _isLoadingComments
                           ? const Center(child: CircularProgressIndicator())
                           : _comments.isEmpty
-                              ? _buildEmptyCommentsState()
-                              : ListView.builder(
-                                  controller: _scrollController,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  itemCount: _comments.length,
-                                  itemBuilder: (context, index) {
-                                    final comment = _comments[index];
-                                    final isExpanded =
-                                        _expandedComments[comment.id] ?? false;
-                                    final commentReplies =
-                                        _replies[comment.id] ?? [];
+                          ? _buildEmptyCommentsState()
+                          : ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: _comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = _comments[index];
+                                final isExpanded =
+                                    _expandedComments[comment.id] ?? false;
+                                final commentReplies =
+                                    _replies[comment.id] ?? [];
 
-                                    return CommentCard(
-                                      comment: comment,
-                                      tripUserId: _trip.userId,
-                                      isExpanded: isExpanded,
-                                      replies: commentReplies,
-                                      onReact: () =>
-                                          _showReactionPicker(comment.id),
-                                      onReply: () => _handleReply(comment.id),
-                                      onToggleReplies: () =>
-                                          _handleToggleReplies(
-                                              comment.id, isExpanded),
-                                    );
-                                  },
-                                ),
+                                return CommentCard(
+                                  comment: comment,
+                                  tripUserId: _trip.userId,
+                                  isExpanded: isExpanded,
+                                  replies: commentReplies,
+                                  onReact: () =>
+                                      _showReactionPicker(comment.id),
+                                  onReply: () => _handleReply(comment.id),
+                                  onToggleReplies: () => _handleToggleReplies(
+                                    comment.id,
+                                    isExpanded,
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                     // Comment input (disabled if not logged in)
                     if (_isLoggedIn)
@@ -574,8 +552,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
-                          border:
-                              Border(top: BorderSide(color: Colors.grey[300]!)),
+                          border: Border(
+                            top: BorderSide(color: Colors.grey[300]!),
+                          ),
                         ),
                         child: const Center(
                           child: Text(
@@ -596,9 +575,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    border: Border(
-                      left: BorderSide(color: Colors.grey[300]!),
-                    ),
+                    border: Border(left: BorderSide(color: Colors.grey[300]!)),
                   ),
                   child: Column(
                     children: [
@@ -668,4 +645,3 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     );
   }
 }
-

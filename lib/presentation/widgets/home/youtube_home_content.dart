@@ -37,9 +37,11 @@ class YouTubeHomeContent extends StatelessWidget {
     // For now, friends trips are those from other users that are not public
     // This logic can be enhanced when friend relationships are implemented
     return trips
-        .where((trip) =>
-            trip.userId != currentUserId &&
-            trip.visibility.toJson() == 'FRIENDS')
+        .where(
+          (trip) =>
+              trip.userId != currentUserId &&
+              trip.visibility.toJson() == 'FRIENDS',
+        )
         .toList();
   }
 
@@ -49,9 +51,11 @@ class YouTubeHomeContent extends StatelessWidget {
       return trips;
     }
     return trips
-        .where((trip) =>
-            trip.userId != currentUserId &&
-            trip.visibility.toJson() == 'PUBLIC')
+        .where(
+          (trip) =>
+              trip.userId != currentUserId &&
+              trip.visibility.toJson() == 'PUBLIC',
+        )
         .toList();
   }
 
@@ -128,10 +132,7 @@ class YouTubeHomeContent extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(width: 8),
         Container(
@@ -142,10 +143,7 @@ class YouTubeHomeContent extends StatelessWidget {
           ),
           child: Text(
             '$count',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -158,17 +156,15 @@ class YouTubeHomeContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.85, // Slightly taller for smaller cards with 4:3 ratio
+        childAspectRatio:
+            0.85, // Slightly taller for smaller cards with 4:3 ratio
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
       itemCount: trips.length,
       itemBuilder: (context, index) {
         final trip = trips[index];
-        return YouTubeTripCard(
-          trip: trip,
-          onTap: () => onTripTap(trip),
-        );
+        return YouTubeTripCard(trip: trip, onTap: () => onTripTap(trip));
       },
     );
   }

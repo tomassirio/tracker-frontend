@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/services/trip_plan_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
@@ -18,7 +18,7 @@ class TripPlansScreen extends StatefulWidget {
 }
 
 class _TripPlansScreenState extends State<TripPlansScreen> {
-  final TripService _tripService = TripService();
+  final TripPlanService _tripPlanService = TripPlanService();
   final HomeRepository _homeRepository = HomeRepository();
   final TextEditingController _searchController = TextEditingController();
   List<TripPlan> _tripPlans = [];
@@ -64,11 +64,10 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
 
     try {
       // Get user's trip plans
-      final plans = await _tripService.getAllTrips();
-      // For now, show empty list. In production, would filter to plans
+      final plans = await _tripPlanService.getUserTripPlans();
       setState(() {
-        _tripPlans = [];
-        _filteredPlans = [];
+        _tripPlans = plans;
+        _filteredPlans = plans;
         _isLoading = false;
       });
     } catch (e) {
@@ -157,10 +156,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
             const SizedBox(width: 12),
             const Text(
               'Wanderer',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 24),
             Expanded(
@@ -207,11 +203,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.calendar_today,
-                size: 64,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 24),
               Text(
                 'Login Required',
@@ -224,10 +216,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
               const SizedBox(height: 16),
               Text(
                 'Please log in to view your trip plans',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -286,11 +275,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.calendar_today,
-                size: 64,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 24),
               Text(
                 'No Trip Plans Yet',
@@ -303,10 +288,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
               const SizedBox(height: 16),
               Text(
                 'Start planning your next adventure!',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -333,8 +315,6 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     }
 
     // If we had trip plans, they would be displayed in a grid here
-    return const Center(
-      child: Text('Trip plans feature coming soon'),
-    );
+    return const Center(child: Text('Trip plans feature coming soon'));
   }
 }

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 class TripTimeline extends StatelessWidget {
   final List<TripLocation> updates;
   final bool isLoading;
-  final VoidCallback? onRefresh;
+  final Future<void> Function()? onRefresh;
 
   const TripTimeline({
     super.key,
@@ -22,9 +22,7 @@ class TripTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (updates.isEmpty) {
@@ -34,11 +32,7 @@ class TripTimeline extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.timeline,
-                size: 48,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.timeline, size: 48, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
                 'No updates yet',
@@ -51,10 +45,7 @@ class TripTimeline extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Trip updates will appear here',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               ),
             ],
           ),
@@ -79,29 +70,18 @@ class TripTimeline extends StatelessWidget {
               Column(
                 children: [
                   if (!isFirst)
-                    Container(
-                      width: 2,
-                      height: 20,
-                      color: Colors.blue,
-                    ),
+                    Container(width: 2, height: 20, color: Colors.blue),
                   Container(
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
                       color: Colors.blue,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
                   ),
                   if (!isLast)
-                    Container(
-                      width: 2,
-                      height: 80,
-                      color: Colors.blue,
-                    ),
+                    Container(width: 2, height: 80, color: Colors.blue),
                 ],
               ),
               const SizedBox(width: 16),

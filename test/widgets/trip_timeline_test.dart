@@ -5,31 +5,24 @@ import 'package:flutter/material.dart';
 
 void main() {
   group('TripTimeline Widget', () {
-    testWidgets('shows loading indicator when isLoading is true',
-        (WidgetTester tester) async {
+    testWidgets('shows loading indicator when isLoading is true', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: TripTimeline(
-              updates: [],
-              isLoading: true,
-            ),
-          ),
+          home: Scaffold(body: TripTimeline(updates: [], isLoading: true)),
         ),
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('shows empty state when no updates', (WidgetTester tester) async {
+    testWidgets('shows empty state when no updates', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: TripTimeline(
-              updates: [],
-              isLoading: false,
-            ),
-          ),
+          home: Scaffold(body: TripTimeline(updates: [], isLoading: false)),
         ),
       );
 
@@ -38,7 +31,9 @@ void main() {
       expect(find.byIcon(Icons.timeline), findsOneWidget);
     });
 
-    testWidgets('displays trip updates in timeline', (WidgetTester tester) async {
+    testWidgets('displays trip updates in timeline', (
+      WidgetTester tester,
+    ) async {
       final updates = [
         TripLocation(
           id: '1',
@@ -59,10 +54,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: TripTimeline(
-              updates: updates,
-              isLoading: false,
-            ),
+            body: TripTimeline(updates: updates, isLoading: false),
           ),
         ),
       );
@@ -72,8 +64,9 @@ void main() {
       expect(find.byIcon(Icons.location_on), findsNWidgets(2));
     });
 
-    testWidgets('displays image when imageUrl is present',
-        (WidgetTester tester) async {
+    testWidgets('displays image when imageUrl is present', (
+      WidgetTester tester,
+    ) async {
       final updates = [
         TripLocation(
           id: '1',
@@ -88,10 +81,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: TripTimeline(
-              updates: updates,
-              isLoading: false,
-            ),
+            body: TripTimeline(updates: updates, isLoading: false),
           ),
         ),
       );
@@ -100,8 +90,9 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
     });
 
-    testWidgets('timeline shows correct number of connection lines',
-        (WidgetTester tester) async {
+    testWidgets('timeline shows correct number of connection lines', (
+      WidgetTester tester,
+    ) async {
       final updates = [
         TripLocation(
           id: '1',
@@ -126,21 +117,21 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: TripTimeline(
-              updates: updates,
-              isLoading: false,
-            ),
+            body: TripTimeline(updates: updates, isLoading: false),
           ),
         ),
       );
 
       // Find timeline indicators (circles)
-      expect(find.byWidgetPredicate(
-        (widget) =>
-            widget is Container &&
-            widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).shape == BoxShape.circle,
-      ), findsNWidgets(3));
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Container &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+        ),
+        findsNWidgets(3),
+      );
     });
   });
 }

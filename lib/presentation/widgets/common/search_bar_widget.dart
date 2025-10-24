@@ -23,10 +23,7 @@ class SearchBarWidget extends StatelessWidget {
           hintText: 'Search trips by name or username...',
           prefixIcon: const Icon(Icons.search),
           suffixIcon: controller.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: onClear,
-                )
+              ? IconButton(icon: const Icon(Icons.clear), onPressed: onClear)
               : null,
           filled: true,
           fillColor: Colors.white,
