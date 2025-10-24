@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:intl/intl.dart';
 
 /// YouTube-style trip card with minimap preview
