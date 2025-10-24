@@ -1,7 +1,7 @@
 # tracker_frontend
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Coverage](https://img.shields.io/badge/coverage-N/A-lightgrey)
+![Coverage](https://img.shields.io/badge/coverage-41%25-orange)
 ![Flutter](https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
