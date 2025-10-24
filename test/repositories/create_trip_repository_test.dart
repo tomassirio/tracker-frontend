@@ -11,9 +11,7 @@ void main() {
 
     setUp(() {
       mockTripService = MockTripService();
-      repository = CreateTripRepository(
-        tripService: mockTripService,
-      );
+      repository = CreateTripRepository(tripService: mockTripService);
     });
 
     group('createTrip', () {
@@ -31,8 +29,14 @@ void main() {
 
         expect(mockTripService.createTripCalled, true);
         expect(mockTripService.lastCreateRequest?.title, 'Test Trip');
-        expect(mockTripService.lastCreateRequest?.description, 'Test Description');
-        expect(mockTripService.lastCreateRequest?.visibility, Visibility.public);
+        expect(
+          mockTripService.lastCreateRequest?.description,
+          'Test Description',
+        );
+        expect(
+          mockTripService.lastCreateRequest?.visibility,
+          Visibility.public,
+        );
         expect(mockTripService.lastCreateRequest?.startDate, startDate);
         expect(mockTripService.lastCreateRequest?.endDate, endDate);
       });
@@ -46,7 +50,10 @@ void main() {
         expect(mockTripService.createTripCalled, true);
         expect(mockTripService.lastCreateRequest?.title, 'Minimal Trip');
         expect(mockTripService.lastCreateRequest?.description, null);
-        expect(mockTripService.lastCreateRequest?.visibility, Visibility.private);
+        expect(
+          mockTripService.lastCreateRequest?.visibility,
+          Visibility.private,
+        );
         expect(mockTripService.lastCreateRequest?.startDate, null);
         expect(mockTripService.lastCreateRequest?.endDate, null);
       });
@@ -58,7 +65,10 @@ void main() {
         );
 
         expect(mockTripService.createTripCalled, true);
-        expect(mockTripService.lastCreateRequest?.visibility, Visibility.protected);
+        expect(
+          mockTripService.lastCreateRequest?.visibility,
+          Visibility.protected,
+        );
       });
 
       test('creates trip with description but no dates', () async {
@@ -69,7 +79,10 @@ void main() {
         );
 
         expect(mockTripService.createTripCalled, true);
-        expect(mockTripService.lastCreateRequest?.description, 'A nice description');
+        expect(
+          mockTripService.lastCreateRequest?.description,
+          'A nice description',
+        );
         expect(mockTripService.lastCreateRequest?.startDate, null);
         expect(mockTripService.lastCreateRequest?.endDate, null);
       });
@@ -112,9 +125,7 @@ void main() {
             title: 'Network Error Trip',
             visibility: Visibility.public,
           ),
-          throwsA(
-            predicate((e) => e.toString().contains('Network error')),
-          ),
+          throwsA(predicate((e) => e.toString().contains('Network error'))),
         );
       });
     });
@@ -122,9 +133,7 @@ void main() {
     group('CreateTripRepository initialization', () {
       test('creates with provided service', () {
         final tripService = MockTripService();
-        final repo = CreateTripRepository(
-          tripService: tripService,
-        );
+        final repo = CreateTripRepository(tripService: tripService);
 
         expect(repo, isNotNull);
       });

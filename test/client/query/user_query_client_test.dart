@@ -48,8 +48,14 @@ void main() {
         expect(result.username, 'testuser');
         expect(result.email, 'test@example.com');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.userById('user-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.userById('user-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getUserById requires authentication', () async {
@@ -102,7 +108,10 @@ void main() {
         expect(result.id, 'user-456');
         expect(result.username, 'publicuser');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.userByUsername('publicuser')));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.userByUsername('publicuser')),
+        );
       });
 
       test('getUserByUsername does not require authentication', () async {
@@ -160,7 +169,10 @@ void main() {
         expect(result.email, 'current@example.com');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersMe));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getCurrentUser requires authentication', () async {
@@ -186,10 +198,7 @@ void main() {
           401,
         );
 
-        expect(
-          () => userQueryClient.getCurrentUser(),
-          throwsException,
-        );
+        expect(() => userQueryClient.getCurrentUser(), throwsException);
       });
     });
 
@@ -223,8 +232,14 @@ void main() {
         expect(result[0].username, 'friend1');
         expect(result[1].username, 'friend2');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFriends));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFriends),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getFriends requires authentication', () async {
@@ -262,8 +277,14 @@ void main() {
         expect(result.length, 1);
         expect(result[0]['id'], 'request-1');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFriendRequestsReceived));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFriendRequestsReceived),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getReceivedFriendRequests requires authentication', () async {
@@ -274,13 +295,16 @@ void main() {
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
 
-      test('getReceivedFriendRequests returns empty list when no requests', () async {
-        mockHttpClient.response = http.Response(jsonEncode([]), 200);
+      test(
+        'getReceivedFriendRequests returns empty list when no requests',
+        () async {
+          mockHttpClient.response = http.Response(jsonEncode([]), 200);
 
-        final result = await userQueryClient.getReceivedFriendRequests();
+          final result = await userQueryClient.getReceivedFriendRequests();
 
-        expect(result, isEmpty);
-      });
+          expect(result, isEmpty);
+        },
+      );
     });
 
     group('getSentFriendRequests', () {
@@ -301,8 +325,14 @@ void main() {
         expect(result.length, 1);
         expect(result[0]['id'], 'request-2');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFriendRequestsSent));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFriendRequestsSent),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getSentFriendRequests requires authentication', () async {
@@ -313,13 +343,16 @@ void main() {
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
 
-      test('getSentFriendRequests returns empty list when no requests', () async {
-        mockHttpClient.response = http.Response(jsonEncode([]), 200);
+      test(
+        'getSentFriendRequests returns empty list when no requests',
+        () async {
+          mockHttpClient.response = http.Response(jsonEncode([]), 200);
 
-        final result = await userQueryClient.getSentFriendRequests();
+          final result = await userQueryClient.getSentFriendRequests();
 
-        expect(result, isEmpty);
-      });
+          expect(result, isEmpty);
+        },
+      );
     });
 
     group('getFollowing', () {
@@ -354,8 +387,14 @@ void main() {
         expect(result[0].username, 'following1');
         expect(result[1].username, 'following2');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFollowsFollowing));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFollowsFollowing),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getFollowing requires authentication', () async {
@@ -366,13 +405,16 @@ void main() {
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
 
-      test('getFollowing returns empty list when not following anyone', () async {
-        mockHttpClient.response = http.Response(jsonEncode([]), 200);
+      test(
+        'getFollowing returns empty list when not following anyone',
+        () async {
+          mockHttpClient.response = http.Response(jsonEncode([]), 200);
 
-        final result = await userQueryClient.getFollowing();
+          final result = await userQueryClient.getFollowing();
 
-        expect(result, isEmpty);
-      });
+          expect(result, isEmpty);
+        },
+      );
     });
 
     group('getFollowers', () {
@@ -407,8 +449,14 @@ void main() {
         expect(result[0].username, 'follower1');
         expect(result[1].username, 'follower2');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFollowsFollowers));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFollowsFollowers),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getFollowers requires authentication', () async {
@@ -440,11 +488,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with query base URL when not provided', () {
-        final client = UserQueryClient();
+      test(
+        'creates default ApiClient with query base URL when not provided',
+        () {
+          final client = UserQueryClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }
@@ -519,4 +570,3 @@ class MockTokenStorage extends TokenStorage {
     _isLoggedIn = false;
   }
 }
-

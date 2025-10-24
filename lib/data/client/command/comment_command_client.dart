@@ -7,13 +7,15 @@ class CommentCommandClient {
   final ApiClient _apiClient;
 
   CommentCommandClient({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create comment or reply on a trip
   /// Use parentCommentId in request body for replies
   /// Requires authentication (USER, ADMIN)
-  Future<Comment> createComment(String tripId, CreateCommentRequest request) async {
+  Future<Comment> createComment(
+    String tripId,
+    CreateCommentRequest request,
+  ) async {
     final response = await _apiClient.post(
       ApiEndpoints.tripComments(tripId),
       body: request.toJson(),
@@ -43,4 +45,3 @@ class CommentCommandClient {
     _apiClient.handleNoContentResponse(response);
   }
 }
-

@@ -71,7 +71,10 @@ void main() {
       test('passes through errors', () async {
         mockUserQueryClient.shouldThrowError = true;
 
-        expect(() => userService.getUserByUsername('searchuser'), throwsException);
+        expect(
+          () => userService.getUserByUsername('searchuser'),
+          throwsException,
+        );
       });
     });
 
@@ -162,7 +165,10 @@ void main() {
       test('passes through errors', () async {
         mockUserCommandClient.shouldThrowError = true;
 
-        expect(() => userService.sendFriendRequest('user-123'), throwsException);
+        expect(
+          () => userService.sendFriendRequest('user-123'),
+          throwsException,
+        );
       });
     });
 
@@ -177,7 +183,10 @@ void main() {
       test('passes through errors', () async {
         mockUserCommandClient.shouldThrowError = true;
 
-        expect(() => userService.acceptFriendRequest('request-123'), throwsException);
+        expect(
+          () => userService.acceptFriendRequest('request-123'),
+          throwsException,
+        );
       });
     });
 
@@ -192,7 +201,10 @@ void main() {
       test('passes through errors', () async {
         mockUserCommandClient.shouldThrowError = true;
 
-        expect(() => userService.declineFriendRequest('request-456'), throwsException);
+        expect(
+          () => userService.declineFriendRequest('request-456'),
+          throwsException,
+        );
       });
     });
 
@@ -366,4 +378,3 @@ class MockUserCommandClient extends UserCommandClient {
     if (shouldThrowError) throw Exception('Failed to unfollow user');
   }
 }
-

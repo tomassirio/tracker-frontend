@@ -18,9 +18,7 @@ class UsernameField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: 'Username',
         prefixIcon: const Icon(Icons.person),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -34,4 +32,3 @@ class UsernameField extends StatelessWidget {
     );
   }
 }
-

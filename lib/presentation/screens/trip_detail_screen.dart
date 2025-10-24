@@ -31,8 +31,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Set<Polyline> _polylines = {};
 
   List<Comment> _comments = [];
-  Map<String, List<Comment>> _replies = {};
-  Map<String, bool> _expandedComments = {};
+  final Map<String, List<Comment>> _replies = {};
+  final Map<String, bool> _expandedComments = {};
 
   bool _isLoadingComments = false;
   bool _isAddingComment = false;
@@ -155,7 +155,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   Future<void> _changeTripStatus(TripStatus newStatus) async {
     try {
-      final updatedTrip = await _repository.changeTripStatus(_trip.id, newStatus);
+      final updatedTrip = await _repository.changeTripStatus(
+        _trip.id,
+        newStatus,
+      );
 
       setState(() => _trip = updatedTrip);
 
@@ -200,9 +203,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       appBar: AppBar(
         title: Text(_trip.name),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          TripStatusMenu(onStatusChanged: _changeTripStatus),
-        ],
+        actions: [TripStatusMenu(onStatusChanged: _changeTripStatus)],
       ),
       body: Column(
         children: [
@@ -241,4 +242,3 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     );
   }
 }
-

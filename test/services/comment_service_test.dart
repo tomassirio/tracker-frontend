@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/services/comment_service.dart';
 import 'package:tracker_frontend/data/client/clients.dart';
@@ -43,7 +42,10 @@ void main() {
 
         expect(result.id, 'comment-456');
         expect(result.parentCommentId, 'parent-1');
-        expect(mockCommentCommandClient.lastRequest?.parentCommentId, 'parent-1');
+        expect(
+          mockCommentCommandClient.lastRequest?.parentCommentId,
+          'parent-1',
+        );
       });
 
       test('passes through errors when adding comment', () async {
@@ -65,7 +67,10 @@ void main() {
 
         expect(mockCommentCommandClient.addReactionCalled, true);
         expect(mockCommentCommandClient.lastCommentId, 'comment-1');
-        expect(mockCommentCommandClient.lastReactionRequest?.reactionType, ReactionType.laugh);
+        expect(
+          mockCommentCommandClient.lastReactionRequest?.reactionType,
+          ReactionType.laugh,
+        );
       });
 
       test('adds heart reaction successfully', () async {
@@ -73,7 +78,10 @@ void main() {
 
         await commentService.addReaction('comment-2', request);
 
-        expect(mockCommentCommandClient.lastReactionRequest?.reactionType, ReactionType.heart);
+        expect(
+          mockCommentCommandClient.lastReactionRequest?.reactionType,
+          ReactionType.heart,
+        );
       });
 
       test('adds laugh reaction successfully', () async {
@@ -81,7 +89,10 @@ void main() {
 
         await commentService.addReaction('comment-3', request);
 
-        expect(mockCommentCommandClient.lastReactionRequest?.reactionType, ReactionType.laugh);
+        expect(
+          mockCommentCommandClient.lastReactionRequest?.reactionType,
+          ReactionType.laugh,
+        );
       });
 
       test('adds anger reaction successfully', () async {
@@ -89,7 +100,10 @@ void main() {
 
         await commentService.addReaction('comment-4', request);
 
-        expect(mockCommentCommandClient.lastReactionRequest?.reactionType, ReactionType.anger);
+        expect(
+          mockCommentCommandClient.lastReactionRequest?.reactionType,
+          ReactionType.anger,
+        );
       });
 
       test('adds sad reaction successfully', () async {
@@ -97,7 +111,10 @@ void main() {
 
         await commentService.addReaction('comment-5', request);
 
-        expect(mockCommentCommandClient.lastReactionRequest?.reactionType, ReactionType.sad);
+        expect(
+          mockCommentCommandClient.lastReactionRequest?.reactionType,
+          ReactionType.sad,
+        );
       });
 
       test('adds smiley reaction successfully', () async {
@@ -105,7 +122,10 @@ void main() {
 
         await commentService.addReaction('comment-6', request);
 
-        expect(mockCommentCommandClient.lastReactionRequest?.reactionType, ReactionType.smiley);
+        expect(
+          mockCommentCommandClient.lastReactionRequest?.reactionType,
+          ReactionType.smiley,
+        );
       });
 
       test('passes through errors when adding reaction', () async {
@@ -182,7 +202,10 @@ class MockCommentCommandClient extends CommentCommandClient {
   bool shouldThrowError = false;
 
   @override
-  Future<Comment> createComment(String tripId, CreateCommentRequest request) async {
+  Future<Comment> createComment(
+    String tripId,
+    CreateCommentRequest request,
+  ) async {
     createCommentCalled = true;
     lastTripId = tripId;
     lastRequest = request;
@@ -205,4 +228,3 @@ class MockCommentCommandClient extends CommentCommandClient {
     if (shouldThrowError) throw Exception('Failed to remove reaction');
   }
 }
-

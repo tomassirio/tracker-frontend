@@ -13,10 +13,12 @@ class TripService {
     TripCommandClient? tripCommandClient,
     TripPlanCommandClient? tripPlanCommandClient,
     TripUpdateCommandClient? tripUpdateCommandClient,
-  })  : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
-        _tripCommandClient = tripCommandClient ?? TripCommandClient(),
-        _tripPlanCommandClient = tripPlanCommandClient ?? TripPlanCommandClient(),
-        _tripUpdateCommandClient = tripUpdateCommandClient ?? TripUpdateCommandClient();
+  }) : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
+       _tripCommandClient = tripCommandClient ?? TripCommandClient(),
+       _tripPlanCommandClient =
+           tripPlanCommandClient ?? TripPlanCommandClient(),
+       _tripUpdateCommandClient =
+           tripUpdateCommandClient ?? TripUpdateCommandClient();
 
   // ===== Trip Query Operations =====
 
@@ -81,10 +83,7 @@ class TripService {
   }
 
   /// Send trip update (location, message)
-  Future<void> sendTripUpdate(
-    String tripId,
-    TripUpdateRequest request,
-  ) async {
+  Future<void> sendTripUpdate(String tripId, TripUpdateRequest request) async {
     await _tripUpdateCommandClient.createTripUpdate(tripId, request);
   }
 

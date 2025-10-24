@@ -6,8 +6,5 @@ class AddReactionRequest {
 
   AddReactionRequest({required this.reactionType});
 
-  Map<String, dynamic> toJson() => {
-        'reactionType': reactionType.toJson(),
-      };
+  Map<String, dynamic> toJson() => {'reactionType': reactionType.toJson()};
 }
-

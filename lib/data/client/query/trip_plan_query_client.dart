@@ -7,8 +7,7 @@ class TripPlanQueryClient {
   final ApiClient _apiClient;
 
   TripPlanQueryClient({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
 
   /// Get trip plan by ID
   /// Requires authentication (USER, ADMIN)
@@ -30,4 +29,3 @@ class TripPlanQueryClient {
     return _apiClient.handleListResponse(response, TripPlan.fromJson);
   }
 }
-

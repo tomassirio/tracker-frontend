@@ -19,9 +19,7 @@ class AuthSubmitButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: isLoading
           ? const SizedBox(
@@ -31,12 +29,8 @@ class AuthSubmitButton extends StatelessWidget {
             )
           : Text(
               isLogin ? 'Sign In' : 'Sign Up',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
     );
   }
 }
-

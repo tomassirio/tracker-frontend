@@ -27,8 +27,6 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
-    print('Parsing UserProfile from JSON: $json');
-
     return UserProfile(
       id: json['id'] as String? ?? json['userId'] as String? ?? '',
       username: json['username'] as String? ?? '',
@@ -40,22 +38,23 @@ class UserProfile {
       followingCount: json['followingCount'] as int? ?? 0,
       tripsCount: json['tripsCount'] as int? ?? 0,
       isFollowing: json['isFollowing'] as bool? ?? false,
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': username,
-        'email': email,
-        if (displayName != null) 'displayName': displayName,
-        if (bio != null) 'bio': bio,
-        if (avatarUrl != null) 'avatarUrl': avatarUrl,
-        'followersCount': followersCount,
-        'followingCount': followingCount,
-        'tripsCount': tripsCount,
-        'isFollowing': isFollowing,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'username': username,
+    'email': email,
+    if (displayName != null) 'displayName': displayName,
+    if (bio != null) 'bio': bio,
+    if (avatarUrl != null) 'avatarUrl': avatarUrl,
+    'followersCount': followersCount,
+    'followingCount': followingCount,
+    'tripsCount': tripsCount,
+    'isFollowing': isFollowing,
+    'createdAt': createdAt.toIso8601String(),
+  };
 }
-

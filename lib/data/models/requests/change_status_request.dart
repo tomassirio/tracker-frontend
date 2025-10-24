@@ -6,8 +6,5 @@ class ChangeStatusRequest {
 
   ChangeStatusRequest({required this.status});
 
-  Map<String, dynamic> toJson() => {
-        'status': status.toJson(),
-      };
+  Map<String, dynamic> toJson() => {'status': status.toJson()};
 }
-

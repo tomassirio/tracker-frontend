@@ -33,10 +33,7 @@ void main() {
 
     group('LoginRequest', () {
       test('toJson converts LoginRequest correctly', () {
-        final request = LoginRequest(
-          username: 'test',
-          password: 'password123',
-        );
+        final request = LoginRequest(username: 'test', password: 'password123');
 
         final json = request.toJson();
 

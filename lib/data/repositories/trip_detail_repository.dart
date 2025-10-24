@@ -12,8 +12,8 @@ class TripDetailRepository {
   TripDetailRepository({
     TripService? tripService,
     CommentService? commentService,
-  })  : _tripService = tripService ?? TripService(),
-        _commentService = commentService ?? CommentService();
+  }) : _tripService = tripService ?? TripService(),
+       _commentService = commentService ?? CommentService();
 
   /// Loads top-level comments for a trip
   Future<List<Comment>> loadComments(Trip trip) async {
@@ -22,13 +22,16 @@ class TripDetailRepository {
   }
 
   /// Loads replies for a specific comment
-  Future<List<Comment>> loadReplies(List<Comment> comments, String commentId) async {
+  Future<List<Comment>> loadReplies(
+    List<Comment> comments,
+    String commentId,
+  ) async {
     final comment = comments.firstWhere((c) => c.id == commentId);
     return comment.replies ?? [];
   }
 
   /// Loads reactions for a comment from the comment object itself
-  /// Note: Reactions are stored as a Map<String, int> in the comment model (reaction type -> count)
+  /// Note: Reactions are stored as a `Map<String, int>` in the comment model (reaction type -> count)
   /// This method returns an empty list as reactions are already embedded in the comment
   Future<List<Reaction>> loadReactions(Comment comment) async {
     // Reactions are already part of the comment object as a map
@@ -46,13 +49,14 @@ class TripDetailRepository {
 
   /// Adds a reply to a comment
   /// Uses parentCommentId in the request body to create a reply
-  Future<Comment> addReply(String tripId, String parentCommentId, String message) async {
+  Future<Comment> addReply(
+    String tripId,
+    String parentCommentId,
+    String message,
+  ) async {
     return await _commentService.addComment(
       tripId,
-      CreateCommentRequest(
-        message: message,
-        parentCommentId: parentCommentId,
-      ),
+      CreateCommentRequest(message: message, parentCommentId: parentCommentId),
     );
   }
 

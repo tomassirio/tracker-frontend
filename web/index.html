@@ -33,7 +33,16 @@
   <link rel="manifest" href="manifest.json">
 
   <!-- Google Maps JavaScript API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBa92TNsmofECxwSA4Y59QM3hVuCz7vsuM"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}"></script>
+
+  <!-- Application Configuration -->
+  <script>
+    window.appConfig = {
+      commandBaseUrl: '{{COMMAND_BASE_URL}}',
+      queryBaseUrl: '{{QUERY_BASE_URL}}',
+      authBaseUrl: '{{AUTH_BASE_URL}}'
+    };
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

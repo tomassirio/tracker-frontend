@@ -5,11 +5,7 @@ class ErrorView extends StatelessWidget {
   final String error;
   final VoidCallback onRetry;
 
-  const ErrorView({
-    super.key,
-    required this.error,
-    required this.onRetry,
-  });
+  const ErrorView({super.key, required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +13,7 @@ class ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red[300],
-          ),
+          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
           const SizedBox(height: 16),
           Text(
             'Error loading trips',
@@ -47,4 +39,3 @@ class ErrorView extends StatelessWidget {
     );
   }
 }
-

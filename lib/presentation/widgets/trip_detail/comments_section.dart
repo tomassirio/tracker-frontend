@@ -36,9 +36,7 @@ class CommentsSection extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.grey[100],
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[300]!),
-            ),
+            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
           child: Row(
             children: [
@@ -46,9 +44,9 @@ class CommentsSection extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Comments (${comments.length})',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -58,8 +56,8 @@ class CommentsSection extends StatelessWidget {
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : comments.isEmpty
-                  ? _buildEmptyState()
-                  : _buildCommentsList(),
+              ? _buildEmptyState()
+              : _buildCommentsList(),
         ),
       ],
     );
@@ -72,26 +70,16 @@ class CommentsSection extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.comment_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.comment_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No comments yet',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               'Be the first to comment!',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -122,4 +110,3 @@ class CommentsSection extends StatelessWidget {
     );
   }
 }
-

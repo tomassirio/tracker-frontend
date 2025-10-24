@@ -57,7 +57,7 @@ void main() {
         expect(trip.name, 'My Trip');
         expect(trip.description, 'A great adventure');
         expect(trip.visibility, Visibility.public);
-        expect(trip.status, TripStatus.in_progress);
+        expect(trip.status, TripStatus.inProgress);
         expect(trip.commentsCount, 5);
         expect(trip.reactionsCount, 10);
       });
@@ -70,7 +70,7 @@ void main() {
           name: 'My Trip',
           description: 'A great adventure',
           visibility: Visibility.public,
-          status: TripStatus.in_progress,
+          status: TripStatus.inProgress,
           createdAt: DateTime(2024, 1, 1),
           updatedAt: DateTime(2024, 1, 2),
         );
@@ -99,9 +99,7 @@ void main() {
 
     group('ChangeStatusRequest', () {
       test('toJson converts ChangeStatusRequest correctly', () {
-        final request = ChangeStatusRequest(
-          status: TripStatus.finished,
-        );
+        final request = ChangeStatusRequest(status: TripStatus.finished);
 
         final json = request.toJson();
 

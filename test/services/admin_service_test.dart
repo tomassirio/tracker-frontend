@@ -4,20 +4,12 @@ import 'package:tracker_frontend/data/client/clients.dart';
 
 void main() {
   group('AdminService', () {
-    late MockUserCommandClient mockUserCommandClient;
     late MockTripCommandClient mockTripCommandClient;
-    late MockCommentCommandClient mockCommentCommandClient;
     late AdminService adminService;
 
     setUp(() {
-      mockUserCommandClient = MockUserCommandClient();
       mockTripCommandClient = MockTripCommandClient();
-      mockCommentCommandClient = MockCommentCommandClient();
-      adminService = AdminService(
-        userCommandClient: mockUserCommandClient,
-        tripCommandClient: mockTripCommandClient,
-        commentCommandClient: mockCommentCommandClient,
-      );
+      adminService = AdminService(tripCommandClient: mockTripCommandClient);
     });
 
     group('deleteTrip', () {
@@ -31,10 +23,7 @@ void main() {
       test('passes through errors when deleting trip', () async {
         mockTripCommandClient.shouldThrowError = true;
 
-        expect(
-          () => adminService.deleteTrip('trip-123'),
-          throwsException,
-        );
+        expect(() => adminService.deleteTrip('trip-123'), throwsException);
       });
 
       test('handles unauthorized errors', () async {
@@ -43,9 +32,7 @@ void main() {
 
         expect(
           () => adminService.deleteTrip('trip-123'),
-          throwsA(
-            predicate((e) => e.toString().contains('Unauthorized')),
-          ),
+          throwsA(predicate((e) => e.toString().contains('Unauthorized'))),
         );
       });
 
@@ -55,40 +42,26 @@ void main() {
 
         expect(
           () => adminService.deleteTrip('nonexistent-trip'),
-          throwsA(
-            predicate((e) => e.toString().contains('not found')),
-          ),
+          throwsA(predicate((e) => e.toString().contains('not found'))),
         );
       });
     });
 
     group('AdminService initialization', () {
-      test('creates with provided clients', () {
-        final userClient = MockUserCommandClient();
+      test('creates with provided client', () {
         final tripClient = MockTripCommandClient();
-        final commentClient = MockCommentCommandClient();
-        final service = AdminService(
-          userCommandClient: userClient,
-          tripCommandClient: tripClient,
-          commentCommandClient: commentClient,
-        );
+        final service = AdminService(tripCommandClient: tripClient);
 
         expect(service, isNotNull);
       });
 
-      test('creates with default clients when not provided', () {
+      test('creates with default client when not provided', () {
         final service = AdminService();
 
         expect(service, isNotNull);
       });
     });
   });
-}
-
-// Mock UserCommandClient
-class MockUserCommandClient extends UserCommandClient {
-  bool shouldThrowError = false;
-  String errorMessage = 'User command failed';
 }
 
 // Mock TripCommandClient
@@ -108,9 +81,8 @@ class MockTripCommandClient extends TripCommandClient {
   }
 }
 
-// Mock CommentCommandClient
+// Mock CommentCommandClient (kept for potential future use)
 class MockCommentCommandClient extends CommentCommandClient {
   bool shouldThrowError = false;
   String errorMessage = 'Comment command failed';
 }
-

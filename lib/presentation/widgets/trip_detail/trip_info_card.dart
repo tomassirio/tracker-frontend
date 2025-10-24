@@ -6,10 +6,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 class TripInfoCard extends StatelessWidget {
   final Trip trip;
 
-  const TripInfoCard({
-    super.key,
-    required this.trip,
-  });
+  const TripInfoCard({super.key, required this.trip});
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +30,7 @@ class TripInfoCard extends StatelessWidget {
               children: [
                 Chip(
                   label: Text(trip.status.toJson()),
-                  avatar: Icon(
-                    UiHelpers.getStatusIcon(trip.status),
-                    size: 16,
-                  ),
+                  avatar: Icon(UiHelpers.getStatusIcon(trip.status), size: 16),
                 ),
                 const SizedBox(width: 8),
                 Chip(

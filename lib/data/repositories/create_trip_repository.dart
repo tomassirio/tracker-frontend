@@ -6,9 +6,8 @@ import 'package:tracker_frontend/data/services/trip_service.dart';
 class CreateTripRepository {
   final TripService _tripService;
 
-  CreateTripRepository({
-    TripService? tripService,
-  }) : _tripService = tripService ?? TripService();
+  CreateTripRepository({TripService? tripService})
+    : _tripService = tripService ?? TripService();
 
   /// Creates a new trip
   Future<void> createTrip({
@@ -29,4 +28,3 @@ class CreateTripRepository {
     await _tripService.createTrip(request);
   }
 }
-

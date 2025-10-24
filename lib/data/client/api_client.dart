@@ -16,8 +16,8 @@ class ApiClient {
     required this.baseUrl,
     http.Client? httpClient,
     TokenStorage? tokenStorage,
-  })  : _httpClient = httpClient ?? http.Client(),
-        _tokenStorage = tokenStorage ?? TokenStorage();
+  }) : _httpClient = httpClient ?? http.Client(),
+       _tokenStorage = tokenStorage ?? TokenStorage();
 
   /// GET request
   Future<http.Response> get(
@@ -193,7 +193,9 @@ class ApiClient {
         return false;
       }
 
-      final uri = Uri.parse('${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}');
+      final uri = Uri.parse(
+        '${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}',
+      );
       final response = await _httpClient.post(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -204,7 +206,8 @@ class ApiClient {
         final data = jsonDecode(response.body);
         await _tokenStorage.saveTokens(
           accessToken: data['access_token'] ?? data['accessToken'],
-          refreshToken: data['refresh_token'] ?? data['refreshToken'] ?? refreshToken,
+          refreshToken:
+              data['refresh_token'] ?? data['refreshToken'] ?? refreshToken,
           tokenType: data['token_type'] ?? data['tokenType'] ?? 'Bearer',
           expiresIn: data['expires_in'] ?? data['expiresIn'] ?? 3600,
         );

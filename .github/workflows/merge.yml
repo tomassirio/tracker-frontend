@@ -1,0 +1,205 @@
+name: Merge to Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  version-and-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release-version: ${{ steps.set-release-version.outputs.version }}
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+          channel: 'stable'
+          cache: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Set release version
+        id: set-release-version
+        run: |
+          # Extract current version from pubspec.yaml (e.g., 1.0.0+1 or 1.0.0-SNAPSHOT+1)
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
+          
+          # Remove -SNAPSHOT and extract base version and build number
+          BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-SNAPSHOT//' | sed 's/+.*//')
+          BUILD_NUMBER=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
+          
+          RELEASE_VERSION="${BASE_VERSION}+${BUILD_NUMBER}"
+          
+          # Update pubspec.yaml with release version
+          sed -i "s/^version: .*/version: ${RELEASE_VERSION}/" pubspec.yaml
+          
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
+          echo "version=${BASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "Release version: ${RELEASE_VERSION}"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Commit release version
+        run: |
+          git add pubspec.yaml
+          git commit -m "ci: Release version ${RELEASE_VERSION}"
+
+      - name: Create Git tag
+        run: |
+          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          git tag -a "v${BASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Extract coverage and update README badges
+        run: |
+          if [ -f "coverage/lcov.info" ]; then
+            # Install lcov if not available
+            sudo apt-get update
+            sudo apt-get install -y lcov
+            
+            # Generate coverage summary
+            COVERAGE_SUMMARY=$(lcov --summary coverage/lcov.info 2>&1)
+            
+            # Extract line coverage percentage
+            COVERAGE=$(echo "$COVERAGE_SUMMARY" | grep -oP 'lines......: \K[0-9.]+' | head -1)
+            
+            if [ -z "$COVERAGE" ]; then
+              COVERAGE="0"
+            fi
+            
+            # Round to integer
+            COVERAGE=$(printf "%.0f" "$COVERAGE")
+            
+            echo "Coverage: ${COVERAGE}%"
+            
+            # Determine badge color
+            if [ "$COVERAGE" -ge 80 ]; then
+              COVERAGE_COLOR="brightgreen"
+            elif [ "$COVERAGE" -ge 60 ]; then
+              COVERAGE_COLOR="yellow"
+            elif [ "$COVERAGE" -ge 40 ]; then
+              COVERAGE_COLOR="orange"
+            else
+              COVERAGE_COLOR="red"
+            fi
+          else
+            echo "No coverage data found"
+            COVERAGE="N/A"
+            COVERAGE_COLOR="lightgrey"
+          fi
+          
+          # Update badges in README if it exists
+          if [ -f "README.md" ]; then
+            BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+            
+            # Update or add version badge
+            if grep -q "version-" README.md; then
+              sed -i "s/version-[0-9.]*-blue/version-${BASE_VERSION}-blue/" README.md
+            fi
+            
+            # Update or add coverage badge
+            if grep -q "coverage-" README.md; then
+              sed -i "s|coverage-[^)]*|coverage-${COVERAGE}%25-${COVERAGE_COLOR}|" README.md
+            fi
+            
+            # Check if there were changes
+            if git diff --quiet README.md; then
+              echo "No badge updates needed"
+            else
+              git add README.md
+              git commit --amend --no-edit
+            fi
+          fi
+
+      - name: Build web application
+        run: flutter build web --release
+
+      - name: Create release notes
+        run: |
+          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          echo "Release ${BASE_VERSION}" > release-notes.md
+          echo "" >> release-notes.md
+          
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "Changes since ${PREV_TAG}:" >> release-notes.md
+            echo "" >> release-notes.md
+            git log --pretty=format:"* %s" ${PREV_TAG}..HEAD >> release-notes.md
+          else
+            echo "Initial release" >> release-notes.md
+          fi
+
+      - name: Create release archive
+        run: |
+          cd build/web
+          tar -czf ../../tracker-frontend-web.tar.gz .
+          cd ../..
+
+      - name: Set next development version
+        run: |
+          # Extract base version and build number
+          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          BUILD_NUMBER=$(echo "${RELEASE_VERSION}" | sed 's/.*+//')
+          
+          # Increment build number for next development iteration
+          NEXT_BUILD=$((BUILD_NUMBER + 1))
+          NEXT_VERSION="${BASE_VERSION}-SNAPSHOT+${NEXT_BUILD}"
+          
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
+          
+          echo "NEXT_VERSION=${NEXT_VERSION}" >> $GITHUB_ENV
+          echo "Next development version: ${NEXT_VERSION}"
+
+      - name: Commit next development version
+        run: |
+          git add pubspec.yaml
+          git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
+
+      - name: Push changes and tags
+        run: |
+          git push
+          git push --tags
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          gh release create "v${BASE_VERSION}" \
+            --title "Release ${BASE_VERSION}" \
+            --notes-file release-notes.md \
+            tracker-frontend-web.tar.gz
+
+  build-release-docker-images:
+    needs: version-and-release
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-build.yml
+    with:
+      push-to-registry: true
+      image-tag: latest
+      checkout-ref: v${{ needs.version-and-release.outputs.release-version }}
+    secrets:
+      registry-username: ${{ github.actor }}
+      registry-password: ${{ secrets.GITHUB_TOKEN }}

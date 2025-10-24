@@ -40,7 +40,7 @@ void main() {
           'name': 'Day 1 Plan',
           'description': 'Visit the museum',
           'createdAt': DateTime.now().toString(),
-          'updatedAt': DateTime.now().toString()
+          'updatedAt': DateTime.now().toString(),
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
 
@@ -50,19 +50,20 @@ void main() {
         expect(result.name, 'Day 1 Plan');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlans));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('createTripPlan requires authentication', () async {
-        final request = CreateTripPlanRequest(
-          name: 'Day 1 Plan',
-        );
+        final request = CreateTripPlanRequest(name: 'Day 1 Plan');
         final responseBody = {
           'id': 'plan-123',
           'userId': 'user-123',
           'name': 'Day 1 Plan',
           'createdAt': DateTime.now().toString(),
-          'updatedAt': DateTime.now().toString()
+          'updatedAt': DateTime.now().toString(),
         };
 
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
@@ -73,9 +74,7 @@ void main() {
       });
 
       test('createTripPlan throws exception on validation error', () async {
-        final request = CreateTripPlanRequest(
-          name: '',
-        );
+        final request = CreateTripPlanRequest(name: '');
         mockHttpClient.response = http.Response(
           '{"message":"Name cannot be empty"}',
           400,
@@ -100,18 +99,27 @@ void main() {
           'name': 'Updated Plan',
           'description': 'Updated description',
           'createdAt': DateTime.now().toString(),
-          'updatedAt': DateTime.now().toString()
+          'updatedAt': DateTime.now().toString(),
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
-        final result = await tripPlanCommandClient.updateTripPlan('plan-123', request);
+        final result = await tripPlanCommandClient.updateTripPlan(
+          'plan-123',
+          request,
+        );
 
         expect(result.id, 'plan-123');
         expect(result.userId, 'user-123');
         expect(result.name, 'Updated Plan');
         expect(mockHttpClient.lastMethod, 'PUT');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlanById('plan-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripPlanById('plan-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('updateTripPlan requires authentication', () async {
@@ -121,7 +129,7 @@ void main() {
           'userId': 'user-123',
           'name': 'Updated Plan',
           'createdAt': DateTime.now().toString(),
-          'updatedAt': DateTime.now().toString()
+          'updatedAt': DateTime.now().toString(),
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
@@ -151,8 +159,14 @@ void main() {
         await tripPlanCommandClient.deleteTripPlan('plan-123');
 
         expect(mockHttpClient.lastMethod, 'DELETE');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlanById('plan-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripPlanById('plan-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('deleteTripPlan requires authentication', () async {
@@ -200,11 +214,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with command base URL when not provided', () {
-        final client = TripPlanCommandClient();
+      test(
+        'creates default ApiClient with command base URL when not provided',
+        () {
+          final client = TripPlanCommandClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }

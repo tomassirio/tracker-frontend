@@ -29,14 +29,10 @@ class DatePickerCard extends StatelessWidget {
               : 'Not set',
         ),
         trailing: selectedDate != null && onClear != null
-            ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: onClear,
-              )
+            ? IconButton(icon: const Icon(Icons.clear), onPressed: onClear)
             : null,
         onTap: onTap,
       ),
     );
   }
 }
-

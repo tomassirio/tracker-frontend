@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
 
 import '../../../data/models/domain/reaction_type.dart';
 
@@ -7,10 +6,7 @@ import '../../../data/models/domain/reaction_type.dart';
 class ReactionPicker extends StatelessWidget {
   final Function(ReactionType) onReactionSelected;
 
-  const ReactionPicker({
-    super.key,
-    required this.onReactionSelected,
-  });
+  const ReactionPicker({super.key, required this.onReactionSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +17,7 @@ class ReactionPicker extends StatelessWidget {
         children: [
           const Text(
             'React to this comment',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -101,14 +94,8 @@ class _ReactionButton extends StatelessWidget {
           color: Colors.grey[100],
           borderRadius: BorderRadius.circular(25),
         ),
-        child: Center(
-          child: Text(
-            emoji,
-            style: const TextStyle(fontSize: 28),
-          ),
-        ),
+        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 28))),
       ),
     );
   }
 }
-

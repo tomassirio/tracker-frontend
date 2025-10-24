@@ -1,5 +1,10 @@
 # tracker_frontend
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Coverage](https://img.shields.io/badge/coverage-N/A-lightgrey)
+![Flutter](https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 Tracker's Frontend/Mobile - A Flutter application for tracking trips and adventures.
 
 ## Overview
@@ -65,10 +70,19 @@ flutter run
 
 ### Running the App
 
-Run the application:
+For local development with your Google Maps API key:
+
 ```bash
-flutter run
+# First time setup
+cp .env.local.example .env.local
+# Edit .env.local and add your API key
+
+# Run the app
+chmod +x dev.sh
+./dev.sh
 ```
+
+For detailed local development setup, see [LOCAL_DEV.md](LOCAL_DEV.md).
 
 For detailed UI setup instructions, including Google Maps API configuration, see [UI_SETUP.md](UI_SETUP.md).
 
@@ -124,6 +138,50 @@ final createTripRequest = CreateTripRequest(
 );
 final trip = await tripService.createTrip(createTripRequest);
 ```
+
+## Docker Deployment
+
+The application can be containerized and deployed using Docker. The web version is served via nginx on **port 51538**.
+
+### Quick Start with Docker
+
+```bash
+# Build the image
+docker build -f docker/Dockerfile -t tracker-frontend:latest .
+
+# Run the container with Google Maps API key
+docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=your_api_key_here tracker-frontend:latest
+
+# Access at http://localhost:51538
+```
+
+### Using docker-compose
+
+Create a `.env` file with your Google Maps API key:
+```bash
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+```
+
+Then run:
+```bash
+cd docker
+docker-compose up
+```
+
+For detailed Docker configuration, environment setup, and deployment options, see [docker/DOCKER.md](docker/DOCKER.md).
+
+### Environment Configuration
+
+Backend API URLs and other settings can be configured via environment variables at runtime. This allows the same Docker image to be deployed to different environments without rebuilding.
+
+See [ENVIRONMENT_CONFIG.md](ENVIRONMENT_CONFIG.md) for complete configuration documentation.
+
+### CI/CD Pipeline
+
+The project includes GitHub Actions workflows for:
+- ✅ **Feature branches**: Automated testing and Docker image building
+- 🚀 **Master branch**: Automatic versioning, releases, and Docker image publishing
+- 🐳 **Docker images**: Published to GitHub Container Registry (GHCR)
 
 ## Contributing
 

@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class ErrorMessage extends StatelessWidget {
   final String message;
 
-  const ErrorMessage({
-    super.key,
-    required this.message,
-  });
+  const ErrorMessage({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +20,10 @@ class ErrorMessage extends StatelessWidget {
           Icon(Icons.error_outline, color: Colors.red.shade700),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              message,
-              style: TextStyle(color: Colors.red.shade700),
-            ),
+            child: Text(message, style: TextStyle(color: Colors.red.shade700)),
           ),
         ],
       ),
     );
   }
 }
-

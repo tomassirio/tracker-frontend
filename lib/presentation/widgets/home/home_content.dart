@@ -32,10 +32,7 @@ class HomeContent extends StatelessWidget {
     }
 
     if (error != null) {
-      return ErrorView(
-        error: error!,
-        onRetry: onRefresh,
-      );
+      return ErrorView(error: error!, onRetry: onRefresh);
     }
 
     if (trips.isEmpty) {
@@ -52,13 +49,9 @@ class HomeContent extends StatelessWidget {
         itemCount: trips.length,
         itemBuilder: (context, index) {
           final trip = trips[index];
-          return TripCard(
-            trip: trip,
-            onTap: () => onTripTap(trip),
-          );
+          return TripCard(trip: trip, onTap: () => onTripTap(trip));
         },
       ),
     );
   }
 }
-

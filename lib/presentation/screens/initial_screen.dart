@@ -48,11 +48,7 @@ class _InitialScreenState extends State<InitialScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.explore,
-                  size: 80,
-                  color: Colors.white,
-                ),
+                Icon(Icons.explore, size: 80, color: Colors.white),
                 SizedBox(height: 24),
                 CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),

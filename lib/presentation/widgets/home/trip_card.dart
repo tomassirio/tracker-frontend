@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 
@@ -7,11 +8,7 @@ class TripCard extends StatelessWidget {
   final Trip trip;
   final VoidCallback onTap;
 
-  const TripCard({
-    super.key,
-    required this.trip,
-    required this.onTap,
-  });
+  const TripCard({super.key, required this.trip, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +67,9 @@ class TripCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(status) {
+  Color _getStatusColor(TripStatus status) {
     switch (status.toString()) {
-      case 'TripStatus.in_progress':
+      case 'TripStatus.inProgress':
         return Colors.green;
       case 'TripStatus.created':
         return Colors.blue;
@@ -85,4 +82,3 @@ class TripCard extends StatelessWidget {
     }
   }
 }
-

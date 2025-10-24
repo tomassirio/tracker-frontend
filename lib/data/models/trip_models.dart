@@ -1,5 +1,6 @@
 /// Trip models
 library;
+
 export 'domain/trip.dart';
 export 'domain/trip_location.dart';
 export 'requests/create_trip_request.dart';

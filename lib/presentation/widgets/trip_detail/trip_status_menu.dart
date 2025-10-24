@@ -6,10 +6,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 class TripStatusMenu extends StatelessWidget {
   final Function(TripStatus) onStatusChanged;
 
-  const TripStatusMenu({
-    super.key,
-    required this.onStatusChanged,
-  });
+  const TripStatusMenu({super.key, required this.onStatusChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +15,11 @@ class TripStatusMenu extends StatelessWidget {
       onSelected: onStatusChanged,
       itemBuilder: (context) => [
         PopupMenuItem(
-          value: TripStatus.in_progress,
+          value: TripStatus.inProgress,
           child: Row(
             children: [
               Icon(
-                UiHelpers.getStatusIcon(TripStatus.in_progress),
+                UiHelpers.getStatusIcon(TripStatus.inProgress),
                 color: Colors.green,
               ),
               const SizedBox(width: 8),
@@ -60,4 +57,3 @@ class TripStatusMenu extends StatelessWidget {
     );
   }
 }
-

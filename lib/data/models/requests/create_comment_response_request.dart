@@ -4,8 +4,5 @@ class CreateCommentResponseRequest {
 
   CreateCommentResponseRequest({required this.message});
 
-  Map<String, dynamic> toJson() => {
-        'message': message,
-      };
+  Map<String, dynamic> toJson() => {'message': message};
 }
-

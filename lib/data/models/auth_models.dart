@@ -1,5 +1,6 @@
 /// Authentication request and response models
 library;
+
 export 'requests/register_request.dart';
 export 'requests/login_request.dart';
 export 'responses/auth_response.dart';

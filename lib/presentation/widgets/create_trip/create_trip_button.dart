@@ -23,10 +23,7 @@ class CreateTripButton extends StatelessWidget {
             )
           : const Icon(Icons.add),
       label: Text(isLoading ? 'Creating...' : 'Create Trip'),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.all(16),
-      ),
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
     );
   }
 }
-

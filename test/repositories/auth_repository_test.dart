@@ -14,24 +14,24 @@ void main() {
     });
 
     group('login', () {
-      test('successful login calls auth service with correct credentials', () async {
-        final username = 'testuser';
-        final password = 'password123';
+      test(
+        'successful login calls auth service with correct credentials',
+        () async {
+          final username = 'testuser';
+          final password = 'password123';
 
-        await authRepository.login(username, password);
+          await authRepository.login(username, password);
 
-        expect(mockAuthService.lastLoginRequest?.username, username);
-        expect(mockAuthService.lastLoginRequest?.password, password);
-        expect(mockAuthService.loginCalled, true);
-      });
+          expect(mockAuthService.lastLoginRequest?.username, username);
+          expect(mockAuthService.lastLoginRequest?.password, password);
+          expect(mockAuthService.loginCalled, true);
+        },
+      );
 
       test('login passes through service errors', () async {
         mockAuthService.shouldThrowError = true;
 
-        expect(
-          () => authRepository.login('user', 'pass'),
-          throwsException,
-        );
+        expect(() => authRepository.login('user', 'pass'), throwsException);
       });
 
       test('login with empty username', () async {
@@ -56,18 +56,21 @@ void main() {
     });
 
     group('register', () {
-      test('successful registration calls auth service with correct data', () async {
-        final username = 'newuser';
-        final email = 'newuser@example.com';
-        final password = 'password123';
+      test(
+        'successful registration calls auth service with correct data',
+        () async {
+          final username = 'newuser';
+          final email = 'newuser@example.com';
+          final password = 'password123';
 
-        await authRepository.register(username, email, password);
+          await authRepository.register(username, email, password);
 
-        expect(mockAuthService.lastRegisterRequest?.username, username);
-        expect(mockAuthService.lastRegisterRequest?.email, email);
-        expect(mockAuthService.lastRegisterRequest?.password, password);
-        expect(mockAuthService.registerCalled, true);
-      });
+          expect(mockAuthService.lastRegisterRequest?.username, username);
+          expect(mockAuthService.lastRegisterRequest?.email, email);
+          expect(mockAuthService.lastRegisterRequest?.password, password);
+          expect(mockAuthService.registerCalled, true);
+        },
+      );
 
       test('register passes through service errors', () async {
         mockAuthService.shouldThrowError = true;
@@ -199,4 +202,3 @@ class MockAuthService extends AuthService {
     }
   }
 }
-
