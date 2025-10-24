@@ -28,12 +28,11 @@ class AuthResponse {
   }
 
   Map<String, dynamic> toJson() => {
-        'access_token': accessToken,
-        'refresh_token': refreshToken,
-        'token_type': tokenType,
-        'expires_in': expiresIn,
-        if (userId != null) 'user_id': userId,
-        if (username != null) 'username': username,
-      };
+    'access_token': accessToken,
+    'refresh_token': refreshToken,
+    'token_type': tokenType,
+    'expires_in': expiresIn,
+    if (userId != null) 'user_id': userId,
+    if (username != null) 'username': username,
+  };
 }
-

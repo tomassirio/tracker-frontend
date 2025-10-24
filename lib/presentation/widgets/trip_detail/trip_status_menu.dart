@@ -6,10 +6,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 class TripStatusMenu extends StatelessWidget {
   final Function(TripStatus) onStatusChanged;
 
-  const TripStatusMenu({
-    super.key,
-    required this.onStatusChanged,
-  });
+  const TripStatusMenu({super.key, required this.onStatusChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -60,4 +57,3 @@ class TripStatusMenu extends StatelessWidget {
     );
   }
 }
-

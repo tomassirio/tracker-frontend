@@ -19,21 +19,20 @@ class Achievement {
   });
 
   factory Achievement.fromJson(Map<String, dynamic> json) => Achievement(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        description: json['description'] as String,
-        iconUrl: json['iconUrl'] as String,
-        requiredPoints: json['requiredPoints'] as int,
-        category: AchievementCategory.fromJson(json['category'] as String),
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    iconUrl: json['iconUrl'] as String,
+    requiredPoints: json['requiredPoints'] as int,
+    category: AchievementCategory.fromJson(json['category'] as String),
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-        'iconUrl': iconUrl,
-        'requiredPoints': requiredPoints,
-        'category': category.toJson(),
-      };
+    'id': id,
+    'name': name,
+    'description': description,
+    'iconUrl': iconUrl,
+    'requiredPoints': requiredPoints,
+    'category': category.toJson(),
+  };
 }
-

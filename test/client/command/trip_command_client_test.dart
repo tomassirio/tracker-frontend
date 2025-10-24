@@ -57,8 +57,14 @@ void main() {
         expect(result.visibility, Visibility.private);
         expect(result.status, TripStatus.created);
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripsCreate));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripsCreate),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('createTrip requires authentication', () async {
@@ -95,10 +101,7 @@ void main() {
           400,
         );
 
-        expect(
-          () => tripCommandClient.createTrip(request),
-          throwsException,
-        );
+        expect(() => tripCommandClient.createTrip(request), throwsException);
       });
     });
 
@@ -129,8 +132,14 @@ void main() {
         expect(result.id, 'trip-123');
         expect(result.name, 'Updated Trip');
         expect(mockHttpClient.lastMethod, 'PUT');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripUpdate('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripUpdate('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('updateTrip requires authentication', () async {
@@ -186,13 +195,22 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
-        final result = await tripCommandClient.changeVisibility('trip-123', request);
+        final result = await tripCommandClient.changeVisibility(
+          'trip-123',
+          request,
+        );
 
         expect(result.id, 'trip-123');
         expect(result.visibility, Visibility.public);
         expect(mockHttpClient.lastMethod, 'PATCH');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripVisibility('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripVisibility('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('changeVisibility requires authentication', () async {
@@ -248,13 +266,22 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
-        final result = await tripCommandClient.changeStatus('trip-123', request);
+        final result = await tripCommandClient.changeStatus(
+          'trip-123',
+          request,
+        );
 
         expect(result.id, 'trip-123');
         expect(result.status, TripStatus.in_progress);
         expect(mockHttpClient.lastMethod, 'PATCH');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripStatus('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripStatus('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('changeStatus requires authentication', () async {
@@ -299,8 +326,14 @@ void main() {
         await tripCommandClient.deleteTrip('trip-123');
 
         expect(mockHttpClient.lastMethod, 'DELETE');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripDelete('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripDelete('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('deleteTrip requires authentication', () async {
@@ -317,10 +350,7 @@ void main() {
           404,
         );
 
-        expect(
-          () => tripCommandClient.deleteTrip('trip-123'),
-          throwsException,
-        );
+        expect(() => tripCommandClient.deleteTrip('trip-123'), throwsException);
       });
 
       test('deleteTrip throws exception on unauthorized', () async {
@@ -329,10 +359,7 @@ void main() {
           403,
         );
 
-        expect(
-          () => tripCommandClient.deleteTrip('trip-123'),
-          throwsException,
-        );
+        expect(() => tripCommandClient.deleteTrip('trip-123'), throwsException);
       });
     });
 
@@ -348,11 +375,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with command base URL when not provided', () {
-        final client = TripCommandClient();
+      test(
+        'creates default ApiClient with command base URL when not provided',
+        () {
+          final client = TripCommandClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }

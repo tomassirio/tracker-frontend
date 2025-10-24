@@ -41,7 +41,10 @@ void main() {
         final result = await apiClient.get('/test', requireAuth: true);
 
         expect(result.statusCode, 200);
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('GET request with custom headers', () async {
@@ -71,10 +74,17 @@ void main() {
         mockHttpClient.response = http.Response('{"success": true}', 201);
         final body = {'name': 'test'};
 
-        final result = await apiClient.post('/test', body: body, requireAuth: true);
+        final result = await apiClient.post(
+          '/test',
+          body: body,
+          requireAuth: true,
+        );
 
         expect(result.statusCode, 201);
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
     });
 
@@ -96,10 +106,17 @@ void main() {
         mockHttpClient.response = http.Response('{"success": true}', 200);
         final body = {'name': 'updated'};
 
-        final result = await apiClient.put('/test', body: body, requireAuth: true);
+        final result = await apiClient.put(
+          '/test',
+          body: body,
+          requireAuth: true,
+        );
 
         expect(result.statusCode, 200);
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
     });
 
@@ -121,10 +138,17 @@ void main() {
         mockHttpClient.response = http.Response('{"success": true}', 200);
         final body = {'status': 'active'};
 
-        final result = await apiClient.patch('/test', body: body, requireAuth: true);
+        final result = await apiClient.patch(
+          '/test',
+          body: body,
+          requireAuth: true,
+        );
 
         expect(result.statusCode, 200);
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
     });
 
@@ -146,7 +170,10 @@ void main() {
         final result = await apiClient.delete('/test', requireAuth: true);
 
         expect(result.statusCode, 204);
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
     });
 
@@ -235,7 +262,10 @@ void main() {
       test('includes custom headers alongside default headers', () async {
         mockHttpClient.response = http.Response('{"data": "test"}', 200);
 
-        await apiClient.get('/test', headers: {'X-Custom-Header': 'custom-value'});
+        await apiClient.get(
+          '/test',
+          headers: {'X-Custom-Header': 'custom-value'},
+        );
 
         expect(mockHttpClient.lastHeaders?['Content-Type'], 'application/json');
         expect(mockHttpClient.lastHeaders?['X-Custom-Header'], 'custom-value');
@@ -252,10 +282,7 @@ class TestModel {
   TestModel({required this.id, required this.name});
 
   factory TestModel.fromJson(Map<String, dynamic> json) {
-    return TestModel(
-      id: json['id'],
-      name: json['name'],
-    );
+    return TestModel(id: json['id'], name: json['name']);
   }
 }
 

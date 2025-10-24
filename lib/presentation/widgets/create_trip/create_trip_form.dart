@@ -64,13 +64,9 @@ class CreateTripForm extends StatelessWidget {
             onClearEndDate: onClearEndDate,
           ),
           const SizedBox(height: 32),
-          CreateTripButton(
-            isLoading: isLoading,
-            onPressed: onSubmit,
-          ),
+          CreateTripButton(isLoading: isLoading, onPressed: onSubmit),
         ],
       ),
     );
   }
 }
-

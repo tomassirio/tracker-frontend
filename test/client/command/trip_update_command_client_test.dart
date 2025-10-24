@@ -39,8 +39,14 @@ void main() {
         await tripUpdateCommandClient.createTripUpdate('trip-123', request);
 
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripUpdates('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripUpdates('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
         expect(mockHttpClient.lastBody, contains('40.712'));
         expect(mockHttpClient.lastBody, contains('-74.006'));
       });
@@ -110,7 +116,8 @@ void main() {
         );
 
         expect(
-          () => tripUpdateCommandClient.createTripUpdate('trip-invalid', request),
+          () =>
+              tripUpdateCommandClient.createTripUpdate('trip-invalid', request),
           throwsException,
         );
       });
@@ -144,11 +151,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with command base URL when not provided', () {
-        final client = TripUpdateCommandClient();
+      test(
+        'creates default ApiClient with command base URL when not provided',
+        () {
+          final client = TripUpdateCommandClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }
@@ -223,4 +233,3 @@ class MockTokenStorage extends TokenStorage {
     _isLoggedIn = false;
   }
 }
-

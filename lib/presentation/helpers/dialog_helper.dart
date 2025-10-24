@@ -24,4 +24,3 @@ class DialogHelper {
     return result ?? false;
   }
 }
-

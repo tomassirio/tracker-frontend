@@ -54,16 +54,19 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('filters out all replies when all comments have parent IDs', () async {
-        final reply1 = createMockComment('comment-1', 'parent-1');
-        final reply2 = createMockComment('comment-2', 'parent-2');
+      test(
+        'filters out all replies when all comments have parent IDs',
+        () async {
+          final reply1 = createMockComment('comment-1', 'parent-1');
+          final reply2 = createMockComment('comment-2', 'parent-2');
 
-        final trip = createMockTrip(comments: [reply1, reply2]);
+          final trip = createMockTrip(comments: [reply1, reply2]);
 
-        final result = await repository.loadComments(trip);
+          final result = await repository.loadComments(trip);
 
-        expect(result, isEmpty);
-      });
+          expect(result, isEmpty);
+        },
+      );
     });
 
     group('loadReplies', () {
@@ -174,14 +177,20 @@ void main() {
 
         expect(mockCommentService.addReactionCalled, true);
         expect(mockCommentService.lastCommentId, 'comment-1');
-        expect(mockCommentService.lastReactionRequest?.reactionType, ReactionType.heart);
+        expect(
+          mockCommentService.lastReactionRequest?.reactionType,
+          ReactionType.heart,
+        );
       });
 
       test('adds different reaction types', () async {
         await repository.addReaction('comment-1', ReactionType.laugh);
 
         expect(mockCommentService.addReactionCalled, true);
-        expect(mockCommentService.lastReactionRequest?.reactionType, ReactionType.laugh);
+        expect(
+          mockCommentService.lastReactionRequest?.reactionType,
+          ReactionType.laugh,
+        );
       });
 
       test('passes through service errors when adding reaction', () async {
@@ -205,10 +214,7 @@ void main() {
       test('passes through service errors when removing reaction', () async {
         mockCommentService.shouldThrowRemoveReactionError = true;
 
-        expect(
-          () => repository.removeReaction('comment-1'),
-          throwsException,
-        );
+        expect(() => repository.removeReaction('comment-1'), throwsException);
       });
     });
 
@@ -216,7 +222,10 @@ void main() {
       test('changes trip status to created', () async {
         mockTripService.mockTrip = createMockTrip(status: TripStatus.created);
 
-        final result = await repository.changeTripStatus('trip-1', TripStatus.created);
+        final result = await repository.changeTripStatus(
+          'trip-1',
+          TripStatus.created,
+        );
 
         expect(result.status, TripStatus.created);
         expect(mockTripService.changeStatusCalled, true);
@@ -227,7 +236,10 @@ void main() {
       test('changes trip status to paused', () async {
         mockTripService.mockTrip = createMockTrip(status: TripStatus.paused);
 
-        final result = await repository.changeTripStatus('trip-1', TripStatus.paused);
+        final result = await repository.changeTripStatus(
+          'trip-1',
+          TripStatus.paused,
+        );
 
         expect(result.status, TripStatus.paused);
         expect(mockTripService.lastStatusRequest?.status, TripStatus.paused);
@@ -236,7 +248,10 @@ void main() {
       test('changes trip status to finished', () async {
         mockTripService.mockTrip = createMockTrip(status: TripStatus.finished);
 
-        final result = await repository.changeTripStatus('trip-1', TripStatus.finished);
+        final result = await repository.changeTripStatus(
+          'trip-1',
+          TripStatus.finished,
+        );
 
         expect(result.status, TripStatus.finished);
         expect(mockTripService.lastStatusRequest?.status, TripStatus.finished);
@@ -387,10 +402,7 @@ class MockCommentService extends CommentService {
   }
 
   @override
-  Future<void> addReaction(
-    String commentId,
-    AddReactionRequest request,
-  ) async {
+  Future<void> addReaction(String commentId, AddReactionRequest request) async {
     addReactionCalled = true;
     lastCommentId = commentId;
     lastReactionRequest = request;
@@ -410,4 +422,3 @@ class MockCommentService extends CommentService {
     }
   }
 }
-

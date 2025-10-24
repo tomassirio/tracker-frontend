@@ -40,9 +40,7 @@ class AuthForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -55,10 +53,7 @@ class AuthForm extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Username field
-              UsernameField(
-                controller: usernameController,
-                isLogin: isLogin,
-              ),
+              UsernameField(controller: usernameController, isLogin: isLogin),
               const SizedBox(height: 16),
 
               // Email field (only for registration)
@@ -68,10 +63,7 @@ class AuthForm extends StatelessWidget {
               ],
 
               // Password field
-              PasswordField(
-                controller: passwordController,
-                isLogin: isLogin,
-              ),
+              PasswordField(controller: passwordController, isLogin: isLogin),
               const SizedBox(height: 16),
 
               // Confirm password field (only for registration)
@@ -125,4 +117,3 @@ class AuthForm extends StatelessWidget {
     );
   }
 }
-

@@ -6,8 +6,5 @@ class ChangeVisibilityRequest {
 
   ChangeVisibilityRequest({required this.visibility});
 
-  Map<String, dynamic> toJson() => {
-        'visibility': visibility.toJson(),
-      };
+  Map<String, dynamic> toJson() => {'visibility': visibility.toJson()};
 }
-

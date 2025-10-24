@@ -7,8 +7,7 @@ class TripCommandClient {
   final ApiClient _apiClient;
 
   TripCommandClient({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create new trip
   /// Requires authentication (USER, ADMIN)
@@ -34,7 +33,10 @@ class TripCommandClient {
 
   /// Change trip visibility (PUBLIC/PRIVATE/PROTECTED)
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<Trip> changeVisibility(String tripId, ChangeVisibilityRequest request) async {
+  Future<Trip> changeVisibility(
+    String tripId,
+    ChangeVisibilityRequest request,
+  ) async {
     final response = await _apiClient.patch(
       ApiEndpoints.tripVisibility(tripId),
       body: request.toJson(),
@@ -64,4 +66,3 @@ class TripCommandClient {
     _apiClient.handleNoContentResponse(response);
   }
 }
-

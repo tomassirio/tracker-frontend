@@ -14,9 +14,9 @@ class AuthService {
     AuthClient? authClient,
     UserQueryClient? userQueryClient,
     TokenStorage? tokenStorage,
-  })  : _authClient = authClient ?? AuthClient(),
-        _userQueryClient = userQueryClient ?? UserQueryClient(),
-        _tokenStorage = tokenStorage ?? TokenStorage();
+  }) : _authClient = authClient ?? AuthClient(),
+       _userQueryClient = userQueryClient ?? UserQueryClient(),
+       _tokenStorage = tokenStorage ?? TokenStorage();
 
   /// Register a new user
   Future<AuthResponse> register(RegisterRequest request) async {
@@ -69,7 +69,9 @@ class AuthService {
     try {
       final profile = await _userQueryClient.getCurrentUser();
 
-      print('Profile fetched successfully - userId: ${profile.id}, username: ${profile.username}');
+      print(
+        'Profile fetched successfully - userId: ${profile.id}, username: ${profile.username}',
+      );
 
       // Update tokens with user info
       await _tokenStorage.saveTokens(

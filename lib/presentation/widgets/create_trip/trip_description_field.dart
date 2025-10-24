@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class TripDescriptionField extends StatelessWidget {
   final TextEditingController controller;
 
-  const TripDescriptionField({
-    super.key,
-    required this.controller,
-  });
+  const TripDescriptionField({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -23,4 +20,3 @@ class TripDescriptionField extends StatelessWidget {
     );
   }
 }
-

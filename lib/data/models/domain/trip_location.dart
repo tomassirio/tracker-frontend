@@ -25,7 +25,9 @@ class TripLocation {
       longitude: (location?['lon'] ?? json['longitude'] ?? 0).toDouble(),
       message: json['message'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ?? DateTime.now(),
+      timestamp:
+          DateTime.tryParse(json['timestamp'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -38,4 +40,3 @@ class TripLocation {
     'timestamp': timestamp.toIso8601String(),
   };
 }
-

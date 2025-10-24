@@ -53,33 +53,39 @@ void main() {
 
         expect(result.accessToken, 'access-token');
         expect(mockAuthClient.registerCalled, true);
-        expect(mockTokenStorage.saveTokensCalls, 2); // Once without user info, once with
+        expect(
+          mockTokenStorage.saveTokensCalls,
+          2,
+        ); // Once without user info, once with
         expect(mockTokenStorage.lastAccessToken, 'access-token');
         expect(mockTokenStorage.lastUserId, 'user-123');
         expect(mockTokenStorage.lastUsername, 'testuser');
       });
 
-      test('registers user and saves tokens even if profile fetch fails', () async {
-        final request = RegisterRequest(
-          username: 'testuser',
-          email: 'test@example.com',
-          password: 'password123',
-        );
-        final authResponse = AuthResponse(
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        );
+      test(
+        'registers user and saves tokens even if profile fetch fails',
+        () async {
+          final request = RegisterRequest(
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'password123',
+          );
+          final authResponse = AuthResponse(
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            tokenType: 'Bearer',
+            expiresIn: 3600,
+          );
 
-        mockAuthClient.mockAuthResponse = authResponse;
-        mockUserQueryClient.shouldThrowError = true;
+          mockAuthClient.mockAuthResponse = authResponse;
+          mockUserQueryClient.shouldThrowError = true;
 
-        final result = await authService.register(request);
+          final result = await authService.register(request);
 
-        expect(result.accessToken, 'access-token');
-        expect(mockTokenStorage.saveTokensCalls, 1); // Only initial save
-      });
+          expect(result.accessToken, 'access-token');
+          expect(mockTokenStorage.saveTokensCalls, 1); // Only initial save
+        },
+      );
 
       test('passes through registration errors', () async {
         final request = RegisterRequest(
@@ -89,10 +95,7 @@ void main() {
         );
         mockAuthClient.shouldThrowError = true;
 
-        expect(
-          () => authService.register(request),
-          throwsException,
-        );
+        expect(() => authService.register(request), throwsException);
       });
     });
 
@@ -131,38 +134,35 @@ void main() {
         expect(mockTokenStorage.lastUsername, 'testuser');
       });
 
-      test('logs in user and saves tokens even if profile fetch fails', () async {
-        final request = LoginRequest(
-          username: 'testuser',
-          password: 'password123',
-        );
-        final authResponse = AuthResponse(
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        );
+      test(
+        'logs in user and saves tokens even if profile fetch fails',
+        () async {
+          final request = LoginRequest(
+            username: 'testuser',
+            password: 'password123',
+          );
+          final authResponse = AuthResponse(
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            tokenType: 'Bearer',
+            expiresIn: 3600,
+          );
 
-        mockAuthClient.mockAuthResponse = authResponse;
-        mockUserQueryClient.shouldThrowError = true;
+          mockAuthClient.mockAuthResponse = authResponse;
+          mockUserQueryClient.shouldThrowError = true;
 
-        final result = await authService.login(request);
+          final result = await authService.login(request);
 
-        expect(result.accessToken, 'access-token');
-        expect(mockTokenStorage.saveTokensCalls, 1);
-      });
+          expect(result.accessToken, 'access-token');
+          expect(mockTokenStorage.saveTokensCalls, 1);
+        },
+      );
 
       test('passes through login errors', () async {
-        final request = LoginRequest(
-          username: 'testuser',
-          password: 'wrong',
-        );
+        final request = LoginRequest(username: 'testuser', password: 'wrong');
         mockAuthClient.shouldThrowError = true;
 
-        expect(
-          () => authService.login(request),
-          throwsException,
-        );
+        expect(() => authService.login(request), throwsException);
       });
     });
 
@@ -220,10 +220,7 @@ void main() {
         );
         mockAuthClient.shouldThrowError = true;
 
-        expect(
-          () => authService.changePassword(request),
-          throwsException,
-        );
+        expect(() => authService.changePassword(request), throwsException);
       });
     });
 

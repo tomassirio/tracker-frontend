@@ -6,7 +6,7 @@ class CommentService {
   final CommentCommandClient _commentCommandClient;
 
   CommentService({CommentCommandClient? commentCommandClient})
-      : _commentCommandClient = commentCommandClient ?? CommentCommandClient();
+    : _commentCommandClient = commentCommandClient ?? CommentCommandClient();
 
   /// Add a comment to a trip
   Future<Comment> addComment(
@@ -17,10 +17,7 @@ class CommentService {
   }
 
   /// Add a reaction to a comment
-  Future<void> addReaction(
-    String commentId,
-    AddReactionRequest request,
-  ) async {
+  Future<void> addReaction(String commentId, AddReactionRequest request) async {
     await _commentCommandClient.addReaction(commentId, request);
   }
 

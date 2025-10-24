@@ -101,4 +101,3 @@ class CommentInput extends StatelessWidget {
     );
   }
 }
-

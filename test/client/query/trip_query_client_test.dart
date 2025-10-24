@@ -48,8 +48,14 @@ void main() {
         expect(result.id, 'trip-123');
         expect(result.name, 'My Trip');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripById('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripById('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getTripById requires authentication', () async {
@@ -90,10 +96,7 @@ void main() {
           403,
         );
 
-        expect(
-          () => tripQueryClient.getTripById('trip-123'),
-          throwsException,
-        );
+        expect(() => tripQueryClient.getTripById('trip-123'), throwsException);
       });
     });
 
@@ -134,7 +137,10 @@ void main() {
         expect(result[1].id, 'trip-2');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.trips));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getAllTrips requires authentication (ADMIN)', () async {
@@ -151,10 +157,7 @@ void main() {
           403,
         );
 
-        expect(
-          () => tripQueryClient.getAllTrips(),
-          throwsException,
-        );
+        expect(() => tripQueryClient.getAllTrips(), throwsException);
       });
     });
 
@@ -195,7 +198,10 @@ void main() {
         expect(result[1].userId, 'user-123');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripsMe));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getCurrentUserTrips requires authentication', () async {
@@ -206,13 +212,16 @@ void main() {
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
 
-      test('getCurrentUserTrips returns empty list when user has no trips', () async {
-        mockHttpClient.response = http.Response(jsonEncode([]), 200);
+      test(
+        'getCurrentUserTrips returns empty list when user has no trips',
+        () async {
+          mockHttpClient.response = http.Response(jsonEncode([]), 200);
 
-        final result = await tripQueryClient.getCurrentUserTrips();
+          final result = await tripQueryClient.getCurrentUserTrips();
 
-        expect(result, isEmpty);
-      });
+          expect(result, isEmpty);
+        },
+      );
     });
 
     group('getPublicTrips', () {
@@ -238,7 +247,10 @@ void main() {
         expect(result.length, 1);
         expect(result[0].name, 'Public Trip 1');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripsPublic));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripsPublic),
+        );
       });
 
       test('getPublicTrips does not require authentication', () async {
@@ -283,8 +295,14 @@ void main() {
         expect(result.length, 1);
         expect(result[0].name, 'Available Trip');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripsAvailable));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripsAvailable),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getAvailableTrips requires authentication', () async {
@@ -320,8 +338,14 @@ void main() {
         expect(result[0].userId, 'user-456');
         expect(result[0].username, 'otheruser');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripsByUser('user-456')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripsByUser('user-456')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getTripsByUser requires authentication', () async {
@@ -344,13 +368,16 @@ void main() {
         );
       });
 
-      test('getTripsByUser returns empty list when user has no trips', () async {
-        mockHttpClient.response = http.Response(jsonEncode([]), 200);
+      test(
+        'getTripsByUser returns empty list when user has no trips',
+        () async {
+          mockHttpClient.response = http.Response(jsonEncode([]), 200);
 
-        final result = await tripQueryClient.getTripsByUser('user-456');
+          final result = await tripQueryClient.getTripsByUser('user-456');
 
-        expect(result, isEmpty);
-      });
+          expect(result, isEmpty);
+        },
+      );
     });
 
     group('TripQueryClient initialization', () {
@@ -365,11 +392,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with query base URL when not provided', () {
-        final client = TripQueryClient();
+      test(
+        'creates default ApiClient with query base URL when not provided',
+        () {
+          final client = TripQueryClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }
@@ -444,4 +474,3 @@ class MockTokenStorage extends TokenStorage {
     _isLoggedIn = false;
   }
 }
-

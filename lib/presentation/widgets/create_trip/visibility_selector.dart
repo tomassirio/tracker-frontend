@@ -65,4 +65,3 @@ class VisibilitySelector extends StatelessWidget {
     }
   }
 }
-

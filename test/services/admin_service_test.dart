@@ -31,10 +31,7 @@ void main() {
       test('passes through errors when deleting trip', () async {
         mockTripCommandClient.shouldThrowError = true;
 
-        expect(
-          () => adminService.deleteTrip('trip-123'),
-          throwsException,
-        );
+        expect(() => adminService.deleteTrip('trip-123'), throwsException);
       });
 
       test('handles unauthorized errors', () async {
@@ -43,9 +40,7 @@ void main() {
 
         expect(
           () => adminService.deleteTrip('trip-123'),
-          throwsA(
-            predicate((e) => e.toString().contains('Unauthorized')),
-          ),
+          throwsA(predicate((e) => e.toString().contains('Unauthorized'))),
         );
       });
 
@@ -55,9 +50,7 @@ void main() {
 
         expect(
           () => adminService.deleteTrip('nonexistent-trip'),
-          throwsA(
-            predicate((e) => e.toString().contains('not found')),
-          ),
+          throwsA(predicate((e) => e.toString().contains('not found'))),
         );
       });
     });
@@ -113,4 +106,3 @@ class MockCommentCommandClient extends CommentCommandClient {
   bool shouldThrowError = false;
   String errorMessage = 'Comment command failed';
 }
-

@@ -7,8 +7,7 @@ class AuthClient {
   final ApiClient _apiClient;
 
   AuthClient({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            ApiClient(baseUrl: ApiEndpoints.authBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.authBaseUrl);
 
   /// Login with username/password
   /// Returns access & refresh tokens

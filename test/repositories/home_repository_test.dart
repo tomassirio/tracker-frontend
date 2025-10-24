@@ -110,18 +110,21 @@ void main() {
         expect(mockTripService.getAvailableTripsCalled, false);
       });
 
-      test('loads public trips when userId is null even if logged in flag is true', () async {
-        mockAuthService.mockIsLoggedIn = true;
-        mockAuthService.mockUserId = null; // No user ID
-        mockTripService.mockTrips = [
-          createMockTrip('trip-public', 'Public Trip'),
-        ];
+      test(
+        'loads public trips when userId is null even if logged in flag is true',
+        () async {
+          mockAuthService.mockIsLoggedIn = true;
+          mockAuthService.mockUserId = null; // No user ID
+          mockTripService.mockTrips = [
+            createMockTrip('trip-public', 'Public Trip'),
+          ];
 
-        final result = await homeRepository.loadTrips();
+          final result = await homeRepository.loadTrips();
 
-        expect(mockTripService.getPublicTripsCalled, true);
-        expect(mockTripService.getAvailableTripsCalled, false);
-      });
+          expect(mockTripService.getPublicTripsCalled, true);
+          expect(mockTripService.getAvailableTripsCalled, false);
+        },
+      );
 
       test('returns empty list when no trips available', () async {
         mockAuthService.mockIsLoggedIn = true;
@@ -138,10 +141,7 @@ void main() {
         mockAuthService.mockUserId = 'user-123';
         mockTripService.shouldThrowError = true;
 
-        expect(
-          () => homeRepository.loadTrips(),
-          throwsException,
-        );
+        expect(() => homeRepository.loadTrips(), throwsException);
       });
     });
 
@@ -155,10 +155,7 @@ void main() {
       test('logout passes through service errors', () async {
         mockAuthService.shouldThrowError = true;
 
-        expect(
-          () => homeRepository.logout(),
-          throwsException,
-        );
+        expect(() => homeRepository.logout(), throwsException);
       });
     });
 
@@ -267,4 +264,3 @@ class MockAuthService extends AuthService {
     }
   }
 }
-

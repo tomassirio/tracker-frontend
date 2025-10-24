@@ -1,5 +1,6 @@
 /// Comment and reaction models
 library;
+
 export 'domain/comment.dart';
 export 'requests/create_comment_request.dart';
 export 'requests/create_comment_response_request.dart';

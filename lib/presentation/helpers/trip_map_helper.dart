@@ -74,4 +74,3 @@ class MapData {
 
   MapData({required this.markers, required this.polylines});
 }
-

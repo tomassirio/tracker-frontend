@@ -47,7 +47,10 @@ void main() {
         expect(result.message, 'Great trip!');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(mockHttpClient.lastUri?.path, endsWith('/comments/comment-123'));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getCommentById requires authentication', () async {
@@ -95,58 +98,70 @@ void main() {
     });
 
     group('getTripComments', () {
-      test('successful retrieval returns list of comments with replies', () async {
-        final responseBody = [
-          {
-            'id': 'comment-1',
-            'tripId': 'trip-123',
-            'userId': 'user-1',
-            'username': 'user1',
-            'message': 'Nice trip!',
-            'reactionsCount': 10,
-            'responsesCount': 2,
-            'replies': [
-              {
-                'id': 'comment-2',
-                'tripId': 'trip-123',
-                'userId': 'user-2',
-                'username': 'user2',
-                'message': 'Thanks!',
-                'parentCommentId': 'comment-1',
-                'reactionsCount': 5,
-                'responsesCount': 0,
-                'createdAt': DateTime.now().toIso8601String(),
-                'updatedAt': DateTime.now().toIso8601String(),
-              },
-            ],
-            'createdAt': DateTime.now().toIso8601String(),
-            'updatedAt': DateTime.now().toIso8601String(),
-          },
-          {
-            'id': 'comment-3',
-            'tripId': 'trip-123',
-            'userId': 'user-3',
-            'username': 'user3',
-            'message': 'Amazing!',
-            'reactionsCount': 15,
-            'responsesCount': 0,
-            'createdAt': DateTime.now().toIso8601String(),
-            'updatedAt': DateTime.now().toIso8601String(),
-          },
-        ];
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+      test(
+        'successful retrieval returns list of comments with replies',
+        () async {
+          final responseBody = [
+            {
+              'id': 'comment-1',
+              'tripId': 'trip-123',
+              'userId': 'user-1',
+              'username': 'user1',
+              'message': 'Nice trip!',
+              'reactionsCount': 10,
+              'responsesCount': 2,
+              'replies': [
+                {
+                  'id': 'comment-2',
+                  'tripId': 'trip-123',
+                  'userId': 'user-2',
+                  'username': 'user2',
+                  'message': 'Thanks!',
+                  'parentCommentId': 'comment-1',
+                  'reactionsCount': 5,
+                  'responsesCount': 0,
+                  'createdAt': DateTime.now().toIso8601String(),
+                  'updatedAt': DateTime.now().toIso8601String(),
+                },
+              ],
+              'createdAt': DateTime.now().toIso8601String(),
+              'updatedAt': DateTime.now().toIso8601String(),
+            },
+            {
+              'id': 'comment-3',
+              'tripId': 'trip-123',
+              'userId': 'user-3',
+              'username': 'user3',
+              'message': 'Amazing!',
+              'reactionsCount': 15,
+              'responsesCount': 0,
+              'createdAt': DateTime.now().toIso8601String(),
+              'updatedAt': DateTime.now().toIso8601String(),
+            },
+          ];
+          mockHttpClient.response = http.Response(
+            jsonEncode(responseBody),
+            200,
+          );
 
-        final result = await commentQueryClient.getTripComments('trip-123');
+          final result = await commentQueryClient.getTripComments('trip-123');
 
-        expect(result.length, 2);
-        expect(result[0].message, 'Nice trip!');
-        expect(result[0].replies?.length, 1);
-        expect(result[0].replies?[0].message, 'Thanks!');
-        expect(result[1].message, 'Amazing!');
-        expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripComments('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
-      });
+          expect(result.length, 2);
+          expect(result[0].message, 'Nice trip!');
+          expect(result[0].replies?.length, 1);
+          expect(result[0].replies?[0].message, 'Thanks!');
+          expect(result[1].message, 'Amazing!');
+          expect(mockHttpClient.lastMethod, 'GET');
+          expect(
+            mockHttpClient.lastUri?.path,
+            endsWith(ApiEndpoints.tripComments('trip-123')),
+          );
+          expect(
+            mockHttpClient.lastHeaders?['Authorization'],
+            'Bearer test-token',
+          );
+        },
+      );
 
       test('getTripComments requires authentication', () async {
         mockHttpClient.response = http.Response(jsonEncode([]), 200);
@@ -201,11 +216,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with query base URL when not provided', () {
-        final client = CommentQueryClient();
+      test(
+        'creates default ApiClient with query base URL when not provided',
+        () {
+          final client = CommentQueryClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }
@@ -280,4 +298,3 @@ class MockTokenStorage extends TokenStorage {
     _isLoggedIn = false;
   }
 }
-

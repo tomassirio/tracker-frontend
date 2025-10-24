@@ -7,8 +7,7 @@ class TripPlanCommandClient {
   final ApiClient _apiClient;
 
   TripPlanCommandClient({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create trip plan
   /// Requires authentication (USER, ADMIN)
@@ -23,7 +22,10 @@ class TripPlanCommandClient {
 
   /// Update trip plan
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<TripPlan> updateTripPlan(String planId, UpdateTripPlanRequest request) async {
+  Future<TripPlan> updateTripPlan(
+    String planId,
+    UpdateTripPlanRequest request,
+  ) async {
     final response = await _apiClient.put(
       ApiEndpoints.tripPlanById(planId),
       body: request.toJson(),
@@ -42,4 +44,3 @@ class TripPlanCommandClient {
     _apiClient.handleNoContentResponse(response);
   }
 }
-

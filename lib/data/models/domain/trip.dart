@@ -44,14 +44,19 @@ class Trip {
     return Trip(
       id: json['id'] as String? ?? '',
       userId: json['userId'] as String? ?? '',
-      name: json['name'] as String? ?? json['title'] as String? ?? 'Untitled Trip',
+      name:
+          json['name'] as String? ??
+          json['title'] as String? ??
+          'Untitled Trip',
       username: json['username'] as String? ?? '',
       description: json['description'] as String?,
       visibility: Visibility.fromJson(
-        ((tripSettings?['visibility'] ?? json['visibility']) as String?) ?? 'PRIVATE',
+        ((tripSettings?['visibility'] ?? json['visibility']) as String?) ??
+            'PRIVATE',
       ),
       status: TripStatus.fromJson(
-        ((tripSettings?['tripStatus'] ?? json['status']) as String?) ?? 'CREATED',
+        ((tripSettings?['tripStatus'] ?? json['status']) as String?) ??
+            'CREATED',
       ),
       startDate: json['startDate'] != null
           ? DateTime.tryParse(json['startDate'] as String)
@@ -61,24 +66,35 @@ class Trip {
           : null,
       locations: json['tripUpdates'] != null && json['tripUpdates'] is List
           ? (json['tripUpdates'] as List)
-          .where((loc) => loc != null)
-          .map((loc) => TripLocation.fromJson(loc as Map<String, dynamic>))
-          .toList()
+                .where((loc) => loc != null)
+                .map(
+                  (loc) => TripLocation.fromJson(loc as Map<String, dynamic>),
+                )
+                .toList()
           : null,
       comments: json['comments'] != null && json['comments'] is List
-
           ? (json['comments'] as List)
-          .where((comment) => comment != null)
-          .map((comment) => Comment.fromJson(comment as Map<String, dynamic>))
-          .toList()
+                .where((comment) => comment != null)
+                .map(
+                  (comment) =>
+                      Comment.fromJson(comment as Map<String, dynamic>),
+                )
+                .toList()
           : null,
-      commentsCount: (json['comments'] as List?)?.length ?? (json['commentsCount'] as int?) ?? 0,
+      commentsCount:
+          (json['comments'] as List?)?.length ??
+          (json['commentsCount'] as int?) ??
+          0,
       reactionsCount: (json['reactionsCount'] as int?) ?? 0,
-      createdAt: DateTime.tryParse(
-          (json['creationTimestamp'] ?? json['createdAt']) as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(
+            (json['creationTimestamp'] ?? json['createdAt']) as String? ?? '',
+          ) ??
           DateTime.now(),
-      updatedAt: DateTime.tryParse(
-          (json['updatedAt'] ?? json['creationTimestamp']) as String? ?? '') ??
+      updatedAt:
+          DateTime.tryParse(
+            (json['updatedAt'] ?? json['creationTimestamp']) as String? ?? '',
+          ) ??
           DateTime.now(),
     );
   }

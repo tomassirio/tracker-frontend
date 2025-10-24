@@ -84,10 +84,7 @@ class CommentCard extends StatelessWidget {
                       ),
                       Text(
                         _formatDateTime(comment.createdAt),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -96,10 +93,7 @@ class CommentCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             // Comment message
-            Text(
-              comment.message,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(comment.message, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 8),
             // Comment actions
             Row(
@@ -156,10 +150,9 @@ class CommentCard extends StatelessWidget {
             // Replies
             if (isExpanded && replies.isNotEmpty) ...[
               const Divider(),
-              ...replies.map((reply) => ReplyCard(
-                    reply: reply,
-                    tripUserId: tripUserId,
-                  )),
+              ...replies.map(
+                (reply) => ReplyCard(reply: reply, tripUserId: tripUserId),
+              ),
             ],
           ],
         ),
@@ -184,4 +177,3 @@ class CommentCard extends StatelessWidget {
     }
   }
 }
-

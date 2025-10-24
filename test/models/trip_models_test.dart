@@ -99,9 +99,7 @@ void main() {
 
     group('ChangeStatusRequest', () {
       test('toJson converts ChangeStatusRequest correctly', () {
-        final request = ChangeStatusRequest(
-          status: TripStatus.finished,
-        );
+        final request = ChangeStatusRequest(status: TripStatus.finished);
 
         final json = request.toJson();
 

@@ -29,9 +29,7 @@ void main() {
 
     group('createComment', () {
       test('successful comment creation returns Comment', () async {
-        final request = CreateCommentRequest(
-          message: 'Great trip!',
-        );
+        final request = CreateCommentRequest(message: 'Great trip!');
         final responseBody = {
           'id': 'comment-123',
           'message': 'Great trip!',
@@ -40,13 +38,22 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
 
-        final result = await commentCommandClient.createComment('trip-123', request);
+        final result = await commentCommandClient.createComment(
+          'trip-123',
+          request,
+        );
 
         expect(result.id, 'comment-123');
         expect(result.message, 'Great trip!');
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripComments('trip-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripComments('trip-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('createComment with parent comment (reply)', () async {
@@ -61,7 +68,10 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
 
-        final result = await commentCommandClient.createComment('trip-123', request);
+        final result = await commentCommandClient.createComment(
+          'trip-123',
+          request,
+        );
 
         expect(result.id, 'comment-789');
         expect(result.parentCommentId, 'comment-456');
@@ -112,8 +122,14 @@ void main() {
         await commentCommandClient.addReaction('comment-123', request);
 
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.commentReactions('comment-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.commentReactions('comment-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
         expect(mockHttpClient.lastBody, contains('HEART'));
       });
 
@@ -121,7 +137,9 @@ void main() {
         final reactions = ['HEART', 'SMILEY', 'SAD', 'LAUGH', 'ANGER'];
 
         for (final reaction in reactions) {
-          final request = AddReactionRequest(reactionType: ReactionType.fromJson(reaction));
+          final request = AddReactionRequest(
+            reactionType: ReactionType.fromJson(reaction),
+          );
           mockHttpClient.response = http.Response('', 204);
 
           await commentCommandClient.addReaction('comment-123', request);
@@ -160,8 +178,14 @@ void main() {
         await commentCommandClient.removeReaction('comment-123');
 
         expect(mockHttpClient.lastMethod, 'DELETE');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.commentReactions('comment-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.commentReactions('comment-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('removeReaction requires authentication', () async {
@@ -209,11 +233,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with command base URL when not provided', () {
-        final client = CommentCommandClient();
+      test(
+        'creates default ApiClient with command base URL when not provided',
+        () {
+          final client = CommentCommandClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }

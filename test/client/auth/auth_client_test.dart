@@ -79,10 +79,7 @@ void main() {
           401,
         );
 
-        expect(
-          () => authClient.login(request),
-          throwsException,
-        );
+        expect(() => authClient.login(request), throwsException);
       });
     });
 
@@ -112,7 +109,10 @@ void main() {
         expect(result.userId, 'user-456');
         expect(result.username, 'newuser');
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.authRegister));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.authRegister),
+        );
         expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
       });
 
@@ -143,10 +143,7 @@ void main() {
           400,
         );
 
-        expect(
-          () => authClient.register(request),
-          throwsException,
-        );
+        expect(() => authClient.register(request), throwsException);
       });
     });
 
@@ -160,7 +157,10 @@ void main() {
 
         expect(mockHttpClient.lastMethod, 'POST');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.authLogout));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('logout requires authentication', () async {
@@ -181,10 +181,7 @@ void main() {
           500,
         );
 
-        expect(
-          () => authClient.logout(),
-          throwsException,
-        );
+        expect(() => authClient.logout(), throwsException);
       });
     });
 
@@ -206,7 +203,10 @@ void main() {
         expect(result.tokenType, 'Bearer');
         expect(result.expiresIn, 3600);
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.authRefresh));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.authRefresh),
+        );
         expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
       });
 
@@ -229,24 +229,27 @@ void main() {
           401,
         );
 
-        expect(
-          () => authClient.refresh(request),
-          throwsException,
-        );
+        expect(() => authClient.refresh(request), throwsException);
       });
     });
 
     group('initiatePasswordReset', () {
-      test('successful password reset initiation completes without error', () async {
-        final request = PasswordResetRequest(email: 'user@example.com');
-        mockHttpClient.response = http.Response('', 204);
+      test(
+        'successful password reset initiation completes without error',
+        () async {
+          final request = PasswordResetRequest(email: 'user@example.com');
+          mockHttpClient.response = http.Response('', 204);
 
-        await authClient.initiatePasswordReset(request);
+          await authClient.initiatePasswordReset(request);
 
-        expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.authPasswordReset));
-        expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
-      });
+          expect(mockHttpClient.lastMethod, 'POST');
+          expect(
+            mockHttpClient.lastUri?.path,
+            endsWith(ApiEndpoints.authPasswordReset),
+          );
+          expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
+        },
+      );
 
       test('initiatePasswordReset does not require authentication', () async {
         final request = PasswordResetRequest(email: 'user@example.com');
@@ -272,16 +275,22 @@ void main() {
     });
 
     group('completePasswordReset', () {
-      test('successful password reset completion completes without error', () async {
-        final request = PasswordResetRequest(email: 'user@example.com');
-        mockHttpClient.response = http.Response('', 204);
+      test(
+        'successful password reset completion completes without error',
+        () async {
+          final request = PasswordResetRequest(email: 'user@example.com');
+          mockHttpClient.response = http.Response('', 204);
 
-        await authClient.completePasswordReset(request);
+          await authClient.completePasswordReset(request);
 
-        expect(mockHttpClient.lastMethod, 'PUT');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.authPasswordReset));
-        expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
-      });
+          expect(mockHttpClient.lastMethod, 'PUT');
+          expect(
+            mockHttpClient.lastUri?.path,
+            endsWith(ApiEndpoints.authPasswordReset),
+          );
+          expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
+        },
+      );
 
       test('completePasswordReset does not require authentication', () async {
         final request = PasswordResetRequest(email: 'user@example.com');
@@ -319,9 +328,15 @@ void main() {
         await authClient.changePassword(request);
 
         expect(mockHttpClient.lastMethod, 'PUT');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.authPasswordChange));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.authPasswordChange),
+        );
         expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('changePassword requires authentication', () async {
@@ -350,10 +365,7 @@ void main() {
           400,
         );
 
-        expect(
-          () => authClient.changePassword(request),
-          throwsException,
-        );
+        expect(() => authClient.changePassword(request), throwsException);
       });
 
       test('changePassword throws exception on weak new password', () async {
@@ -368,10 +380,7 @@ void main() {
           400,
         );
 
-        expect(
-          () => authClient.changePassword(request),
-          throwsException,
-        );
+        expect(() => authClient.changePassword(request), throwsException);
       });
     });
 
@@ -387,11 +396,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with auth base URL when not provided', () {
-        final client = AuthClient();
+      test(
+        'creates default ApiClient with auth base URL when not provided',
+        () {
+          final client = AuthClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }

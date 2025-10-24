@@ -232,7 +232,8 @@ void main() {
       test('returns true when token is expired', () async {
         // Manually set an expired token
         final prefs = await SharedPreferences.getInstance();
-        final expiredTime = DateTime.now().millisecondsSinceEpoch - 1000; // 1 second ago
+        final expiredTime =
+            DateTime.now().millisecondsSinceEpoch - 1000; // 1 second ago
         await prefs.setInt('expires_at', expiredTime);
 
         final result = await tokenStorage.isAccessTokenExpired();
@@ -240,27 +241,34 @@ void main() {
         expect(result, true);
       });
 
-      test('returns true when token expires within 60 seconds (buffer)', () async {
-        // Set token to expire in 30 seconds
-        final prefs = await SharedPreferences.getInstance();
-        final soonExpired = DateTime.now().millisecondsSinceEpoch + 30000;
-        await prefs.setInt('expires_at', soonExpired);
+      test(
+        'returns true when token expires within 60 seconds (buffer)',
+        () async {
+          // Set token to expire in 30 seconds
+          final prefs = await SharedPreferences.getInstance();
+          final soonExpired = DateTime.now().millisecondsSinceEpoch + 30000;
+          await prefs.setInt('expires_at', soonExpired);
 
-        final result = await tokenStorage.isAccessTokenExpired();
+          final result = await tokenStorage.isAccessTokenExpired();
 
-        expect(result, true); // Should be true because of 60 second buffer
-      });
+          expect(result, true); // Should be true because of 60 second buffer
+        },
+      );
 
-      test('returns false when token expires beyond 60 second buffer', () async {
-        // Set token to expire in 2 minutes
-        final prefs = await SharedPreferences.getInstance();
-        final notExpiringSoon = DateTime.now().millisecondsSinceEpoch + 120000;
-        await prefs.setInt('expires_at', notExpiringSoon);
+      test(
+        'returns false when token expires beyond 60 second buffer',
+        () async {
+          // Set token to expire in 2 minutes
+          final prefs = await SharedPreferences.getInstance();
+          final notExpiringSoon =
+              DateTime.now().millisecondsSinceEpoch + 120000;
+          await prefs.setInt('expires_at', notExpiringSoon);
 
-        final result = await tokenStorage.isAccessTokenExpired();
+          final result = await tokenStorage.isAccessTokenExpired();
 
-        expect(result, false);
-      });
+          expect(result, false);
+        },
+      );
     });
 
     group('isLoggedIn', () {
@@ -432,4 +440,3 @@ void main() {
     });
   });
 }
-

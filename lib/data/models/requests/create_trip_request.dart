@@ -17,11 +17,10 @@ class CreateTripRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        if (description != null) 'description': description,
-        'visibility': visibility.toJson(),
-        if (startDate != null) 'startDate': startDate!.toIso8601String(),
-        if (endDate != null) 'endDate': endDate!.toIso8601String(),
-      };
+    'title': title,
+    if (description != null) 'description': description,
+    'visibility': visibility.toJson(),
+    if (startDate != null) 'startDate': startDate!.toIso8601String(),
+    if (endDate != null) 'endDate': endDate!.toIso8601String(),
+  };
 }
-

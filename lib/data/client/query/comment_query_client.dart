@@ -7,8 +7,7 @@ class CommentQueryClient {
   final ApiClient _apiClient;
 
   CommentQueryClient({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
 
   /// Get comment by ID
   /// Requires authentication (USER, ADMIN)
@@ -30,4 +29,3 @@ class CommentQueryClient {
     return _apiClient.handleListResponse(response, Comment.fromJson);
   }
 }
-

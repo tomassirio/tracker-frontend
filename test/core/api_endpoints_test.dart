@@ -55,7 +55,10 @@ void main() {
 
       test('userByUsername generates correct path', () {
         expect(ApiEndpoints.userByUsername('john'), '/users/username/john');
-        expect(ApiEndpoints.userByUsername('test_user'), '/users/username/test_user');
+        expect(
+          ApiEndpoints.userByUsername('test_user'),
+          '/users/username/test_user',
+        );
       });
 
       test('usersFriends path is correct', () {
@@ -63,11 +66,17 @@ void main() {
       });
 
       test('usersFriendRequestsReceived path is correct', () {
-        expect(ApiEndpoints.usersFriendRequestsReceived, '/users/friends/requests/received');
+        expect(
+          ApiEndpoints.usersFriendRequestsReceived,
+          '/users/friends/requests/received',
+        );
       });
 
       test('usersFriendRequestsSent path is correct', () {
-        expect(ApiEndpoints.usersFriendRequestsSent, '/users/friends/requests/sent');
+        expect(
+          ApiEndpoints.usersFriendRequestsSent,
+          '/users/friends/requests/sent',
+        );
       });
 
       test('usersFollowsFollowing path is correct', () {
@@ -89,13 +98,25 @@ void main() {
       });
 
       test('usersFriendRequestAccept generates correct path', () {
-        expect(ApiEndpoints.usersFriendRequestAccept('req123'), '/users/friends/requests/req123/accept');
-        expect(ApiEndpoints.usersFriendRequestAccept('abc-def'), '/users/friends/requests/abc-def/accept');
+        expect(
+          ApiEndpoints.usersFriendRequestAccept('req123'),
+          '/users/friends/requests/req123/accept',
+        );
+        expect(
+          ApiEndpoints.usersFriendRequestAccept('abc-def'),
+          '/users/friends/requests/abc-def/accept',
+        );
       });
 
       test('usersFriendRequestDecline generates correct path', () {
-        expect(ApiEndpoints.usersFriendRequestDecline('req123'), '/users/friends/requests/req123/decline');
-        expect(ApiEndpoints.usersFriendRequestDecline('xyz-789'), '/users/friends/requests/xyz-789/decline');
+        expect(
+          ApiEndpoints.usersFriendRequestDecline('req123'),
+          '/users/friends/requests/req123/decline',
+        );
+        expect(
+          ApiEndpoints.usersFriendRequestDecline('xyz-789'),
+          '/users/friends/requests/xyz-789/decline',
+        );
       });
 
       test('usersFollows path is correct', () {
@@ -104,7 +125,10 @@ void main() {
 
       test('usersUnfollow generates correct path', () {
         expect(ApiEndpoints.usersUnfollow('user123'), '/users/follows/user123');
-        expect(ApiEndpoints.usersUnfollow('followed-id'), '/users/follows/followed-id');
+        expect(
+          ApiEndpoints.usersUnfollow('followed-id'),
+          '/users/follows/followed-id',
+        );
       });
     });
 
@@ -152,8 +176,14 @@ void main() {
       });
 
       test('tripVisibility generates correct path', () {
-        expect(ApiEndpoints.tripVisibility('trip123'), '/trips/trip123/visibility');
-        expect(ApiEndpoints.tripVisibility('abc-def'), '/trips/abc-def/visibility');
+        expect(
+          ApiEndpoints.tripVisibility('trip123'),
+          '/trips/trip123/visibility',
+        );
+        expect(
+          ApiEndpoints.tripVisibility('abc-def'),
+          '/trips/abc-def/visibility',
+        );
       });
 
       test('tripStatus generates correct path', () {
@@ -187,8 +217,14 @@ void main() {
       });
 
       test('commentReactions generates correct path', () {
-        expect(ApiEndpoints.commentReactions('comment123'), '/comments/comment123/reactions');
-        expect(ApiEndpoints.commentReactions('xyz-789'), '/comments/xyz-789/reactions');
+        expect(
+          ApiEndpoints.commentReactions('comment123'),
+          '/comments/comment123/reactions',
+        );
+        expect(
+          ApiEndpoints.commentReactions('xyz-789'),
+          '/comments/xyz-789/reactions',
+        );
       });
     });
   });

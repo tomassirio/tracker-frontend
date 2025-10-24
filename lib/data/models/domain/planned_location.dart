@@ -24,11 +24,10 @@ class PlannedLocation {
       );
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'latitude': latitude,
-        'longitude': longitude,
-        if (notes != null) 'notes': notes,
-        'order': order,
-      };
+    'name': name,
+    'latitude': latitude,
+    'longitude': longitude,
+    if (notes != null) 'notes': notes,
+    'order': order,
+  };
 }
-

@@ -5,28 +5,20 @@ import 'package:tracker_frontend/data/services/auth_service.dart';
 class AuthRepository {
   final AuthService _authService;
 
-  AuthRepository({
-    AuthService? authService,
-  }) : _authService = authService ?? AuthService();
+  AuthRepository({AuthService? authService})
+    : _authService = authService ?? AuthService();
 
   /// Logs in a user with username and password
   Future<void> login(String username, String password) async {
     await _authService.login(
-      LoginRequest(
-        username: username,
-        password: password,
-      ),
+      LoginRequest(username: username, password: password),
     );
   }
 
   /// Registers a new user
   Future<void> register(String username, String email, String password) async {
     await _authService.register(
-      RegisterRequest(
-        username: username,
-        email: email,
-        password: password,
-      ),
+      RegisterRequest(username: username, email: email, password: password),
     );
   }
 
@@ -35,4 +27,3 @@ class AuthRepository {
     await _authService.requestPasswordReset(email);
   }
 }
-

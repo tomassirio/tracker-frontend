@@ -10,9 +10,9 @@ class AdminService {
     UserCommandClient? userCommandClient,
     TripCommandClient? tripCommandClient,
     CommentCommandClient? commentCommandClient,
-  })  : _userCommandClient = userCommandClient ?? UserCommandClient(),
-        _tripCommandClient = tripCommandClient ?? TripCommandClient(),
-        _commentCommandClient = commentCommandClient ?? CommentCommandClient();
+  }) : _userCommandClient = userCommandClient ?? UserCommandClient(),
+       _tripCommandClient = tripCommandClient ?? TripCommandClient(),
+       _commentCommandClient = commentCommandClient ?? CommentCommandClient();
 
   /// Delete a trip (admin only)
   Future<void> deleteTrip(String tripId) async {

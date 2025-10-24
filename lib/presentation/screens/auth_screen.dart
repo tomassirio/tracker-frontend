@@ -74,10 +74,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      UiHelpers.showErrorMessage(
-        context,
-        'Please enter your email address',
-      );
+      UiHelpers.showErrorMessage(context, 'Please enter your email address');
       return;
     }
 

@@ -45,8 +45,14 @@ void main() {
         expect(result.id, 'plan-123');
         expect(result.name, 'Day 1 Plan');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlanById('plan-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripPlanById('plan-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getTripPlanById requires authentication', () async {
@@ -120,7 +126,10 @@ void main() {
         expect(result[1].name, 'Day 2');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlans));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('getMyTripPlans requires authentication', () async {
@@ -145,10 +154,7 @@ void main() {
           401,
         );
 
-        expect(
-          () => tripPlanQueryClient.getMyTripPlans(),
-          throwsException,
-        );
+        expect(() => tripPlanQueryClient.getMyTripPlans(), throwsException);
       });
     });
 
@@ -164,11 +170,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with query base URL when not provided', () {
-        final client = TripPlanQueryClient();
+      test(
+        'creates default ApiClient with query base URL when not provided',
+        () {
+          final client = TripPlanQueryClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }
@@ -243,4 +252,3 @@ class MockTokenStorage extends TokenStorage {
     _isLoggedIn = false;
   }
 }
-

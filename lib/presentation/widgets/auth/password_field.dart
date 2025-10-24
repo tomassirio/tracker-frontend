@@ -41,9 +41,7 @@ class _PasswordFieldState extends State<PasswordField> {
             });
           },
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       obscureText: _obscurePassword,
       validator: (value) {
@@ -62,4 +60,3 @@ class _PasswordFieldState extends State<PasswordField> {
     );
   }
 }
-

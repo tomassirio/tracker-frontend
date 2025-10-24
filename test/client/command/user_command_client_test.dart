@@ -50,8 +50,14 @@ void main() {
         expect(result.id, 'user-123');
         expect(result.username, 'newuser');
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersCreate));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersCreate),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('createUser requires authentication', () async {
@@ -79,10 +85,7 @@ void main() {
           400,
         );
 
-        expect(
-          () => userCommandClient.createUser(userData),
-          throwsException,
-        );
+        expect(() => userCommandClient.createUser(userData), throwsException);
       });
     });
 
@@ -93,9 +96,15 @@ void main() {
         await userCommandClient.sendFriendRequest('user-456');
 
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFriendRequests));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFriendRequests),
+        );
         expect(mockHttpClient.lastBody, contains('user-456'));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('sendFriendRequest requires authentication', () async {
@@ -120,15 +129,24 @@ void main() {
     });
 
     group('acceptFriendRequest', () {
-      test('successful friend request acceptance completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test(
+        'successful friend request acceptance completes without error',
+        () async {
+          mockHttpClient.response = http.Response('', 204);
 
-        await userCommandClient.acceptFriendRequest('request-123');
+          await userCommandClient.acceptFriendRequest('request-123');
 
-        expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFriendRequestAccept('request-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
-      });
+          expect(mockHttpClient.lastMethod, 'POST');
+          expect(
+            mockHttpClient.lastUri?.path,
+            endsWith(ApiEndpoints.usersFriendRequestAccept('request-123')),
+          );
+          expect(
+            mockHttpClient.lastHeaders?['Authorization'],
+            'Bearer test-token',
+          );
+        },
+      );
 
       test('acceptFriendRequest requires authentication', () async {
         mockHttpClient.response = http.Response('', 204);
@@ -152,15 +170,24 @@ void main() {
     });
 
     group('declineFriendRequest', () {
-      test('successful friend request decline completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test(
+        'successful friend request decline completes without error',
+        () async {
+          mockHttpClient.response = http.Response('', 204);
 
-        await userCommandClient.declineFriendRequest('request-123');
+          await userCommandClient.declineFriendRequest('request-123');
 
-        expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFriendRequestDecline('request-123')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
-      });
+          expect(mockHttpClient.lastMethod, 'POST');
+          expect(
+            mockHttpClient.lastUri?.path,
+            endsWith(ApiEndpoints.usersFriendRequestDecline('request-123')),
+          );
+          expect(
+            mockHttpClient.lastHeaders?['Authorization'],
+            'Bearer test-token',
+          );
+        },
+      );
 
       test('declineFriendRequest requires authentication', () async {
         mockHttpClient.response = http.Response('', 204);
@@ -190,9 +217,15 @@ void main() {
         await userCommandClient.followUser('user-789');
 
         expect(mockHttpClient.lastMethod, 'POST');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersFollows));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersFollows),
+        );
         expect(mockHttpClient.lastBody, contains('user-789'));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('followUser requires authentication', () async {
@@ -209,10 +242,7 @@ void main() {
           409,
         );
 
-        expect(
-          () => userCommandClient.followUser('user-789'),
-          throwsException,
-        );
+        expect(() => userCommandClient.followUser('user-789'), throwsException);
       });
 
       test('followUser throws exception on user not found', () async {
@@ -235,8 +265,14 @@ void main() {
         await userCommandClient.unfollowUser('user-789');
 
         expect(mockHttpClient.lastMethod, 'DELETE');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.usersUnfollow('user-789')));
-        expect(mockHttpClient.lastHeaders?['Authorization'], 'Bearer test-token');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.usersUnfollow('user-789')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
       });
 
       test('unfollowUser requires authentication', () async {
@@ -272,11 +308,14 @@ void main() {
         expect(client, isNotNull);
       });
 
-      test('creates default ApiClient with command base URL when not provided', () {
-        final client = UserCommandClient();
+      test(
+        'creates default ApiClient with command base URL when not provided',
+        () {
+          final client = UserCommandClient();
 
-        expect(client, isNotNull);
-      });
+          expect(client, isNotNull);
+        },
+      );
     });
   });
 }

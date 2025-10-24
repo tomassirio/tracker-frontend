@@ -6,11 +6,7 @@ class ReplyCard extends StatelessWidget {
   final Comment reply;
   final String tripUserId;
 
-  const ReplyCard({
-    super.key,
-    required this.reply,
-    required this.tripUserId,
-  });
+  const ReplyCard({super.key, required this.reply, required this.tripUserId});
 
   @override
   Widget build(BuildContext context) {
@@ -53,19 +49,12 @@ class ReplyCard extends StatelessWidget {
                     ),
                     if (isOwner) ...[
                       const SizedBox(width: 4),
-                      const Icon(
-                        Icons.star,
-                        size: 12,
-                        color: Colors.amber,
-                      ),
+                      const Icon(Icons.star, size: 12, color: Colors.amber),
                     ],
                     const SizedBox(width: 8),
                     Text(
                       _formatDateTime(reply.createdAt),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -73,10 +62,7 @@ class ReplyCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            reply.message,
-            style: const TextStyle(fontSize: 13),
-          ),
+          Text(reply.message, style: const TextStyle(fontSize: 13)),
         ],
       ),
     );
@@ -99,4 +85,3 @@ class ReplyCard extends StatelessWidget {
     }
   }
 }
-

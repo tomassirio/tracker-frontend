@@ -54,4 +54,3 @@ class EmptyTripsView extends StatelessWidget {
     );
   }
 }
-

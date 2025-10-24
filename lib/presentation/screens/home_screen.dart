@@ -78,18 +78,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleProfile() {
-    UiHelpers.showSuccessMessage(
-      context,
-      'User Profile coming soon!',
-    );
+    UiHelpers.showSuccessMessage(context, 'User Profile coming soon!');
   }
 
   Future<void> _navigateToAuth() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AuthScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const AuthScreen()),
     );
 
     if (result == true || mounted) {
@@ -101,9 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _navigateToCreateTrip() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CreateTripScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const CreateTripScreen()),
     );
 
     if (result == true) {
@@ -114,9 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToTripDetail(Trip trip) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => TripDetailScreen(trip: trip),
-      ),
+      MaterialPageRoute(builder: (context) => TripDetailScreen(trip: trip)),
     );
   }
 
@@ -138,10 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton.icon(
               onPressed: _navigateToAuth,
               icon: const Icon(Icons.login, color: Colors.white),
-              label: const Text(
-                'Login',
-                style: TextStyle(color: Colors.white),
-              ),
+              label: const Text('Login', style: TextStyle(color: Colors.white)),
             ),
         ],
       ),

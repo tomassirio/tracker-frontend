@@ -3,9 +3,12 @@ import 'dart:js_interop';
 /// API endpoint constants
 class ApiEndpoints {
   // Base URLs - read from window.appConfig (injected by Docker) or use defaults
-  static String get commandBaseUrl => _getConfigValue('commandBaseUrl', 'http://localhost:8081/api/1');
-  static String get queryBaseUrl => _getConfigValue('queryBaseUrl', 'http://localhost:8082/api/1');
-  static String get authBaseUrl => _getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
+  static String get commandBaseUrl =>
+      _getConfigValue('commandBaseUrl', 'http://localhost:8081/api/1');
+  static String get queryBaseUrl =>
+      _getConfigValue('queryBaseUrl', 'http://localhost:8082/api/1');
+  static String get authBaseUrl =>
+      _getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
 
   // Helper to read from window.appConfig with fallback
   static String _getConfigValue(String key, String defaultValue) {
@@ -36,7 +39,8 @@ class ApiEndpoints {
   static String userById(String userId) => '/users/$userId';
   static String userByUsername(String username) => '/users/username/$username';
   static const String usersFriends = '/users/friends';
-  static const String usersFriendRequestsReceived = '/users/friends/requests/received';
+  static const String usersFriendRequestsReceived =
+      '/users/friends/requests/received';
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
   static const String usersFollowsFollowing = '/users/follows/following';
   static const String usersFollowsFollowers = '/users/follows/followers';
@@ -44,10 +48,13 @@ class ApiEndpoints {
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';
   static const String usersFriendRequests = '/users/friends/requests';
-  static String usersFriendRequestAccept(String requestId) => '/users/friends/requests/$requestId/accept';
-  static String usersFriendRequestDecline(String requestId) => '/users/friends/requests/$requestId/decline';
+  static String usersFriendRequestAccept(String requestId) =>
+      '/users/friends/requests/$requestId/accept';
+  static String usersFriendRequestDecline(String requestId) =>
+      '/users/friends/requests/$requestId/decline';
   static const String usersFollows = '/users/follows';
-  static String usersUnfollow(String followedId) => '/users/follows/$followedId';
+  static String usersUnfollow(String followedId) =>
+      '/users/follows/$followedId';
 
   // Trip Query endpoints (use queryBaseUrl)
   static String tripById(String tripId) => '/trips/$tripId';
@@ -73,7 +80,8 @@ class ApiEndpoints {
 
   // Comment Command endpoints (use commandBaseUrl)
   static String tripComments(String tripId) => '/trips/$tripId/comments';
-  static String commentReactions(String commentId) => '/comments/$commentId/reactions';
+  static String commentReactions(String commentId) =>
+      '/comments/$commentId/reactions';
 }
 
 // JavaScript interop - only for web

@@ -9,8 +9,8 @@ class UserService {
   UserService({
     UserQueryClient? userQueryClient,
     UserCommandClient? userCommandClient,
-  })  : _userQueryClient = userQueryClient ?? UserQueryClient(),
-        _userCommandClient = userCommandClient ?? UserCommandClient();
+  }) : _userQueryClient = userQueryClient ?? UserQueryClient(),
+       _userCommandClient = userCommandClient ?? UserCommandClient();
 
   /// Get own profile
   Future<UserProfile> getMyProfile() async {

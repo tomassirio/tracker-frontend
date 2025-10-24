@@ -18,16 +18,16 @@ class UserAchievement {
       UserAchievement(
         id: json['id'] as String,
         userId: json['userId'] as String,
-        achievement:
-            Achievement.fromJson(json['achievement'] as Map<String, dynamic>),
+        achievement: Achievement.fromJson(
+          json['achievement'] as Map<String, dynamic>,
+        ),
         unlockedAt: DateTime.parse(json['unlockedAt'] as String),
       );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'userId': userId,
-        'achievement': achievement.toJson(),
-        'unlockedAt': unlockedAt.toIso8601String(),
-      };
+    'id': id,
+    'userId': userId,
+    'achievement': achievement.toJson(),
+    'unlockedAt': unlockedAt.toIso8601String(),
+  };
 }
-
