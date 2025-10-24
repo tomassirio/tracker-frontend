@@ -85,4 +85,25 @@ class TripDetailRepository {
   Future<bool> isLoggedIn() async {
     return await _authService.isLoggedIn();
   }
+
+  /// Gets the current user's username
+  Future<String?> getCurrentUsername() async {
+    return await _authService.getCurrentUsername();
+  }
+
+  /// Gets the current user's ID
+  Future<String?> getCurrentUserId() async {
+    return await _authService.getCurrentUserId();
+  }
+
+  /// Logs out the current user
+  Future<void> logout() async {
+    await _authService.logout();
+  }
+
+  /// Loads trip updates for a specific trip
+  Future<List<TripLocation>> loadTripUpdates(String tripId) async {
+    final trip = await _tripService.getTripById(tripId);
+    return trip.locations ?? [];
+  }
 }

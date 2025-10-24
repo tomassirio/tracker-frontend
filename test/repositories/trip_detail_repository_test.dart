@@ -285,6 +285,28 @@ void main() {
         expect(repo, isNotNull);
       });
     });
+
+    group('New methods', () {
+      test('isLoggedIn method exists', () async {
+        expect(repository.isLoggedIn, isA<Function>());
+      });
+
+      test('getCurrentUsername method exists', () async {
+        expect(repository.getCurrentUsername, isA<Function>());
+      });
+
+      test('getCurrentUserId method exists', () async {
+        expect(repository.getCurrentUserId, isA<Function>());
+      });
+
+      test('logout method exists', () async {
+        expect(repository.logout, isA<Function>());
+      });
+
+      test('loadTripUpdates method exists', () async {
+        expect(repository.loadTripUpdates, isA<Function>());
+      });
+    });
   });
 }
 

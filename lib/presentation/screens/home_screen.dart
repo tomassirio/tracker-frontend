@@ -9,6 +9,7 @@ import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.d
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
+import 'trip_plans_screen.dart';
 import 'auth_screen.dart';
 
 /// Home screen showing list of trips
@@ -127,7 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
         // Already on trips
         break;
       case 1:
-        UiHelpers.showSuccessMessage(context, 'Trip Plans coming soon!');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TripPlansScreen()),
+        );
         break;
       case 2:
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');

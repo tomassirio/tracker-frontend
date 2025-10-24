@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:intl/intl.dart';
 
-/// YouTube-style trip card with minimap preview
+/// YouTube-style trip card with static map preview
 class YouTubeTripCard extends StatelessWidget {
   final Trip trip;
   final VoidCallback onTap;
@@ -40,11 +39,45 @@ class YouTubeTripCard extends StatelessWidget {
     }
   }
 
+  /// Generate static map image URL from Google Maps Static API
+  String _generateStaticMapUrl() {
+    final initialLocation = TripMapHelper.getInitialLocation(trip);
+    final zoom = TripMapHelper.getInitialZoom(trip);
+    
+    // Base URL for Google Maps Static API
+    final baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
+    
+    // Center on the initial location
+    final center = '${initialLocation.latitude},${initialLocation.longitude}';
+    
+    // Build markers parameter for trip locations
+    final markers = StringBuffer();
+    if (trip.locations != null && trip.locations!.isNotEmpty) {
+      markers.write('&markers=');
+      for (var i = 0; i < trip.locations!.length; i++) {
+        final loc = trip.locations![i];
+        if (i > 0) markers.write('|');
+        markers.write('${loc.latitude},${loc.longitude}');
+      }
+    }
+    
+    // Build path parameter for polyline
+    final path = StringBuffer();
+    if (trip.locations != null && trip.locations!.length > 1) {
+      path.write('&path=color:0x0000ff|weight:2');
+      for (final loc in trip.locations!) {
+        path.write('|${loc.latitude},${loc.longitude}');
+      }
+    }
+    
+    // Size for the static map (adjust based on card size)
+    const size = '400x225'; // 16:9 ratio
+    
+    return '$baseUrl?center=$center&zoom=${zoom.toInt()}&size=$size${markers.toString()}${path.toString()}&key=\${GOOGLE_MAPS_API_KEY}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final mapData = TripMapHelper.createMapData(trip);
-    final initialLocation = TripMapHelper.getInitialLocation(trip);
-
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -52,27 +85,26 @@ class YouTubeTripCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Minimap preview (16:9 aspect ratio like YouTube)
+            // Static map preview (4:3 aspect ratio - smaller than before)
             AspectRatio(
-              aspectRatio: 16 / 9,
+              aspectRatio: 4 / 3,
               child: Stack(
                 children: [
-                  GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: initialLocation,
-                      zoom: TripMapHelper.getInitialZoom(trip),
+                  // Static map image
+                  Container(
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: Icon(
+                        Icons.map,
+                        size: 48,
+                        color: Colors.grey[500],
+                      ),
                     ),
-                    markers: mapData.markers,
-                    polylines: mapData.polylines,
-                    zoomControlsEnabled: false,
-                    mapToolbarEnabled: false,
-                    myLocationButtonEnabled: false,
-                    scrollGesturesEnabled: false,
-                    zoomGesturesEnabled: false,
-                    tiltGesturesEnabled: false,
-                    rotateGesturesEnabled: false,
-                    liteModeEnabled: true, // Use lite mode for better performance
                   ),
+                  // Note: Static map images would require API key injection
+                  // For now showing placeholder. In production, use:
+                  // Image.network(_generateStaticMapUrl(), fit: BoxFit.cover)
+                  
                   // Status badge overlay
                   Positioned(
                     bottom: 8,
