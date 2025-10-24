@@ -62,6 +62,15 @@ jobs:
       - name: Create Git tag
         run: |
           BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          
+          # Check if tag already exists
+          if git rev-parse "v${BASE_VERSION}" >/dev/null 2>&1; then
+            echo "Error: Tag v${BASE_VERSION} already exists!"
+            echo "This likely means the version in pubspec.yaml was not properly incremented."
+            echo "Please ensure the version follows semantic versioning and is incremented for each release."
+            exit 1
+          fi
+          
           git tag -a "v${BASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
 
       - name: Run tests with coverage
@@ -156,13 +165,18 @@ jobs:
 
       - name: Set next development version
         run: |
-          # Extract base version and build number
+          # Extract base version from release version
           BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-          BUILD_NUMBER=$(echo "${RELEASE_VERSION}" | sed 's/.*+//')
           
-          # Increment build number for next development iteration
-          NEXT_BUILD=$((BUILD_NUMBER + 1))
-          NEXT_VERSION="${BASE_VERSION}-SNAPSHOT+${NEXT_BUILD}"
+          # Split version into major.minor.patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
+          
+          # Increment patch version for next development iteration
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_BASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
+          
+          # Reset build number to 1 for the new version
+          NEXT_VERSION="${NEXT_BASE_VERSION}-SNAPSHOT+1"
           
           # Update pubspec.yaml
           sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
