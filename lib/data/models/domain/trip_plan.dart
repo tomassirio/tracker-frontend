@@ -4,7 +4,7 @@ import 'planned_location.dart';
 class TripPlan {
   final String id;
   final String userId;
-  final String title;
+  final String name;
   final String? description;
   final DateTime? plannedStartDate;
   final DateTime? plannedEndDate;
@@ -15,7 +15,7 @@ class TripPlan {
   TripPlan({
     required this.id,
     required this.userId,
-    required this.title,
+    required this.name,
     this.description,
     this.plannedStartDate,
     this.plannedEndDate,
@@ -27,7 +27,7 @@ class TripPlan {
   factory TripPlan.fromJson(Map<String, dynamic> json) => TripPlan(
         id: json['id'] as String,
         userId: json['userId'] as String,
-        title: json['title'] as String,
+        name: json['name'] as String,
         description: json['description'] as String?,
         plannedStartDate: json['plannedStartDate'] != null
             ? DateTime.parse(json['plannedStartDate'] as String)
@@ -48,7 +48,7 @@ class TripPlan {
   Map<String, dynamic> toJson() => {
         'id': id,
         'userId': userId,
-        'title': title,
+        'name': name,
         if (description != null) 'description': description,
         if (plannedStartDate != null)
           'plannedStartDate': plannedStartDate!.toIso8601String(),
