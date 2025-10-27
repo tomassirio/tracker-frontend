@@ -52,6 +52,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   String? _username;
   String? _userId;
 
+  // Collapsible panel states
+  bool _isTimelineCollapsed = false;
+  bool _isCommentsCollapsed = false;
+
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -469,6 +473,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       ),
                       child: Row(
                         children: [
+                          IconButton(
+                            icon: Icon(
+                              _isCommentsCollapsed
+                                  ? Icons.expand_more
+                                  : Icons.expand_less,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isCommentsCollapsed = !_isCommentsCollapsed;
+                              });
+                            },
+                            tooltip: _isCommentsCollapsed
+                                ? 'Expand comments'
+                                : 'Collapse comments',
+                          ),
+                          const SizedBox(width: 8),
                           Text(
                             '${_comments.length} Comments',
                             style: const TextStyle(
@@ -477,141 +498,194 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                             ),
                           ),
                           const Spacer(),
-                          PopupMenuButton<CommentSortOption>(
-                            icon: const Icon(Icons.sort),
-                            onSelected: _changeSortOption,
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: CommentSortOption.latest,
-                                child: Text('Latest first'),
-                              ),
-                              const PopupMenuItem(
-                                value: CommentSortOption.oldest,
-                                child: Text('Oldest first'),
-                              ),
-                              const PopupMenuItem(
-                                value: CommentSortOption.mostReplies,
-                                child: Text('Most replies'),
-                              ),
-                              const PopupMenuItem(
-                                value: CommentSortOption.mostReactions,
-                                child: Text('Most reactions'),
-                              ),
-                            ],
-                          ),
+                          if (!_isCommentsCollapsed)
+                            PopupMenuButton<CommentSortOption>(
+                              icon: const Icon(Icons.sort),
+                              onSelected: _changeSortOption,
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: CommentSortOption.latest,
+                                  child: Text('Latest first'),
+                                ),
+                                const PopupMenuItem(
+                                  value: CommentSortOption.oldest,
+                                  child: Text('Oldest first'),
+                                ),
+                                const PopupMenuItem(
+                                  value: CommentSortOption.mostReplies,
+                                  child: Text('Most replies'),
+                                ),
+                                const PopupMenuItem(
+                                  value: CommentSortOption.mostReactions,
+                                  child: Text('Most reactions'),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ),
                     // Comments list
-                    Expanded(
-                      flex: 2,
-                      child: _isLoadingComments
-                          ? const Center(child: CircularProgressIndicator())
-                          : _comments.isEmpty
-                          ? _buildEmptyCommentsState()
-                          : ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              itemCount: _comments.length,
-                              itemBuilder: (context, index) {
-                                final comment = _comments[index];
-                                final isExpanded =
-                                    _expandedComments[comment.id] ?? false;
-                                final commentReplies =
-                                    _replies[comment.id] ?? [];
+                    if (!_isCommentsCollapsed) ...[
+                      Expanded(
+                        flex: 2,
+                        child: _isLoadingComments
+                            ? const Center(child: CircularProgressIndicator())
+                            : _comments.isEmpty
+                                ? _buildEmptyCommentsState()
+                                : ListView.builder(
+                                    controller: _scrollController,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    itemCount: _comments.length,
+                                    itemBuilder: (context, index) {
+                                      final comment = _comments[index];
+                                      final isExpanded =
+                                          _expandedComments[comment.id] ?? false;
+                                      final commentReplies =
+                                          _replies[comment.id] ?? [];
 
-                                return CommentCard(
-                                  comment: comment,
-                                  tripUserId: _trip.userId,
-                                  isExpanded: isExpanded,
-                                  replies: commentReplies,
-                                  onReact: () =>
-                                      _showReactionPicker(comment.id),
-                                  onReply: () => _handleReply(comment.id),
-                                  onToggleReplies: () => _handleToggleReplies(
-                                    comment.id,
-                                    isExpanded,
+                                      return CommentCard(
+                                        comment: comment,
+                                        tripUserId: _trip.userId,
+                                        isExpanded: isExpanded,
+                                        replies: commentReplies,
+                                        onReact: () =>
+                                            _showReactionPicker(comment.id),
+                                        onReply: () => _handleReply(comment.id),
+                                        onToggleReplies: () => _handleToggleReplies(
+                                          comment.id,
+                                          isExpanded,
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
-                    ),
-                    // Comment input (disabled if not logged in)
-                    if (_isLoggedIn)
-                      CommentInput(
-                        controller: _commentController,
-                        isAddingComment: _isAddingComment,
-                        isReplyMode: _replyingToCommentId != null,
-                        onSend: _addComment,
-                        onCancelReply: () {
-                          setState(() => _replyingToCommentId = null);
-                        },
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          border: Border(
-                            top: BorderSide(color: Colors.grey[300]!),
-                          ),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Please log in to comment',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
                       ),
+                      // Comment input (disabled if not logged in)
+                      if (_isLoggedIn)
+                        CommentInput(
+                          controller: _commentController,
+                          isAddingComment: _isAddingComment,
+                          isReplyMode: _replyingToCommentId != null,
+                          onSend: _addComment,
+                          onCancelReply: () {
+                            setState(() => _replyingToCommentId = null);
+                          },
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            border: Border(
+                              top: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Please log in to comment',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ],
                 ),
               ),
               // Timeline column (20%)
-              Expanded(
-                flex: 2,
-                child: Container(
+              if (!_isTimelineCollapsed)
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(left: BorderSide(color: Colors.grey[300]!)),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.timeline, size: 20),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Timeline',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.close, size: 20),
+                                onPressed: () {
+                                  setState(() {
+                                    _isTimelineCollapsed = true;
+                                  });
+                                },
+                                tooltip: 'Collapse timeline',
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: TripTimeline(
+                            updates: _tripUpdates,
+                            isLoading: _isLoadingUpdates,
+                            onRefresh: _loadTripUpdates,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              // Collapsed timeline tab
+              if (_isTimelineCollapsed)
+                Container(
+                  width: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.grey[100],
                     border: Border(left: BorderSide(color: Colors.grey[300]!)),
                   ),
                   child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          border: Border(
-                            bottom: BorderSide(color: Colors.grey[300]!),
-                          ),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.timeline, size: 20),
-                            SizedBox(width: 8),
-                            Text(
+                      const SizedBox(height: 16),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left, size: 20),
+                        onPressed: () {
+                          setState(() {
+                            _isTimelineCollapsed = false;
+                          });
+                        },
+                        tooltip: 'Expand timeline',
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: RotatedBox(
+                          quarterTurns: 3,
+                          child: Center(
+                            child: Text(
                               'Timeline',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: TripTimeline(
-                          updates: _tripUpdates,
-                          isLoading: _isLoadingUpdates,
-                          onRefresh: _loadTripUpdates,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
             ],
           );
         },
