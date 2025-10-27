@@ -94,6 +94,18 @@ class CommentCard extends StatelessWidget {
             style: const TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 8),
+          // Display reactions by type
+          if (comment.reactions != null && comment.reactions!.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: comment.reactions!.entries
+                  .where((entry) => entry.value > 0)
+                  .map((entry) => _buildReactionChip(entry.key, entry.value))
+                  .toList(),
+            ),
+            const SizedBox(height: 8),
+          ],
           Row(
             children: [
               InkWell(
@@ -103,7 +115,7 @@ class CommentCard extends StatelessWidget {
                     Icon(Icons.add_reaction_outlined, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Text(
-                      '${comment.reactionsCount}',
+                      'React',
                       style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                     ),
                   ],
@@ -153,6 +165,50 @@ class CommentCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildReactionChip(String reactionType, int count) {
+    final emoji = _getReactionEmoji(reactionType);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 4),
+          Text(
+            count.toString(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getReactionEmoji(String reactionType) {
+    switch (reactionType.toUpperCase()) {
+      case 'HEART':
+        return '❤️';
+      case 'SMILEY':
+        return '😊';
+      case 'LAUGH':
+        return '😂';
+      case 'SAD':
+        return '😢';
+      case 'ANGER':
+        return '😡';
+      default:
+        return '👍';
+    }
   }
 
   String _formatTimestamp(DateTime timestamp) {
