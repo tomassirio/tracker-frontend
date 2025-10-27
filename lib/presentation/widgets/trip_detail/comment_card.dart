@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'reply_card.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/reply_card.dart';
 
-/// A card widget displaying a single comment with reactions and replies
+/// Widget displaying a comment card with reactions and replies
 class CommentCard extends StatelessWidget {
   final Comment comment;
   final String tripUserId;
@@ -25,155 +25,150 @@ class CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOwner = comment.userId == tripUserId;
+    final isAuthor = comment.userId == tripUserId;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      color: isOwner ? Colors.amber[50] : Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Comment header
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: isOwner ? Colors.amber : Colors.blue,
-                  child: Text(
-                    comment.username[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isAuthor ? Colors.blue[50] : Colors.white,
+        border: Border.all(color: isAuthor ? Colors.blue[200]! : Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                child: Text(comment.username[0].toUpperCase()),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            comment.username,
-                            style: const TextStyle(
+                      Text(
+                        comment.username,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (isAuthor) ...[
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[100],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'AUTHOR',
+                            style: TextStyle(
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              color: Colors.blue,
                             ),
                           ),
-                          if (isOwner) ...[
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.star,
-                              size: 16,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Owner',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.amber[700],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ],
+                        ),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    _formatTimestamp(comment.createdAt),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            comment.message,
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              InkWell(
+                onTap: onReact,
+                child: Row(
+                  children: [
+                    Icon(Icons.add_reaction_outlined, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${comment.reactionsCount}',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              InkWell(
+                onTap: onReply,
+                child: Row(
+                  children: [
+                    Icon(Icons.reply, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'Reply',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              if (comment.responsesCount > 0) ...[
+                const SizedBox(width: 16),
+                InkWell(
+                  onTap: onToggleReplies,
+                  child: Row(
+                    children: [
+                      Icon(
+                        isExpanded ? Icons.expand_less : Icons.expand_more,
+                        size: 16,
+                        color: Colors.grey[600],
                       ),
+                      const SizedBox(width: 4),
                       Text(
-                        _formatDateTime(comment.createdAt),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        '${comment.responsesCount} ${comment.responsesCount == 1 ? 'reply' : 'replies'}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                       ),
                     ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            // Comment message
-            Text(comment.message, style: const TextStyle(fontSize: 14)),
-            const SizedBox(height: 8),
-            // Comment actions
-            Row(
-              children: [
-                // Reaction button
-                TextButton.icon(
-                  onPressed: onReact,
-                  icon: const Icon(Icons.thumb_up_outlined, size: 16),
-                  label: Text(
-                    comment.reactionsCount > 0
-                        ? '${comment.reactionsCount}'
-                        : 'React',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Reply button
-                TextButton.icon(
-                  onPressed: onReply,
-                  icon: const Icon(Icons.reply, size: 16),
-                  label: const Text('Reply', style: TextStyle(fontSize: 12)),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                if (comment.responsesCount > 0) ...[
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: onToggleReplies,
-                    icon: Icon(
-                      isExpanded ? Icons.expand_less : Icons.expand_more,
-                      size: 16,
-                    ),
-                    label: Text(
-                      '${comment.responsesCount} ${comment.responsesCount == 1 ? 'reply' : 'replies'}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            // Replies
-            if (isExpanded && replies.isNotEmpty) ...[
-              const Divider(),
-              ...replies.map(
-                (reply) => ReplyCard(reply: reply, tripUserId: tripUserId),
-              ),
             ],
+          ),
+          if (isExpanded && replies.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            ...replies.map((reply) => ReplyCard(reply: reply)),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
+  String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
-    final difference = now.difference(dateTime);
+    final difference = now.difference(timestamp);
 
-    if (difference.inDays > 7) {
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
+    if (difference.inMinutes < 1) {
       return 'Just now';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
     }
   }
 }
