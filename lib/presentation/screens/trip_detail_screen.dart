@@ -259,7 +259,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     if (confirm) {
       await _repository.logout();
       if (mounted) {
-        Navigator.pop(context);
+        // Pop with result to trigger refresh in home screen
+        Navigator.pop(context, true);
       }
     }
   }
@@ -290,12 +291,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _navigateToAuth() async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AuthScreen()),
     );
-    await _loadUserInfo();
-    await _checkLoginStatus();
+
+    // Refresh screen data after login
+    if (result == true && mounted) {
+      await _loadUserInfo();
+      await _checkLoginStatus();
+      await _loadComments(); // Reload comments in case user can now see more
+      await _loadTripUpdates(); // Reload timeline
+      setState(() {}); // Force rebuild to update UI
+    }
   }
 
   @override

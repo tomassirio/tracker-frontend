@@ -164,11 +164,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _navigateToTripDetail(Trip trip) {
-    Navigator.push(
+  void _navigateToTripDetail(Trip trip) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TripDetailScreen(trip: trip)),
     );
+
+    // Refresh if user logged out from trip detail screen
+    if (result == true && mounted) {
+      await _loadUserInfo();
+      await _loadTrips();
+    }
   }
 
   @override
