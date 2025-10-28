@@ -74,7 +74,7 @@ jobs:
           git tag -a "v${BASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
 
       - name: Run tests with coverage
-        run: flutter test --coverage
+        run: make test
 
       - name: Extract coverage and update README badges
         run: |
@@ -138,7 +138,7 @@ jobs:
           fi
 
       - name: Build web application
-        run: flutter build web --release
+        run: make build
 
       - name: Create release notes
         run: |

@@ -24,14 +24,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting
-        run: dart format --set-exit-if-changed .
+      - name: Format code
+        run: make format
 
       - name: Analyze project source
-        run: flutter analyze
+        run: make analyze
 
       - name: Run tests with coverage
-        run: flutter test --coverage
+        run: make test
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
