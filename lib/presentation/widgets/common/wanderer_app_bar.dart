@@ -58,10 +58,7 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: TextButton.icon(
               onPressed: onLoginPressed,
               icon: const Icon(Icons.login, color: Colors.white),
-              label: const Text(
-                'Login',
-                style: TextStyle(color: Colors.white),
-              ),
+              label: const Text('Login', style: TextStyle(color: Colors.white)),
             ),
           ),
         if (isLoggedIn && username != null)
@@ -104,7 +101,9 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
                         Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               child: Text(
                                 username![0].toUpperCase(),
                                 style: const TextStyle(

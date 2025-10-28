@@ -317,7 +317,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         onLoginPressed: _navigateToAuth,
         username: _username,
         userId: _userId,
-        onProfile: () => UiHelpers.showSuccessMessage(context, 'Profile coming soon!'),
+        onProfile: () =>
+            UiHelpers.showSuccessMessage(context, 'Profile coming soon!'),
         onSettings: _handleSettings,
         onLogout: _logout,
       ),
