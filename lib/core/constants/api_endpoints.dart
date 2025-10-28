@@ -32,6 +32,7 @@ class ApiEndpoints {
 
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';
+  static const String usersUpdate = '/users/me';
   static const String usersFriendRequests = '/users/friends/requests';
   static String usersFriendRequestAccept(String requestId) =>
       '/users/friends/requests/$requestId/accept';

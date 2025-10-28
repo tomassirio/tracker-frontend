@@ -9,6 +9,7 @@ import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
 import 'trip_plans_screen.dart';
+import 'profile_screen.dart';
 import 'auth_screen.dart';
 
 /// Home screen showing list of trips
@@ -110,7 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleProfile() {
-    UiHelpers.showSuccessMessage(context, 'User Profile coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    ).then((result) {
+      if (result == true && mounted) {
+        // User logged out from profile screen
+        _loadUserInfo();
+        _loadTrips();
+      }
+    });
   }
 
   void _handleSettings() {
@@ -136,7 +146,16 @@ class _HomeScreenState extends State<HomeScreen> {
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
         break;
       case 3:
-        _handleProfile();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        ).then((result) {
+          if (result == true && mounted) {
+            // User logged out from profile screen
+            _loadUserInfo();
+            _loadTrips();
+          }
+        });
         break;
     }
   }
