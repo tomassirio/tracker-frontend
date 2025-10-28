@@ -32,7 +32,9 @@ class CommentCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isAuthor ? Colors.blue[50] : Colors.white,
-        border: Border.all(color: isAuthor ? Colors.blue[200]! : Colors.grey[300]!),
+        border: Border.all(
+          color: isAuthor ? Colors.blue[200]! : Colors.grey[300]!,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -89,10 +91,7 @@ class CommentCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            comment.message,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(comment.message, style: const TextStyle(fontSize: 14)),
           const SizedBox(height: 8),
           // Display reactions by type
           if (comment.reactions != null && comment.reactions!.isNotEmpty) ...[
@@ -112,7 +111,11 @@ class CommentCard extends StatelessWidget {
                 onTap: onReact,
                 child: Row(
                   children: [
-                    Icon(Icons.add_reaction_outlined, size: 16, color: Colors.grey[600]),
+                    Icon(
+                      Icons.add_reaction_outlined,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'React',
@@ -128,10 +131,7 @@ class CommentCard extends StatelessWidget {
                   children: [
                     Icon(Icons.reply, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 4),
-                    const Text(
-                      'Reply',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    const Text('Reply', style: TextStyle(fontSize: 12)),
                   ],
                 ),
               ),

@@ -68,4 +68,14 @@ class TripQueryClient {
     );
     return _apiClient.handleListResponse(response, Trip.fromJson);
   }
+
+  /// Get trip updates/locations for a specific trip
+  /// Requires authentication (visibility-dependent)
+  Future<List<TripLocation>> getTripUpdates(String tripId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.tripUpdates(tripId),
+      requireAuth: true,
+    );
+    return _apiClient.handleListResponse(response, TripLocation.fromJson);
+  }
 }

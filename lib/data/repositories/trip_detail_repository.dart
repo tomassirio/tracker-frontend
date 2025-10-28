@@ -19,19 +19,15 @@ class TripDetailRepository {
        _commentService = commentService ?? CommentService(),
        _authService = authService ?? AuthService();
 
-  /// Loads top-level comments for a trip
-  Future<List<Comment>> loadComments(Trip trip) async {
-    final allComments = trip.comments ?? [];
+  /// Loads top-level comments for a trip via API
+  Future<List<Comment>> loadComments(String tripId) async {
+    final allComments = await _commentService.getCommentsByTripId(tripId);
     return allComments.where((c) => c.parentCommentId == null).toList();
   }
 
-  /// Loads replies for a specific comment
-  Future<List<Comment>> loadReplies(
-    List<Comment> comments,
-    String commentId,
-  ) async {
-    final comment = comments.firstWhere((c) => c.id == commentId);
-    return comment.replies ?? [];
+  /// Loads replies for a specific comment via API
+  Future<List<Comment>> loadReplies(String commentId) async {
+    return await _commentService.getRepliesByCommentId(commentId);
   }
 
   /// Loads reactions for a comment from the comment object itself
@@ -101,9 +97,8 @@ class TripDetailRepository {
     await _authService.logout();
   }
 
-  /// Loads trip updates for a specific trip
+  /// Loads trip updates for a specific trip via API
   Future<List<TripLocation>> loadTripUpdates(String tripId) async {
-    final trip = await _tripService.getTripById(tripId);
-    return trip.locations ?? [];
+    return await _tripService.getTripUpdates(tripId);
   }
 }

@@ -48,10 +48,7 @@ class ReplyCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            reply.message,
-            style: const TextStyle(fontSize: 13),
-          ),
+          Text(reply.message, style: const TextStyle(fontSize: 13)),
         ],
       ),
     );

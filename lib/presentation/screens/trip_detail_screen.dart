@@ -123,7 +123,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isLoadingComments = true);
 
     try {
-      final comments = await _repository.loadComments(_trip);
+      final comments = await _repository.loadComments(_trip.id);
       setState(() {
         _comments = comments;
         _sortComments();
@@ -163,7 +163,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   Future<void> _loadReplies(String commentId) async {
     try {
-      final replies = await _repository.loadReplies(_comments, commentId);
+      final replies = await _repository.loadReplies(commentId);
       setState(() {
         _replies[commentId] = replies;
         _expandedComments[commentId] = true;
@@ -356,11 +356,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     // Map takes available space
                     Expanded(
                       child: TripMapView(
-                        initialLocation: TripMapHelper.getInitialLocation(_trip),
+                        initialLocation: TripMapHelper.getInitialLocation(
+                          _trip,
+                        ),
                         initialZoom: TripMapHelper.getInitialZoom(_trip),
                         markers: _markers,
                         polylines: _polylines,
-                        onMapCreated: (controller) => _mapController = controller,
+                        onMapCreated: (controller) =>
+                            _mapController = controller,
                       ),
                     ),
                     // Trip info section

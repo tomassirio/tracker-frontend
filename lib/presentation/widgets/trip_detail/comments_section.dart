@@ -59,9 +59,7 @@ class CommentsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.grey[100],
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[300]!),
-            ),
+            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
           child: Row(
             children: [
@@ -114,27 +112,28 @@ class CommentsSection extends StatelessWidget {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : comments.isEmpty
-                    ? _buildEmptyCommentsState()
-                    : ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final comment = comments[index];
-                          final isExpanded = expandedComments[comment.id] ?? false;
-                          final commentReplies = replies[comment.id] ?? [];
+                ? _buildEmptyCommentsState()
+                : ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: comments.length,
+                    itemBuilder: (context, index) {
+                      final comment = comments[index];
+                      final isExpanded = expandedComments[comment.id] ?? false;
+                      final commentReplies = replies[comment.id] ?? [];
 
-                          return CommentCard(
-                            comment: comment,
-                            tripUserId: tripUserId,
-                            isExpanded: isExpanded,
-                            replies: commentReplies,
-                            onReact: () => onReact(comment.id),
-                            onReply: () => onReply(comment.id),
-                            onToggleReplies: () => onToggleReplies(comment.id, isExpanded),
-                          );
-                        },
-                      ),
+                      return CommentCard(
+                        comment: comment,
+                        tripUserId: tripUserId,
+                        isExpanded: isExpanded,
+                        replies: commentReplies,
+                        onReact: () => onReact(comment.id),
+                        onReply: () => onReply(comment.id),
+                        onToggleReplies: () =>
+                            onToggleReplies(comment.id, isExpanded),
+                      );
+                    },
+                  ),
           ),
           // Comment input (disabled if not logged in)
           if (isLoggedIn)
@@ -150,9 +149,7 @@ class CommentsSection extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                border: Border(
-                  top: BorderSide(color: Colors.grey[300]!),
-                ),
+                border: Border(top: BorderSide(color: Colors.grey[300]!)),
               ),
               child: const Center(
                 child: Text(
@@ -184,7 +181,9 @@ class CommentsSection extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              isLoggedIn ? 'Be the first to comment!' : 'Log in to add a comment',
+              isLoggedIn
+                  ? 'Be the first to comment!'
+                  : 'Log in to add a comment',
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],

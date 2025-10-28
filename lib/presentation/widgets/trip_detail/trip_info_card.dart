@@ -13,19 +13,14 @@ class TripInfoCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             trip.name,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(
@@ -56,41 +51,24 @@ class TripInfoCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                Icons.comment,
-                size: 16,
-                color: Colors.grey[600],
-              ),
+              Icon(Icons.comment, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
                 '${trip.commentsCount} comments',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
               ),
               const SizedBox(width: 16),
-              Icon(
-                Icons.visibility,
-                size: 16,
-                color: Colors.grey[600],
-              ),
+              Icon(Icons.visibility, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
                 trip.visibility.toJson(),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
               ),
             ],
           ),
           if (trip.description != null) ...[
             const SizedBox(height: 12),
-            Text(
-              trip.description!,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(trip.description!, style: const TextStyle(fontSize: 14)),
           ],
         ],
       ),

@@ -34,10 +34,7 @@ class TripTimeline extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 8),
-              TextButton(
-                onPressed: onRefresh,
-                child: const Text('Refresh'),
-              ),
+              TextButton(onPressed: onRefresh, child: const Text('Refresh')),
             ],
           ),
         ),
@@ -67,11 +64,7 @@ class TripTimeline extends StatelessWidget {
                     ),
                   ),
                   if (!isLast)
-                    Container(
-                      width: 2,
-                      height: 60,
-                      color: Colors.grey[300],
-                    ),
+                    Container(width: 2, height: 60, color: Colors.grey[300]),
                 ],
               ),
               const SizedBox(width: 12),
@@ -98,12 +91,19 @@ class TripTimeline extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: Colors.grey[600],
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               '${update.latitude.toStringAsFixed(4)}, ${update.longitude.toStringAsFixed(4)}',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ),
                         ],

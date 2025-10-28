@@ -1,4 +1,5 @@
 import '../client/clients.dart';
+import '../client/query/trip_plan_query_client.dart';
 import '../models/trip_models.dart';
 
 /// Service for trip plan operations

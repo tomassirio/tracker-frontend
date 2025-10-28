@@ -103,15 +103,9 @@ class _ReactionButton extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 32),
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 32)),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12),
-            ),
+            Text(label, style: const TextStyle(fontSize: 12)),
           ],
         ),
       ),

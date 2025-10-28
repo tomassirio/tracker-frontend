@@ -23,9 +23,7 @@ class CommentInput extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.grey[300]!),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey[300]!)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +53,9 @@ class CommentInput extends StatelessWidget {
                 child: TextField(
                   controller: controller,
                   decoration: InputDecoration(
-                    hintText: isReplyMode ? 'Write a reply...' : 'Write a comment...',
+                    hintText: isReplyMode
+                        ? 'Write a reply...'
+                        : 'Write a comment...',
                     border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,

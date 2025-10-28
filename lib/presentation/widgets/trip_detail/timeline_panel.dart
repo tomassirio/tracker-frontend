@@ -72,9 +72,7 @@ class TimelinePanel extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey[300]!),
-                ),
+                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
               ),
               child: Row(
                 children: [
@@ -82,10 +80,7 @@ class TimelinePanel extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text(
                     'Timeline',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   IconButton(
