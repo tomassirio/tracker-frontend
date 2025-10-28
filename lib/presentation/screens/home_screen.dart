@@ -4,8 +4,7 @@ import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/widgets/home/youtube_home_content.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
-import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
@@ -175,40 +174,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Row(
-          children: [
-            const WandererLogo(size: 36),
-            const SizedBox(width: 12),
-            const Text(
-              'Wanderer',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: SearchBarWidget(
-                controller: _searchController,
-                onSearch: (_) => _filterTrips(),
-                onClear: _clearSearch,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          if (!_isLoggedIn)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: TextButton.icon(
-                onPressed: _navigateToAuth,
-                icon: const Icon(Icons.login, color: Colors.white),
-                label: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-        ],
+      appBar: WandererAppBar(
+        searchController: _searchController,
+        onSearch: _filterTrips,
+        onClear: _clearSearch,
+        isLoggedIn: _isLoggedIn,
+        onLoginPressed: _navigateToAuth,
+        username: _username,
+        userId: _userId,
+        onProfile: _handleProfile,
+        onSettings: _handleSettings,
+        onLogout: _logout,
       ),
       drawer: AppSidebar(
         username: _username,

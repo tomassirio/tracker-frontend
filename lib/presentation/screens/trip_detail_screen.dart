@@ -11,8 +11,7 @@ import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
-import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
 
@@ -302,40 +301,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Row(
-          children: [
-            const WandererLogo(size: 36),
-            const SizedBox(width: 12),
-            const Text(
-              'Wanderer',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: SearchBarWidget(
-                controller: _searchController,
-                onSearch: (_) {},
-                onClear: () => _searchController.clear(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          if (!_isLoggedIn)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: TextButton.icon(
-                onPressed: _navigateToAuth,
-                icon: const Icon(Icons.login, color: Colors.white),
-                label: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-        ],
+      appBar: WandererAppBar(
+        searchController: _searchController,
+        onSearch: () {},
+        onClear: () => _searchController.clear(),
+        isLoggedIn: _isLoggedIn,
+        onLoginPressed: _navigateToAuth,
+        username: _username,
+        userId: _userId,
+        onProfile: () => UiHelpers.showSuccessMessage(context, 'Profile coming soon!'),
+        onSettings: _handleSettings,
+        onLogout: _logout,
       ),
       drawer: AppSidebar(
         username: _username,
@@ -399,7 +375,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       )
                     else
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: CommentsSection(
                           comments: _comments,
                           replies: _replies,
