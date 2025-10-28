@@ -26,19 +26,21 @@ class CommentCommandClient {
   /// Add a reaction to a comment
   /// Requires authentication (USER, ADMIN)
   Future<void> addReaction(String commentId, AddReactionRequest request) async {
-    await _apiClient.post(
+    final response = await _apiClient.post(
       ApiEndpoints.commentReactions(commentId),
       body: request.toJson(),
       requireAuth: true,
     );
+    _apiClient.handleNoContentResponse(response);
   }
 
   /// Remove a reaction from a comment
   /// Requires authentication (USER, ADMIN)
   Future<void> removeReaction(String commentId) async {
-    await _apiClient.delete(
+    final response = await _apiClient.delete(
       ApiEndpoints.commentReactions(commentId),
       requireAuth: true,
     );
+    _apiClient.handleNoContentResponse(response);
   }
 }

@@ -15,7 +15,7 @@ void main() {
 
         final json = request.toJson();
 
-        expect(json['title'], 'My Trip');
+        expect(json['name'], 'My Trip');
         expect(json['description'], 'A great adventure');
         expect(json['visibility'], 'PUBLIC');
         expect(json['startDate'], '2024-01-01T00:00:00.000');

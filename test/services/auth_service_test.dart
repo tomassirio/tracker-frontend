@@ -221,9 +221,7 @@ void main() {
 
     group('isLoggedIn', () {
       test('returns true when access token exists', () async {
-        when(
-          mockTokenStorage.getAccessToken(),
-        ).thenAnswer((_) async => 'access-token');
+        when(mockTokenStorage.isLoggedIn()).thenAnswer((_) async => true);
 
         final result = await authService.isLoggedIn();
 
@@ -231,7 +229,7 @@ void main() {
       });
 
       test('returns false when no access token', () async {
-        when(mockTokenStorage.getAccessToken()).thenAnswer((_) async => null);
+        when(mockTokenStorage.isLoggedIn()).thenAnswer((_) async => false);
 
         final result = await authService.isLoggedIn();
 
