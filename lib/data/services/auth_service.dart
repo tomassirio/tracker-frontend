@@ -1,3 +1,4 @@
+import '../client/query/user_query_client.dart';
 import '../models/auth_models.dart';
 import '../client/clients.dart';
 import '../storage/token_storage.dart';

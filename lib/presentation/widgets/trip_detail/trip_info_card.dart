@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 
-/// Card widget displaying trip information
+/// Widget displaying trip information card
 class TripInfoCard extends StatelessWidget {
   final Trip trip;
 
@@ -10,47 +9,68 @@ class TripInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasLocations = trip.locations != null && trip.locations!.isNotEmpty;
-
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (trip.description != null) ...[
-              Text(
-                trip.description!,
-                style: Theme.of(context).textTheme.bodyMedium,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            trip.name,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                child: Text(trip.username[0].toUpperCase()),
               ),
-              const SizedBox(height: 12),
-            ],
-            Row(
-              children: [
-                Chip(
-                  label: Text(trip.status.toJson()),
-                  avatar: Icon(UiHelpers.getStatusIcon(trip.status), size: 16),
-                ),
-                const SizedBox(width: 8),
-                Chip(
-                  label: Text(trip.visibility.toJson()),
-                  avatar: Icon(
-                    UiHelpers.getVisibilityIcon(trip.visibility),
-                    size: 16,
-                  ),
-                ),
-              ],
-            ),
-            if (hasLocations) ...[
-              const SizedBox(height: 8),
+              const SizedBox(width: 8),
               Text(
-                '${trip.locations!.length} location update(s)',
-                style: Theme.of(context).textTheme.bodySmall,
+                trip.username,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              Chip(
+                label: Text(
+                  trip.status.toJson().toUpperCase(),
+                  style: const TextStyle(fontSize: 11),
+                ),
+                padding: EdgeInsets.zero,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.comment, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                '${trip.commentsCount} comments',
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              ),
+              const SizedBox(width: 16),
+              Icon(Icons.visibility, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                trip.visibility.toJson(),
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              ),
+            ],
+          ),
+          if (trip.description != null) ...[
+            const SizedBox(height: 12),
+            Text(trip.description!, style: const TextStyle(fontSize: 14)),
           ],
-        ),
+        ],
       ),
     );
   }

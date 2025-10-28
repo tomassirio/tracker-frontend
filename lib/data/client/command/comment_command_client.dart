@@ -9,8 +9,7 @@ class CommentCommandClient {
   CommentCommandClient({ApiClient? apiClient})
     : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
-  /// Create comment or reply on a trip
-  /// Use parentCommentId in request body for replies
+  /// Create a new comment (top-level or reply)
   /// Requires authentication (USER, ADMIN)
   Future<Comment> createComment(
     String tripId,
@@ -24,7 +23,7 @@ class CommentCommandClient {
     return _apiClient.handleResponse(response, Comment.fromJson);
   }
 
-  /// Add a reaction to a comment (HEART, SMILEY, SAD, LAUGH, ANGER)
+  /// Add a reaction to a comment
   /// Requires authentication (USER, ADMIN)
   Future<void> addReaction(String commentId, AddReactionRequest request) async {
     final response = await _apiClient.post(

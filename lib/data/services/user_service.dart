@@ -1,5 +1,6 @@
+import '../client/command/user_command_client.dart';
+import '../client/query/user_query_client.dart';
 import '../models/user_models.dart';
-import '../client/clients.dart';
 
 /// Service for user operations
 class UserService {

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/data/models/comment_models.dart';
 
-import '../../../data/models/domain/reaction_type.dart';
-
-/// A bottom sheet widget for picking reactions
+/// Modal bottom sheet for selecting reactions
 class ReactionPicker extends StatelessWidget {
   final Function(ReactionType) onReactionSelected;
 
@@ -11,61 +10,67 @@ class ReactionPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'React to this comment',
+            'Choose a reaction',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            alignment: WrapAlignment.center,
             children: [
               _ReactionButton(
                 emoji: '❤️',
+                label: 'Heart',
                 type: ReactionType.heart,
                 onTap: () {
-                  Navigator.pop(context);
                   onReactionSelected(ReactionType.heart);
+                  Navigator.pop(context);
                 },
               ),
               _ReactionButton(
                 emoji: '😊',
+                label: 'Smiley',
                 type: ReactionType.smiley,
                 onTap: () {
-                  Navigator.pop(context);
                   onReactionSelected(ReactionType.smiley);
-                },
-              ),
-              _ReactionButton(
-                emoji: '😥',
-                type: ReactionType.sad,
-                onTap: () {
                   Navigator.pop(context);
-                  onReactionSelected(ReactionType.sad);
                 },
               ),
               _ReactionButton(
                 emoji: '😂',
+                label: 'Laugh',
                 type: ReactionType.laugh,
                 onTap: () {
-                  Navigator.pop(context);
                   onReactionSelected(ReactionType.laugh);
+                  Navigator.pop(context);
                 },
               ),
               _ReactionButton(
-                emoji: '😠',
+                emoji: '😢',
+                label: 'Sad',
+                type: ReactionType.sad,
+                onTap: () {
+                  onReactionSelected(ReactionType.sad);
+                  Navigator.pop(context);
+                },
+              ),
+              _ReactionButton(
+                emoji: '😡',
+                label: 'Anger',
                 type: ReactionType.anger,
                 onTap: () {
-                  Navigator.pop(context);
                   onReactionSelected(ReactionType.anger);
+                  Navigator.pop(context);
                 },
               ),
             ],
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -74,11 +79,13 @@ class ReactionPicker extends StatelessWidget {
 
 class _ReactionButton extends StatelessWidget {
   final String emoji;
+  final String label;
   final ReactionType type;
   final VoidCallback onTap;
 
   const _ReactionButton({
     required this.emoji,
+    required this.label,
     required this.type,
     required this.onTap,
   });
@@ -87,14 +94,20 @@ class _ReactionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        width: 50,
-        height: 50,
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 28))),
+        child: Column(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 32)),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(fontSize: 12)),
+          ],
+        ),
       ),
     );
   }

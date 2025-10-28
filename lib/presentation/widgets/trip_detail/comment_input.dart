@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// A widget for adding comments or replies
+/// Widget for input field to add comments
 class CommentInput extends StatelessWidget {
   final TextEditingController controller;
   final bool isAddingComment;
   final bool isReplyMode;
   final VoidCallback onSend;
-  final VoidCallback? onCancelReply;
+  final VoidCallback onCancelReply;
 
   const CommentInput({
     super.key,
@@ -14,48 +14,36 @@ class CommentInput extends StatelessWidget {
     required this.isAddingComment,
     required this.isReplyMode,
     required this.onSend,
-    this.onCancelReply,
+    required this.onCancelReply,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        border: Border(top: BorderSide(color: Colors.grey[300]!)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isReplyMode && onCancelReply != null) ...[
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.reply, size: 16, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  const Text('Replying to comment'),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20),
-                    onPressed: onCancelReply,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
+          if (isReplyMode) ...[
+            Row(
+              children: [
+                const Icon(Icons.reply, size: 16),
+                const SizedBox(width: 8),
+                const Text(
+                  'Replying to comment',
+                  style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 16),
+                  onPressed: onCancelReply,
+                  tooltip: 'Cancel reply',
+                ),
+              ],
             ),
             const SizedBox(height: 8),
           ],
@@ -67,7 +55,7 @@ class CommentInput extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: isReplyMode
                         ? 'Write a reply...'
-                        : 'Add a comment...',
+                        : 'Write a comment...',
                     border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -81,7 +69,6 @@ class CommentInput extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: isAddingComment ? null : onSend,
                 icon: isAddingComment
                     ? const SizedBox(
                         width: 20,
@@ -89,10 +76,7 @@ class CommentInput extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.send),
-                style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                ),
+                onPressed: isAddingComment ? null : onSend,
               ),
             ],
           ),

@@ -20,7 +20,7 @@ void main() {
         final endDate = DateTime(2025, 10, 30);
 
         await repository.createTrip(
-          title: 'Test Trip',
+          name: 'Test Trip',
           description: 'Test Description',
           visibility: Visibility.public,
           startDate: startDate,
@@ -28,7 +28,7 @@ void main() {
         );
 
         expect(mockTripService.createTripCalled, true);
-        expect(mockTripService.lastCreateRequest?.title, 'Test Trip');
+        expect(mockTripService.lastCreateRequest?.name, 'Test Trip');
         expect(
           mockTripService.lastCreateRequest?.description,
           'Test Description',
@@ -43,12 +43,12 @@ void main() {
 
       test('creates trip with required parameters only', () async {
         await repository.createTrip(
-          title: 'Minimal Trip',
+          name: 'Minimal Trip',
           visibility: Visibility.private,
         );
 
         expect(mockTripService.createTripCalled, true);
-        expect(mockTripService.lastCreateRequest?.title, 'Minimal Trip');
+        expect(mockTripService.lastCreateRequest?.name, 'Minimal Trip');
         expect(mockTripService.lastCreateRequest?.description, null);
         expect(
           mockTripService.lastCreateRequest?.visibility,
@@ -60,7 +60,7 @@ void main() {
 
       test('creates trip with friends visibility', () async {
         await repository.createTrip(
-          title: 'Friends Trip',
+          name: 'Friends Trip',
           visibility: Visibility.protected,
         );
 
@@ -73,7 +73,7 @@ void main() {
 
       test('creates trip with description but no dates', () async {
         await repository.createTrip(
-          title: 'Trip with Description',
+          name: 'Trip with Description',
           description: 'A nice description',
           visibility: Visibility.public,
         );
@@ -92,7 +92,7 @@ void main() {
         final endDate = DateTime(2025, 11, 5);
 
         await repository.createTrip(
-          title: 'Trip with Dates',
+          name: 'Trip with Dates',
           visibility: Visibility.private,
           startDate: startDate,
           endDate: endDate,
@@ -109,7 +109,7 @@ void main() {
 
         expect(
           () => repository.createTrip(
-            title: 'Error Trip',
+            name: 'Error Trip',
             visibility: Visibility.public,
           ),
           throwsException,
@@ -122,7 +122,7 @@ void main() {
 
         expect(
           () => repository.createTrip(
-            title: 'Network Error Trip',
+            name: 'Network Error Trip',
             visibility: Visibility.public,
           ),
           throwsA(predicate((e) => e.toString().contains('Network error'))),
@@ -167,7 +167,7 @@ class MockTripService extends TripService {
     return Trip(
       id: 'trip-123',
       userId: 'user-123',
-      name: request.title,
+      name: request.name,
       username: 'testuser',
       visibility: request.visibility,
       status: TripStatus.created,

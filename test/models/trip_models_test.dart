@@ -7,7 +7,7 @@ void main() {
     group('CreateTripRequest', () {
       test('toJson converts CreateTripRequest correctly', () {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           description: 'A great adventure',
           visibility: Visibility.public,
           startDate: DateTime(2024, 1, 1),
@@ -15,7 +15,7 @@ void main() {
 
         final json = request.toJson();
 
-        expect(json['title'], 'My Trip');
+        expect(json['name'], 'My Trip');
         expect(json['description'], 'A great adventure');
         expect(json['visibility'], 'PUBLIC');
         expect(json['startDate'], '2024-01-01T00:00:00.000');
@@ -23,7 +23,7 @@ void main() {
 
       test('toJson excludes null values', () {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           visibility: Visibility.private,
         );
 

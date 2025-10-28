@@ -106,4 +106,11 @@ class TripService {
   Future<void> deleteTripPlan(String planId) async {
     await _tripPlanCommandClient.deleteTripPlan(planId);
   }
+
+  // ===== Trip Updates Operations =====
+
+  /// Get trip updates/locations for a specific trip
+  Future<List<TripLocation>> getTripUpdates(String tripId) async {
+    return await _tripQueryClient.getTripUpdates(tripId);
+  }
 }

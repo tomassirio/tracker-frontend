@@ -3,10 +3,12 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/widgets/home/home_content.dart';
-import 'package:tracker_frontend/presentation/widgets/home/profile_menu.dart';
+import 'package:tracker_frontend/presentation/widgets/home/youtube_home_content.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
+import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
+import 'trip_plans_screen.dart';
 import 'auth_screen.dart';
 
 /// Home screen showing list of trips
@@ -19,18 +21,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HomeRepository _repository = HomeRepository();
+  final TextEditingController _searchController = TextEditingController();
   List<Trip> _trips = [];
+  List<Trip> _filteredTrips = [];
   bool _isLoading = false;
   String? _error;
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
+  int _selectedSidebarIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
     _loadTrips();
+    _searchController.addListener(_filterTrips);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserInfo() async {
@@ -55,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final trips = await _repository.loadTrips();
       setState(() {
         _trips = trips;
+        _filteredTrips = trips;
         _isLoading = false;
       });
     } catch (e) {
@@ -63,6 +76,25 @@ class _HomeScreenState extends State<HomeScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _filterTrips() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredTrips = _trips;
+      } else {
+        _filteredTrips = _trips.where((trip) {
+          return trip.name.toLowerCase().contains(query) ||
+              trip.username.toLowerCase().contains(query);
+        }).toList();
+      }
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _filterTrips();
   }
 
   Future<void> _logout() async {
@@ -79,6 +111,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleProfile() {
     UiHelpers.showSuccessMessage(context, 'User Profile coming soon!');
+  }
+
+  void _handleSettings() {
+    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+  }
+
+  void _handleSidebarSelection(int index) {
+    setState(() {
+      _selectedSidebarIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        // Already on trips
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TripPlansScreen()),
+        );
+        break;
+      case 2:
+        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
+        break;
+      case 3:
+        _handleProfile();
+        break;
+    }
   }
 
   Future<void> _navigateToAuth() async {
@@ -104,40 +164,48 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _navigateToTripDetail(Trip trip) {
-    Navigator.push(
+  void _navigateToTripDetail(Trip trip) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TripDetailScreen(trip: trip)),
     );
+
+    // Refresh if user logged out from trip detail screen
+    if (result == true && mounted) {
+      await _loadUserInfo();
+      await _loadTrips();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isLoggedIn ? 'My Trips' : 'Public Trips'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          if (_username != null)
-            ProfileMenu(
-              username: _username!,
-              userId: _userId,
-              onLogout: _logout,
-              onProfile: _handleProfile,
-            )
-          else
-            TextButton.icon(
-              onPressed: _navigateToAuth,
-              icon: const Icon(Icons.login, color: Colors.white),
-              label: const Text('Login', style: TextStyle(color: Colors.white)),
-            ),
-        ],
+      appBar: WandererAppBar(
+        searchController: _searchController,
+        onSearch: _filterTrips,
+        onClear: _clearSearch,
+        isLoggedIn: _isLoggedIn,
+        onLoginPressed: _navigateToAuth,
+        username: _username,
+        userId: _userId,
+        onProfile: _handleProfile,
+        onSettings: _handleSettings,
+        onLogout: _logout,
       ),
-      body: HomeContent(
+      drawer: AppSidebar(
+        username: _username,
+        userId: _userId,
+        selectedIndex: _selectedSidebarIndex,
+        onItemSelected: _handleSidebarSelection,
+        onLogout: _logout,
+        onSettings: _handleSettings,
+      ),
+      body: YouTubeHomeContent(
         isLoading: _isLoading,
         error: _error,
-        trips: _trips,
+        trips: _filteredTrips,
         isLoggedIn: _isLoggedIn,
+        currentUserId: _userId,
         onRefresh: _loadTrips,
         onTripTap: _navigateToTripDetail,
         onLoginPressed: _navigateToAuth,

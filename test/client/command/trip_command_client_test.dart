@@ -31,7 +31,7 @@ void main() {
     group('createTrip', () {
       test('successful trip creation returns Trip', () async {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           description: 'A great adventure',
         );
         final responseBody = {
@@ -69,7 +69,7 @@ void main() {
 
       test('createTrip requires authentication', () async {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           description: 'A great adventure',
         );
         final responseBody = {
@@ -93,7 +93,7 @@ void main() {
 
       test('createTrip throws exception on error', () async {
         final request = CreateTripRequest(
-          title: 'My Trip',
+          name: 'My Trip',
           description: 'A great adventure',
         );
         mockHttpClient.response = http.Response(
@@ -108,7 +108,7 @@ void main() {
     group('updateTrip', () {
       test('successful trip update returns updated Trip', () async {
         final request = UpdateTripRequest(
-          title: 'Updated Trip',
+          name: 'Updated Trip',
           description: 'Updated description',
         );
         final responseBody = {
@@ -143,7 +143,7 @@ void main() {
       });
 
       test('updateTrip requires authentication', () async {
-        final request = UpdateTripRequest(title: 'Updated Trip');
+        final request = UpdateTripRequest(name: 'Updated Trip');
         final responseBody = {
           'id': 'trip-123',
           'userId': 'user-123',
@@ -164,7 +164,7 @@ void main() {
       });
 
       test('updateTrip throws exception on unauthorized', () async {
-        final request = UpdateTripRequest(title: 'Updated Trip');
+        final request = UpdateTripRequest(name: 'Updated Trip');
         mockHttpClient.response = http.Response(
           '{"message":"Not authorized"}',
           403,

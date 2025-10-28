@@ -99,7 +99,7 @@ void main() {
     group('Trip Command Operations', () {
       test('createTrip creates new trip', () async {
         final request = CreateTripRequest(
-          title: 'New Trip',
+          name: 'New Trip',
           visibility: Visibility.public,
         );
         final mockTrip = createMockTrip('trip-new', 'New Trip');
@@ -112,7 +112,7 @@ void main() {
       });
 
       test('updateTrip updates existing trip', () async {
-        final request = UpdateTripRequest(title: 'Updated Trip');
+        final request = UpdateTripRequest(name: 'Updated Trip');
         final mockTrip = createMockTrip('trip-1', 'Updated Trip');
         mockTripCommandClient.mockTrip = mockTrip;
 
@@ -215,7 +215,7 @@ void main() {
       test('passes through command errors', () async {
         mockTripCommandClient.shouldThrowError = true;
         final request = CreateTripRequest(
-          title: 'Test',
+          name: 'Test',
           visibility: Visibility.public,
         );
 
