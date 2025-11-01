@@ -47,7 +47,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoggedIn = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
-  int _selectedSidebarIndex = 0;
+  final int _selectedSidebarIndex = 0;
   String? _username;
   String? _userId;
 

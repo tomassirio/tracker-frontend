@@ -28,7 +28,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
-  int _selectedSidebarIndex = 1; // Trip Plans is index 1
+  final int _selectedSidebarIndex = 1; // Trip Plans is index 1
 
   @override
   void initState() {

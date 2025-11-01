@@ -1,5 +1,5 @@
 @JS()
-library directions_web;
+library;
 
 import 'dart:js_interop';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -22,7 +22,7 @@ class DirectionsServiceWeb {
       // This requires the Directions API to be available in the loaded Google Maps JS
       final result = await _callDirectionsServiceJS(waypoints);
 
-      if (result != null && result.isNotEmpty) {
+      if (result.isNotEmpty) {
         return result;
       } else {
         return waypoints;

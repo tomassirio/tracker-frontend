@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
-  int _selectedSidebarIndex = 0;
+  final int _selectedSidebarIndex = 0;
 
   @override
   void initState() {
