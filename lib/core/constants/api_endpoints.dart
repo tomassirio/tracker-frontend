@@ -11,6 +11,9 @@ class ApiEndpoints {
   static String get authBaseUrl =>
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
 
+  // Google Maps API key - read from window.appConfig
+  static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
+
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/auth/register';
   static const String authLogin = '/auth/login';
@@ -32,6 +35,7 @@ class ApiEndpoints {
 
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';
+  static const String usersUpdate = '/users/me';
   static const String usersFriendRequests = '/users/friends/requests';
   static String usersFriendRequestAccept(String requestId) =>
       '/users/friends/requests/$requestId/accept';

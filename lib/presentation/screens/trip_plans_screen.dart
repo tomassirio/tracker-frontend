@@ -28,7 +28,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
-  int _selectedSidebarIndex = 1; // Trip Plans is index 1
+  final int _selectedSidebarIndex = 1; // Trip Plans is index 1
 
   @override
   void initState() {
@@ -112,27 +112,6 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
   }
 
-  void _handleSidebarSelection(int index) {
-    setState(() {
-      _selectedSidebarIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pop(context); // Go back to trips
-        break;
-      case 1:
-        // Already on trip plans
-        break;
-      case 2:
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
-        break;
-      case 3:
-        UiHelpers.showSuccessMessage(context, 'Profile coming soon!');
-        break;
-    }
-  }
-
   Future<void> _navigateToAuth() async {
     final result = await Navigator.push(
       context,
@@ -187,7 +166,6 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         username: _username,
         userId: _userId,
         selectedIndex: _selectedSidebarIndex,
-        onItemSelected: _handleSidebarSelection,
         onLogout: _logout,
         onSettings: _handleSettings,
       ),
