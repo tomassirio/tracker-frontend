@@ -67,7 +67,7 @@ void main() {
     });
 
     group('getUserTrips', () {
-      test('returns trips for a specific user', () async {
+      test('returns trips for current user', () async {
         mockTripService.mockTrips = [
           createMockTrip('trip-1', 'Trip 1'),
           createMockTrip('trip-2', 'Trip 2'),
@@ -78,7 +78,8 @@ void main() {
         expect(result.length, 2);
         expect(result[0].id, 'trip-1');
         expect(result[1].id, 'trip-2');
-        expect(mockTripService.getUserTripsCalled, true);
+        // Verify it called getMyTrips, not getUserTrips(userId)
+        expect(mockTripService.getMyTripsCalled, true);
       });
 
       test('returns empty list when no trips', () async {
@@ -260,6 +261,7 @@ class MockUserService extends UserService {
 class MockTripService extends TripService {
   List<Trip> mockTrips = [];
   bool getUserTripsCalled = false;
+  bool getMyTripsCalled = false;
   bool shouldThrowError = false;
 
   @override
@@ -271,6 +273,47 @@ class MockTripService extends TripService {
     }
 
     return mockTrips;
+  }
+
+  @override
+  Future<List<Trip>> getMyTrips() async {
+    getMyTripsCalled = true;
+
+    if (shouldThrowError) {
+      throw Exception('Failed to load trips');
+    }
+    return mockTrips;
+  }
+
+  @override
+  Future<Trip> getTripById(String tripId) async {
+    if (shouldThrowError) {
+      throw Exception('Failed to get trip');
+    }
+    return mockTrips.first;
+  }
+
+  @override
+  Future<Trip> createTrip(CreateTripRequest request) async {
+    if (shouldThrowError) {
+      throw Exception('Failed to create trip');
+    }
+    return mockTrips.first;
+  }
+
+  @override
+  Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
+    if (shouldThrowError) {
+      throw Exception('Failed to update trip');
+    }
+    return mockTrips.first;
+  }
+
+  @override
+  Future<void> deleteTrip(String tripId) async {
+    if (shouldThrowError) {
+      throw Exception('Failed to delete trip');
+    }
   }
 }
 
