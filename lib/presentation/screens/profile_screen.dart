@@ -6,6 +6,11 @@ import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
+import 'package:tracker_frontend/core/constants/api_endpoints.dart';
+import '../../core/constants/enums.dart';
+import '../../data/client/google_maps_api_client.dart';
+import '../../data/client/google_routes_api_client.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
 import 'trip_detail_screen.dart';
 import 'home_screen.dart';
@@ -463,18 +468,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           )
         else
-          GridView.builder(
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.2,
-            ),
             itemCount: _userTrips.length,
             itemBuilder: (context, index) {
-              return _buildTripCard(_userTrips[index]);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildTripCard(_userTrips[index]),
+              );
             },
           ),
       ],
@@ -482,52 +484,254 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildTripCard(Trip trip) {
+    return ProfileTripCard(
+      trip: trip,
+      onTap: () => _navigateToTripDetail(trip),
+    );
+  }
+}
+
+/// Trip card for profile screen with mini map
+class ProfileTripCard extends StatefulWidget {
+  final Trip trip;
+  final VoidCallback onTap;
+
+  const ProfileTripCard({
+    super.key,
+    required this.trip,
+    required this.onTap,
+  });
+
+  @override
+  State<ProfileTripCard> createState() => _ProfileTripCardState();
+}
+
+class _ProfileTripCardState extends State<ProfileTripCard> {
+  String? _encodedPolyline;
+  late final GoogleMapsApiClient _mapsClient;
+  late final GoogleRoutesApiClient _routesClient;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiKey = ApiEndpoints.googleMapsApiKey;
+    _mapsClient = GoogleMapsApiClient(apiKey);
+    _routesClient = GoogleRoutesApiClient(apiKey);
+    _fetchRoute();
+  }
+
+  /// Fetch the walking route between first and last location
+  Future<void> _fetchRoute() async {
+    if (widget.trip.locations == null || widget.trip.locations!.length < 2) {
+      return;
+    }
+
+    try {
+      // Get route between first and last location
+      final firstLocation = widget.trip.locations!.first;
+      final lastLocation = widget.trip.locations!.last;
+
+      final waypoints = [
+        LatLng(firstLocation.latitude, firstLocation.longitude),
+        LatLng(lastLocation.latitude, lastLocation.longitude),
+      ];
+
+      final result = await _routesClient.getWalkingRoute(waypoints);
+
+      if (result.isSuccess && mounted) {
+        // Encode the route points to use in Static Maps API
+        final encoded = GoogleRoutesApiClient.encodePolyline(result.points);
+        setState(() {
+          _encodedPolyline = encoded;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch route for profile trip card: $e');
+    }
+  }
+
+  /// Generate static map image URL from Google Maps Static API
+  String _generateStaticMapUrl() {
+    if (widget.trip.locations == null || widget.trip.locations!.isEmpty) {
+      return '';
+    }
+
+    final firstLoc = widget.trip.locations!.first;
+    final lastLoc = widget.trip.locations!.last;
+
+    if (widget.trip.locations!.length == 1) {
+      // Single location
+      return _mapsClient.generateStaticMapUrl(
+        center: LatLng(firstLoc.latitude, firstLoc.longitude),
+        markers: [
+          MapMarker(
+            position: LatLng(firstLoc.latitude, firstLoc.longitude),
+            color: 'green',
+          ),
+        ],
+        size: '240x240',
+      );
+    } else {
+      // Multiple locations - show route
+      return _mapsClient.generateRouteMapUrl(
+        startPoint: LatLng(firstLoc.latitude, firstLoc.longitude),
+        endPoint: LatLng(lastLoc.latitude, lastLoc.longitude),
+        encodedPolyline: _encodedPolyline,
+        size: '240x240',
+      );
+    }
+  }
+
+  Color _getStatusColor(TripStatus status) {
+    switch (status) {
+      case TripStatus.created:
+        return Colors.grey;
+      case TripStatus.inProgress:
+        return Colors.blue;
+      case TripStatus.paused:
+        return Colors.orange;
+      case TripStatus.finished:
+        return Colors.green;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _navigateToTripDetail(trip),
-        child: Column(
+        onTap: widget.onTap,
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                color: Colors.blue[100],
-                child: const Icon(
-                  Icons.map,
-                  size: 48,
-                  color: Colors.blue,
-                ),
-              ),
+            // Mini map preview (120x120)
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: _buildMiniMap(),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    trip.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+            // Trip info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Trip title
+                    Text(
+                      widget.trip.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    trip.status.toString().split('.').last,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                    const SizedBox(height: 8),
+                    // Status badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(widget.trip.status),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        widget.trip.status
+                            .toString()
+                            .split('.')
+                            .last
+                            .toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    // Metadata
+                    Row(
+                      children: [
+                        Icon(Icons.comment, size: 14, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.trip.commentsCount}',
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(
+                          widget.trip.visibility.toJson() == 'PUBLIC'
+                              ? Icons.public
+                              : Icons.lock,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.trip.visibility.toJson(),
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMiniMap() {
+    if (widget.trip.locations == null || widget.trip.locations!.isEmpty) {
+      return Container(
+        color: Colors.grey[300],
+        child: Center(
+          child: Icon(
+            Icons.map_outlined,
+            size: 32,
+            color: Colors.grey[500],
+          ),
+        ),
+      );
+    }
+
+    return Image.network(
+      _generateStaticMapUrl(),
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: Colors.grey[300],
+          child: Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+              strokeWidth: 2,
+            ),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: Colors.grey[300],
+          child: Center(
+            child: Icon(
+              Icons.map,
+              size: 32,
+              color: Colors.grey[500],
+            ),
+          ),
+        );
+      },
     );
   }
 }

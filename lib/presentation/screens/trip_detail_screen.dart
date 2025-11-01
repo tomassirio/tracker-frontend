@@ -14,6 +14,7 @@ import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
+import 'profile_screen.dart';
 
 /// Trip detail screen showing trip info, map, and comments
 class TripDetailScreen extends StatefulWidget {
@@ -294,9 +295,30 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
         break;
       case 3:
-        UiHelpers.showSuccessMessage(context, 'Profile coming soon!');
+        // Navigate to Profile screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        ).then((result) {
+          if (result == true && mounted) {
+            // User logged out from profile screen
+            Navigator.pop(context, true); // Go back to home with logout signal
+          }
+        });
         break;
     }
+  }
+
+  void _handleProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    ).then((result) {
+      if (result == true && mounted) {
+        // User logged out from profile screen
+        Navigator.pop(context, true); // Go back to home with logout signal
+      }
+    });
   }
 
   Future<void> _navigateToAuth() async {
@@ -326,8 +348,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         onLoginPressed: _navigateToAuth,
         username: _username,
         userId: _userId,
-        onProfile: () =>
-            UiHelpers.showSuccessMessage(context, 'Profile coming soon!'),
+        onProfile: _handleProfile, // Use the proper handler
         onSettings: _handleSettings,
         onLogout: _logout,
       ),

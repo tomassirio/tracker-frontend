@@ -30,7 +30,8 @@ class ProfileRepository {
 
   /// Gets trips for a specific user
   Future<List<Trip>> getUserTrips(String userId) async {
-    return await _tripService.getUserTrips(userId);
+    // For the current user's profile, use getMyTrips which calls /trips/me
+    return await _tripService.getMyTrips();
   }
 
   /// Checks if user is logged in
