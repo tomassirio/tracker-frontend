@@ -12,8 +12,7 @@ class ApiEndpoints {
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
 
   // Google Maps API key - read from window.appConfig
-  static String get googleMapsApiKey =>
-      getConfigValue('googleMapsApiKey', '');
+  static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
 
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/auth/register';

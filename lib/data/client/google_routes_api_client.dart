@@ -47,7 +47,9 @@ class GoogleRoutesApiClient {
     List<LatLng> waypoints,
     String travelMode,
   ) async {
-    final url = Uri.parse('https://routes.googleapis.com/directions/v2:computeRoutes');
+    final url = Uri.parse(
+      'https://routes.googleapis.com/directions/v2:computeRoutes',
+    );
 
     // Build request body
     final requestBody = {
@@ -56,33 +58,38 @@ class GoogleRoutesApiClient {
           'latLng': {
             'latitude': waypoints.first.latitude,
             'longitude': waypoints.first.longitude,
-          }
-        }
+          },
+        },
       },
       'destination': {
         'location': {
           'latLng': {
             'latitude': waypoints.last.latitude,
             'longitude': waypoints.last.longitude,
-          }
-        }
+          },
+        },
       },
       'travelMode': travelMode,
       'computeAlternativeRoutes': false,
       'languageCode': 'en-US',
-      'units': 'METRIC'
+      'units': 'METRIC',
     };
 
     // Add intermediate waypoints if present
     if (waypoints.length > 2) {
-      final intermediates = waypoints.sublist(1, waypoints.length - 1).map((point) => {
-        'location': {
-          'latLng': {
-            'latitude': point.latitude,
-            'longitude': point.longitude,
-          }
-        }
-      }).toList();
+      final intermediates = waypoints
+          .sublist(1, waypoints.length - 1)
+          .map(
+            (point) => {
+              'location': {
+                'latLng': {
+                  'latitude': point.latitude,
+                  'longitude': point.longitude,
+                },
+              },
+            },
+          )
+          .toList();
       requestBody['intermediates'] = intermediates;
     }
 
@@ -91,12 +98,15 @@ class GoogleRoutesApiClient {
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': _apiKey,
-        'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+        'X-Goog-FieldMask':
+            'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
       },
       body: json.encode(requestBody),
     );
 
-    debugPrint('📡 GoogleRoutesApiClient: Response status: ${response.statusCode}');
+    debugPrint(
+      '📡 GoogleRoutesApiClient: Response status: ${response.statusCode}',
+    );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -104,8 +114,10 @@ class GoogleRoutesApiClient {
       if (data['routes'] != null && (data['routes'] as List).isNotEmpty) {
         final route = data['routes'][0];
 
-        if (route['polyline'] != null && route['polyline']['encodedPolyline'] != null) {
-          final encodedPolyline = route['polyline']['encodedPolyline'] as String;
+        if (route['polyline'] != null &&
+            route['polyline']['encodedPolyline'] != null) {
+          final encodedPolyline =
+              route['polyline']['encodedPolyline'] as String;
           final decodedPoints = decodePolyline(encodedPolyline);
 
           // Extract route metadata
@@ -231,6 +243,6 @@ class RouteResult {
   bool get hasError => error != null;
   bool get isSuccess => error == null && points.length > 1;
 
-  double? get distanceKm => distanceMeters != null ? distanceMeters! / 1000 : null;
+  double? get distanceKm =>
+      distanceMeters != null ? distanceMeters! / 1000 : null;
 }
-

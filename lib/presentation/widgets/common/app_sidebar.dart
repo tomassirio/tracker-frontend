@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/screens/home_screen.dart';
+import 'package:tracker_frontend/presentation/screens/trip_plans_screen.dart';
+import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
 
 /// Sidebar navigation for the app
 class AppSidebar extends StatelessWidget {
   final String? username;
   final String? userId;
   final int selectedIndex;
-  final Function(int) onItemSelected;
   final VoidCallback? onLogout;
   final VoidCallback? onSettings;
 
@@ -14,10 +18,49 @@ class AppSidebar extends StatelessWidget {
     this.username,
     this.userId,
     required this.selectedIndex,
-    required this.onItemSelected,
     this.onLogout,
     this.onSettings,
   });
+
+  void _handleNavigation(BuildContext context, int index) {
+    // Close drawer first
+    Navigator.pop(context);
+
+    // If already on the selected screen, do nothing
+    if (selectedIndex == index) {
+      return;
+    }
+
+    switch (index) {
+      case 0:
+        // Navigate to Trips (Home)
+        if (selectedIndex != 0) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+        break;
+      case 1:
+        // Navigate to Trip Plans
+        Navigator.push(
+          context,
+          PageTransitions.slideLeft(const TripPlansScreen()),
+        );
+        break;
+      case 2:
+        // Achievements coming soon
+        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
+        break;
+      case 3:
+        // Navigate to Profile
+        Navigator.push(
+          context,
+          PageTransitions.slideRight(const ProfileScreen()),
+        );
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,46 +92,28 @@ class AppSidebar extends StatelessWidget {
             leading: const Icon(Icons.map),
             title: const Text('Trips'),
             selected: selectedIndex == 0,
-            onTap: () {
-              onItemSelected(0);
-              Navigator.pop(context);
-            },
+            onTap: () => _handleNavigation(context, 0),
           ),
           ListTile(
             leading: const Icon(Icons.calendar_today),
             title: const Text('Trip Plans'),
             selected: selectedIndex == 1,
             enabled: isLoggedIn,
-            onTap: isLoggedIn
-                ? () {
-                    onItemSelected(1);
-                    Navigator.pop(context);
-                  }
-                : null,
+            onTap: isLoggedIn ? () => _handleNavigation(context, 1) : null,
           ),
           ListTile(
             leading: const Icon(Icons.emoji_events),
             title: const Text('Achievements'),
             selected: selectedIndex == 2,
             enabled: isLoggedIn,
-            onTap: isLoggedIn
-                ? () {
-                    onItemSelected(2);
-                    Navigator.pop(context);
-                  }
-                : null,
+            onTap: isLoggedIn ? () => _handleNavigation(context, 2) : null,
           ),
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('My Profile'),
             selected: selectedIndex == 3,
             enabled: isLoggedIn,
-            onTap: isLoggedIn
-                ? () {
-                    Navigator.pop(context); // Close drawer first
-                    onItemSelected(3); // Then trigger navigation
-                  }
-                : null,
+            onTap: isLoggedIn ? () => _handleNavigation(context, 3) : null,
           ),
           const Divider(),
           if (isLoggedIn) ...[

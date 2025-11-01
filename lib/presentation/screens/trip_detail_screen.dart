@@ -6,6 +6,7 @@ import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
@@ -279,40 +280,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
   }
 
-  void _handleSidebarSelection(int index) {
-    setState(() {
-      _selectedSidebarIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pop(context); // Go back to trips
-        break;
-      case 1:
-        UiHelpers.showSuccessMessage(context, 'Trip Plans coming soon!');
-        break;
-      case 2:
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
-        break;
-      case 3:
-        // Navigate to Profile screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        ).then((result) {
-          if (result == true && mounted) {
-            // User logged out from profile screen
-            Navigator.pop(context, true); // Go back to home with logout signal
-          }
-        });
-        break;
-    }
-  }
-
   void _handleProfile() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      PageTransitions.slideRight(const ProfileScreen()),
     ).then((result) {
       if (result == true && mounted) {
         // User logged out from profile screen
@@ -348,7 +319,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         onLoginPressed: _navigateToAuth,
         username: _username,
         userId: _userId,
-        onProfile: _handleProfile, // Use the proper handler
+        onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
       ),
@@ -356,7 +327,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         username: _username,
         userId: _userId,
         selectedIndex: _selectedSidebarIndex,
-        onItemSelected: _handleSidebarSelection,
         onLogout: _logout,
         onSettings: _handleSettings,
       ),

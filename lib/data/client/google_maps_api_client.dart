@@ -74,16 +74,8 @@ class GoogleMapsApiClient {
 
     // Create markers
     final markers = [
-      MapMarker(
-        position: startPoint,
-        color: startColor,
-        label: startLabel,
-      ),
-      MapMarker(
-        position: endPoint,
-        color: endColor,
-        label: endLabel,
-      ),
+      MapMarker(position: startPoint, color: startColor, label: startLabel),
+      MapMarker(position: endPoint, color: endColor, label: endLabel),
     ];
 
     // Create path
@@ -119,12 +111,7 @@ class MapMarker {
   final String? label;
   final String? size;
 
-  MapMarker({
-    required this.position,
-    this.color,
-    this.label,
-    this.size,
-  });
+  MapMarker({required this.position, this.color, this.label, this.size});
 
   String toUrlParameter() {
     final params = <String>[];
@@ -146,12 +133,7 @@ class MapPath {
   final String? encodedPolyline;
   final List<LatLng>? points;
 
-  MapPath._({
-    this.color,
-    this.weight,
-    this.encodedPolyline,
-    this.points,
-  });
+  MapPath._({this.color, this.weight, this.encodedPolyline, this.points});
 
   /// Create a path from an encoded polyline
   factory MapPath.encoded({
@@ -172,11 +154,7 @@ class MapPath {
     String color = '0x0088ffff',
     int weight = 3,
   }) {
-    return MapPath._(
-      color: color,
-      weight: weight,
-      points: points,
-    );
+    return MapPath._(color: color, weight: weight, points: points);
   }
 
   String toUrlParameter() {
@@ -201,4 +179,3 @@ class MapPath {
     return 'path=$pathParam';
   }
 }
-

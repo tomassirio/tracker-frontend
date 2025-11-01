@@ -105,7 +105,9 @@ class _TripMapViewState extends State<TripMapView> {
                 _isMapReady = true;
               });
               widget.onMapCreated(controller);
-              debugPrint('Map created successfully with ${widget.markers.length} markers and ${widget.polylines.length} polylines');
+              debugPrint(
+                'Map created successfully with ${widget.markers.length} markers and ${widget.polylines.length} polylines',
+              );
             } catch (e) {
               setState(() {
                 _hasError = true;

@@ -14,9 +14,9 @@ class ProfileRepository {
     UserService? userService,
     TripService? tripService,
     AuthService? authService,
-  })  : _userService = userService ?? UserService(),
-        _tripService = tripService ?? TripService(),
-        _authService = authService ?? AuthService();
+  }) : _userService = userService ?? UserService(),
+       _tripService = tripService ?? TripService(),
+       _authService = authService ?? AuthService();
 
   /// Gets the current user's profile
   Future<UserProfile> getMyProfile() async {

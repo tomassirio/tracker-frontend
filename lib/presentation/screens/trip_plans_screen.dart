@@ -8,7 +8,6 @@ import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.d
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'auth_screen.dart';
-import 'profile_screen.dart';
 
 /// Trip Plans screen showing list of planned trips
 class TripPlansScreen extends StatefulWidget {
@@ -113,36 +112,6 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
   }
 
-  void _handleSidebarSelection(int index) {
-    setState(() {
-      _selectedSidebarIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pop(context); // Go back to trips
-        break;
-      case 1:
-        // Already on trip plans
-        break;
-      case 2:
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        ).then((result) {
-          if (result == true && mounted) {
-            // User logged out from profile screen
-            _loadUserInfo();
-            _loadTripPlans();
-          }
-        });
-        break;
-    }
-  }
-
   Future<void> _navigateToAuth() async {
     final result = await Navigator.push(
       context,
@@ -197,7 +166,6 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         username: _username,
         userId: _userId,
         selectedIndex: _selectedSidebarIndex,
-        onItemSelected: _handleSidebarSelection,
         onLogout: _logout,
         onSettings: _handleSettings,
       ),

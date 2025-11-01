@@ -133,7 +133,8 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
               child: Stack(
                 children: [
                   // Static map image - now actually loading!
-                  if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty)
+                  if (widget.trip.locations != null &&
+                      widget.trip.locations!.isNotEmpty)
                     Image.network(
                       _generateStaticMapUrl(),
                       fit: BoxFit.cover,

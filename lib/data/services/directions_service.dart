@@ -23,7 +23,9 @@ class DirectionsService {
         return waypoints;
       }
     } catch (e) {
-      debugPrint('💥 DirectionsService failed: $e, falling back to straight lines');
+      debugPrint(
+        '💥 DirectionsService failed: $e, falling back to straight lines',
+      );
       return waypoints;
     }
   }

@@ -6,4 +6,3 @@ class DirectionsServiceWeb {
     throw UnsupportedError('DirectionsServiceWeb is only available on web');
   }
 }
-

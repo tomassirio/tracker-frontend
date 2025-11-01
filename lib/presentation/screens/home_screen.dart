@@ -3,12 +3,12 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/home/youtube_home_content.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
-import 'trip_plans_screen.dart';
 import 'profile_screen.dart';
 import 'auth_screen.dart';
 
@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleProfile() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      PageTransitions.slideRight(const ProfileScreen()),
     ).then((result) {
       if (result == true && mounted) {
         // User logged out from profile screen
@@ -125,39 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleSettings() {
     UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
-  }
-
-  void _handleSidebarSelection(int index) {
-    setState(() {
-      _selectedSidebarIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        // Already on trips
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TripPlansScreen()),
-        );
-        break;
-      case 2:
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        ).then((result) {
-          if (result == true && mounted) {
-            // User logged out from profile screen
-            _loadUserInfo();
-            _loadTrips();
-          }
-        });
-        break;
-    }
   }
 
   Future<void> _navigateToAuth() async {
@@ -186,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToTripDetail(Trip trip) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TripDetailScreen(trip: trip)),
+      PageTransitions.slideDown(TripDetailScreen(trip: trip)),
     );
 
     // Refresh if user logged out from trip detail screen
@@ -215,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
         username: _username,
         userId: _userId,
         selectedIndex: _selectedSidebarIndex,
-        onItemSelected: _handleSidebarSelection,
         onLogout: _logout,
         onSettings: _handleSettings,
       ),

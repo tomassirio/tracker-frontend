@@ -7,8 +7,7 @@ class UserCommandClient {
   final ApiClient _apiClient;
 
   UserCommandClient({ApiClient? apiClient})
-      : _apiClient =
-            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create new user
   /// Requires authentication (ADMIN)

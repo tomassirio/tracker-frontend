@@ -4,6 +4,7 @@ import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/repositories/profile_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
@@ -13,8 +14,6 @@ import '../../data/client/google_routes_api_client.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
 import 'trip_detail_screen.dart';
-import 'home_screen.dart';
-import 'trip_plans_screen.dart';
 
 /// User profile screen showing user information, statistics, and trips
 class ProfileScreen extends StatefulWidget {
@@ -119,36 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
   }
 
-  void _handleSidebarSelection(int index) {
-    setState(() {
-      _selectedSidebarIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        // Navigate to home/trips screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-        break;
-      case 1:
-        // Navigate to trip plans screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const TripPlansScreen()),
-        );
-        break;
-      case 2:
-        // Achievements coming soon
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
-        break;
-      case 3:
-        // Already on profile screen, do nothing
-        break;
-    }
-  }
-
   Future<void> _navigateToAuth() async {
     final result = await Navigator.push(
       context,
@@ -163,18 +132,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _navigateToTripDetail(Trip trip) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TripDetailScreen(trip: trip)),
+      PageTransitions.slideDown(TripDetailScreen(trip: trip)),
     );
   }
 
   Future<void> _showEditProfileDialog() async {
     if (_profile == null) return;
 
-    final displayNameController =
-        TextEditingController(text: _profile!.displayName);
+    final displayNameController = TextEditingController(
+      text: _profile!.displayName,
+    );
     final bioController = TextEditingController(text: _profile!.bio);
-    final avatarUrlController =
-        TextEditingController(text: _profile!.avatarUrl);
+    final avatarUrlController = TextEditingController(
+      text: _profile!.avatarUrl,
+    );
 
     final result = await showDialog<bool>(
       context: context,
@@ -283,7 +254,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         username: _profile?.username,
         userId: _profile?.id,
         selectedIndex: _selectedSidebarIndex,
-        onItemSelected: _handleSidebarSelection,
         onLogout: _logout,
         onSettings: _handleSettings,
       ),
@@ -373,18 +343,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       Text(
                         '@${_profile!.username}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _profile!.email,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -398,10 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             if (_profile!.bio != null) ...[
               const SizedBox(height: 16),
-              Text(
-                _profile!.bio!,
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text(_profile!.bio!, style: const TextStyle(fontSize: 16)),
             ],
           ],
         ),
@@ -437,10 +398,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -496,11 +454,7 @@ class ProfileTripCard extends StatefulWidget {
   final Trip trip;
   final VoidCallback onTap;
 
-  const ProfileTripCard({
-    super.key,
-    required this.trip,
-    required this.onTap,
-  });
+  const ProfileTripCard({super.key, required this.trip, required this.onTap});
 
   @override
   State<ProfileTripCard> createState() => _ProfileTripCardState();
@@ -605,11 +559,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Mini map preview (120x120)
-            SizedBox(
-              width: 120,
-              height: 120,
-              child: _buildMiniMap(),
-            ),
+            SizedBox(width: 120, height: 120, child: _buildMiniMap()),
             // Trip info
             Expanded(
               child: Padding(
@@ -659,8 +609,10 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
                         const SizedBox(width: 4),
                         Text(
                           '${widget.trip.commentsCount}',
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Icon(
@@ -673,8 +625,10 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
                         const SizedBox(width: 4),
                         Text(
                           widget.trip.visibility.toJson(),
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
@@ -693,11 +647,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
       return Container(
         color: Colors.grey[300],
         child: Center(
-          child: Icon(
-            Icons.map_outlined,
-            size: 32,
-            color: Colors.grey[500],
-          ),
+          child: Icon(Icons.map_outlined, size: 32, color: Colors.grey[500]),
         ),
       );
     }
@@ -713,7 +663,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
               strokeWidth: 2,
             ),
@@ -724,11 +674,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
         return Container(
           color: Colors.grey[300],
           child: Center(
-            child: Icon(
-              Icons.map,
-              size: 32,
-              color: Colors.grey[500],
-            ),
+            child: Icon(Icons.map, size: 32, color: Colors.grey[500]),
           ),
         );
       },

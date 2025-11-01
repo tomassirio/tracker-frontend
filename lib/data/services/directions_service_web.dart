@@ -13,7 +13,9 @@ class DirectionsServiceWeb {
       return waypoints;
     }
 
-    debugPrint('🗺️ DirectionsServiceWeb: Getting directions for ${waypoints.length} waypoints');
+    debugPrint(
+      '🗺️ DirectionsServiceWeb: Getting directions for ${waypoints.length} waypoints',
+    );
 
     try {
       // For web, we'll use the JavaScript Directions Service
@@ -26,7 +28,9 @@ class DirectionsServiceWeb {
         return waypoints;
       }
     } catch (e) {
-      debugPrint('💥 DirectionsServiceWeb failed: $e, falling back to straight lines');
+      debugPrint(
+        '💥 DirectionsServiceWeb failed: $e, falling back to straight lines',
+      );
       return waypoints;
     }
   }
@@ -39,4 +43,3 @@ class DirectionsServiceWeb {
     return waypoints;
   }
 }
-

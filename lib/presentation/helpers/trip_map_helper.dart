@@ -54,7 +54,6 @@ class TripMapHelper {
 
   /// Creates route polyline using Google Directions API
   static Future<MapData> createMapDataWithDirections(Trip trip) async {
-
     final markers = <Marker>{};
     final polylines = <Polyline>{};
 
@@ -81,12 +80,12 @@ class TripMapHelper {
                     BitmapDescriptor.hueRed, // Start point - red
                   )
                 : i == locations.length - 1
-                    ? BitmapDescriptor.defaultMarkerWithHue(
-                        BitmapDescriptor.hueGreen, // End point - green
-                      )
-                    : BitmapDescriptor.defaultMarkerWithHue(
-                        BitmapDescriptor.hueOrange, // Waypoints - orange
-                      ),
+                ? BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueGreen, // End point - green
+                  )
+                : BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueOrange, // Waypoints - orange
+                  ),
           ),
         );
       }
@@ -113,7 +112,6 @@ class TripMapHelper {
               jointType: JointType.round,
             ),
           );
-
         } catch (e) {
           // Fallback to straight lines if Directions API fails
           polylines.add(
