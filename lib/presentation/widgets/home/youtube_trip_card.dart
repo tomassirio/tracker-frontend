@@ -1,15 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../helpers/trip_map_helper.dart';
+import '../../../core/constants/api_endpoints.dart';
+import '../../../data/client/google_maps_api_client.dart';
+import '../../../data/client/google_routes_api_client.dart';
 
 /// YouTube-style trip card with static map preview
-class YouTubeTripCard extends StatelessWidget {
+class YouTubeTripCard extends StatefulWidget {
   final Trip trip;
   final VoidCallback onTap;
 
   const YouTubeTripCard({super.key, required this.trip, required this.onTap});
+
+  @override
+  State<YouTubeTripCard> createState() => _YouTubeTripCardState();
+}
+
+class _YouTubeTripCardState extends State<YouTubeTripCard> {
+  String? _encodedPolyline;
+  late final GoogleMapsApiClient _mapsClient;
+  late final GoogleRoutesApiClient _routesClient;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiKey = ApiEndpoints.googleMapsApiKey;
+    _mapsClient = GoogleMapsApiClient(apiKey);
+    _routesClient = GoogleRoutesApiClient(apiKey);
+    _fetchRoute();
+  }
+
+  /// Fetch the walking route between first and last location
+  Future<void> _fetchRoute() async {
+    if (widget.trip.locations == null || widget.trip.locations!.length < 2) {
+      return;
+    }
+
+    try {
+      // Get route between first and last location
+      final firstLocation = widget.trip.locations!.first;
+      final lastLocation = widget.trip.locations!.last;
+
+      final waypoints = [
+        LatLng(firstLocation.latitude, firstLocation.longitude),
+        LatLng(lastLocation.latitude, lastLocation.longitude),
+      ];
+
+      final result = await _routesClient.getWalkingRoute(waypoints);
+
+      if (result.isSuccess && mounted) {
+        // Encode the route points to use in Static Maps API
+        final encoded = GoogleRoutesApiClient.encodePolyline(result.points);
+        setState(() {
+          _encodedPolyline = encoded;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch route for trip card: $e');
+    }
+  }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -38,41 +89,33 @@ class YouTubeTripCard extends StatelessWidget {
 
   /// Generate static map image URL from Google Maps Static API
   String _generateStaticMapUrl() {
-    final initialLocation = TripMapHelper.getInitialLocation(trip);
-    final zoom = TripMapHelper.getInitialZoom(trip);
-
-    // Base URL for Google Maps Static API
-    final baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
-
-    // Center on the initial location
-    final center = '${initialLocation.latitude},${initialLocation.longitude}';
-
-    // Build markers parameter for trip locations
-    final markers = StringBuffer();
-    if (trip.locations != null && trip.locations!.isNotEmpty) {
-      markers.write('&markers=color:red');
-      for (var i = 0; i < trip.locations!.length; i++) {
-        final loc = trip.locations![i];
-        markers.write('|${loc.latitude},${loc.longitude}');
-      }
+    if (widget.trip.locations == null || widget.trip.locations!.isEmpty) {
+      // Return a default/empty map URL
+      return '';
     }
 
-    // Build path parameter for polyline
-    final path = StringBuffer();
-    if (trip.locations != null && trip.locations!.length > 1) {
-      path.write('&path=color:0x0000ffff|weight:3');
-      for (final loc in trip.locations!) {
-        path.write('|${loc.latitude},${loc.longitude}');
-      }
+    final firstLoc = widget.trip.locations!.first;
+    final lastLoc = widget.trip.locations!.last;
+
+    if (widget.trip.locations!.length == 1) {
+      // Single location
+      return _mapsClient.generateStaticMapUrl(
+        center: LatLng(firstLoc.latitude, firstLoc.longitude),
+        markers: [
+          MapMarker(
+            position: LatLng(firstLoc.latitude, firstLoc.longitude),
+            color: 'green',
+          ),
+        ],
+      );
+    } else {
+      // Multiple locations - show route
+      return _mapsClient.generateRouteMapUrl(
+        startPoint: LatLng(firstLoc.latitude, firstLoc.longitude),
+        endPoint: LatLng(lastLoc.latitude, lastLoc.longitude),
+        encodedPolyline: _encodedPolyline,
+      );
     }
-
-    // Size for the static map (adjust based on card size)
-    const size = '600x450'; // 4:3 ratio, higher resolution for better quality
-
-    // Use the API key from index.html
-    const apiKey = 'AIzaSyAgtMvCDbR3itDDEdvT3Iw-K2h_g_tyRHs';
-
-    return '$baseUrl?center=$center&zoom=${zoom.toInt()}&size=$size${markers.toString()}${path.toString()}&key=$apiKey';
   }
 
   @override
@@ -80,7 +123,7 @@ class YouTubeTripCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -90,7 +133,7 @@ class YouTubeTripCard extends StatelessWidget {
               child: Stack(
                 children: [
                   // Static map image - now actually loading!
-                  if (trip.locations != null && trip.locations!.isNotEmpty)
+                  if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty)
                     Image.network(
                       _generateStaticMapUrl(),
                       fit: BoxFit.cover,
@@ -147,7 +190,7 @@ class YouTubeTripCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        trip.status.toJson().toUpperCase(),
+                        widget.trip.status.toJson().toUpperCase(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -167,7 +210,7 @@ class YouTubeTripCard extends StatelessWidget {
                 children: [
                   // Trip title
                   Text(
-                    trip.name,
+                    widget.trip.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -182,7 +225,7 @@ class YouTubeTripCard extends StatelessWidget {
                       Icon(Icons.person, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
-                        trip.username,
+                        widget.trip.username,
                         style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                       ),
                     ],
@@ -192,7 +235,7 @@ class YouTubeTripCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        _formatDate(trip.createdAt),
+                        _formatDate(widget.trip.createdAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(width: 8),
@@ -208,10 +251,10 @@ class YouTubeTripCard extends StatelessWidget {
                       Icon(Icons.comment, size: 14, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
-                        '${trip.commentsCount}',
+                        '${widget.trip.commentsCount}',
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
-                      if (trip.visibility.toJson() == 'PUBLIC') ...[
+                      if (widget.trip.visibility.toJson() == 'PUBLIC') ...[
                         const SizedBox(width: 8),
                         Container(
                           width: 3,
@@ -226,10 +269,10 @@ class YouTubeTripCard extends StatelessWidget {
                       ],
                     ],
                   ),
-                  if (trip.description != null) ...[
+                  if (widget.trip.description != null) ...[
                     const SizedBox(height: 8),
                     Text(
-                      trip.description!,
+                      widget.trip.description!,
                       style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

@@ -8,6 +8,7 @@ import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.d
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'auth_screen.dart';
+import 'profile_screen.dart';
 
 /// Trip Plans screen showing list of planned trips
 class TripPlansScreen extends StatefulWidget {
@@ -128,7 +129,16 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
         break;
       case 3:
-        UiHelpers.showSuccessMessage(context, 'Profile coming soon!');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        ).then((result) {
+          if (result == true && mounted) {
+            // User logged out from profile screen
+            _loadUserInfo();
+            _loadTripPlans();
+          }
+        });
         break;
     }
   }

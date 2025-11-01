@@ -8,6 +8,8 @@ import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.da
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
 import 'trip_detail_screen.dart';
+import 'home_screen.dart';
+import 'trip_plans_screen.dart';
 
 /// User profile screen showing user information, statistics, and trips
 class ProfileScreen extends StatefulWidget {
@@ -117,9 +119,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _selectedSidebarIndex = index;
     });
 
-    if (index != 3) {
-      // Navigate away from profile screen
-      Navigator.of(context).pop();
+    switch (index) {
+      case 0:
+        // Navigate to home/trips screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+        break;
+      case 1:
+        // Navigate to trip plans screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const TripPlansScreen()),
+        );
+        break;
+      case 2:
+        // Achievements coming soon
+        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
+        break;
+      case 3:
+        // Already on profile screen, do nothing
+        break;
     }
   }
 

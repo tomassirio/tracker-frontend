@@ -85,8 +85,8 @@ class AppSidebar extends StatelessWidget {
             enabled: isLoggedIn,
             onTap: isLoggedIn
                 ? () {
-                    onItemSelected(3);
-                    Navigator.pop(context);
+                    Navigator.pop(context); // Close drawer first
+                    onItemSelected(3); // Then trigger navigation
                   }
                 : null,
           ),
