@@ -1,79 +1,105 @@
 import 'package:flutter/material.dart';
 
-/// Custom page route transitions for different navigation directions
+/// Custom page route transitions inspired by Binding of Isaac's retro menu style
+/// These transitions ensure proper bidirectional movement for a cohesive spatial layout:
+/// - Profile is to the right of Trips
+/// - Trip Plans is to the left of Trips
+/// - Trip Details are below Trips
 class PageTransitions {
-  /// Slide from right to left (for profile navigation)
+  static const Duration _transitionDuration = Duration(milliseconds: 250);
+
+  /// Navigate to profile (slides in from right, exits to right)
   static PageRouteBuilder slideRight(Widget page) {
     return PageRouteBuilder(
+      transitionDuration: _transitionDuration,
+      reverseTransitionDuration: _transitionDuration,
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
+        final slideAnimation =
+            Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              ),
+            );
 
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
+        final fadeAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
 
-        return SlideTransition(position: animation.drive(tween), child: child);
+        return SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(opacity: fadeAnimation, child: child),
+        );
       },
     );
   }
 
-  /// Slide from left to right (for trips/trip plans navigation)
+  /// Navigate to trip plans (slides in from left, exits to left)
   static PageRouteBuilder slideLeft(Widget page) {
     return PageRouteBuilder(
+      transitionDuration: _transitionDuration,
+      reverseTransitionDuration: _transitionDuration,
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(-1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
+        final slideAnimation =
+            Tween<Offset>(
+              begin: const Offset(-1.0, 0.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              ),
+            );
 
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
+        final fadeAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
 
-        return SlideTransition(position: animation.drive(tween), child: child);
+        return SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(opacity: fadeAnimation, child: child),
+        );
       },
     );
   }
 
-  /// Slide from bottom to top (for trip detail navigation)
-  static PageRouteBuilder slideDown(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(0.0, 1.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-    );
-  }
-
-  /// Slide from top to bottom (for navigating back from detail screens)
+  /// Navigate to trip details (slides up from bottom, exits down)
   static PageRouteBuilder slideUp(Widget page) {
     return PageRouteBuilder(
+      transitionDuration: _transitionDuration,
+      reverseTransitionDuration: _transitionDuration,
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(0.0, -1.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
+        final slideAnimation =
+            Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              ),
+            );
 
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
+        final fadeAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
 
-        return SlideTransition(position: animation.drive(tween), child: child);
+        return SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(opacity: fadeAnimation, child: child),
+        );
       },
     );
   }

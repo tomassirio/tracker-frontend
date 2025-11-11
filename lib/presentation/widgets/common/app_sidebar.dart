@@ -33,24 +33,32 @@ class AppSidebar extends StatelessWidget {
 
     switch (index) {
       case 0:
-        // Navigate to Trips (Home)
-        if (selectedIndex != 0) {
-          // Use slideUp transition when coming from detail screens (index -1)
-          if (selectedIndex == -1) {
-            Navigator.pushReplacement(
-              context,
-              PageTransitions.slideDown(const HomeScreen()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          }
+        // Navigate to Trips (Home) - center position
+        if (selectedIndex == -1) {
+          // From trip detail - pop all routes until we're back at home
+          Navigator.popUntil(context, (route) => route.isFirst);
+        } else if (selectedIndex == 1) {
+          // Coming from Trip Plans (left) - slide right
+          Navigator.pushReplacement(
+            context,
+            PageTransitions.slideRight(const HomeScreen()),
+          );
+        } else if (selectedIndex == 3) {
+          // Coming from Profile (right) - slide left
+          Navigator.pushReplacement(
+            context,
+            PageTransitions.slideLeft(const HomeScreen()),
+          );
+        } else if (selectedIndex != 0) {
+          // From other screens - use default
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
         }
         break;
       case 1:
-        // Navigate to Trip Plans
+        // Navigate to Trip Plans (left of home)
         Navigator.push(
           context,
           PageTransitions.slideLeft(const TripPlansScreen()),
@@ -61,7 +69,7 @@ class AppSidebar extends StatelessWidget {
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
         break;
       case 3:
-        // Navigate to Profile
+        // Navigate to Profile (right of home)
         Navigator.push(
           context,
           PageTransitions.slideRight(const ProfileScreen()),

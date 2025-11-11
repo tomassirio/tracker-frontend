@@ -132,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _navigateToTripDetail(Trip trip) {
     Navigator.push(
       context,
-      PageTransitions.slideDown(TripDetailScreen(trip: trip)),
+      PageTransitions.slideUp(TripDetailScreen(trip: trip)),
     );
   }
 
@@ -421,10 +421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (_userTrips.isNotEmpty)
               Text(
                 '${_userTrips.length} ${_userTrips.length == 1 ? 'trip' : 'trips'}',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
           ],
         ),

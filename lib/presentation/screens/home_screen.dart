@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToTripDetail(Trip trip) async {
     final result = await Navigator.push(
       context,
-      PageTransitions.slideDown(TripDetailScreen(trip: trip)),
+      PageTransitions.slideUp(TripDetailScreen(trip: trip)),
     );
 
     // Refresh if user logged out from trip detail screen
