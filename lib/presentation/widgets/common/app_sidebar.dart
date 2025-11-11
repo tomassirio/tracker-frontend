@@ -35,10 +35,18 @@ class AppSidebar extends StatelessWidget {
       case 0:
         // Navigate to Trips (Home)
         if (selectedIndex != 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          // Use slideUp transition when coming from detail screens (index -1)
+          if (selectedIndex == -1) {
+            Navigator.pushReplacement(
+              context,
+              PageTransitions.slideUp(const HomeScreen()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
         }
         break;
       case 1:

@@ -23,7 +23,7 @@ class TripPlanQueryClient {
   /// Requires authentication (USER, ADMIN)
   Future<List<TripPlan>> getMyTripPlans() async {
     final response = await _apiClient.get(
-      ApiEndpoints.tripPlans,
+      "${ApiEndpoints.tripPlans}/me",
       requireAuth: true,
     );
     return _apiClient.handleListResponse(response, TripPlan.fromJson);

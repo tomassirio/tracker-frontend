@@ -374,7 +374,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatCard('Trips', _profile!.tripsCount.toString()),
+        _buildStatCard('Trips', _userTrips.length.toString()),
         _buildStatCard('Followers', _profile!.followersCount.toString()),
         _buildStatCard('Following', _profile!.followingCount.toString()),
       ],
@@ -411,9 +411,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'My Trips',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'My Trips',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            if (_userTrips.isNotEmpty)
+              Text(
+                '${_userTrips.length} ${_userTrips.length == 1 ? 'trip' : 'trips'}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 16),
         if (_isLoadingTrips)
@@ -426,16 +439,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           )
         else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _userTrips.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildTripCard(_userTrips[index]),
-              );
-            },
+          // Make the trip list independently scrollable with a max height
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 500, // Maximum height before scrolling kicks in
+            ),
+            child: ListView.builder(
+              shrinkWrap: false,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: _userTrips.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildTripCard(_userTrips[index]),
+                );
+              },
+            ),
           ),
       ],
     );
