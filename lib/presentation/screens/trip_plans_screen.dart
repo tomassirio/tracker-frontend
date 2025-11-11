@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/trip_plan_service.dart';
+import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
-import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
-import 'package:tracker_frontend/data/repositories/home_repository.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plans_content.dart';
 import 'auth_screen.dart';
 
 /// Trip Plans screen showing list of planned trips
@@ -124,43 +124,34 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     }
   }
 
+  void _handleTripPlanTap(TripPlan plan) {
+    UiHelpers.showSuccessMessage(
+      context,
+      'Trip plan details coming soon!',
+    );
+  }
+
+  void _handleCreatePlan() {
+    UiHelpers.showSuccessMessage(
+      context,
+      'Create trip plan feature coming soon!',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Row(
-          children: [
-            const WandererLogo(size: 36),
-            const SizedBox(width: 12),
-            const Text(
-              'Wanderer',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: SearchBarWidget(
-                controller: _searchController,
-                onSearch: (_) => _filterPlans(),
-                onClear: _clearSearch,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          if (!_isLoggedIn)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: TextButton.icon(
-                onPressed: _navigateToAuth,
-                icon: const Icon(Icons.login, color: Colors.white),
-                label: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-        ],
+      appBar: WandererAppBar(
+        searchController: _searchController,
+        onSearch: _filterPlans,
+        onClear: _clearSearch,
+        isLoggedIn: _isLoggedIn,
+        onLoginPressed: _navigateToAuth,
+        username: _username,
+        userId: _userId,
+        onProfile: () {}, // Not used in this screen
+        onSettings: _handleSettings,
+        onLogout: _logout,
       ),
       drawer: AppSidebar(
         username: _username,
@@ -169,130 +160,17 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         onLogout: _logout,
         onSettings: _handleSettings,
       ),
-      body: _buildBody(),
+      body: TripPlansContent(
+        isLoading: _isLoading,
+        error: _error,
+        tripPlans: _filteredPlans,
+        isLoggedIn: _isLoggedIn,
+        onRefresh: _loadTripPlans,
+        onTripPlanTap: _handleTripPlanTap,
+        onLoginPressed: _navigateToAuth,
+        onCreatePressed: _handleCreatePlan,
+      ),
     );
   }
 
-  Widget _buildBody() {
-    if (!_isLoggedIn) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 24),
-              Text(
-                'Login Required',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Please log in to view your trip plans',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _navigateToAuth,
-                icon: const Icon(Icons.login),
-                label: const Text('Login'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading trip plans',
-              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _error!,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadTripPlans,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_filteredPlans.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 24),
-              Text(
-                'No Trip Plans Yet',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Start planning your next adventure!',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () {
-                  UiHelpers.showSuccessMessage(
-                    context,
-                    'Create trip plan feature coming soon!',
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Create Trip Plan'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // If we had trip plans, they would be displayed in a grid here
-    return const Center(child: Text('Trip plans feature coming soon'));
-  }
 }

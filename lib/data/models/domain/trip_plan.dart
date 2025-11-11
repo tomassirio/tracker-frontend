@@ -1,63 +1,85 @@
-import 'planned_location.dart';
+/// Location model for trip plan start/end locations
+class PlanLocation {
+  final double lat;
+  final double lon;
 
-/// Trip plan model
+  PlanLocation({
+    required this.lat,
+    required this.lon,
+  });
+
+  factory PlanLocation.fromJson(Map<String, dynamic> json) => PlanLocation(
+    lat: (json['lat'] as num).toDouble(),
+    lon: (json['lon'] as num).toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'lat': lat,
+    'lon': lon,
+  };
+}
+
+/// Trip plan model matching backend TripPlanDTO
 class TripPlan {
   final String id;
   final String userId;
   final String name;
-  final String? description;
-  final DateTime? plannedStartDate;
-  final DateTime? plannedEndDate;
-  final List<PlannedLocation>? plannedLocations;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String planType;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final PlanLocation? startLocation;
+  final PlanLocation? endLocation;
+  final List<PlanLocation> waypoints;
+  final DateTime createdTimestamp;
 
   TripPlan({
     required this.id,
     required this.userId,
     required this.name,
-    this.description,
-    this.plannedStartDate,
-    this.plannedEndDate,
-    this.plannedLocations,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.planType,
+    this.startDate,
+    this.endDate,
+    this.startLocation,
+    this.endLocation,
+    this.waypoints = const [],
+    required this.createdTimestamp,
   });
 
   factory TripPlan.fromJson(Map<String, dynamic> json) => TripPlan(
     id: json['id'] as String,
     userId: json['userId'] as String,
     name: json['name'] as String,
-    description: json['description'] as String?,
-    plannedStartDate: json['plannedStartDate'] != null
-        ? DateTime.parse(json['plannedStartDate'] as String)
+    planType: json['planType'] as String,
+    startDate: json['startDate'] != null
+        ? DateTime.parse(json['startDate'] as String)
         : null,
-    plannedEndDate: json['plannedEndDate'] != null
-        ? DateTime.parse(json['plannedEndDate'] as String)
+    endDate: json['endDate'] != null
+        ? DateTime.parse(json['endDate'] as String)
         : null,
-    plannedLocations: json['plannedLocations'] != null
-        ? (json['plannedLocations'] as List)
-              .map(
-                (loc) => PlannedLocation.fromJson(loc as Map<String, dynamic>),
-              )
+    startLocation: json['startLocation'] != null
+        ? PlanLocation.fromJson(json['startLocation'] as Map<String, dynamic>)
+        : null,
+    endLocation: json['endLocation'] != null
+        ? PlanLocation.fromJson(json['endLocation'] as Map<String, dynamic>)
+        : null,
+    waypoints: json['waypoints'] != null
+        ? (json['waypoints'] as List)
+              .map((loc) => PlanLocation.fromJson(loc as Map<String, dynamic>))
               .toList()
-        : null,
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
+        : const [],
+    createdTimestamp: DateTime.parse(json['createdTimestamp'] as String),
   );
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'userId': userId,
     'name': name,
-    if (description != null) 'description': description,
-    if (plannedStartDate != null)
-      'plannedStartDate': plannedStartDate!.toIso8601String(),
-    if (plannedEndDate != null)
-      'plannedEndDate': plannedEndDate!.toIso8601String(),
-    if (plannedLocations != null)
-      'plannedLocations': plannedLocations!.map((loc) => loc.toJson()).toList(),
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
+    'planType': planType,
+    if (startDate != null) 'startDate': startDate!.toIso8601String().split('T')[0],
+    if (endDate != null) 'endDate': endDate!.toIso8601String().split('T')[0],
+    if (startLocation != null) 'startLocation': startLocation!.toJson(),
+    if (endLocation != null) 'endLocation': endLocation!.toJson(),
+    'waypoints': waypoints.map((loc) => loc.toJson()).toList(),
+    'createdTimestamp': createdTimestamp.toIso8601String(),
   };
 }

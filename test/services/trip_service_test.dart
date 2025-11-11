@@ -251,8 +251,8 @@ TripPlan createMockTripPlan(String id, String name) {
     id: id,
     userId: 'user-1',
     name: name,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
+    planType: 'SIMPLE',
+    createdTimestamp: DateTime.now(),
   );
 }
 

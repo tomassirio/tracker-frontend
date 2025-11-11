@@ -31,19 +31,22 @@ void main() {
         final responseBody = {
           'id': 'plan-123',
           'userId': 'user-123',
-          'tripId': 'trip-123',
-          'name': 'Day 1 Plan',
-          'description': 'Visit the museum',
-          'date': DateTime.now().toIso8601String(),
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
+          'name': 'Europe Summer Trip',
+          'planType': 'SIMPLE',
+          'startDate': '2025-11-20',
+          'endDate': '2025-11-25',
+          'startLocation': {'lat': 0.1, 'lon': 0.1},
+          'endLocation': {'lat': 0.2, 'lon': 0.2},
+          'waypoints': [],
+          'createdTimestamp': DateTime.now().toIso8601String(),
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
         final result = await tripPlanQueryClient.getTripPlanById('plan-123');
 
         expect(result.id, 'plan-123');
-        expect(result.name, 'Day 1 Plan');
+        expect(result.name, 'Europe Summer Trip');
+        expect(result.planType, 'SIMPLE');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
@@ -59,9 +62,14 @@ void main() {
         final responseBody = {
           'id': 'plan-123',
           'userId': 'user-123',
-          'name': 'Day 1 Plan',
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
+          'name': 'Europe Summer Trip',
+          'planType': 'SIMPLE',
+          'startDate': '2025-11-20',
+          'endDate': '2025-11-25',
+          'startLocation': {'lat': 0.1, 'lon': 0.1},
+          'endLocation': {'lat': 0.2, 'lon': 0.2},
+          'waypoints': [],
+          'createdTimestamp': DateTime.now().toIso8601String(),
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
@@ -101,20 +109,26 @@ void main() {
           {
             'id': 'plan-1',
             'userId': 'user-123',
-            'tripId': 'trip-1',
-            'name': 'Day 1',
-            'description': 'Museum visit',
-            'createdAt': DateTime.now().toIso8601String(),
-            'updatedAt': DateTime.now().toIso8601String(),
+            'name': 'Europe Trip',
+            'planType': 'SIMPLE',
+            'startDate': '2025-11-20',
+            'endDate': '2025-11-25',
+            'startLocation': {'lat': 0.1, 'lon': 0.1},
+            'endLocation': {'lat': 0.2, 'lon': 0.2},
+            'waypoints': [],
+            'createdTimestamp': DateTime.now().toIso8601String(),
           },
           {
             'id': 'plan-2',
             'userId': 'user-123',
-            'tripId': 'trip-1',
-            'name': 'Day 2',
-            'description': 'Beach day',
-            'createdAt': DateTime.now().toIso8601String(),
-            'updatedAt': DateTime.now().toIso8601String(),
+            'name': 'Asia Adventure',
+            'planType': 'SIMPLE',
+            'startDate': '2025-12-01',
+            'endDate': '2025-12-15',
+            'startLocation': {'lat': 0.3, 'lon': 0.3},
+            'endLocation': {'lat': 0.4, 'lon': 0.4},
+            'waypoints': [],
+            'createdTimestamp': DateTime.now().toIso8601String(),
           },
         ];
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
@@ -122,10 +136,10 @@ void main() {
         final result = await tripPlanQueryClient.getMyTripPlans();
 
         expect(result.length, 2);
-        expect(result[0].name, 'Day 1');
-        expect(result[1].name, 'Day 2');
+        expect(result[0].name, 'Europe Trip');
+        expect(result[1].name, 'Asia Adventure');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlans));
+        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlansMe));
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
           'Bearer test-token',

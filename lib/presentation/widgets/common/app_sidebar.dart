@@ -39,7 +39,7 @@ class AppSidebar extends StatelessWidget {
           if (selectedIndex == -1) {
             Navigator.pushReplacement(
               context,
-              PageTransitions.slideUp(const HomeScreen()),
+              PageTransitions.slideDown(const HomeScreen()),
             );
           } else {
             Navigator.pushReplacement(
