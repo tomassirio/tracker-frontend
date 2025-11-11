@@ -11,6 +11,9 @@ class ApiEndpoints {
   static String get authBaseUrl =>
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
 
+  // Google Maps API key - read from window.appConfig
+  static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
+
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/auth/register';
   static const String authLogin = '/auth/login';
@@ -32,6 +35,7 @@ class ApiEndpoints {
 
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';
+  static const String usersUpdate = '/users/me';
   static const String usersFriendRequests = '/users/friends/requests';
   static String usersFriendRequestAccept(String requestId) =>
       '/users/friends/requests/$requestId/accept';
@@ -56,9 +60,10 @@ class ApiEndpoints {
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
 
-  // Trip Plan Command endpoints (use commandBaseUrl)
+  // Trip Plan endpoints (use commandBaseUrl for commands, queryBaseUrl for queries)
   static const String tripPlans = '/trips/plans';
   static String tripPlanById(String planId) => '/trips/plans/$planId';
+  static const String tripPlansMe = '/trips/plans/me';
 
   // Trip Update Command endpoints (use commandBaseUrl)
   static String tripUpdates(String tripId) => '/trips/$tripId/updates';

@@ -6,6 +6,7 @@ import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
@@ -14,6 +15,7 @@ import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
+import 'profile_screen.dart';
 
 /// Trip detail screen showing trip info, map, and comments
 class TripDetailScreen extends StatefulWidget {
@@ -45,7 +47,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoggedIn = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
-  int _selectedSidebarIndex = 0;
+  final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
   String? _username;
   String? _userId;
 
@@ -110,12 +112,21 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  void _updateMapData() {
-    final mapData = TripMapHelper.createMapData(_trip);
-    setState(() {
-      _markers = mapData.markers;
-      _polylines = mapData.polylines;
-    });
+  Future<void> _updateMapData() async {
+    try {
+      final mapData = await TripMapHelper.createMapDataWithDirections(_trip);
+      setState(() {
+        _markers = mapData.markers;
+        _polylines = mapData.polylines;
+      });
+    } catch (e) {
+      // Fallback to straight lines if Directions API fails
+      final mapData = TripMapHelper.createMapData(_trip);
+      setState(() {
+        _markers = mapData.markers;
+        _polylines = mapData.polylines;
+      });
+    }
   }
 
   Future<void> _loadComments() async {
@@ -269,25 +280,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
   }
 
-  void _handleSidebarSelection(int index) {
-    setState(() {
-      _selectedSidebarIndex = index;
+  void _handleProfile() {
+    Navigator.push(
+      context,
+      PageTransitions.slideRight(const ProfileScreen()),
+    ).then((result) {
+      if (result == true && mounted) {
+        // User logged out from profile screen
+        Navigator.pop(context, true); // Go back to home with logout signal
+      }
     });
-
-    switch (index) {
-      case 0:
-        Navigator.pop(context); // Go back to trips
-        break;
-      case 1:
-        UiHelpers.showSuccessMessage(context, 'Trip Plans coming soon!');
-        break;
-      case 2:
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
-        break;
-      case 3:
-        UiHelpers.showSuccessMessage(context, 'Profile coming soon!');
-        break;
-    }
   }
 
   Future<void> _navigateToAuth() async {
@@ -317,8 +319,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         onLoginPressed: _navigateToAuth,
         username: _username,
         userId: _userId,
-        onProfile: () =>
-            UiHelpers.showSuccessMessage(context, 'Profile coming soon!'),
+        onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
       ),
@@ -326,7 +327,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         username: _username,
         userId: _userId,
         selectedIndex: _selectedSidebarIndex,
-        onItemSelected: _handleSidebarSelection,
         onLogout: _logout,
         onSettings: _handleSettings,
       ),

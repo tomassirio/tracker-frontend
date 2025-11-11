@@ -77,4 +77,9 @@ class UserService {
   Future<void> unfollowUser(String userId) async {
     await _userCommandClient.unfollowUser(userId);
   }
+
+  /// Update current user's profile
+  Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
+    return await _userCommandClient.updateProfile(request);
+  }
 }

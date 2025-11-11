@@ -1,0 +1,54 @@
+import 'package:flutter/material.dart';
+
+/// Login required view for trip plans
+class LoginRequiredView extends StatelessWidget {
+  final VoidCallback? onLoginPressed;
+
+  const LoginRequiredView({
+    super.key,
+    this.onLoginPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 24),
+            Text(
+              'Login Required',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Please log in to view your trip plans',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: onLoginPressed,
+              icon: const Icon(Icons.login),
+              label: const Text('Login'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

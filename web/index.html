@@ -32,9 +32,6 @@
   <title>tracker_frontend</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Google Maps JavaScript API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}"></script>
-
   <!-- Application Configuration -->
   <script>
     window.appConfig = {
@@ -42,9 +39,22 @@
       queryBaseUrl: '{{QUERY_BASE_URL}}',
       authBaseUrl: '{{AUTH_BASE_URL}}'
     };
+
+    // Signal that Google Maps should initialize
+    window._googleMapsLoading = true;
   </script>
 </head>
 <body>
+  <!-- Google Maps JavaScript API - Load before Flutter with callback -->
+  <script>
+    function initGoogleMaps() {
+      window._googleMapsLoading = false;
+      window._googleMapsLoaded = true;
+      console.log('Google Maps API loaded successfully');
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIijc10o3XeaO3niT4oaoWjHkq8x-zqWk&libraries=places,geometry&callback=initGoogleMaps"></script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

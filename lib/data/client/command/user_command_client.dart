@@ -73,4 +73,15 @@ class UserCommandClient {
     );
     _apiClient.handleNoContentResponse(response);
   }
+
+  /// Update current user's profile
+  /// Requires authentication (USER, ADMIN)
+  Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
+    final response = await _apiClient.put(
+      ApiEndpoints.usersUpdate,
+      body: request.toJson(),
+      requireAuth: true,
+    );
+    return _apiClient.handleResponse(response, UserProfile.fromJson);
+  }
 }
