@@ -125,10 +125,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   }
 
   void _handleTripPlanTap(TripPlan plan) {
-    UiHelpers.showSuccessMessage(
-      context,
-      'Trip plan details coming soon!',
-    );
+    UiHelpers.showSuccessMessage(context, 'Trip plan details coming soon!');
   }
 
   void _handleCreatePlan() {
@@ -172,5 +169,4 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
       ),
     );
   }
-
 }

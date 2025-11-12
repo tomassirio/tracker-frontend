@@ -1,5 +1,4 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/foundation.dart';
 import '../client/google_routes_api_client.dart';
 
 /// Service for interacting with Google Maps Routes API
@@ -23,9 +22,6 @@ class DirectionsService {
         return waypoints;
       }
     } catch (e) {
-      debugPrint(
-        '💥 DirectionsService failed: $e, falling back to straight lines',
-      );
       return waypoints;
     }
   }

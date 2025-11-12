@@ -18,11 +18,16 @@ class AuthResponse {
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
     return AuthResponse(
-      accessToken: json['access_token'] ?? json['accessToken'],
-      refreshToken: json['refresh_token'] ?? json['refreshToken'],
-      tokenType: json['token_type'] ?? json['tokenType'] ?? 'Bearer',
-      expiresIn: json['expires_in'] ?? json['expiresIn'] ?? 3600,
-      userId: json['user_id'] ?? json['userId'],
+      accessToken: json['accessToken'] ?? json['access_token'] ?? '',
+      refreshToken: json['refreshToken'] ?? json['refresh_token'] ?? '',
+      tokenType: json['tokenType'] ?? json['token_type'] ?? 'Bearer',
+      expiresIn: (json['expiresIn'] ?? json['expires_in'] ?? 3600) is int
+          ? json['expiresIn'] ?? json['expires_in'] ?? 3600
+          : int.tryParse(
+                  (json['expiresIn'] ?? json['expires_in'] ?? 3600).toString(),
+                ) ??
+                3600,
+      userId: json['userId'] ?? json['user_id'],
       username: json['username'],
     );
   }

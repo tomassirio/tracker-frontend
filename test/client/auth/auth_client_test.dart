@@ -189,10 +189,10 @@ void main() {
       test('successful token refresh returns new AuthResponse', () async {
         final request = RefreshTokenRequest(refreshToken: 'old-refresh-token');
         final responseBody = {
-          'access_token': 'new-access-token',
-          'refresh_token': 'new-refresh-token',
-          'token_type': 'Bearer',
-          'expires_in': 3600,
+          'accessToken': 'new-access-token',
+          'refreshToken': 'new-refresh-token',
+          'tokenType': 'Bearer',
+          'expiresIn': 3600,
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
 
@@ -442,6 +442,7 @@ class MockTokenStorage extends TokenStorage {
   String? refreshToken;
   String? tokenType;
   bool _isLoggedIn = false;
+  bool _isExpired = false;
 
   @override
   Future<String?> getAccessToken() async => accessToken;
@@ -456,6 +457,9 @@ class MockTokenStorage extends TokenStorage {
   Future<bool> isLoggedIn() async => _isLoggedIn;
 
   @override
+  Future<bool> isAccessTokenExpired() async => _isExpired;
+
+  @override
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
@@ -468,6 +472,7 @@ class MockTokenStorage extends TokenStorage {
     this.refreshToken = refreshToken;
     this.tokenType = tokenType;
     _isLoggedIn = true;
+    _isExpired = false;
   }
 
   @override
@@ -476,5 +481,6 @@ class MockTokenStorage extends TokenStorage {
     refreshToken = null;
     tokenType = null;
     _isLoggedIn = false;
+    _isExpired = true;
   }
 }

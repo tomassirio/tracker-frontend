@@ -71,6 +71,419 @@ void main() {
         expect(() => userService.getUserById('invalid-id'), throwsException);
       });
     });
+
+    group('getUserByUsername', () {
+      test('returns user profile by username', () async {
+        final mockProfile = createMockUserProfile('user-789', 'johndoe');
+
+        when(
+          mockUserQueryClient.getUserByUsername('johndoe'),
+        ).thenAnswer((_) async => mockProfile);
+
+        final result = await userService.getUserByUsername('johndoe');
+
+        expect(result.id, 'user-789');
+        expect(result.username, 'johndoe');
+        verify(mockUserQueryClient.getUserByUsername('johndoe')).called(1);
+      });
+
+      test('handles errors when fetching user by username', () async {
+        when(
+          mockUserQueryClient.getUserByUsername(any),
+        ).thenThrow(Exception('User not found'));
+
+        expect(
+          () => userService.getUserByUsername('nonexistent'),
+          throwsException,
+        );
+      });
+    });
+
+    group('getFriends', () {
+      test('returns list of friends', () async {
+        final mockFriends = [
+          createMockUserProfile('user-1', 'friend1'),
+          createMockUserProfile('user-2', 'friend2'),
+        ];
+
+        when(
+          mockUserQueryClient.getFriends(),
+        ).thenAnswer((_) async => mockFriends);
+
+        final result = await userService.getFriends();
+
+        expect(result.length, 2);
+        expect(result[0].username, 'friend1');
+        expect(result[1].username, 'friend2');
+        verify(mockUserQueryClient.getFriends()).called(1);
+      });
+
+      test('returns empty list when user has no friends', () async {
+        when(mockUserQueryClient.getFriends()).thenAnswer((_) async => []);
+
+        final result = await userService.getFriends();
+
+        expect(result, isEmpty);
+        verify(mockUserQueryClient.getFriends()).called(1);
+      });
+
+      test('handles errors when fetching friends', () async {
+        when(
+          mockUserQueryClient.getFriends(),
+        ).thenThrow(Exception('Failed to fetch friends'));
+
+        expect(() => userService.getFriends(), throwsException);
+      });
+    });
+
+    group('getReceivedFriendRequests', () {
+      test('returns list of received friend requests', () async {
+        final mockRequests = [
+          {'id': 'req-1', 'from': 'user-1'},
+          {'id': 'req-2', 'from': 'user-2'},
+        ];
+
+        when(
+          mockUserQueryClient.getReceivedFriendRequests(),
+        ).thenAnswer((_) async => mockRequests);
+
+        final result = await userService.getReceivedFriendRequests();
+
+        expect(result.length, 2);
+        verify(mockUserQueryClient.getReceivedFriendRequests()).called(1);
+      });
+
+      test('returns empty list when no pending requests', () async {
+        when(
+          mockUserQueryClient.getReceivedFriendRequests(),
+        ).thenAnswer((_) async => []);
+
+        final result = await userService.getReceivedFriendRequests();
+
+        expect(result, isEmpty);
+      });
+
+      test('handles errors when fetching received requests', () async {
+        when(
+          mockUserQueryClient.getReceivedFriendRequests(),
+        ).thenThrow(Exception('Failed to fetch requests'));
+
+        expect(() => userService.getReceivedFriendRequests(), throwsException);
+      });
+    });
+
+    group('getSentFriendRequests', () {
+      test('returns list of sent friend requests', () async {
+        final mockRequests = [
+          {'id': 'req-3', 'to': 'user-3'},
+          {'id': 'req-4', 'to': 'user-4'},
+        ];
+
+        when(
+          mockUserQueryClient.getSentFriendRequests(),
+        ).thenAnswer((_) async => mockRequests);
+
+        final result = await userService.getSentFriendRequests();
+
+        expect(result.length, 2);
+        verify(mockUserQueryClient.getSentFriendRequests()).called(1);
+      });
+
+      test('returns empty list when no sent requests', () async {
+        when(
+          mockUserQueryClient.getSentFriendRequests(),
+        ).thenAnswer((_) async => []);
+
+        final result = await userService.getSentFriendRequests();
+
+        expect(result, isEmpty);
+      });
+
+      test('handles errors when fetching sent requests', () async {
+        when(
+          mockUserQueryClient.getSentFriendRequests(),
+        ).thenThrow(Exception('Failed to fetch sent requests'));
+
+        expect(() => userService.getSentFriendRequests(), throwsException);
+      });
+    });
+
+    group('getFollowing', () {
+      test('returns list of users being followed', () async {
+        final mockFollowing = [
+          createMockUserProfile('user-5', 'following1'),
+          createMockUserProfile('user-6', 'following2'),
+        ];
+
+        when(
+          mockUserQueryClient.getFollowing(),
+        ).thenAnswer((_) async => mockFollowing);
+
+        final result = await userService.getFollowing();
+
+        expect(result.length, 2);
+        expect(result[0].username, 'following1');
+        expect(result[1].username, 'following2');
+        verify(mockUserQueryClient.getFollowing()).called(1);
+      });
+
+      test('returns empty list when not following anyone', () async {
+        when(mockUserQueryClient.getFollowing()).thenAnswer((_) async => []);
+
+        final result = await userService.getFollowing();
+
+        expect(result, isEmpty);
+      });
+
+      test('handles errors when fetching following list', () async {
+        when(
+          mockUserQueryClient.getFollowing(),
+        ).thenThrow(Exception('Failed to fetch following'));
+
+        expect(() => userService.getFollowing(), throwsException);
+      });
+    });
+
+    group('getFollowers', () {
+      test('returns list of followers', () async {
+        final mockFollowers = [
+          createMockUserProfile('user-7', 'follower1'),
+          createMockUserProfile('user-8', 'follower2'),
+        ];
+
+        when(
+          mockUserQueryClient.getFollowers(),
+        ).thenAnswer((_) async => mockFollowers);
+
+        final result = await userService.getFollowers();
+
+        expect(result.length, 2);
+        expect(result[0].username, 'follower1');
+        expect(result[1].username, 'follower2');
+        verify(mockUserQueryClient.getFollowers()).called(1);
+      });
+
+      test('returns empty list when user has no followers', () async {
+        when(mockUserQueryClient.getFollowers()).thenAnswer((_) async => []);
+
+        final result = await userService.getFollowers();
+
+        expect(result, isEmpty);
+      });
+
+      test('handles errors when fetching followers', () async {
+        when(
+          mockUserQueryClient.getFollowers(),
+        ).thenThrow(Exception('Failed to fetch followers'));
+
+        expect(() => userService.getFollowers(), throwsException);
+      });
+    });
+
+    group('sendFriendRequest', () {
+      test('sends friend request successfully', () async {
+        when(
+          mockUserCommandClient.sendFriendRequest('user-123'),
+        ).thenAnswer((_) async => {});
+
+        await userService.sendFriendRequest('user-123');
+
+        verify(mockUserCommandClient.sendFriendRequest('user-123')).called(1);
+      });
+
+      test('handles errors when sending friend request', () async {
+        when(
+          mockUserCommandClient.sendFriendRequest(any),
+        ).thenThrow(Exception('Failed to send request'));
+
+        expect(
+          () => userService.sendFriendRequest('user-123'),
+          throwsException,
+        );
+      });
+
+      test('passes correct user ID to command client', () async {
+        when(
+          mockUserCommandClient.sendFriendRequest('user-456'),
+        ).thenAnswer((_) async => {});
+
+        await userService.sendFriendRequest('user-456');
+
+        verify(mockUserCommandClient.sendFriendRequest('user-456')).called(1);
+      });
+    });
+
+    group('acceptFriendRequest', () {
+      test('accepts friend request successfully', () async {
+        when(
+          mockUserCommandClient.acceptFriendRequest('req-123'),
+        ).thenAnswer((_) async => {});
+
+        await userService.acceptFriendRequest('req-123');
+
+        verify(mockUserCommandClient.acceptFriendRequest('req-123')).called(1);
+      });
+
+      test('handles errors when accepting friend request', () async {
+        when(
+          mockUserCommandClient.acceptFriendRequest(any),
+        ).thenThrow(Exception('Failed to accept request'));
+
+        expect(
+          () => userService.acceptFriendRequest('req-123'),
+          throwsException,
+        );
+      });
+
+      test('passes correct request ID to command client', () async {
+        when(
+          mockUserCommandClient.acceptFriendRequest('req-789'),
+        ).thenAnswer((_) async => {});
+
+        await userService.acceptFriendRequest('req-789');
+
+        verify(mockUserCommandClient.acceptFriendRequest('req-789')).called(1);
+      });
+    });
+
+    group('declineFriendRequest', () {
+      test('declines friend request successfully', () async {
+        when(
+          mockUserCommandClient.declineFriendRequest('req-123'),
+        ).thenAnswer((_) async => {});
+
+        await userService.declineFriendRequest('req-123');
+
+        verify(mockUserCommandClient.declineFriendRequest('req-123')).called(1);
+      });
+
+      test('handles errors when declining friend request', () async {
+        when(
+          mockUserCommandClient.declineFriendRequest(any),
+        ).thenThrow(Exception('Failed to decline request'));
+
+        expect(
+          () => userService.declineFriendRequest('req-123'),
+          throwsException,
+        );
+      });
+
+      test('passes correct request ID to command client', () async {
+        when(
+          mockUserCommandClient.declineFriendRequest('req-456'),
+        ).thenAnswer((_) async => {});
+
+        await userService.declineFriendRequest('req-456');
+
+        verify(mockUserCommandClient.declineFriendRequest('req-456')).called(1);
+      });
+    });
+
+    group('followUser', () {
+      test('follows user successfully', () async {
+        when(
+          mockUserCommandClient.followUser('user-123'),
+        ).thenAnswer((_) async => {});
+
+        await userService.followUser('user-123');
+
+        verify(mockUserCommandClient.followUser('user-123')).called(1);
+      });
+
+      test('handles errors when following user', () async {
+        when(
+          mockUserCommandClient.followUser(any),
+        ).thenThrow(Exception('Failed to follow user'));
+
+        expect(() => userService.followUser('user-123'), throwsException);
+      });
+
+      test('passes correct user ID to command client', () async {
+        when(
+          mockUserCommandClient.followUser('user-789'),
+        ).thenAnswer((_) async => {});
+
+        await userService.followUser('user-789');
+
+        verify(mockUserCommandClient.followUser('user-789')).called(1);
+      });
+    });
+
+    group('unfollowUser', () {
+      test('unfollows user successfully', () async {
+        when(
+          mockUserCommandClient.unfollowUser('user-123'),
+        ).thenAnswer((_) async => {});
+
+        await userService.unfollowUser('user-123');
+
+        verify(mockUserCommandClient.unfollowUser('user-123')).called(1);
+      });
+
+      test('handles errors when unfollowing user', () async {
+        when(
+          mockUserCommandClient.unfollowUser(any),
+        ).thenThrow(Exception('Failed to unfollow user'));
+
+        expect(() => userService.unfollowUser('user-123'), throwsException);
+      });
+
+      test('passes correct user ID to command client', () async {
+        when(
+          mockUserCommandClient.unfollowUser('user-456'),
+        ).thenAnswer((_) async => {});
+
+        await userService.unfollowUser('user-456');
+
+        verify(mockUserCommandClient.unfollowUser('user-456')).called(1);
+      });
+    });
+
+    group('updateProfile', () {
+      test('updates profile successfully', () async {
+        final request = UpdateProfileRequest(
+          displayName: 'John Doe',
+          bio: 'Test bio',
+        );
+        final mockProfile = createMockUserProfile('user-123', 'johndoe');
+
+        when(
+          mockUserCommandClient.updateProfile(request),
+        ).thenAnswer((_) async => mockProfile);
+
+        final result = await userService.updateProfile(request);
+
+        expect(result.id, 'user-123');
+        expect(result.username, 'johndoe');
+        verify(mockUserCommandClient.updateProfile(request)).called(1);
+      });
+
+      test('handles errors when updating profile', () async {
+        final request = UpdateProfileRequest(displayName: 'Test');
+
+        when(
+          mockUserCommandClient.updateProfile(request),
+        ).thenThrow(Exception('Failed to update profile'));
+
+        expect(() => userService.updateProfile(request), throwsException);
+      });
+
+      test('passes correct request to command client', () async {
+        final request = UpdateProfileRequest(
+          displayName: 'Updated Name',
+          bio: 'Updated bio',
+        );
+        final mockProfile = createMockUserProfile('user-123', 'testuser');
+
+        when(
+          mockUserCommandClient.updateProfile(request),
+        ).thenAnswer((_) async => mockProfile);
+
+        await userService.updateProfile(request);
+
+        verify(mockUserCommandClient.updateProfile(request)).called(1);
+      });
+    });
   });
 }
 

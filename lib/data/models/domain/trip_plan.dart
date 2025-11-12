@@ -3,20 +3,14 @@ class PlanLocation {
   final double lat;
   final double lon;
 
-  PlanLocation({
-    required this.lat,
-    required this.lon,
-  });
+  PlanLocation({required this.lat, required this.lon});
 
   factory PlanLocation.fromJson(Map<String, dynamic> json) => PlanLocation(
     lat: (json['lat'] as num).toDouble(),
     lon: (json['lon'] as num).toDouble(),
   );
 
-  Map<String, dynamic> toJson() => {
-    'lat': lat,
-    'lon': lon,
-  };
+  Map<String, dynamic> toJson() => {'lat': lat, 'lon': lon};
 }
 
 /// Trip plan model matching backend TripPlanDTO
@@ -75,7 +69,8 @@ class TripPlan {
     'userId': userId,
     'name': name,
     'planType': planType,
-    if (startDate != null) 'startDate': startDate!.toIso8601String().split('T')[0],
+    if (startDate != null)
+      'startDate': startDate!.toIso8601String().split('T')[0],
     if (endDate != null) 'endDate': endDate!.toIso8601String().split('T')[0],
     if (startLocation != null) 'startLocation': startLocation!.toJson(),
     if (endLocation != null) 'endLocation': endLocation!.toJson(),

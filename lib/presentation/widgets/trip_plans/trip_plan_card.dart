@@ -6,11 +6,7 @@ class TripPlanCard extends StatelessWidget {
   final TripPlan plan;
   final VoidCallback onTap;
 
-  const TripPlanCard({
-    super.key,
-    required this.plan,
-    required this.onTap,
-  });
+  const TripPlanCard({super.key, required this.plan, required this.onTap});
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
@@ -52,7 +48,11 @@ class TripPlanCard extends StatelessWidget {
               if (plan.startDate != null && plan.endDate != null) ...[
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -93,4 +93,3 @@ class TripPlanCard extends StatelessWidget {
     );
   }
 }
-

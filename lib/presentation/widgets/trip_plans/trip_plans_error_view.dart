@@ -33,13 +33,9 @@ class TripPlansErrorView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Retry'),
-          ),
+          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
         ],
       ),
     );
   }
 }
-
