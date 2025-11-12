@@ -8,6 +8,8 @@ on:
 jobs:
   version-and-release:
     runs-on: ubuntu-latest
+    # Skip if commit was made by GitHub Actions (prevents infinite loop)
+    if: "!contains(github.event.head_commit.message, 'ci: Prepare for next development iteration') && !contains(github.event.head_commit.message, 'ci: Release version')"
     outputs:
       release-version: ${{ steps.set-release-version.outputs.version }}
     permissions:
