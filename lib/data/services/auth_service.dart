@@ -121,4 +121,39 @@ class AuthService {
   Future<String?> getCurrentUsername() async {
     return await _tokenStorage.getUsername();
   }
+
+  /// Refresh access token using refresh token
+  /// Returns true if refresh was successful, false otherwise
+  /// Automatically called by ApiClient when tokens expire
+  Future<bool> refreshAccessToken() async {
+    try {
+      final refreshToken = await _tokenStorage.getRefreshToken();
+      if (refreshToken == null) {
+        await _tokenStorage.clearTokens();
+        return false;
+      }
+
+      final request = RefreshTokenRequest(refreshToken: refreshToken);
+      final authResponse = await _authClient.refresh(request);
+
+      // Save new tokens
+      await _tokenStorage.saveTokens(
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+        tokenType: authResponse.tokenType,
+        expiresIn: authResponse.expiresIn,
+      );
+
+      return true;
+    } catch (e) {
+      // Refresh failed, clear tokens
+      await _tokenStorage.clearTokens();
+      return false;
+    }
+  }
+
+  /// Check if the current access token is expired
+  Future<bool> isTokenExpired() async {
+    return await _tokenStorage.isAccessTokenExpired();
+  }
 }

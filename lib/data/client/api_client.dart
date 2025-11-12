@@ -9,8 +9,8 @@ class ApiClient {
   final TokenStorage _tokenStorage;
   final String baseUrl;
 
-  // Flag to prevent infinite refresh loops
-  bool _isRefreshing = false;
+  // Future to track ongoing refresh operation (prevents concurrent refresh attempts)
+  Future<bool>? _refreshFuture;
 
   ApiClient({
     required this.baseUrl,
@@ -25,13 +25,18 @@ class ApiClient {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
     var response = await _httpClient.get(uri, headers: requestHeaders);
 
-    // If unauthorized and we need auth, try to refresh token
-    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+    // If unauthorized and we need auth, try to refresh token (fallback)
+    if (response.statusCode == 401 && requireAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       if (refreshed) {
         // Retry the request with new token
@@ -50,6 +55,11 @@ class ApiClient {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
@@ -59,7 +69,7 @@ class ApiClient {
       body: jsonEncode(body),
     );
 
-    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+    if (response.statusCode == 401 && requireAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
@@ -81,6 +91,11 @@ class ApiClient {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
@@ -90,7 +105,7 @@ class ApiClient {
       body: jsonEncode(body),
     );
 
-    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+    if (response.statusCode == 401 && requireAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
@@ -112,6 +127,11 @@ class ApiClient {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
@@ -121,7 +141,7 @@ class ApiClient {
       body: jsonEncode(body),
     );
 
-    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+    if (response.statusCode == 401 && requireAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
@@ -142,12 +162,17 @@ class ApiClient {
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
     var response = await _httpClient.delete(uri, headers: requestHeaders);
 
-    if (response.statusCode == 401 && requireAuth && !_isRefreshing) {
+    if (response.statusCode == 401 && requireAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
@@ -181,11 +206,40 @@ class ApiClient {
     return headers;
   }
 
-  /// Refresh the access token using refresh token
-  Future<bool> _refreshTokenIfNeeded() async {
-    if (_isRefreshing) return false;
+  /// Ensure access token is valid, refreshing proactively if expired
+  /// This follows OAuth2 best practices by checking expiration before making requests
+  Future<void> _ensureValidToken() async {
+    try {
+      final isExpired = await _tokenStorage.isAccessTokenExpired();
+      if (isExpired) {
+        await _refreshTokenIfNeeded();
+      }
+    } catch (e) {
+      // If isAccessTokenExpired is not implemented (e.g., in tests), skip proactive refresh
+      // Fallback to 401 handling will still work
+    }
+  }
 
-    _isRefreshing = true;
+  /// Refresh the access token using refresh token
+  /// Uses a shared Future to prevent concurrent refresh attempts (OAuth2 best practice)
+  Future<bool> _refreshTokenIfNeeded() async {
+    // If already refreshing, wait for that operation to complete
+    if (_refreshFuture != null) {
+      return await _refreshFuture!;
+    }
+
+    // Start new refresh operation
+    _refreshFuture = _performTokenRefresh();
+
+    try {
+      return await _refreshFuture!;
+    } finally {
+      _refreshFuture = null;
+    }
+  }
+
+  /// Perform the actual token refresh operation
+  Future<bool> _performTokenRefresh() async {
     try {
       final refreshToken = await _tokenStorage.getRefreshToken();
       if (refreshToken == null) {
@@ -196,20 +250,37 @@ class ApiClient {
       final uri = Uri.parse(
         '${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}',
       );
+
+      // Use raw HTTP client to avoid recursion (don't call our own post method)
       final response = await _httpClient.post(
         uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'refresh_token': refreshToken}),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'refreshToken': refreshToken}),
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+        // Get new tokens from response
+        final newAccessToken = data['accessToken'] ?? data['access_token'];
+        final newRefreshToken = data['refreshToken'] ?? data['refresh_token'] ?? refreshToken;
+        final tokenType = data['tokenType'] ?? data['token_type'] ?? 'Bearer';
+        final expiresIn = data['expiresIn'] ?? data['expires_in'] ?? 3600;
+
+        if (newAccessToken == null) {
+          // Invalid response format
+          await _tokenStorage.clearTokens();
+          return false;
+        }
+
         await _tokenStorage.saveTokens(
-          accessToken: data['access_token'] ?? data['accessToken'],
-          refreshToken:
-              data['refresh_token'] ?? data['refreshToken'] ?? refreshToken,
-          tokenType: data['token_type'] ?? data['tokenType'] ?? 'Bearer',
-          expiresIn: data['expires_in'] ?? data['expiresIn'] ?? 3600,
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+          tokenType: tokenType,
+          expiresIn: expiresIn is int ? expiresIn : int.tryParse(expiresIn.toString()) ?? 3600,
         );
         return true;
       } else {
@@ -218,10 +289,9 @@ class ApiClient {
         return false;
       }
     } catch (e) {
+      // On any error, clear tokens to force re-login
       await _tokenStorage.clearTokens();
       return false;
-    } finally {
-      _isRefreshing = false;
     }
   }
 
@@ -262,11 +332,17 @@ class ApiClient {
   /// Handle errors from API
   Exception _handleError(http.Response response) {
     try {
+      // Try to parse as JSON first
       final error = jsonDecode(response.body);
       final message = error['message'] ?? error['error'] ?? 'Unknown error';
       return Exception('API Error (${response.statusCode}): $message');
     } catch (e) {
-      return Exception('API Error (${response.statusCode}): ${response.body}');
+      // If not JSON, return the raw body (backend might return plain text)
+      final body = response.body.trim();
+      if (body.isNotEmpty && body.length < 200) {
+        return Exception('API Error (${response.statusCode}): $body');
+      }
+      return Exception('API Error (${response.statusCode})');
     }
   }
 }
