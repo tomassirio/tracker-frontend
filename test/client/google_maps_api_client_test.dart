@@ -29,10 +29,7 @@ void main() {
       test('includes zoom level when provided', () {
         final center = const LatLng(37.7749, -122.4194);
 
-        final url = client.generateStaticMapUrl(
-          center: center,
-          zoom: 12,
-        );
+        final url = client.generateStaticMapUrl(center: center, zoom: 12);
 
         expect(url, contains('zoom=12'));
       });
@@ -69,12 +66,12 @@ void main() {
           weight: 4,
         );
 
-        final url = client.generateStaticMapUrl(
-          center: center,
-          path: path,
-        );
+        final url = client.generateStaticMapUrl(center: center, path: path);
 
-        expect(url, contains('path=color:0x0088ffff|weight:4|enc:_p~iF~ps|U_ulLnnqC'));
+        expect(
+          url,
+          contains('path=color:0x0088ffff|weight:4|enc:_p~iF~ps|U_ulLnnqC'),
+        );
       });
 
       test('handles all parameters together', () {
@@ -130,7 +127,12 @@ void main() {
         expect(url, contains('center=$centerLat,$centerLng'));
         expect(url, contains('markers=color:green|label:A|37.7749,-122.4194'));
         expect(url, contains('markers=color:red|label:B|37.7849,-122.4094'));
-        expect(url, contains('path=color:0x0088ffff|weight:3|37.7749,-122.4194|37.7849,-122.4094'));
+        expect(
+          url,
+          contains(
+            'path=color:0x0088ffff|weight:3|37.7749,-122.4194|37.7849,-122.4094',
+          ),
+        );
       });
 
       test('uses encoded polyline when provided', () {
@@ -144,7 +146,10 @@ void main() {
           encodedPolyline: encodedPolyline,
         );
 
-        expect(url, contains('path=color:0x0088ffff|weight:4|enc:$encodedPolyline'));
+        expect(
+          url,
+          contains('path=color:0x0088ffff|weight:4|enc:$encodedPolyline'),
+        );
       });
 
       test('respects custom colors and labels', () {
@@ -162,8 +167,14 @@ void main() {
           pathWeight: 5,
         );
 
-        expect(url, contains('markers=color:blue|label:Start|37.7749,-122.4194'));
-        expect(url, contains('markers=color:purple|label:End|37.7849,-122.4094'));
+        expect(
+          url,
+          contains('markers=color:blue|label:Start|37.7749,-122.4194'),
+        );
+        expect(
+          url,
+          contains('markers=color:purple|label:End|37.7849,-122.4094'),
+        );
         expect(url, contains('color:0xff00ffff'));
       });
 
@@ -197,9 +208,7 @@ void main() {
     });
 
     test('generates URL parameter with only position', () {
-      final marker = MapMarker(
-        position: const LatLng(37.7749, -122.4194),
-      );
+      final marker = MapMarker(position: const LatLng(37.7749, -122.4194));
 
       final param = marker.toUrlParameter();
 
@@ -244,9 +253,7 @@ void main() {
       });
 
       test('uses default color and weight', () {
-        final path = MapPath.encoded(
-          encodedPolyline: '_p~iF~ps|U_ulLnnqC',
-        );
+        final path = MapPath.encoded(encodedPolyline: '_p~iF~ps|U_ulLnnqC');
 
         final param = path.toUrlParameter();
 
@@ -268,7 +275,10 @@ void main() {
 
         final param = path.toUrlParameter();
 
-        expect(param, 'path=color:0xff0000ff|weight:5|37.7749,-122.4194|37.7849,-122.4094|37.7949,-122.3994');
+        expect(
+          param,
+          'path=color:0xff0000ff|weight:5|37.7749,-122.4194|37.7849,-122.4094|37.7949,-122.3994',
+        );
       });
 
       test('uses default color and weight', () {
@@ -306,4 +316,3 @@ void main() {
     });
   });
 }
-

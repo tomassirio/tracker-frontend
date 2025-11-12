@@ -10,7 +10,7 @@ class GoogleRoutesApiClient {
   final http.Client _httpClient;
 
   GoogleRoutesApiClient(this._apiKey, {http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? http.Client();
 
   /// Get walking route between waypoints
   ///

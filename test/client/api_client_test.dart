@@ -28,8 +28,9 @@ void main() {
     group('GET requests', () {
       test('successful GET without auth', () async {
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         final response = await apiClient.get('/test');
 
@@ -40,16 +41,18 @@ void main() {
       });
 
       test('successful GET with auth', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'test-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'test-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         final response = await apiClient.get('/test', requireAuth: true);
 
@@ -59,22 +62,27 @@ void main() {
       });
 
       test('GET with 401 triggers token refresh and retry', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'old-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'old-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test');
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
 
         // First request returns 401, then retry returns 200
         var getCallCount = 0;
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async {
+        when(mockHttpClient.get(uri, headers: anyNamed('headers'))).thenAnswer((
+          _,
+        ) async {
           getCallCount++;
           if (getCallCount == 1) {
             return http.Response('Unauthorized', 401);
@@ -84,149 +92,179 @@ void main() {
         });
 
         // Refresh token request succeeds
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'accessToken': 'new-token',
-                'refreshToken': 'new-refresh-token',
-                'tokenType': 'Bearer',
-                'expiresIn': 3600,
-              }),
-              200,
-            ));
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({
+              'accessToken': 'new-token',
+              'refreshToken': 'new-refresh-token',
+              'tokenType': 'Bearer',
+              'expiresIn': 3600,
+            }),
+            200,
+          ),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
-
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
         final response = await apiClient.get('/test', requireAuth: true);
 
         expect(response.statusCode, 200);
-        verify(mockTokenStorage.saveTokens(
-          accessToken: 'new-token',
-          refreshToken: 'new-refresh-token',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        )).called(1);
+        verify(
+          mockTokenStorage.saveTokens(
+            accessToken: 'new-token',
+            refreshToken: 'new-refresh-token',
+            tokenType: 'Bearer',
+            expiresIn: 3600,
+          ),
+        ).called(1);
       });
 
       test('GET with custom headers', () async {
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get(
           '/test',
           headers: {'X-Custom-Header': 'custom-value'},
         );
 
-        verify(mockHttpClient.get(
-          uri,
-          headers: argThat(
-            containsPair('X-Custom-Header', 'custom-value'),
-            named: 'headers',
+        verify(
+          mockHttpClient.get(
+            uri,
+            headers: argThat(
+              containsPair('X-Custom-Header', 'custom-value'),
+              named: 'headers',
+            ),
           ),
-        )).called(1);
+        ).called(1);
       });
 
       test('GET with expired token triggers proactive refresh', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'accessToken': 'new-token',
-                'refreshToken': 'refresh-token',
-                'tokenType': 'Bearer',
-                'expiresIn': 3600,
-              }),
-              200,
-            ));
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({
+              'accessToken': 'new-token',
+              'refreshToken': 'refresh-token',
+              'tokenType': 'Bearer',
+              'expiresIn': 3600,
+            }),
+            200,
+          ),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'new-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'new-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
         verify(mockTokenStorage.isAccessTokenExpired()).called(1);
-        verify(mockTokenStorage.saveTokens(
-          accessToken: 'new-token',
-          refreshToken: 'refresh-token',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        )).called(1);
+        verify(
+          mockTokenStorage.saveTokens(
+            accessToken: 'new-token',
+            refreshToken: 'refresh-token',
+            tokenType: 'Bearer',
+            expiresIn: 3600,
+          ),
+        ).called(1);
       });
     });
 
     group('POST requests', () {
       test('successful POST without auth', () async {
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.post(
-          uri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response('{"id": "123"}', 201));
+        when(
+          mockHttpClient.post(
+            uri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async => http.Response('{"id": "123"}', 201));
 
-        final response = await apiClient.post(
-          '/test',
-          body: {'name': 'test'},
-        );
+        final response = await apiClient.post('/test', body: {'name': 'test'});
 
         expect(response.statusCode, 201);
-        verify(mockHttpClient.post(
-          uri,
-          headers: anyNamed('headers'),
-          body: jsonEncode({'name': 'test'}),
-        )).called(1);
+        verify(
+          mockHttpClient.post(
+            uri,
+            headers: anyNamed('headers'),
+            body: jsonEncode({'name': 'test'}),
+          ),
+        ).called(1);
       });
 
       test('POST with auth and 401 retry', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'old-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'old-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test');
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
 
         // Setup POST to test endpoint: first 401, then retry with 201
         var postCallCount = 0;
-        when(mockHttpClient.post(
-          uri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async {
+        when(
+          mockHttpClient.post(
+            uri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async {
           postCallCount++;
           if (postCallCount == 1) {
             return http.Response('Unauthorized', 401);
@@ -236,25 +274,30 @@ void main() {
         });
 
         // Refresh endpoint succeeds
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'accessToken': 'new-token',
-                'refreshToken': 'refresh-token',
-              }),
-              200,
-            ));
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({
+              'accessToken': 'new-token',
+              'refreshToken': 'refresh-token',
+            }),
+            200,
+          ),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
-
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
         final response = await apiClient.post(
           '/test',
@@ -269,11 +312,13 @@ void main() {
     group('PUT requests', () {
       test('successful PUT without auth', () async {
         final uri = Uri.parse('https://api.example.com/test/123');
-        when(mockHttpClient.put(
-          uri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response('{"id": "123"}', 200));
+        when(
+          mockHttpClient.put(
+            uri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async => http.Response('{"id": "123"}', 200));
 
         final response = await apiClient.put(
           '/test/123',
@@ -284,25 +329,31 @@ void main() {
       });
 
       test('PUT with 401 triggers refresh and retry', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'old-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'old-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test/123');
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
 
         // PUT endpoint: first 401, then retry with 200
         var putCallCount = 0;
-        when(mockHttpClient.put(
-          uri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async {
+        when(
+          mockHttpClient.put(
+            uri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async {
           putCallCount++;
           if (putCallCount == 1) {
             return http.Response('Unauthorized', 401);
@@ -311,27 +362,32 @@ void main() {
           }
         });
 
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'access_token': 'new-token',
-                'refresh_token': 'refresh-token',
-                'token_type': 'Bearer',
-                'expires_in': 7200,
-              }),
-              200,
-            ));
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({
+              'access_token': 'new-token',
+              'refresh_token': 'refresh-token',
+              'token_type': 'Bearer',
+              'expires_in': 7200,
+            }),
+            200,
+          ),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
-
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
         final response = await apiClient.put(
           '/test/123',
@@ -340,23 +396,27 @@ void main() {
         );
 
         expect(response.statusCode, 200);
-        verify(mockTokenStorage.saveTokens(
-          accessToken: 'new-token',
-          refreshToken: 'refresh-token',
-          tokenType: 'Bearer',
-          expiresIn: 7200,
-        )).called(1);
+        verify(
+          mockTokenStorage.saveTokens(
+            accessToken: 'new-token',
+            refreshToken: 'refresh-token',
+            tokenType: 'Bearer',
+            expiresIn: 7200,
+          ),
+        ).called(1);
       });
     });
 
     group('PATCH requests', () {
       test('successful PATCH without auth', () async {
         final uri = Uri.parse('https://api.example.com/test/123');
-        when(mockHttpClient.patch(
-          uri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response('{"id": "123"}', 200));
+        when(
+          mockHttpClient.patch(
+            uri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async => http.Response('{"id": "123"}', 200));
 
         final response = await apiClient.patch(
           '/test/123',
@@ -367,25 +427,31 @@ void main() {
       });
 
       test('PATCH with 401 triggers refresh and retry', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'old-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'old-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test/123');
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
 
         // PATCH endpoint: first 401, then retry with 200
         var patchCallCount = 0;
-        when(mockHttpClient.patch(
-          uri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async {
+        when(
+          mockHttpClient.patch(
+            uri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async {
           patchCallCount++;
           if (patchCallCount == 1) {
             return http.Response('Unauthorized', 401);
@@ -394,24 +460,25 @@ void main() {
           }
         });
 
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'accessToken': 'new-token',
-              }),
-              200,
-            ));
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async =>
+              http.Response(jsonEncode({'accessToken': 'new-token'}), 200),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
-
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
         final response = await apiClient.patch(
           '/test/123',
@@ -426,8 +493,9 @@ void main() {
     group('DELETE requests', () {
       test('successful DELETE without auth', () async {
         final uri = Uri.parse('https://api.example.com/test/123');
-        when(mockHttpClient.delete(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('', 204));
+        when(
+          mockHttpClient.delete(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('', 204));
 
         final response = await apiClient.delete('/test/123');
 
@@ -435,22 +503,27 @@ void main() {
       });
 
       test('DELETE with 401 triggers refresh and retry', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'old-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'old-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test/123');
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
 
         // DELETE endpoint: first 401, then retry with 204
         var deleteCallCount = 0;
-        when(mockHttpClient.delete(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async {
+        when(
+          mockHttpClient.delete(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async {
           deleteCallCount++;
           if (deleteCallCount == 1) {
             return http.Response('Unauthorized', 401);
@@ -459,25 +532,30 @@ void main() {
           }
         });
 
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'accessToken': 'new-token',
-                'refreshToken': 'refresh-token',
-              }),
-              200,
-            ));
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({
+              'accessToken': 'new-token',
+              'refreshToken': 'refresh-token',
+            }),
+            200,
+          ),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
-
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
         final response = await apiClient.delete('/test/123', requireAuth: true);
 
@@ -487,67 +565,79 @@ void main() {
 
     group('Token refresh', () {
       test('refresh token success with snake_case response', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({
-                'access_token': 'new-token',
-                'refresh_token': 'new-refresh',
-                'token_type': 'Bearer',
-                'expires_in': '3600',
-              }),
-              200,
-            ));
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({
+              'access_token': 'new-token',
+              'refresh_token': 'new-refresh',
+              'token_type': 'Bearer',
+              'expires_in': '3600',
+            }),
+            200,
+          ),
+        );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
+        when(
+          mockTokenStorage.saveTokens(
+            accessToken: anyNamed('accessToken'),
+            refreshToken: anyNamed('refreshToken'),
+            tokenType: anyNamed('tokenType'),
+            expiresIn: anyNamed('expiresIn'),
+          ),
+        ).thenAnswer((_) async => {});
 
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'new-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'new-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
-        verify(mockTokenStorage.saveTokens(
-          accessToken: 'new-token',
-          refreshToken: 'new-refresh',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        )).called(1);
+        verify(
+          mockTokenStorage.saveTokens(
+            accessToken: 'new-token',
+            refreshToken: 'new-refresh',
+            tokenType: 'Bearer',
+            expiresIn: 3600,
+          ),
+        ).called(1);
       });
 
       test('refresh token fails with no refresh token', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => null);
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => true);
+        when(mockTokenStorage.getRefreshToken()).thenAnswer((_) async => null);
         when(mockTokenStorage.clearTokens()).thenAnswer((_) async => {});
 
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => null);
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(mockTokenStorage.getAccessToken()).thenAnswer((_) async => null);
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
@@ -555,30 +645,34 @@ void main() {
       });
 
       test('refresh token fails with invalid response', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              jsonEncode({'error': 'invalid'}),
-              200,
-            ));
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(jsonEncode({'error': 'invalid'}), 200),
+        );
 
         when(mockTokenStorage.clearTokens()).thenAnswer((_) async => {});
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => null);
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(mockTokenStorage.getAccessToken()).thenAnswer((_) async => null);
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
@@ -586,27 +680,32 @@ void main() {
       });
 
       test('refresh token fails with 401 response', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response('Unauthorized', 401));
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer((_) async => http.Response('Unauthorized', 401));
 
         when(mockTokenStorage.clearTokens()).thenAnswer((_) async => {});
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => null);
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(mockTokenStorage.getAccessToken()).thenAnswer((_) async => null);
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
@@ -614,106 +713,131 @@ void main() {
       });
 
       test('refresh token fails with exception', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockTokenStorage.getRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenThrow(Exception('Network error'));
+        final refreshUri = Uri.parse(
+          'http://localhost:8083/api/1/auth/refresh',
+        );
+        when(
+          mockHttpClient.post(
+            refreshUri,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenThrow(Exception('Network error'));
 
         when(mockTokenStorage.clearTokens()).thenAnswer((_) async => {});
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => null);
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(mockTokenStorage.getAccessToken()).thenAnswer((_) async => null);
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
         verify(mockTokenStorage.clearTokens()).called(1);
       });
 
-      test('concurrent refresh requests share the same refresh operation', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'refresh-token');
+      test(
+        'concurrent refresh requests share the same refresh operation',
+        () async {
+          when(
+            mockTokenStorage.isAccessTokenExpired(),
+          ).thenAnswer((_) async => true);
+          when(
+            mockTokenStorage.getRefreshToken(),
+          ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async {
-          await Future.delayed(Duration(milliseconds: 100));
-          return http.Response(
-            jsonEncode({
-              'accessToken': 'new-token',
-              'refreshToken': 'refresh-token',
-            }),
-            200,
+          final refreshUri = Uri.parse(
+            'http://localhost:8083/api/1/auth/refresh',
           );
-        });
+          when(
+            mockHttpClient.post(
+              refreshUri,
+              headers: anyNamed('headers'),
+              body: anyNamed('body'),
+            ),
+          ).thenAnswer((_) async {
+            await Future.delayed(Duration(milliseconds: 100));
+            return http.Response(
+              jsonEncode({
+                'accessToken': 'new-token',
+                'refreshToken': 'refresh-token',
+              }),
+              200,
+            );
+          });
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
+          when(
+            mockTokenStorage.saveTokens(
+              accessToken: anyNamed('accessToken'),
+              refreshToken: anyNamed('refreshToken'),
+              tokenType: anyNamed('tokenType'),
+              expiresIn: anyNamed('expiresIn'),
+            ),
+          ).thenAnswer((_) async => {});
 
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'new-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+          when(
+            mockTokenStorage.getAccessToken(),
+          ).thenAnswer((_) async => 'new-token');
+          when(
+            mockTokenStorage.getTokenType(),
+          ).thenAnswer((_) async => 'Bearer');
 
-        final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+          final uri = Uri.parse('https://api.example.com/test');
+          when(
+            mockHttpClient.get(uri, headers: anyNamed('headers')),
+          ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
-        // Fire off two concurrent requests
-        await Future.wait([
-          apiClient.get('/test', requireAuth: true),
-          apiClient.get('/test', requireAuth: true),
-        ]);
+          // Fire off two concurrent requests
+          await Future.wait([
+            apiClient.get('/test', requireAuth: true),
+            apiClient.get('/test', requireAuth: true),
+          ]);
 
-        // Should only refresh once despite two concurrent requests
-        verify(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).called(1);
-      });
+          // Should only refresh once despite two concurrent requests
+          verify(
+            mockHttpClient.post(
+              refreshUri,
+              headers: anyNamed('headers'),
+              body: anyNamed('body'),
+            ),
+          ).called(1);
+        },
+      );
 
       test('uses default Bearer token type when none provided', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => false);
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'test-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => null);
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenAnswer((_) async => false);
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'test-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => null);
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         await apiClient.get('/test', requireAuth: true);
 
-        verify(mockHttpClient.get(
-          uri,
-          headers: argThat(
-            containsPair('Authorization', 'Bearer test-token'),
-            named: 'headers',
+        verify(
+          mockHttpClient.get(
+            uri,
+            headers: argThat(
+              containsPair('Authorization', 'Bearer test-token'),
+              named: 'headers',
+            ),
           ),
-        )).called(1);
+        ).called(1);
       });
     });
 
@@ -753,30 +877,31 @@ void main() {
             response,
             (json) => TestModel.fromJson(json),
           ),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Bad request'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Bad request'),
+            ),
+          ),
         );
       });
 
       test('handleResponse throws on 404 error with JSON error field', () {
-        final response = http.Response(
-          '{"error": "Not found"}',
-          404,
-        );
+        final response = http.Response('{"error": "Not found"}', 404);
 
         expect(
           () => apiClient.handleResponse(
             response,
             (json) => TestModel.fromJson(json),
           ),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Not found'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Not found'),
+            ),
+          ),
         );
       });
 
@@ -788,11 +913,13 @@ void main() {
             response,
             (json) => TestModel.fromJson(json),
           ),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Internal Server Error'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Internal Server Error'),
+            ),
+          ),
         );
       });
 
@@ -805,14 +932,13 @@ void main() {
             response,
             (json) => TestModel.fromJson(json),
           ),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            allOf(
-              contains('API Error (500)'),
-              isNot(contains(longBody)),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              allOf(contains('API Error (500)'), isNot(contains(longBody))),
             ),
-          )),
+          ),
         );
       });
 
@@ -874,16 +1000,18 @@ void main() {
 
     group('Edge cases', () {
       test('handles isAccessTokenExpired throwing exception', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenThrow(UnimplementedError());
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'test-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+        when(
+          mockTokenStorage.isAccessTokenExpired(),
+        ).thenThrow(UnimplementedError());
+        when(
+          mockTokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'test-token');
+        when(mockTokenStorage.getTokenType()).thenAnswer((_) async => 'Bearer');
 
         final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+        when(
+          mockHttpClient.get(uri, headers: anyNamed('headers')),
+        ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
         final response = await apiClient.get('/test', requireAuth: true);
 
@@ -891,50 +1019,68 @@ void main() {
         // Should still work, falling back to 401 handling
       });
 
-      test('refresh keeps old refresh token if not provided in response', () async {
-        when(mockTokenStorage.isAccessTokenExpired())
-            .thenAnswer((_) async => true);
-        when(mockTokenStorage.getRefreshToken())
-            .thenAnswer((_) async => 'old-refresh-token');
+      test(
+        'refresh keeps old refresh token if not provided in response',
+        () async {
+          when(
+            mockTokenStorage.isAccessTokenExpired(),
+          ).thenAnswer((_) async => true);
+          when(
+            mockTokenStorage.getRefreshToken(),
+          ).thenAnswer((_) async => 'old-refresh-token');
 
-        final refreshUri = Uri.parse('http://localhost:8083/api/1/auth/refresh');
-        when(mockHttpClient.post(
-          refreshUri,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
+          final refreshUri = Uri.parse(
+            'http://localhost:8083/api/1/auth/refresh',
+          );
+          when(
+            mockHttpClient.post(
+              refreshUri,
+              headers: anyNamed('headers'),
+              body: anyNamed('body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
               jsonEncode({
                 'accessToken': 'new-access-token',
                 // No refreshToken in response
               }),
               200,
-            ));
+            ),
+          );
 
-        when(mockTokenStorage.saveTokens(
-          accessToken: anyNamed('accessToken'),
-          refreshToken: anyNamed('refreshToken'),
-          tokenType: anyNamed('tokenType'),
-          expiresIn: anyNamed('expiresIn'),
-        )).thenAnswer((_) async => {});
+          when(
+            mockTokenStorage.saveTokens(
+              accessToken: anyNamed('accessToken'),
+              refreshToken: anyNamed('refreshToken'),
+              tokenType: anyNamed('tokenType'),
+              expiresIn: anyNamed('expiresIn'),
+            ),
+          ).thenAnswer((_) async => {});
 
-        when(mockTokenStorage.getAccessToken())
-            .thenAnswer((_) async => 'new-access-token');
-        when(mockTokenStorage.getTokenType())
-            .thenAnswer((_) async => 'Bearer');
+          when(
+            mockTokenStorage.getAccessToken(),
+          ).thenAnswer((_) async => 'new-access-token');
+          when(
+            mockTokenStorage.getTokenType(),
+          ).thenAnswer((_) async => 'Bearer');
 
-        final uri = Uri.parse('https://api.example.com/test');
-        when(mockHttpClient.get(uri, headers: anyNamed('headers')))
-            .thenAnswer((_) async => http.Response('{"data": "test"}', 200));
+          final uri = Uri.parse('https://api.example.com/test');
+          when(
+            mockHttpClient.get(uri, headers: anyNamed('headers')),
+          ).thenAnswer((_) async => http.Response('{"data": "test"}', 200));
 
-        await apiClient.get('/test', requireAuth: true);
+          await apiClient.get('/test', requireAuth: true);
 
-        verify(mockTokenStorage.saveTokens(
-          accessToken: 'new-access-token',
-          refreshToken: 'old-refresh-token',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        )).called(1);
-      });
+          verify(
+            mockTokenStorage.saveTokens(
+              accessToken: 'new-access-token',
+              refreshToken: 'old-refresh-token',
+              tokenType: 'Bearer',
+              expiresIn: 3600,
+            ),
+          ).called(1);
+        },
+      );
     });
   });
 }
@@ -947,10 +1093,6 @@ class TestModel {
   TestModel({required this.id, required this.name});
 
   factory TestModel.fromJson(Map<String, dynamic> json) {
-    return TestModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-    );
+    return TestModel(id: json['id'] as String, name: json['name'] as String);
   }
 }
-

@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class EmptyTripPlansView extends StatelessWidget {
   final VoidCallback? onCreatePressed;
 
-  const EmptyTripPlansView({
-    super.key,
-    this.onCreatePressed,
-  });
+  const EmptyTripPlansView({super.key, this.onCreatePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -51,4 +48,3 @@ class EmptyTripPlansView extends StatelessWidget {
     );
   }
 }
-

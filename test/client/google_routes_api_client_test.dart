@@ -30,20 +30,20 @@ void main() {
         final mockResponse = {
           'routes': [
             {
-              'polyline': {
-                'encodedPolyline': '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
-              },
+              'polyline': {'encodedPolyline': '_p~iF~ps|U_ulLnnqC_mqNvxq`@'},
               'distanceMeters': 1500,
               'duration': '300s',
-            }
-          ]
+            },
+          ],
         };
 
-        when(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer(
+        when(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
@@ -56,14 +56,18 @@ void main() {
         expect(result.duration, '300s');
         expect(result.distanceKm, 1.5);
 
-        final captured = verify(mockHttpClient.post(
-          captureAny,
-          headers: captureAnyNamed('headers'),
-          body: captureAnyNamed('body'),
-        )).captured;
+        final captured = verify(
+          mockHttpClient.post(
+            captureAny,
+            headers: captureAnyNamed('headers'),
+            body: captureAnyNamed('body'),
+          ),
+        ).captured;
 
-        expect(captured[0].toString(),
-            contains('routes.googleapis.com/directions/v2:computeRoutes'));
+        expect(
+          captured[0].toString(),
+          contains('routes.googleapis.com/directions/v2:computeRoutes'),
+        );
 
         final headers = captured[1] as Map<String, String>;
         expect(headers['X-Goog-Api-Key'], apiKey);
@@ -79,11 +83,13 @@ void main() {
           const LatLng(37.7849, -122.4094),
         ];
 
-        when(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer(
+        when(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
           (_) async => http.Response('{"error": "Invalid request"}', 400),
         );
 
@@ -101,11 +107,13 @@ void main() {
 
         expect(result.points, waypoints);
         expect(result.hasError, false);
-        verifyNever(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        ));
+        verifyNever(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        );
       });
 
       test('handles intermediate waypoints correctly', () async {
@@ -118,20 +126,20 @@ void main() {
         final mockResponse = {
           'routes': [
             {
-              'polyline': {
-                'encodedPolyline': '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
-              },
+              'polyline': {'encodedPolyline': '_p~iF~ps|U_ulLnnqC_mqNvxq`@'},
               'distanceMeters': 2500,
               'duration': '500s',
-            }
-          ]
+            },
+          ],
         };
 
-        when(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer(
+        when(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
@@ -139,11 +147,13 @@ void main() {
 
         expect(result.isSuccess, true);
 
-        final captured = verify(mockHttpClient.post(
-          captureAny,
-          headers: captureAnyNamed('headers'),
-          body: captureAnyNamed('body'),
-        )).captured;
+        final captured = verify(
+          mockHttpClient.post(
+            captureAny,
+            headers: captureAnyNamed('headers'),
+            body: captureAnyNamed('body'),
+          ),
+        ).captured;
 
         final body = json.decode(captured[2] as String);
         expect(body['intermediates'], isNotNull);
@@ -158,11 +168,13 @@ void main() {
 
         final mockResponse = {'routes': []};
 
-        when(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer(
+        when(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
@@ -180,18 +192,17 @@ void main() {
 
         final mockResponse = {
           'routes': [
-            {
-              'distanceMeters': 1500,
-              'duration': '300s',
-            }
-          ]
+            {'distanceMeters': 1500, 'duration': '300s'},
+          ],
         };
 
-        when(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer(
+        when(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
@@ -212,20 +223,20 @@ void main() {
         final mockResponse = {
           'routes': [
             {
-              'polyline': {
-                'encodedPolyline': '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
-              },
+              'polyline': {'encodedPolyline': '_p~iF~ps|U_ulLnnqC_mqNvxq`@'},
               'distanceMeters': 1200,
               'duration': '180s',
-            }
-          ]
+            },
+          ],
         };
 
-        when(mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer(
+        when(
+          mockHttpClient.post(
+            any,
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
@@ -233,11 +244,13 @@ void main() {
 
         expect(result.isSuccess, true);
 
-        final captured = verify(mockHttpClient.post(
-          captureAny,
-          headers: captureAnyNamed('headers'),
-          body: captureAnyNamed('body'),
-        )).captured;
+        final captured = verify(
+          mockHttpClient.post(
+            captureAny,
+            headers: captureAnyNamed('headers'),
+            body: captureAnyNamed('body'),
+          ),
+        ).captured;
 
         final body = json.decode(captured[2] as String);
         expect(body['travelMode'], 'DRIVE');
@@ -318,10 +331,7 @@ void main() {
 
     group('RouteResult', () {
       test('hasError returns true when error is present', () {
-        final result = RouteResult(
-          points: [],
-          error: 'Test error',
-        );
+        final result = RouteResult(points: [], error: 'Test error');
 
         expect(result.hasError, true);
         expect(result.isSuccess, false);
@@ -337,9 +347,7 @@ void main() {
       });
 
       test('isSuccess returns false for single point', () {
-        final result = RouteResult(
-          points: [const LatLng(1, 1)],
-        );
+        final result = RouteResult(points: [const LatLng(1, 1)]);
 
         expect(result.isSuccess, false);
       });
@@ -363,4 +371,3 @@ void main() {
     });
   });
 }
-

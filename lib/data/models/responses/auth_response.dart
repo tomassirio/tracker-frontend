@@ -23,7 +23,10 @@ class AuthResponse {
       tokenType: json['tokenType'] ?? json['token_type'] ?? 'Bearer',
       expiresIn: (json['expiresIn'] ?? json['expires_in'] ?? 3600) is int
           ? json['expiresIn'] ?? json['expires_in'] ?? 3600
-          : int.tryParse((json['expiresIn'] ?? json['expires_in'] ?? 3600).toString()) ?? 3600,
+          : int.tryParse(
+                  (json['expiresIn'] ?? json['expires_in'] ?? 3600).toString(),
+                ) ??
+                3600,
       userId: json['userId'] ?? json['user_id'],
       username: json['username'],
     );

@@ -266,7 +266,8 @@ class ApiClient {
 
         // Get new tokens from response
         final newAccessToken = data['accessToken'] ?? data['access_token'];
-        final newRefreshToken = data['refreshToken'] ?? data['refresh_token'] ?? refreshToken;
+        final newRefreshToken =
+            data['refreshToken'] ?? data['refresh_token'] ?? refreshToken;
         final tokenType = data['tokenType'] ?? data['token_type'] ?? 'Bearer';
         final expiresIn = data['expiresIn'] ?? data['expires_in'] ?? 3600;
 
@@ -280,7 +281,9 @@ class ApiClient {
           accessToken: newAccessToken,
           refreshToken: newRefreshToken,
           tokenType: tokenType,
-          expiresIn: expiresIn is int ? expiresIn : int.tryParse(expiresIn.toString()) ?? 3600,
+          expiresIn: expiresIn is int
+              ? expiresIn
+              : int.tryParse(expiresIn.toString()) ?? 3600,
         );
         return true;
       } else {

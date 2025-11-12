@@ -139,7 +139,10 @@ void main() {
         expect(result[0].name, 'Europe Trip');
         expect(result[1].name, 'Asia Adventure');
         expect(mockHttpClient.lastMethod, 'GET');
-        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlansMe));
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripPlansMe),
+        );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
           'Bearer test-token',

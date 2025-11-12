@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class LoginRequiredView extends StatelessWidget {
   final VoidCallback? onLoginPressed;
 
-  const LoginRequiredView({
-    super.key,
-    this.onLoginPressed,
-  });
+  const LoginRequiredView({super.key, this.onLoginPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -51,4 +48,3 @@ class LoginRequiredView extends StatelessWidget {
     );
   }
 }
-

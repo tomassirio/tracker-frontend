@@ -7,6 +7,7 @@ import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/services/comment_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/services/auth_service.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 
 import 'trip_detail_repository_test.mocks.dart';
 
@@ -190,6 +191,161 @@ void main() {
         expect(result, isEmpty);
       });
     });
+
+    group('addReaction', () {
+      test('adds reaction to a comment successfully', () async {
+        when(
+          mockCommentService.addReaction('comment-1', any),
+        ).thenAnswer((_) async => {});
+
+        await repository.addReaction('comment-1', ReactionType.heart);
+
+        verify(mockCommentService.addReaction('comment-1', any)).called(1);
+      });
+
+      test('handles API errors gracefully', () async {
+        when(
+          mockCommentService.addReaction('comment-1', any),
+        ).thenThrow(Exception('API Error'));
+
+        expect(
+          () => repository.addReaction('comment-1', ReactionType.heart),
+          throwsException,
+        );
+      });
+    });
+
+    group('removeReaction', () {
+      test('removes reaction from a comment successfully', () async {
+        when(
+          mockCommentService.removeReaction('comment-1'),
+        ).thenAnswer((_) async => {});
+
+        await repository.removeReaction('comment-1');
+
+        verify(mockCommentService.removeReaction('comment-1')).called(1);
+      });
+
+      test('handles API errors gracefully', () async {
+        when(
+          mockCommentService.removeReaction('comment-1'),
+        ).thenThrow(Exception('API Error'));
+
+        expect(() => repository.removeReaction('comment-1'), throwsException);
+      });
+    });
+
+    group('changeTripStatus', () {
+      test('changes trip status successfully', () async {
+        final updatedTrip = createMockTrip('trip-1', TripStatus.inProgress);
+
+        when(
+          mockTripService.changeStatus('trip-1', any),
+        ).thenAnswer((_) async => updatedTrip);
+
+        final result = await repository.changeTripStatus(
+          'trip-1',
+          TripStatus.inProgress,
+        );
+
+        expect(result.id, 'trip-1');
+        expect(result.status, TripStatus.inProgress);
+        verify(mockTripService.changeStatus('trip-1', any)).called(1);
+      });
+
+      test('handles API errors gracefully', () async {
+        when(
+          mockTripService.changeStatus('trip-1', any),
+        ).thenThrow(Exception('API Error'));
+
+        expect(
+          () => repository.changeTripStatus('trip-1', TripStatus.finished),
+          throwsException,
+        );
+      });
+    });
+
+    group('isLoggedIn', () {
+      test('returns true when user is logged in', () async {
+        when(mockAuthService.isLoggedIn()).thenAnswer((_) async => true);
+
+        final result = await repository.isLoggedIn();
+
+        expect(result, true);
+        verify(mockAuthService.isLoggedIn()).called(1);
+      });
+
+      test('returns false when user is not logged in', () async {
+        when(mockAuthService.isLoggedIn()).thenAnswer((_) async => false);
+
+        final result = await repository.isLoggedIn();
+
+        expect(result, false);
+        verify(mockAuthService.isLoggedIn()).called(1);
+      });
+    });
+
+    group('getCurrentUsername', () {
+      test('returns username when user is logged in', () async {
+        when(
+          mockAuthService.getCurrentUsername(),
+        ).thenAnswer((_) async => 'testuser');
+
+        final result = await repository.getCurrentUsername();
+
+        expect(result, 'testuser');
+        verify(mockAuthService.getCurrentUsername()).called(1);
+      });
+
+      test('returns null when no user is logged in', () async {
+        when(
+          mockAuthService.getCurrentUsername(),
+        ).thenAnswer((_) async => null);
+
+        final result = await repository.getCurrentUsername();
+
+        expect(result, null);
+        verify(mockAuthService.getCurrentUsername()).called(1);
+      });
+    });
+
+    group('getCurrentUserId', () {
+      test('returns user ID when user is logged in', () async {
+        when(
+          mockAuthService.getCurrentUserId(),
+        ).thenAnswer((_) async => 'user-123');
+
+        final result = await repository.getCurrentUserId();
+
+        expect(result, 'user-123');
+        verify(mockAuthService.getCurrentUserId()).called(1);
+      });
+
+      test('returns null when no user is logged in', () async {
+        when(mockAuthService.getCurrentUserId()).thenAnswer((_) async => null);
+
+        final result = await repository.getCurrentUserId();
+
+        expect(result, null);
+        verify(mockAuthService.getCurrentUserId()).called(1);
+      });
+    });
+
+    group('logout', () {
+      test('logs out user successfully', () async {
+        when(mockAuthService.logout()).thenAnswer((_) async => {});
+
+        await repository.logout();
+
+        verify(mockAuthService.logout()).called(1);
+      });
+
+      test('handles errors gracefully', () async {
+        when(mockAuthService.logout()).thenThrow(Exception('Logout Error'));
+
+        expect(() => repository.logout(), throwsException);
+      });
+    });
   });
 }
 
@@ -218,5 +374,19 @@ TripLocation createMockTripLocation(double lat, double lng) {
     latitude: lat,
     longitude: lng,
     timestamp: DateTime.now(),
+  );
+}
+
+Trip createMockTrip(String id, TripStatus status) {
+  return Trip(
+    id: id,
+    userId: 'user-1',
+    name: 'Test Trip',
+    username: 'testuser',
+    description: 'Test Description',
+    status: status,
+    visibility: Visibility.public,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
   );
 }
