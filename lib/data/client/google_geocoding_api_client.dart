@@ -7,8 +7,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class GoogleGeocodingApiClient {
   final String _apiKey;
   final String _baseUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+  final http.Client _httpClient;
 
-  GoogleGeocodingApiClient(this._apiKey);
+  GoogleGeocodingApiClient(this._apiKey, {http.Client? httpClient})
+      : _httpClient = httpClient ?? http.Client();
 
   /// Reverse geocode a location to get address information
   /// Returns a PlaceInfo object with city and country, or null if not found
@@ -18,7 +20,7 @@ class GoogleGeocodingApiClient {
         '$_baseUrl?latlng=${location.latitude},${location.longitude}&key=$_apiKey',
       );
 
-      final response = await http.get(url);
+      final response = await _httpClient.get(url);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
