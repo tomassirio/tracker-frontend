@@ -7,8 +7,10 @@ import 'package:flutter/foundation.dart';
 /// Handles route computation and polyline encoding/decoding
 class GoogleRoutesApiClient {
   final String _apiKey;
+  final http.Client _httpClient;
 
-  GoogleRoutesApiClient(this._apiKey);
+  GoogleRoutesApiClient(this._apiKey, {http.Client? httpClient})
+      : _httpClient = httpClient ?? http.Client();
 
   /// Get walking route between waypoints
   ///
@@ -93,7 +95,7 @@ class GoogleRoutesApiClient {
       requestBody['intermediates'] = intermediates;
     }
 
-    final response = await http.post(
+    final response = await _httpClient.post(
       url,
       headers: {
         'Content-Type': 'application/json',
