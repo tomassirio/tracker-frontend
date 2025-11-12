@@ -13,10 +13,6 @@ class DirectionsServiceWeb {
       return waypoints;
     }
 
-    debugPrint(
-      '🗺️ DirectionsServiceWeb: Getting directions for ${waypoints.length} waypoints',
-    );
-
     try {
       // For web, we'll use the JavaScript Directions Service
       // This requires the Directions API to be available in the loaded Google Maps JS

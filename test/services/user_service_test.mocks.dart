@@ -181,4 +181,19 @@ class MockUserCommandClient extends _i1.Mock implements _i5.UserCommandClient {
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i2.UserProfile> updateProfile(
+    _i2.UpdateProfileRequest? request,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateProfile, [request]),
+            returnValue: _i4.Future<_i2.UserProfile>.value(
+              _FakeUserProfile_0(
+                this,
+                Invocation.method(#updateProfile, [request]),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.UserProfile>);
 }

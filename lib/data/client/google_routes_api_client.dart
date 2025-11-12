@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/foundation.dart';
 
 /// Client for Google Routes API v2
 /// Handles route computation and polyline encoding/decoding
@@ -38,7 +37,6 @@ class GoogleRoutesApiClient {
       final response = await _computeRoutes(waypoints, travelMode);
       return response;
     } catch (e) {
-      debugPrint('💥 GoogleRoutesApiClient: Failed to get route: $e');
       // Return original waypoints as fallback
       return RouteResult(points: waypoints, error: e.toString());
     }
@@ -106,10 +104,6 @@ class GoogleRoutesApiClient {
       body: json.encode(requestBody),
     );
 
-    debugPrint(
-      '📡 GoogleRoutesApiClient: Response status: ${response.statusCode}',
-    );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
@@ -133,11 +127,8 @@ class GoogleRoutesApiClient {
           );
         }
       }
-
-      debugPrint('❌ GoogleRoutesApiClient: No routes found in response');
       throw Exception('No routes found in Routes API response');
     } else {
-      debugPrint('❌ GoogleRoutesApiClient: HTTP error ${response.statusCode}');
       throw Exception('Routes API HTTP error: ${response.statusCode}');
     }
   }
