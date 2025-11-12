@@ -3,6 +3,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
+import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
+import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
@@ -28,7 +30,7 @@ class TripDetailScreen extends StatefulWidget {
 }
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
-  final TripDetailRepository _repository = TripDetailRepository();
+  late final TripDetailRepository _repository;
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
   late Trip _trip;
@@ -61,6 +63,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize repository with geocoding client for place enrichment
+    final apiKey = ApiEndpoints.googleMapsApiKey;
+    final geocodingClient = apiKey.isNotEmpty
+        ? GoogleGeocodingApiClient(apiKey)
+        : null;
+    _repository = TripDetailRepository(geocodingClient: geocodingClient);
+
     _trip = widget.trip;
     _updateMapData();
     _checkLoginStatus();

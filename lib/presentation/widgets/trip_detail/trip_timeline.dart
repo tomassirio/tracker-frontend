@@ -80,16 +80,44 @@ class TripTimeline extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _formatTimestamp(update.timestamp),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
+                      // Timestamp and battery in header row
                       Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _formatTimestamp(update.timestamp),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                          if (update.battery != null)
+                            Row(
+                              children: [
+                                Icon(
+                                  _getBatteryIcon(update.battery!),
+                                  size: 14,
+                                  color: _getBatteryColor(update.battery!),
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${update.battery}%',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: _getBatteryColor(update.battery!),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Location with icon
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
                             Icons.location_on,
@@ -99,15 +127,60 @@ class TripTimeline extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              '${update.latitude.toStringAsFixed(4)}, ${update.longitude.toStringAsFixed(4)}',
+                              update.displayLocation,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: Colors.grey[800],
+                                fontWeight: update.city != null
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
                               ),
                             ),
                           ),
                         ],
                       ),
+                      // Message if present
+                      if (update.message != null &&
+                          update.message!.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Text(
+                            update.message!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[800],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                      // Reactions if present
+                      if (update.reactionCount > 0) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.favorite,
+                              size: 12,
+                              color: Colors.red[400],
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${update.reactionCount} ${update.reactionCount == 1 ? 'reaction' : 'reactions'}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -134,5 +207,20 @@ class TripTimeline extends StatelessWidget {
     } else {
       return '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
     }
+  }
+
+  IconData _getBatteryIcon(int battery) {
+    if (battery >= 90) return Icons.battery_full;
+    if (battery >= 70) return Icons.battery_6_bar;
+    if (battery >= 50) return Icons.battery_5_bar;
+    if (battery >= 30) return Icons.battery_3_bar;
+    if (battery >= 20) return Icons.battery_2_bar;
+    return Icons.battery_1_bar;
+  }
+
+  Color _getBatteryColor(int battery) {
+    if (battery >= 50) return Colors.green;
+    if (battery >= 20) return Colors.orange;
+    return Colors.red;
   }
 }
