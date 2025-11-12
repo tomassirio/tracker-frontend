@@ -19,6 +19,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -35,12 +36,18 @@ jobs:
       - name: Set release version
         id: set-release-version
         run: |
-          # Extract current version from pubspec.yaml (e.g., 1.0.0+1 or 1.0.0-SNAPSHOT+1)
+          # Extract current version from pubspec.yaml (e.g., 1.0.0-SNAPSHOT or 1.0.0-SNAPSHOT+1)
           CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
           
-          # Remove -SNAPSHOT and extract base version and build number
+          # Remove -SNAPSHOT and extract base version
           BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-SNAPSHOT//' | sed 's/+.*//')
-          BUILD_NUMBER=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
+          
+          # Check if there's a build number, otherwise default to 1
+          if echo "$CURRENT_VERSION" | grep -q '+'; then
+            BUILD_NUMBER=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
+          else
+            BUILD_NUMBER="1"
+          fi
           
           RELEASE_VERSION="${BASE_VERSION}+${BUILD_NUMBER}"
           
@@ -175,8 +182,8 @@ jobs:
           NEXT_PATCH=$((PATCH + 1))
           NEXT_BASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
           
-          # Reset build number to 1 for the new version
-          NEXT_VERSION="${NEXT_BASE_VERSION}-SNAPSHOT+1"
+          # Next version is SNAPSHOT without build number
+          NEXT_VERSION="${NEXT_BASE_VERSION}-SNAPSHOT"
           
           # Update pubspec.yaml
           sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
