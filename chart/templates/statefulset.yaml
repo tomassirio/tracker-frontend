@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  serviceName: {{ .Chart.Name }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
+          protocol: TCP
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: nginx.conf
+          readOnly: true
+        env:
+        - name: GOOGLE_MAPS_API_KEY
+          value: "{{ .Values.application.googleMapsApiKey }}"
+        - name: COMMAND_BASE_URL
+          value: "{{ .Values.application.commandBaseUrl }}"
+        - name: QUERY_BASE_URL
+          value: "{{ .Values.application.queryBaseUrl }}"
+        - name: AUTH_BASE_URL
+          value: "{{ .Values.application.authBaseUrl }}"
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Chart.Name }}-config
+  {{- if .Values.volumeClaimTemplates.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.volumeClaimTemplates.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.volumeClaimTemplates.storage }}
+  {{- end }}

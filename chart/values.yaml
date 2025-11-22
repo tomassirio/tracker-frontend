@@ -1,0 +1,32 @@
+replicaCount: 2
+image:
+  repository: ghcr.io/tomassirio/tracker-frontend
+  pullPolicy: IfNotPresent
+  tag: "1.0.3"
+service:
+  type: ClusterIP
+  port: 51538
+  targetPort: 51538
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+# Application configuration
+application:
+  port: 51538
+  
+  # Google Maps API Key
+  googleMapsApiKey: "AIzaSyCIijc10o3XeaO3niT4oaoWjHkq8x-zqWk"
+  
+  # Backend service URLs
+  commandBaseUrl: "http://tracker-command:8081/api/1"
+  queryBaseUrl: "http://tracker-query:8082/api/1"
+  authBaseUrl: "http://tracker-auth:8083/api/1"
+# Pod Storage
+volumeClaimTemplates:
+  enabled: false
+  storage: 1Gi
+  storageClassName: standard

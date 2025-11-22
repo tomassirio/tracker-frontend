@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tracker-frontend
+description: Helm chart for Tracker Frontend Service
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

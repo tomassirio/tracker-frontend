@@ -37,7 +37,8 @@
     window.appConfig = {
       commandBaseUrl: '{{COMMAND_BASE_URL}}',
       queryBaseUrl: '{{QUERY_BASE_URL}}',
-      authBaseUrl: '{{AUTH_BASE_URL}}'
+      authBaseUrl: '{{AUTH_BASE_URL}}',
+      googleMapsApiKey: '{{GOOGLE_MAPS_API_KEY}}'
     };
 
     // Signal that Google Maps should initialize
@@ -53,7 +54,7 @@
       console.log('Google Maps API loaded successfully');
     }
   </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIijc10o3XeaO3niT4oaoWjHkq8x-zqWk&libraries=places,geometry&callback=initGoogleMaps"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&libraries=places,geometry&callback=initGoogleMaps"></script>
 
   <script src="flutter_bootstrap.js" async></script>
 </body>
