@@ -45,12 +45,12 @@ spec:
           name: {{ .Chart.Name }}{{ .Values.nameSuffix }}-config
 {{- if .Values.volumeClaimTemplates.enabled }}
   volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{ .Values.volumeClaimTemplates.storageClassName }}
-      resources:
-        requests:
-          storage: {{ .Values.volumeClaimTemplates.storage }}
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.volumeClaimTemplates.storageClassName }}
+        resources:
+          requests:
+            storage: {{ .Values.volumeClaimTemplates.storage }}
 {{- end }}
