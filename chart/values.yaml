@@ -17,7 +17,7 @@ ingress:
     # For local dev with Let's Encrypt (optional)
     # cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: localwanderer.com  # Will be overridden to localwanderer-dev.com in dev
+    - host: wanderer.localwanderer.com  # Will be overridden to wanderer.localwanderer-dev.com in dev
       paths:
         - path: /
           pathType: Prefix

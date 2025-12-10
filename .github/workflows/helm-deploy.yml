@@ -109,12 +109,12 @@ jobs:
             COMMAND_URL="http://tracker-command:8081/api/1"
             QUERY_URL="http://tracker-query:8082/api/1"
             AUTH_URL="http://tracker-auth:8083/api/1"
-            INGRESS_HOST="localwanderer-dev.com"
+            INGRESS_HOST="wanderer.localwanderer-dev.com"
           else
             COMMAND_URL="http://tracker-command:8081/api/1"
             QUERY_URL="http://tracker-query:8082/api/1"
             AUTH_URL="http://tracker-auth:8083/api/1"
-            INGRESS_HOST="localwanderer.com"
+            INGRESS_HOST="wanderer.localwanderer.com"
           fi
           
           # Deploy
