@@ -37,13 +37,13 @@ resources:
 application:
   port: 51538
   
-  # Google Maps API Key
-  googleMapsApiKey: "AIzaSyCIijc10o3XeaO3niT4oaoWjHkq8x-zqWk"
-  
-  # Backend service URLs
-  commandBaseUrl: "http://tracker-command:8081/api/1"
-  queryBaseUrl: "http://tracker-query:8082/api/1"
-  authBaseUrl: "http://tracker-auth:8083/api/1"
+  # Google Maps API Key (provided via GitHub secret in pipeline)
+  googleMapsApiKey: ""
+
+  # Backend service URLs (production ports: 42xxx)
+  commandBaseUrl: "http://tracker-command:42001/api/1"
+  queryBaseUrl: "http://tracker-query:42002/api/1"
+  authBaseUrl: "http://tracker-auth:42003/api/1"
 # Pod Storage
 volumeClaimTemplates:
   enabled: false

@@ -15,7 +15,7 @@ jobs:
     with:
       environment: dev
       image-tag: ${{ inputs.image-tag }}
-      namespace: wanderer
+      namespace: wanderer-dev
     secrets:
       TWINGATE_SERVICE_KEY: ${{ secrets.TWINGATE_SERVICE_KEY }}
       KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
