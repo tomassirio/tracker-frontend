@@ -56,7 +56,6 @@ jobs:
           flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=false
           echo "✓ Flutter web build complete"
 
-      - name: Build Flutter web
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
