@@ -13,7 +13,6 @@ help:
 	@echo "  make run          - Run the application in Chrome"
 	@echo "  make docker       - Build Docker image"
 	@echo "  make clean-verify - Clean and verify"
-
 # Main verification command (equivalent to mvn spotless:apply clean verify)
 verify: format analyze test
 	@echo "✅ All checks passed!"
@@ -51,17 +50,11 @@ run:
 	@flutter run -d chrome
 
 # Build Docker image
-docker:
+# Build Docker image
 	@echo "🐳 Building Docker image..."
-	@docker build -f docker/Dockerfile -t tracker-frontend:latest .
+	@echo "🐳 Building Docker image..."
 
 # Full clean + verify
-clean-verify: clean verify
-
-# Watch mode for tests (uses a simple loop since Flutter doesn't have native watch)
-test-watch:
-	@echo "👀 Running tests in watch mode (Ctrl+C to stop)..."
-	@echo "Watching for file changes..."
 	@while true; do \
 		clear; \
 		echo "🧪 Running tests... ($(shell date '+%H:%M:%S'))"; \

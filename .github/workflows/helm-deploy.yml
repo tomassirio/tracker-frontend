@@ -1,0 +1,146 @@
+name: Helm Deploy to Kubernetes
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Deployment environment (dev, staging, prod)'
+        required: true
+        type: string
+      image-tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        type: string
+      namespace:
+        description: 'Kubernetes namespace'
+        required: false
+        type: string
+        default: 'wanderer'
+    secrets:
+      # Twingate
+      TWINGATE_SERVICE_KEY:
+        description: 'Twingate service key for cluster access'
+        required: true
+
+      # Kubernetes
+      KUBECONFIG_CONTENT:
+        description: 'Base64 encoded kubeconfig file'
+        required: true
+
+      # Application Secrets
+      GOOGLE_MAPS_API_KEY:
+        description: 'Google Maps API Key'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Connect to Twingate
+        uses: twingate/github-action@v1
+        with:
+          service-key: ${{ secrets.TWINGATE_SERVICE_KEY }}
+
+      - name: Setup Kubernetes
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_CONTENT }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Update Chart.yaml versions
+        run: |
+          # For dev: use SNAPSHOT version from pubspec.yaml
+          # For prod: use image-tag (released version)
+          if [ "${{ inputs.environment }}" == "dev" ]; then
+            # Extract SNAPSHOT version from pubspec.yaml for dev
+            VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+            echo "Dev environment: Using SNAPSHOT version from pubspec.yaml: $VERSION"
+          else
+            # Use image-tag for production (released version)
+            VERSION="${{ inputs.image-tag }}"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+            echo "Production environment: Using released version: $VERSION"
+          fi
+          
+          # Update version in Chart.yaml
+          CHART_FILE="./chart/Chart.yaml"
+          if [ -f "$CHART_FILE" ]; then
+            sed -i "s/^version: .*/version: $VERSION/" "$CHART_FILE"
+            sed -i "s/^appVersion: .*/appVersion: \"$VERSION\"/" "$CHART_FILE"
+            echo "Updated $CHART_FILE to version $VERSION"
+            cat "$CHART_FILE"
+          else
+            echo "Error: Chart.yaml not found at $CHART_FILE"
+            exit 1
+          fi
+
+      - name: Deploy Tracker Frontend
+        run: |
+          echo "================================================"
+          echo "Deploying tracker-frontend..."
+          echo "================================================"
+          
+          # Check if release exists
+          if helm list -n ${{ inputs.namespace }} --short | grep -q "^tracker-frontend$"; then
+            echo "tracker-frontend exists, upgrading..."
+            ACTION="upgrade"
+          else
+            echo "tracker-frontend does not exist, installing..."
+            ACTION="install"
+          fi
+          
+          # Set backend URLs based on environment
+          if [ "${{ inputs.environment }}" == "dev" ]; then
+            COMMAND_URL="http://tracker-command:8081/api/1"
+            QUERY_URL="http://tracker-query:8082/api/1"
+            AUTH_URL="http://tracker-auth:8083/api/1"
+          else
+            COMMAND_URL="http://tracker-command:8081/api/1"
+            QUERY_URL="http://tracker-query:8082/api/1"
+            AUTH_URL="http://tracker-auth:8083/api/1"
+          fi
+          
+          # Deploy
+          helm $ACTION tracker-frontend ./chart \
+            --namespace ${{ inputs.namespace }} \
+            --create-namespace \
+            --set image.tag="${{ inputs.image-tag }}" \
+            --set application.googleMapsApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
+            --set application.commandBaseUrl="$COMMAND_URL" \
+            --set application.queryBaseUrl="$QUERY_URL" \
+            --set application.authBaseUrl="$AUTH_URL" \
+            --wait --timeout 5m
+          
+          echo "✓ tracker-frontend deployed successfully"
+
+      - name: Verify deployment
+        run: |
+          echo "=== Deployments ==="
+          kubectl get deployments,statefulsets -n ${{ inputs.namespace }} -l app=tracker-frontend
+          
+          echo ""
+          echo "=== Pods ==="
+          kubectl get pods -n ${{ inputs.namespace }} -l app=tracker-frontend
+          
+          echo ""
+          echo "=== Services ==="
+          kubectl get services -n ${{ inputs.namespace }} -l app=tracker-frontend
+
+      - name: Check pod health
+        run: |
+          echo "Checking pod health..."
+          kubectl wait --for=condition=ready pod -l app=tracker-frontend \
+            -n ${{ inputs.namespace }} --timeout=120s || true
+
+      - name: Display pod logs on failure
+        if: failure()
+        run: |
+          echo "=== tracker-frontend logs ==="
+          kubectl logs -l app=tracker-frontend -n ${{ inputs.namespace }} --tail=100 || true
+

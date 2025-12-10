@@ -143,45 +143,147 @@ final trip = await tripService.createTrip(createTripRequest);
 
 The application can be containerized and deployed using Docker. The web version is served via nginx on **port 51538**.
 
-### Quick Start with Docker
-
 ```bash
 # Build the image
 docker build -f docker/Dockerfile -t tracker-frontend:latest .
-
+# Build the image
 # Run the container with Google Maps API key
 docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=your_api_key_here tracker-frontend:latest
-
-# Access at http://localhost:51538
-```
 
 ### Using docker-compose
 
 Create a `.env` file with your Google Maps API key:
 ```bash
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-```
-
-Then run:
-```bash
-cd docker
-docker-compose up
-```
-
-For detailed Docker configuration, environment setup, and deployment options, see [docker/DOCKER.md](docker/DOCKER.md).
-
-### Environment Configuration
-
 Backend API URLs and other settings can be configured via environment variables at runtime. This allows the same Docker image to be deployed to different environments without rebuilding.
 
 See [ENVIRONMENT_CONFIG.md](ENVIRONMENT_CONFIG.md) for complete configuration documentation.
 
+## Kubernetes Deployment
+
+The application can be deployed to Kubernetes using Helm charts. The chart is located in the `chart/` directory.
+
+### Prerequisites
+
+- Kubernetes cluster with kubectl access
+- Helm 3.x installed
+- Twingate access (for production deployments)
+- Required secrets configured in GitHub
+
+### Helm Chart Structure
+
+```
+chart/
+├── Chart.yaml           # Chart metadata and version
+├── values.yaml         # Default values for the chart
+└── templates/
+    ├── configmap.yaml  # Nginx configuration
+    ├── service.yaml    # Kubernetes service
+    └── statefulset.yaml # StatefulSet for the frontend
+```
+
+### Manual Deployment
+
+```bash
+# Deploy to production
+helm install tracker-frontend ./chart \
+  --namespace wanderer \
+  --create-namespace \
+  --set image.tag="v1.0.3" \
+  --set application.googleMapsApiKey="YOUR_API_KEY" \
+  --set application.commandBaseUrl="http://tracker-command:8081/api/1" \
+  --set application.queryBaseUrl="http://tracker-query:8082/api/1" \
+  --set application.authBaseUrl="http://tracker-auth:8083/api/1"
+
+# Upgrade existing deployment
+helm upgrade tracker-frontend ./chart \
+  --namespace wanderer \
+  --set image.tag="v1.0.4"
+
+# Uninstall
+helm uninstall tracker-frontend --namespace wanderer
+```
+
+### Configuration
+
+Key configuration values in `values.yaml`:
+
+- `replicaCount`: Number of replicas (default: 2)
+- `image.repository`: Docker image repository
+- `image.tag`: Image tag to deploy
+- `service.port`: Service port (default: 51538)
+- `application.googleMapsApiKey`: Google Maps API key
+- `application.commandBaseUrl`: Backend command service URL
+- `application.queryBaseUrl`: Backend query service URL
+- `application.authBaseUrl`: Backend auth service URL
+
 ### CI/CD Pipeline
 
-The project includes GitHub Actions workflows for:
-- ✅ **Feature branches**: Automated testing and Docker image building
-- 🚀 **Master branch**: Automatic versioning, releases, and Docker image publishing
-- 🐳 **Docker images**: Published to GitHub Container Registry (GHCR)
+The project includes comprehensive GitHub Actions workflows for automated deployments:
+
+#### Workflows
+
+1. **Feature Branch CI** (`.github/workflows/ci.yml`)
+   - Triggers on push to non-master branches
+   - Runs tests, format checks, and analysis
+   - Builds Docker images for testing
+
+2. **Master Branch Release** (`.github/workflows/merge.yml`)
+   - Triggers on push to master
+   - Automatic version management (removes -SNAPSHOT)
+   - Creates GitHub releases with artifacts
+   - Builds and publishes Docker images to GHCR
+   - **Automatically deploys to production cluster**
+
+3. **Helm Deployment** (`.github/workflows/helm-deploy.yml`)
+   - Reusable workflow for Kubernetes deployments
+   - Supports dev and prod environments
+   - Uses Twingate for secure cluster access
+   - Updates Chart.yaml versions automatically
+
+4. **Manual Production Deployment** (`.github/workflows/deploy-production.yml`)
+   - Manually triggered workflow or triggered on release publish
+   - Allows deploying specific image tags to production
+
+5. **Manual Dev Deployment** (`.github/workflows/deploy-dev.yml`)
+   - Manually triggered workflow for dev environment
+   - Defaults to 'latest' image tag
+
+#### Required GitHub Secrets
+
+For automated deployments, configure these secrets in your GitHub repository:
+
+- `TWINGATE_SERVICE_KEY`: Twingate service key for cluster access
+- `KUBECONFIG_CONTENT`: Base64-encoded kubeconfig file
+- `GOOGLE_MAPS_API_KEY`: Google Maps API key for the application
+
+#### Deployment Flow
+
+**Automatic (on merge to master):**
+```
+Push to master → Version & Release → Build Docker → Deploy to Production
+```
+
+**Manual:**
+```
+GitHub Actions → Run workflow → Select environment → Deploy
+```
+
+### Monitoring Deployments
+
+```bash
+# Check deployment status
+kubectl get deployments,statefulsets -n wanderer -l app=tracker-frontend
+
+# Check pods
+kubectl get pods -n wanderer -l app=tracker-frontend
+
+# Check logs
+kubectl logs -l app=tracker-frontend -n wanderer --tail=100
+
+# Describe pod for troubleshooting
+kubectl describe pod <pod-name> -n wanderer
+```
 
 ## Contributing
 

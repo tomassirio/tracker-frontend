@@ -1,11 +1,25 @@
 # Docker Configuration
 
+## Multi-Platform Support
+
+The Docker images built by CI/CD support multiple platforms:
+- **linux/amd64** (x86_64) - Standard servers and development machines
+- **linux/arm64** (ARM64) - Raspberry Pi 3/4/5, AWS Graviton, Apple Silicon
+
+Images from the GitHub Container Registry automatically work on both platforms.
+
 ## Building the Docker Image
 
 ### Using Docker directly:
 
+For local platform (default):
 ```bash
 docker build -f docker/Dockerfile -t tracker-frontend:latest .
+```
+
+For multi-platform builds (requires Docker Buildx):
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -f docker/Dockerfile -t tracker-frontend:latest .
 ```
 
 ### Using docker-compose:
