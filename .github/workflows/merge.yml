@@ -221,8 +221,23 @@ jobs:
     uses: ./.github/workflows/docker-build.yml
     with:
       push-to-registry: true
-      image-tag: latest
+      image-tag: v${{ needs.version-and-release.outputs.release-version }}
       checkout-ref: v${{ needs.version-and-release.outputs.release-version }}
     secrets:
       registry-username: ${{ github.actor }}
       registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-to-production:
+    needs:
+      - version-and-release
+      - build-release-docker-images
+    uses: ./.github/workflows/helm-deploy.yml
+    with:
+      environment: prod
+      image-tag: v${{ needs.version-and-release.outputs.release-version }}
+      namespace: wanderer
+    secrets:
+      TWINGATE_SERVICE_KEY: ${{ secrets.TWINGATE_SERVICE_KEY }}
+      KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+
