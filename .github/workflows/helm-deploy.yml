@@ -51,6 +51,15 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_CONTENT }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
+          
+          # Skip TLS verification for self-signed certificates
+          CLUSTER_NAME=$(kubectl config view -o jsonpath='{.clusters[0].name}')
+          kubectl config set-cluster "$CLUSTER_NAME" --insecure-skip-tls-verify=true
+          
+          echo "Testing cluster connection..."
+          kubectl cluster-info
+          kubectl get nodes
+          echo "✓ Successfully connected to Kubernetes cluster"
 
       - name: Update Chart.yaml versions
         run: |

@@ -50,10 +50,17 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Building version: ${VERSION}"
 
+      - name: Build Flutter web
+        run: |
+          flutter pub get
+          flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=false
+          echo "✓ Flutter web build complete"
+
+      - name: Build Flutter web
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: arm64,amd64
+          platforms: arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -75,18 +82,19 @@ jobs:
             type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=${{ inputs.image-tag }},enable=${{ inputs.image-tag != '' }}
             type=raw,value=latest,enable=${{ inputs.push-to-registry }}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           push: ${{ inputs.push-to-registry }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
 
       - name: List built images
         if: ${{ inputs.push-to-registry }}

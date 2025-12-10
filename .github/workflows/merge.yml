@@ -6,15 +6,15 @@ on:
       - master
 
 jobs:
-  version-and-release:
+  prepare-release:
     runs-on: ubuntu-latest
     # Skip if commit was made by GitHub Actions (prevents infinite loop)
     if: "!contains(github.event.head_commit.message, 'ci: Prepare for next development iteration') && !contains(github.event.head_commit.message, 'ci: Release version')"
     outputs:
       release-version: ${{ steps.set-release-version.outputs.version }}
+      base-version: ${{ steps.set-release-version.outputs.base-version }}
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,10 +58,9 @@ jobs:
           
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
           echo "version=${BASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "base-version=${BASE_VERSION}" >> $GITHUB_OUTPUT
           echo "Release version: ${RELEASE_VERSION}"
 
-      - name: Install dependencies
-        run: flutter pub get
 
       - name: Commit release version
         run: |
@@ -82,11 +81,36 @@ jobs:
           
           git tag -a "v${BASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
 
+      - name: Push changes and tags
+        run: |
+          git push origin master
+          git push origin --tags
+
+  test-and-coverage:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+          channel: 'stable'
+          cache: true
+
       - name: Run tests with coverage
         run: make test
 
       - name: Extract coverage and update README badges
         run: |
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          
           if [ -f "coverage/lcov.info" ]; then
             # Install lcov if not available
             sudo apt-get update
@@ -125,8 +149,6 @@ jobs:
           
           # Update badges in README if it exists
           if [ -f "README.md" ]; then
-            BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-            
             # Update or add version badge
             if grep -q "version-" README.md; then
               sed -i "s/version-[0-9.]*-blue/version-${BASE_VERSION}-blue/" README.md
@@ -138,33 +160,33 @@ jobs:
             fi
             
             # Check if there were changes
-            if git diff --quiet README.md; then
-              echo "No badge updates needed"
-            else
+            if ! git diff --quiet README.md; then
+              git config user.name "GitHub Actions"
+              git config user.email "github-actions@github.com"
               git add README.md
-              git commit --amend --no-edit
+              git commit -m "ci: Update README badges"
+              git push origin HEAD:master
             fi
           fi
 
+  build-web-app:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+          channel: 'stable'
+          cache: true
+
       - name: Build web application
         run: make build
-
-      - name: Create release notes
-        run: |
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-          echo "Release ${BASE_VERSION}" > release-notes.md
-          echo "" >> release-notes.md
-          
-          # Get the previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
-          if [ -n "$PREV_TAG" ]; then
-            echo "Changes since ${PREV_TAG}:" >> release-notes.md
-            echo "" >> release-notes.md
-            git log --pretty=format:"* %s" ${PREV_TAG}..HEAD >> release-notes.md
-          else
-            echo "Initial release" >> release-notes.md
-          fi
 
       - name: Create release archive
         run: |
@@ -172,10 +194,83 @@ jobs:
           tar -czf ../../tracker-frontend-web.tar.gz .
           cd ../..
 
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: tracker-frontend-web.tar.gz
+          retention-days: 1
+
+  create-release:
+    needs:
+      - prepare-release
+      - test-and-coverage
+      - build-web-app
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Download web build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+
+      - name: Create release notes
+        run: |
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          echo "Release ${BASE_VERSION}" > release-notes.md
+          echo "" >> release-notes.md
+          
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 v${BASE_VERSION}^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "Changes since ${PREV_TAG}:" >> release-notes.md
+            echo "" >> release-notes.md
+            git log --pretty=format:"* %s" ${PREV_TAG}..v${BASE_VERSION} >> release-notes.md
+          else
+            echo "Initial release" >> release-notes.md
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          gh release create "v${BASE_VERSION}" \
+            --title "Release ${BASE_VERSION}" \
+            --notes-file release-notes.md \
+            tracker-frontend-web.tar.gz
+
+  finalize-release:
+    needs:
+      - prepare-release
+      - create-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
       - name: Set next development version
         run: |
-          # Extract base version from release version
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          # Extract base version
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
           
           # Split version into major.minor.patch
           IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
@@ -197,44 +292,31 @@ jobs:
         run: |
           git add pubspec.yaml
           git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
-
-      - name: Push changes and tags
-        run: |
           git push origin master
-          git push origin --tags
-
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-          gh release create "v${BASE_VERSION}" \
-            --title "Release ${BASE_VERSION}" \
-            --notes-file release-notes.md \
-            tracker-frontend-web.tar.gz
 
   build-release-docker-images:
-    needs: version-and-release
+    needs: prepare-release
     permissions:
       contents: read
       packages: write
     uses: ./.github/workflows/docker-build.yml
     with:
       push-to-registry: true
-      image-tag: v${{ needs.version-and-release.outputs.release-version }}
-      checkout-ref: v${{ needs.version-and-release.outputs.release-version }}
+      image-tag: v${{ needs.prepare-release.outputs.base-version }}
+      checkout-ref: v${{ needs.prepare-release.outputs.base-version }}
     secrets:
       registry-username: ${{ github.actor }}
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-to-production:
     needs:
-      - version-and-release
+      - prepare-release
       - build-release-docker-images
+      - test-and-coverage
     uses: ./.github/workflows/helm-deploy.yml
     with:
       environment: prod
-      image-tag: v${{ needs.version-and-release.outputs.release-version }}
+      image-tag: v${{ needs.prepare-release.outputs.base-version }}
       namespace: wanderer
     secrets:
       TWINGATE_SERVICE_KEY: ${{ secrets.TWINGATE_SERVICE_KEY }}

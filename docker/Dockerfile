@@ -1,26 +1,8 @@
-# Build stage
-FROM ghcr.io/cirruslabs/flutter:stable AS build
-
-# Set working directory
-WORKDIR /app
-
-# Copy pubspec files
-COPY pubspec.yaml pubspec.lock* ./
-
-# Get dependencies
-RUN flutter pub get
-
-# Copy the rest of the application
-COPY . .
-
-# Build web application
-RUN flutter build web --release
-
-# Runtime stage - use nginx to serve the static files
+# Use nginx to serve the pre-built static files
 FROM nginx:alpine
 
-# Copy the built web app to nginx html directory
-COPY --from=build /app/build/web /usr/share/nginx/html
+# Copy the pre-built web app (built in GitHub Actions) to nginx html directory
+COPY build/web /usr/share/nginx/html
 
 # Copy custom nginx configuration
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
