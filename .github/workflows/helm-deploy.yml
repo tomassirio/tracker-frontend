@@ -105,17 +105,18 @@ jobs:
           fi
           
           # Set backend URLs and ingress hostname based on environment
+          # Note: Backend URLs must be publicly accessible via ingress for browser-based frontend
           if [ "${{ inputs.environment }}" == "dev" ]; then
-            # Dev environment uses 32xxx ports and -dev suffix on service names
-            COMMAND_URL="http://tracker-command-dev:32001/api/1"
-            QUERY_URL="http://tracker-query-dev:32002/api/1"
-            AUTH_URL="http://tracker-auth-dev:32003/api/1"
+            # Dev environment - use ingress hostnames
+            COMMAND_URL="http://command.localwanderer-dev.com/api/1"
+            QUERY_URL="http://query.localwanderer-dev.com/api/1"
+            AUTH_URL="http://auth.localwanderer-dev.com/api/1"
             INGRESS_HOST="wanderer.localwanderer-dev.com"
           else
-            # Production uses 42xxx ports and no suffix on service names
-            COMMAND_URL="http://tracker-command:42001/api/1"
-            QUERY_URL="http://tracker-query:42002/api/1"
-            AUTH_URL="http://tracker-auth:42003/api/1"
+            # Production - use ingress hostnames
+            COMMAND_URL="http://command.localwanderer.com/api/1"
+            QUERY_URL="http://query.localwanderer.com/api/1"
+            AUTH_URL="http://auth.localwanderer.com/api/1"
             INGRESS_HOST="wanderer.localwanderer.com"
           fi
           

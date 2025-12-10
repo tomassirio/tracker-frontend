@@ -40,10 +40,11 @@ application:
   # Google Maps API Key (provided via GitHub secret in pipeline)
   googleMapsApiKey: ""
 
-  # Backend service URLs (production ports: 42xxx)
-  commandBaseUrl: "http://tracker-command:42001/api/1"
-  queryBaseUrl: "http://tracker-query:42002/api/1"
-  authBaseUrl: "http://tracker-auth:42003/api/1"
+  # Backend service URLs (must be publicly accessible via ingress for browser access)
+  # These are overridden by the pipeline based on environment
+  commandBaseUrl: "http://command.localwanderer.com/api/1"
+  queryBaseUrl: "http://query.localwanderer.com/api/1"
+  authBaseUrl: "http://auth.localwanderer.com/api/1"
 # Pod Storage
 volumeClaimTemplates:
   enabled: false
