@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}{{ .Values.nameSuffix }}
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ .Chart.Name }}{{ .Values.nameSuffix }}
 spec:
-  serviceName: {{ .Chart.Name }}
+  serviceName: {{ .Chart.Name }}{{ .Values.nameSuffix }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: {{ .Chart.Name }}{{ .Values.nameSuffix }}
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: {{ .Chart.Name }}{{ .Values.nameSuffix }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: {{ .Chart.Name }}{{ .Values.nameSuffix }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
@@ -42,7 +42,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ .Chart.Name }}-config
+          name: {{ .Chart.Name }}{{ .Values.nameSuffix }}-config
   {{- if .Values.volumeClaimTemplates.enabled }}
   volumeClaimTemplates:
   - metadata:

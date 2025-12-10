@@ -120,10 +120,18 @@ jobs:
             INGRESS_HOST="wanderer.localwanderer.com"
           fi
           
+          # Set name suffix for dev environment
+          if [ "${{ inputs.environment }}" == "dev" ]; then
+            NAME_SUFFIX="-dev"
+          else
+            NAME_SUFFIX=""
+          fi
+          
           # Deploy
           helm $ACTION tracker-frontend ./chart \
             --namespace ${{ inputs.namespace }} \
             --create-namespace \
+            --set nameSuffix="$NAME_SUFFIX" \
             --set image.tag="${{ inputs.image-tag }}" \
             --set application.googleMapsApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
             --set application.commandBaseUrl="$COMMAND_URL" \
@@ -139,26 +147,51 @@ jobs:
 
       - name: Verify deployment
         run: |
+          # Set name suffix for resource selection
+          if [ "${{ inputs.environment }}" == "dev" ]; then
+            APP_NAME="tracker-frontend-dev"
+          else
+            APP_NAME="tracker-frontend"
+          fi
+          
           echo "=== Deployments ==="
-          kubectl get deployments,statefulsets -n ${{ inputs.namespace }} -l app=tracker-frontend
+          kubectl get deployments,statefulsets -n ${{ inputs.namespace }} -l app=$APP_NAME
           
           echo ""
           echo "=== Pods ==="
-          kubectl get pods -n ${{ inputs.namespace }} -l app=tracker-frontend
+          kubectl get pods -n ${{ inputs.namespace }} -l app=$APP_NAME
           
           echo ""
           echo "=== Services ==="
-          kubectl get services -n ${{ inputs.namespace }} -l app=tracker-frontend
+          kubectl get services -n ${{ inputs.namespace }} -l app=$APP_NAME
+          
+          echo ""
+          echo "=== Ingress ==="
+          kubectl get ingress -n ${{ inputs.namespace }} -l app=$APP_NAME
 
       - name: Check pod health
         run: |
+          # Set name suffix for resource selection
+          if [ "${{ inputs.environment }}" == "dev" ]; then
+            APP_NAME="tracker-frontend-dev"
+          else
+            APP_NAME="tracker-frontend"
+          fi
+          
           echo "Checking pod health..."
-          kubectl wait --for=condition=ready pod -l app=tracker-frontend \
+          kubectl wait --for=condition=ready pod -l app=$APP_NAME \
             -n ${{ inputs.namespace }} --timeout=120s || true
 
       - name: Display pod logs on failure
         if: failure()
         run: |
-          echo "=== tracker-frontend logs ==="
-          kubectl logs -l app=tracker-frontend -n ${{ inputs.namespace }} --tail=100 || true
+          # Set name suffix for resource selection
+          if [ "${{ inputs.environment }}" == "dev" ]; then
+            APP_NAME="tracker-frontend-dev"
+          else
+            APP_NAME="tracker-frontend"
+          fi
+          
+          echo "=== $APP_NAME logs ==="
+          kubectl logs -l app=$APP_NAME -n ${{ inputs.namespace }} --tail=100 || true
 
