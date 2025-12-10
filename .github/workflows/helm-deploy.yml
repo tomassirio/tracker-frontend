@@ -120,18 +120,21 @@ jobs:
             INGRESS_HOST="wanderer.localwanderer.com"
           fi
           
-          # Set name suffix for dev environment
+          # Set name suffix and port for environment
           if [ "${{ inputs.environment }}" == "dev" ]; then
             NAME_SUFFIX="-dev"
+            SERVICE_PORT="41538"
           else
             NAME_SUFFIX=""
+            SERVICE_PORT="51538"
           fi
           
           # Deploy
           helm $ACTION tracker-frontend ./chart \
             --namespace ${{ inputs.namespace }} \
             --create-namespace \
-            --set nameSuffix="$NAME_SUFFIX" \
+            --set "nameSuffix=$NAME_SUFFIX" \
+            --set "service.port=$SERVICE_PORT" \
             --set image.tag="${{ inputs.image-tag }}" \
             --set application.googleMapsApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
             --set application.commandBaseUrl="$COMMAND_URL" \

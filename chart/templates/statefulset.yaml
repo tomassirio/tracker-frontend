@@ -43,7 +43,7 @@ spec:
       - name: config
         configMap:
           name: {{ .Chart.Name }}{{ .Values.nameSuffix }}-config
-  {{- if .Values.volumeClaimTemplates.enabled }}
+{{- if .Values.volumeClaimTemplates.enabled }}
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -53,4 +53,4 @@ spec:
       resources:
         requests:
           storage: {{ .Values.volumeClaimTemplates.storage }}
-  {{- end }}
+{{- end }}
