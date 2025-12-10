@@ -104,15 +104,17 @@ jobs:
             ACTION="install"
           fi
           
-          # Set backend URLs based on environment
+          # Set backend URLs and ingress hostname based on environment
           if [ "${{ inputs.environment }}" == "dev" ]; then
             COMMAND_URL="http://tracker-command:8081/api/1"
             QUERY_URL="http://tracker-query:8082/api/1"
             AUTH_URL="http://tracker-auth:8083/api/1"
+            INGRESS_HOST="localwanderer-dev.com"
           else
             COMMAND_URL="http://tracker-command:8081/api/1"
             QUERY_URL="http://tracker-query:8082/api/1"
             AUTH_URL="http://tracker-auth:8083/api/1"
+            INGRESS_HOST="localwanderer.com"
           fi
           
           # Deploy
@@ -124,9 +126,13 @@ jobs:
             --set application.commandBaseUrl="$COMMAND_URL" \
             --set application.queryBaseUrl="$QUERY_URL" \
             --set application.authBaseUrl="$AUTH_URL" \
+            --set ingress.hosts[0].host="$INGRESS_HOST" \
+            --set ingress.hosts[0].paths[0].path="/" \
+            --set ingress.hosts[0].paths[0].pathType="Prefix" \
             --wait --timeout 5m
           
           echo "✓ tracker-frontend deployed successfully"
+          echo "Access at: http://$INGRESS_HOST"
 
       - name: Verify deployment
         run: |
