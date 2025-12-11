@@ -43,7 +43,9 @@ application:
   # Google Maps API Key (provided via GitHub secret in pipeline)
   googleMapsApiKey: ""
 
-  # Backend service URLs - using relative paths proxied by nginx to internal services
+  # Backend service URLs - using relative paths that nginx will proxy to internal services
+  # These are injected into the Flutter web app and used by the browser
+  # nginx proxies these paths to the internal Kubernetes services at /api/1/
   commandBaseUrl: "/api/command"
   queryBaseUrl: "/api/query"
   authBaseUrl: "/api/auth"
