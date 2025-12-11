@@ -62,16 +62,16 @@ jobs:
           if [ "${{ inputs.environment }}" == "dev" ]; then
             echo "name-suffix=-dev" >> $GITHUB_OUTPUT
             echo "service-port=41538" >> $GITHUB_OUTPUT
-            echo "command-url=http://command.localwanderer-dev.com/api/1" >> $GITHUB_OUTPUT
-            echo "query-url=http://query.localwanderer-dev.com/api/1" >> $GITHUB_OUTPUT
-            echo "auth-url=http://auth.localwanderer-dev.com/api/1" >> $GITHUB_OUTPUT
+            echo "command-url=/api/command" >> $GITHUB_OUTPUT
+            echo "query-url=/api/query" >> $GITHUB_OUTPUT
+            echo "auth-url=/api/auth" >> $GITHUB_OUTPUT
             echo "ingress-host=wanderer.localwanderer-dev.com" >> $GITHUB_OUTPUT
           else
             echo "name-suffix=" >> $GITHUB_OUTPUT
             echo "service-port=51538" >> $GITHUB_OUTPUT
-            echo "command-url=http://command.localwanderer.com/api/1" >> $GITHUB_OUTPUT
-            echo "query-url=http://query.localwanderer.com/api/1" >> $GITHUB_OUTPUT
-            echo "auth-url=http://auth.localwanderer.com/api/1" >> $GITHUB_OUTPUT
+            echo "command-url=/api/command" >> $GITHUB_OUTPUT
+            echo "query-url=/api/query" >> $GITHUB_OUTPUT
+            echo "auth-url=/api/auth" >> $GITHUB_OUTPUT
             echo "ingress-host=wanderer.localwanderer.com" >> $GITHUB_OUTPUT
           fi
 
