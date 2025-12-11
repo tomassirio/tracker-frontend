@@ -75,7 +75,7 @@ void main() {
 
         final uri = Uri.parse('https://api.example.com/test');
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
 
         // First request returns 401, then retry returns 200
@@ -163,7 +163,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
         when(
           mockHttpClient.post(
@@ -253,7 +253,7 @@ void main() {
 
         final uri = Uri.parse('https://api.example.com/test');
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
 
         // Setup POST to test endpoint: first 401, then retry with 201
@@ -342,7 +342,7 @@ void main() {
 
         final uri = Uri.parse('https://api.example.com/test/123');
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
 
         // PUT endpoint: first 401, then retry with 200
@@ -440,7 +440,7 @@ void main() {
 
         final uri = Uri.parse('https://api.example.com/test/123');
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
 
         // PATCH endpoint: first 401, then retry with 200
@@ -516,7 +516,7 @@ void main() {
 
         final uri = Uri.parse('https://api.example.com/test/123');
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
 
         // DELETE endpoint: first 401, then retry with 204
@@ -573,7 +573,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
         when(
           mockHttpClient.post(
@@ -653,7 +653,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
         when(
           mockHttpClient.post(
@@ -688,7 +688,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
         when(
           mockHttpClient.post(
@@ -721,7 +721,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final refreshUri = Uri.parse(
-          'http://localhost:8083/api/1/auth/refresh',
+          '/api/auth/auth/refresh',
         );
         when(
           mockHttpClient.post(
@@ -756,7 +756,7 @@ void main() {
           ).thenAnswer((_) async => 'refresh-token');
 
           final refreshUri = Uri.parse(
-            'http://localhost:8083/api/1/auth/refresh',
+            '/api/auth/auth/refresh',
           );
           when(
             mockHttpClient.post(
@@ -1030,7 +1030,7 @@ void main() {
           ).thenAnswer((_) async => 'old-refresh-token');
 
           final refreshUri = Uri.parse(
-            'http://localhost:8083/api/1/auth/refresh',
+            '/api/auth/auth/refresh',
           );
           when(
             mockHttpClient.post(
