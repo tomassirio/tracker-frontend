@@ -30,7 +30,7 @@ data:
 
         # Auth Service - proxy /api/auth/* to tracker-auth service /api/1/*
         location /api/auth/ {
-            proxy_pass http://tracker-auth{{ .Values.nameSuffix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.authPort }}/api/1/;
+            proxy_pass http://tracker-auth{{ .Values.nameSuffix }}:{{ .Values.backend.authPort }}/api/1/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -42,7 +42,7 @@ data:
 
         # Command Service - proxy /api/command/* to tracker-command service /api/1/*
         location /api/command/ {
-            proxy_pass http://tracker-command{{ .Values.nameSuffix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.commandPort }}/api/1/;
+            proxy_pass http://tracker-command{{ .Values.nameSuffix }}:{{ .Values.backend.commandPort }}/api/1/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -54,7 +54,7 @@ data:
 
         # Query Service - proxy /api/query/* to tracker-query service /api/1/*
         location /api/query/ {
-            proxy_pass http://tracker-query{{ .Values.nameSuffix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.queryPort }}/api/1/;
+            proxy_pass http://tracker-query{{ .Values.nameSuffix }}:{{ .Values.backend.queryPort }}/api/1/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
