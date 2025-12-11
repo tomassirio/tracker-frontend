@@ -43,11 +43,16 @@ application:
   # Google Maps API Key (provided via GitHub secret in pipeline)
   googleMapsApiKey: ""
 
-  # Backend service URLs (must be publicly accessible via ingress for browser access)
-  # These are overridden by the pipeline based on environment
-  commandBaseUrl: "http://command.localwanderer.com/api/1"
-  queryBaseUrl: "http://query.localwanderer.com/api/1"
-  authBaseUrl: "http://auth.localwanderer.com/api/1"
+  # Backend service URLs - using relative paths proxied by nginx to internal services
+  commandBaseUrl: "/api/command"
+  queryBaseUrl: "/api/query"
+  authBaseUrl: "/api/auth"
+
+# Backend service configuration (internal Kubernetes services)
+backend:
+  commandPort: 32001
+  queryPort: 32002
+  authPort: 32003
 # Pod Storage
 volumeClaimTemplates:
   enabled: false

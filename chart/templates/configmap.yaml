@@ -6,6 +6,9 @@ metadata:
     app: {{ .Chart.Name }}{{ .Values.nameSuffix }}
 data:
   nginx.conf: |
+    # Resolver for Kubernetes DNS
+    resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+
     server {
         listen {{ .Values.application.port }};
         server_name localhost;
@@ -23,6 +26,34 @@ data:
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
         add_header X-XSS-Protection "1; mode=block" always;
+
+        # Proxy to internal backend services
+        # Command Service
+        location /api/command/ {
+            proxy_pass http://tracker-command{{ .Values.nameSuffix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.commandPort }}/api/1/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Query Service
+        location /api/query/ {
+            proxy_pass http://tracker-query{{ .Values.nameSuffix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.queryPort }}/api/1/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Auth Service
+        location /api/auth/ {
+            proxy_pass http://tracker-auth{{ .Values.nameSuffix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.authPort }}/api/1/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
 
         # Handle Flutter web routing
         location / {
