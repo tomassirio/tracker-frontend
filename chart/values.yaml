@@ -52,9 +52,9 @@ application:
 
 # Backend service configuration (internal Kubernetes services)
 backend:
-  commandPort: 32001
-  queryPort: 32002
-  authPort: 32003
+  commandPort: 8081
+  queryPort: 8082
+  authPort: 8083
 # Pod Storage
 volumeClaimTemplates:
   enabled: false
