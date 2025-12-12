@@ -19,27 +19,27 @@ void main() {
 
     group('Auth endpoints', () {
       test('authRegister path is correct', () {
-        expect(ApiEndpoints.authRegister, '/auth/register');
+        expect(ApiEndpoints.authRegister, '/register');
       });
 
       test('authLogin path is correct', () {
-        expect(ApiEndpoints.authLogin, '/auth/login');
+        expect(ApiEndpoints.authLogin, '/login');
       });
 
       test('authLogout path is correct', () {
-        expect(ApiEndpoints.authLogout, '/auth/logout');
+        expect(ApiEndpoints.authLogout, '/logout');
       });
 
       test('authRefresh path is correct', () {
-        expect(ApiEndpoints.authRefresh, '/auth/refresh');
+        expect(ApiEndpoints.authRefresh, '/refresh');
       });
 
       test('authPasswordReset path is correct', () {
-        expect(ApiEndpoints.authPasswordReset, '/auth/password/reset');
+        expect(ApiEndpoints.authPasswordReset, '/password/reset');
       });
 
       test('authPasswordChange path is correct', () {
-        expect(ApiEndpoints.authPasswordChange, '/auth/password/change');
+        expect(ApiEndpoints.authPasswordChange, '/password/change');
       });
     });
 
