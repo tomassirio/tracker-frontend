@@ -16,12 +16,12 @@ class ApiEndpoints {
   static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
 
   // Auth endpoints (use authBaseUrl)
-  static const String authRegister = '/auth/register';
-  static const String authLogin = '/auth/login';
-  static const String authLogout = '/auth/logout';
-  static const String authRefresh = '/auth/refresh';
-  static const String authPasswordReset = '/auth/password/reset';
-  static const String authPasswordChange = '/auth/password/change';
+  static const String authRegister = '/register';
+  static const String authLogin = '/login';
+  static const String authLogout = '/logout';
+  static const String authRefresh = '/refresh';
+  static const String authPasswordReset = '/password/reset';
+  static const String authPasswordChange = '/password/change';
 
   // User Query endpoints (use queryBaseUrl)
   static const String usersMe = '/users/me';
