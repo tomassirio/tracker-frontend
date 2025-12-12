@@ -54,14 +54,6 @@ jobs:
         run: |
           flutter pub get
           flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=false
-          echo "✓ Flutter web build complete"
-
-      - name: Verify build output
-        run: |
-          echo "Checking build/web directory..."
-          ls -la build/web/ || echo "build/web does not exist!"
-          echo "Current directory contents:"
-          ls -la
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -104,7 +96,3 @@ jobs:
             network.host
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-
-      - name: List built images
-        if: ${{ inputs.push-to-registry }}
-        run: echo "Images pushed with tags ${{ steps.meta.outputs.tags }}"

@@ -58,60 +58,25 @@ jobs:
       - name: Set environment variables
         id: config
         run: |
+          # Shared configuration
+          echo "command-url=/api/command" >> $GITHUB_OUTPUT
+          echo "query-url=/api/query" >> $GITHUB_OUTPUT
+          echo "auth-url=/api/auth" >> $GITHUB_OUTPUT
+          
           # Environment-specific configuration
           if [ "${{ inputs.environment }}" == "dev" ]; then
             echo "name-suffix=-dev" >> $GITHUB_OUTPUT
             echo "service-port=41538" >> $GITHUB_OUTPUT
-            echo "command-url=/api/command" >> $GITHUB_OUTPUT
-            echo "query-url=/api/query" >> $GITHUB_OUTPUT
-            echo "auth-url=/api/auth" >> $GITHUB_OUTPUT
             echo "ingress-host=wanderer.localwanderer-dev.com" >> $GITHUB_OUTPUT
           else
             echo "name-suffix=" >> $GITHUB_OUTPUT
             echo "service-port=51538" >> $GITHUB_OUTPUT
-            echo "command-url=/api/command" >> $GITHUB_OUTPUT
-            echo "query-url=/api/query" >> $GITHUB_OUTPUT
-            echo "auth-url=/api/auth" >> $GITHUB_OUTPUT
             echo "ingress-host=wanderer.localwanderer.com" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Update Chart version
-        run: |
-          if [ "${{ inputs.environment }}" == "dev" ]; then
-            VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
-          else
-            VERSION="${{ inputs.image-tag }}"
-            VERSION="${VERSION#v}"
-          fi
-          
-          sed -i "s/^version: .*/version: $VERSION/" ./chart/Chart.yaml
-          sed -i "s/^appVersion: .*/appVersion: \"$VERSION\"/" ./chart/Chart.yaml
-          echo "Chart version: $VERSION"
-
-      - name: Clean up old resources (if needed)
-        run: |
-          # Only clean up in dev if old structure exists
-          if [ "${{ inputs.environment }}" == "dev" ]; then
-            if kubectl get statefulset tracker-frontend -n ${{ inputs.namespace }} 2>/dev/null; then
-              echo "Cleaning up old resource structure..."
-              helm uninstall tracker-frontend -n ${{ inputs.namespace }} || true
-              kubectl delete statefulset,service,ingress,configmap -l app=tracker-frontend -n ${{ inputs.namespace }} --ignore-not-found=true
-              sleep 3
-            fi
           fi
 
       - name: Deploy with Helm
         run: |
-          # Determine action
-          if helm list -n ${{ inputs.namespace }} --short | grep -q "^tracker-frontend$"; then
-            ACTION="upgrade"
-          else
-            ACTION="install"
-          fi
-          
-          echo "Running: helm $ACTION tracker-frontend"
-          
-          helm $ACTION tracker-frontend ./chart \
+          helm upgrade --install tracker-frontend ./chart \
             --namespace ${{ inputs.namespace }} \
             --create-namespace \
             --set nameSuffix="${{ steps.config.outputs.name-suffix }}" \
@@ -133,22 +98,15 @@ jobs:
         run: |
           APP_LABEL="tracker-frontend${{ steps.config.outputs.name-suffix }}"
           
-          echo "=== Resources ==="
-          kubectl get statefulset,service,ingress -n ${{ inputs.namespace }} -l app=$APP_LABEL
+          echo "=== Deployment Status ==="
+          kubectl get statefulset,pod,service,ingress -n ${{ inputs.namespace }} -l app=$APP_LABEL
           
-          echo ""
-          echo "=== Pods ==="
-          kubectl get pods -n ${{ inputs.namespace }} -l app=$APP_LABEL
-          
-          echo ""
-          echo "=== Pod Health ==="
           kubectl wait --for=condition=ready pod -l app=$APP_LABEL \
-            -n ${{ inputs.namespace }} --timeout=120s || true
+            -n ${{ inputs.namespace }} --timeout=120s
 
       - name: Show logs on failure
         if: failure()
         run: |
           APP_LABEL="tracker-frontend${{ steps.config.outputs.name-suffix }}"
-          echo "=== Pod Logs ==="
-          kubectl logs -l app=$APP_LABEL -n ${{ inputs.namespace }} --tail=50 || true
+          kubectl logs -l app=$APP_LABEL -n ${{ inputs.namespace }} --tail=100 || true
 
