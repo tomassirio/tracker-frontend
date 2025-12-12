@@ -13,6 +13,7 @@ jobs:
     outputs:
       release-version: ${{ steps.set-release-version.outputs.version }}
       base-version: ${{ steps.set-release-version.outputs.base-version }}
+      skip: ${{ steps.set-release-version.outputs.skip }}
     permissions:
       contents: write
     steps:
@@ -36,13 +37,22 @@ jobs:
           BUILD_NUMBER=$(echo "$CURRENT_VERSION" | grep -oP '\+\K[0-9]+' || echo "1")
           RELEASE_VERSION="${BASE_VERSION}+${BUILD_NUMBER}"
           
+          # Check if tag already exists - skip release if so
+          if git rev-parse "v${BASE_VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${BASE_VERSION} already exists, skipping release"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
           sed -i "s/^version: .*/version: ${RELEASE_VERSION}/" pubspec.yaml
           
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
           echo "version=${BASE_VERSION}" >> $GITHUB_OUTPUT
           echo "base-version=${BASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
 
       - name: Commit release version
+        if: steps.set-release-version.outputs.skip != 'true'
         run: |
           if ! git diff --quiet pubspec.yaml; then
             git add pubspec.yaml
@@ -52,23 +62,20 @@ jobs:
           fi
 
       - name: Create Git tag
+        if: steps.set-release-version.outputs.skip != 'true'
         run: |
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-          
-          if git rev-parse "v${BASE_VERSION}" >/dev/null 2>&1; then
-            echo "Error: Tag v${BASE_VERSION} already exists!"
-            exit 1
-          fi
-          
+          BASE_VERSION="${{ steps.set-release-version.outputs.base-version }}"
           git tag -a "v${BASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
 
       - name: Push changes and tags
+        if: steps.set-release-version.outputs.skip != 'true'
         run: |
           git push origin master || echo "No new commits to push"
           git push origin --tags
 
   test-and-coverage:
     needs: prepare-release
+    if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -123,6 +130,7 @@ jobs:
 
   build-web-app:
     needs: prepare-release
+    if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -155,6 +163,7 @@ jobs:
       - prepare-release
       - test-and-coverage
       - build-web-app
+    if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -199,6 +208,7 @@ jobs:
 
   build-release-docker-images:
     needs: prepare-release
+    if: needs.prepare-release.outputs.skip != 'true'
     permissions:
       contents: read
       packages: write
@@ -216,6 +226,7 @@ jobs:
       - prepare-release
       - build-release-docker-images
       - test-and-coverage
+    if: needs.prepare-release.outputs.skip != 'true'
     uses: ./.github/workflows/helm-deploy.yml
     with:
       environment: prod
@@ -230,6 +241,7 @@ jobs:
     needs:
       - prepare-release
       - create-release
+    if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
