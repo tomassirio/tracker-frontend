@@ -44,8 +44,12 @@ jobs:
 
       - name: Commit release version
         run: |
-          git add pubspec.yaml
-          git commit -m "ci: Release version ${RELEASE_VERSION}"
+          if ! git diff --quiet pubspec.yaml; then
+            git add pubspec.yaml
+            git commit -m "ci: Release version ${RELEASE_VERSION}"
+          else
+            echo "No version changes to commit"
+          fi
 
       - name: Create Git tag
         run: |
@@ -60,7 +64,7 @@ jobs:
 
       - name: Push changes and tags
         run: |
-          git push origin master
+          git push origin master || echo "No new commits to push"
           git push origin --tags
 
   test-and-coverage:
@@ -250,9 +254,14 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
           NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
           
-          # Update pubspec.yaml and commit
+          # Update pubspec.yaml and commit only if changed
           sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
-          git add pubspec.yaml
-          git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
-          git push origin master
+          
+          if ! git diff --quiet pubspec.yaml; then
+            git add pubspec.yaml
+            git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
+            git push origin master
+          else
+            echo "Version already set to ${NEXT_VERSION}"
+          fi
 
