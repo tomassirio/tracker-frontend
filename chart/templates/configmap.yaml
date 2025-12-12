@@ -28,9 +28,9 @@ data:
         # The Flutter app uses three different base URLs (/api/command, /api/query, /api/auth)
         # which nginx proxies to the internal Kubernetes services
 
-        # Auth Service - proxy /api/auth/* to tracker-auth service /api/1/*
+        # Auth Service - proxy /api/auth/* to tracker-auth service /api/1/auth/*
         location /api/auth/ {
-            proxy_pass http://tracker-auth{{ .Values.nameSuffix }}:{{ .Values.backend.authPort }}/api/1/;
+            proxy_pass http://tracker-auth{{ .Values.nameSuffix }}:{{ .Values.backend.authPort }}/api/1/auth/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
