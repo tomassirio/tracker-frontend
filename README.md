@@ -239,15 +239,11 @@ The project includes comprehensive GitHub Actions workflows for automated deploy
    - Reusable workflow for Kubernetes deployments
    - Supports dev and prod environments
    - Uses Twingate for secure cluster access
-   - Updates Chart.yaml versions automatically
 
-4. **Manual Production Deployment** (`.github/workflows/deploy-production.yml`)
-   - Manually triggered workflow or triggered on release publish
-   - Allows deploying specific image tags to production
-
-5. **Manual Dev Deployment** (`.github/workflows/deploy-dev.yml`)
-   - Manually triggered workflow for dev environment
-   - Defaults to 'latest' image tag
+4. **Manual Deployment** (`.github/workflows/manual-deploy.yml`)
+   - Manually triggered workflow with environment selector (dev/prod)
+   - Auto-triggers on release publish for production
+   - Allows deploying specific image tags
 
 #### Required GitHub Secrets
 

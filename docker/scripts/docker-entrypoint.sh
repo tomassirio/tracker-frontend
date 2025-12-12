@@ -20,9 +20,11 @@ else
 fi
 
 # Inject backend URLs with defaults
-COMMAND_URL="${COMMAND_BASE_URL:-http://localhost:8081/api/1}"
-QUERY_URL="${QUERY_BASE_URL:-http://localhost:8082/api/1}"
-AUTH_URL="${AUTH_BASE_URL:-http://localhost:8083/api/1}"
+# Use relative paths so the browser makes requests to the same origin (nginx proxy)
+# This allows nginx to proxy to internal Kubernetes services
+COMMAND_URL="${COMMAND_BASE_URL:-/api/command}"
+QUERY_URL="${QUERY_BASE_URL:-/api/query}"
+AUTH_URL="${AUTH_BASE_URL:-/api/auth}"
 
 echo "Injecting backend URLs into index.html"
 echo "  Command Base URL: ${COMMAND_URL}"

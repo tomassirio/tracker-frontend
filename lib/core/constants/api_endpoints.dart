@@ -4,12 +4,13 @@ import '../config/api_endpoints_stub.dart'
 /// API endpoint constants
 class ApiEndpoints {
   // Base URLs - read from window.appConfig (injected by Docker) or use defaults
+  // Defaults use relative paths for Kubernetes deployments, falls back to localhost for local dev
   static String get commandBaseUrl =>
-      getConfigValue('commandBaseUrl', 'http://localhost:8081/api/1');
+      getConfigValue('commandBaseUrl', '/api/command');
   static String get queryBaseUrl =>
-      getConfigValue('queryBaseUrl', 'http://localhost:8082/api/1');
+      getConfigValue('queryBaseUrl', '/api/query');
   static String get authBaseUrl =>
-      getConfigValue('authBaseUrl', 'http://localhost:8083/api/1');
+      getConfigValue('authBaseUrl', '/api/auth');
 
   // Google Maps API key - read from window.appConfig
   static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');

@@ -1,12 +1,34 @@
-replicaCount: 2
+# Name suffix for environment-specific deployments (e.g., "-dev" for dev environment)
+nameSuffix: ""
+
+replicaCount: 1
 image:
   repository: ghcr.io/tomassirio/tracker-frontend
   pullPolicy: IfNotPresent
   tag: "1.0.3"
 service:
-  type: ClusterIP
-  port: 51538
+  type: ClusterIP  # Changed back to ClusterIP since we'll use Ingress
+  port: 51538  # Production port (dev uses 41538)
   targetPort: 51538
+
+ingress:
+  enabled: true
+  className: "nginx"  # or "traefik" if you're using Traefik
+  annotations:
+    # For Cloudflare Tunnel (when ready)
+    # external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    # For local dev with Let's Encrypt (optional)
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: wanderer.localwanderer.com  # Will be overridden to wanderer.localwanderer-dev.com in dev
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # - secretName: wanderer-tls
+    #   hosts:
+    #     - localwanderer.com
+
 resources:
   limits:
     cpu: 200m
@@ -18,13 +40,21 @@ resources:
 application:
   port: 51538
   
-  # Google Maps API Key
-  googleMapsApiKey: "AIzaSyCIijc10o3XeaO3niT4oaoWjHkq8x-zqWk"
-  
-  # Backend service URLs
-  commandBaseUrl: "http://tracker-command:8081/api/1"
-  queryBaseUrl: "http://tracker-query:8082/api/1"
-  authBaseUrl: "http://tracker-auth:8083/api/1"
+  # Google Maps API Key (provided via GitHub secret in pipeline)
+  googleMapsApiKey: ""
+
+  # Backend service URLs - using relative paths that nginx will proxy to internal services
+  # These are injected into the Flutter web app and used by the browser
+  # nginx proxies these paths to the internal Kubernetes services at /api/1/
+  commandBaseUrl: "/api/command"
+  queryBaseUrl: "/api/query"
+  authBaseUrl: "/api/auth"
+
+# Backend service configuration (internal Kubernetes services)
+backend:
+  commandPort: 8081
+  queryPort: 8082
+  authPort: 8083
 # Pod Storage
 volumeClaimTemplates:
   enabled: false

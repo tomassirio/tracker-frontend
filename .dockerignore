@@ -7,8 +7,9 @@
 .vscode
 *.iml
 
-# Build outputs
-build/
+# Build outputs (but keep build/web for Docker)
+build/*
+!build/web
 .dart_tool/
 
 # Test coverage

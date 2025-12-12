@@ -6,15 +6,15 @@ on:
       - master
 
 jobs:
-  version-and-release:
+  prepare-release:
     runs-on: ubuntu-latest
     # Skip if commit was made by GitHub Actions (prevents infinite loop)
     if: "!contains(github.event.head_commit.message, 'ci: Prepare for next development iteration') && !contains(github.event.head_commit.message, 'ci: Release version')"
     outputs:
       release-version: ${{ steps.set-release-version.outputs.version }}
+      base-version: ${{ steps.set-release-version.outputs.base-version }}
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,13 +22,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           persist-credentials: true
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.7'
-          channel: 'stable'
-          cache: true
 
       - name: Configure Git
         run: |
@@ -38,30 +31,17 @@ jobs:
       - name: Set release version
         id: set-release-version
         run: |
-          # Extract current version from pubspec.yaml (e.g., 1.0.0-SNAPSHOT or 1.0.0-SNAPSHOT+1)
           CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
-          
-          # Remove -SNAPSHOT and extract base version
           BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-SNAPSHOT//' | sed 's/+.*//')
-          
-          # Check if there's a build number, otherwise default to 1
-          if echo "$CURRENT_VERSION" | grep -q '+'; then
-            BUILD_NUMBER=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
-          else
-            BUILD_NUMBER="1"
-          fi
-          
+          BUILD_NUMBER=$(echo "$CURRENT_VERSION" | grep -oP '\+\K[0-9]+' || echo "1")
           RELEASE_VERSION="${BASE_VERSION}+${BUILD_NUMBER}"
           
-          # Update pubspec.yaml with release version
           sed -i "s/^version: .*/version: ${RELEASE_VERSION}/" pubspec.yaml
           
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
           echo "version=${BASE_VERSION}" >> $GITHUB_OUTPUT
-          echo "Release version: ${RELEASE_VERSION}"
+          echo "base-version=${BASE_VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies
-        run: flutter pub get
 
       - name: Commit release version
         run: |
@@ -72,169 +52,202 @@ jobs:
         run: |
           BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
           
-          # Check if tag already exists
           if git rev-parse "v${BASE_VERSION}" >/dev/null 2>&1; then
             echo "Error: Tag v${BASE_VERSION} already exists!"
-            echo "This likely means the version in pubspec.yaml was not properly incremented."
-            echo "Please ensure the version follows semantic versioning and is incremented for each release."
             exit 1
           fi
           
           git tag -a "v${BASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
-
-      - name: Run tests with coverage
-        run: make test
-
-      - name: Extract coverage and update README badges
-        run: |
-          if [ -f "coverage/lcov.info" ]; then
-            # Install lcov if not available
-            sudo apt-get update
-            sudo apt-get install -y lcov
-            
-            # Generate coverage summary
-            COVERAGE_SUMMARY=$(lcov --summary coverage/lcov.info 2>&1)
-            
-            # Extract line coverage percentage
-            COVERAGE=$(echo "$COVERAGE_SUMMARY" | grep -oP 'lines......: \K[0-9.]+' | head -1)
-            
-            if [ -z "$COVERAGE" ]; then
-              COVERAGE="0"
-            fi
-            
-            # Round to integer
-            COVERAGE=$(printf "%.0f" "$COVERAGE")
-            
-            echo "Coverage: ${COVERAGE}%"
-            
-            # Determine badge color
-            if [ "$COVERAGE" -ge 80 ]; then
-              COVERAGE_COLOR="brightgreen"
-            elif [ "$COVERAGE" -ge 60 ]; then
-              COVERAGE_COLOR="yellow"
-            elif [ "$COVERAGE" -ge 40 ]; then
-              COVERAGE_COLOR="orange"
-            else
-              COVERAGE_COLOR="red"
-            fi
-          else
-            echo "No coverage data found"
-            COVERAGE="N/A"
-            COVERAGE_COLOR="lightgrey"
-          fi
-          
-          # Update badges in README if it exists
-          if [ -f "README.md" ]; then
-            BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-            
-            # Update or add version badge
-            if grep -q "version-" README.md; then
-              sed -i "s/version-[0-9.]*-blue/version-${BASE_VERSION}-blue/" README.md
-            fi
-            
-            # Update or add coverage badge
-            if grep -q "coverage-" README.md; then
-              sed -i "s|coverage-[^)]*|coverage-${COVERAGE}%25-${COVERAGE_COLOR}|" README.md
-            fi
-            
-            # Check if there were changes
-            if git diff --quiet README.md; then
-              echo "No badge updates needed"
-            else
-              git add README.md
-              git commit --amend --no-edit
-            fi
-          fi
-
-      - name: Build web application
-        run: make build
-
-      - name: Create release notes
-        run: |
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-          echo "Release ${BASE_VERSION}" > release-notes.md
-          echo "" >> release-notes.md
-          
-          # Get the previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
-          if [ -n "$PREV_TAG" ]; then
-            echo "Changes since ${PREV_TAG}:" >> release-notes.md
-            echo "" >> release-notes.md
-            git log --pretty=format:"* %s" ${PREV_TAG}..HEAD >> release-notes.md
-          else
-            echo "Initial release" >> release-notes.md
-          fi
-
-      - name: Create release archive
-        run: |
-          cd build/web
-          tar -czf ../../tracker-frontend-web.tar.gz .
-          cd ../..
-
-      - name: Set next development version
-        run: |
-          # Extract base version from release version
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
-          
-          # Split version into major.minor.patch
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
-          
-          # Increment patch version for next development iteration
-          NEXT_PATCH=$((PATCH + 1))
-          NEXT_BASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
-          
-          # Next version is SNAPSHOT without build number
-          NEXT_VERSION="${NEXT_BASE_VERSION}-SNAPSHOT"
-          
-          # Update pubspec.yaml
-          sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
-          
-          echo "NEXT_VERSION=${NEXT_VERSION}" >> $GITHUB_ENV
-          echo "Next development version: ${NEXT_VERSION}"
-
-      - name: Commit next development version
-        run: |
-          git add pubspec.yaml
-          git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
 
       - name: Push changes and tags
         run: |
           git push origin master
           git push origin --tags
 
+  test-and-coverage:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.1'
+          channel: 'stable'
+          cache: true
+
+      - name: Run tests with coverage
+        run: make test
+
+      - name: Extract coverage and update README badges
+        run: |
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          
+          if [ -f "coverage/lcov.info" ]; then
+            sudo apt-get update && sudo apt-get install -y lcov
+            COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep -oP 'lines......: \K[0-9.]+' | head -1 || echo "0")
+            COVERAGE=$(printf "%.0f" "$COVERAGE")
+            
+            if [ "$COVERAGE" -ge 80 ]; then COVERAGE_COLOR="brightgreen"
+            elif [ "$COVERAGE" -ge 60 ]; then COVERAGE_COLOR="yellow"
+            elif [ "$COVERAGE" -ge 40 ]; then COVERAGE_COLOR="orange"
+            else COVERAGE_COLOR="red"; fi
+          else
+            COVERAGE="N/A"
+            COVERAGE_COLOR="lightgrey"
+          fi
+          
+          if [ -f "README.md" ]; then
+            sed -i "s/version-[0-9.]*-blue/version-${BASE_VERSION}-blue/" README.md
+            sed -i "s|coverage-[^)]*|coverage-${COVERAGE}%25-${COVERAGE_COLOR}|" README.md
+            
+            if ! git diff --quiet README.md; then
+              git config user.name "GitHub Actions"
+              git config user.email "github-actions@github.com"
+              git add README.md
+              git commit -m "ci: Update README badges"
+              git push origin HEAD:master
+            fi
+          fi
+
+  build-web-app:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.1'
+          channel: 'stable'
+          cache: true
+
+      - name: Build web application
+        run: make build
+
+      - name: Create release archive
+        run: tar -czf tracker-frontend-web.tar.gz -C build/web .
+
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: tracker-frontend-web.tar.gz
+          retention-days: 1
+
+  create-release:
+    needs:
+      - prepare-release
+      - test-and-coverage
+      - build-web-app
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Download web build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+
+      - name: Create release notes
+        run: |
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          echo "Release ${BASE_VERSION}" > release-notes.md
+          echo "" >> release-notes.md
+          
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 v${BASE_VERSION}^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "Changes since ${PREV_TAG}:" >> release-notes.md
+            echo "" >> release-notes.md
+            git log --pretty=format:"* %s" ${PREV_TAG}..v${BASE_VERSION} >> release-notes.md
+          else
+            echo "Initial release" >> release-notes.md
+          fi
+
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BASE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/+.*//')
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
           gh release create "v${BASE_VERSION}" \
             --title "Release ${BASE_VERSION}" \
             --notes-file release-notes.md \
             tracker-frontend-web.tar.gz
 
+  finalize-release:
+    needs:
+      - prepare-release
+      - create-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Set next development version
+        run: |
+          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          
+          # Split version into major.minor.patch and increment patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
+          NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
+          
+          # Update pubspec.yaml and commit
+          sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
+          git add pubspec.yaml
+          git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
+          git push origin master
+
   build-release-docker-images:
-    needs: version-and-release
+    needs: prepare-release
     permissions:
       contents: read
       packages: write
     uses: ./.github/workflows/docker-build.yml
     with:
       push-to-registry: true
-      image-tag: v${{ needs.version-and-release.outputs.release-version }}
-      checkout-ref: v${{ needs.version-and-release.outputs.release-version }}
+      image-tag: v${{ needs.prepare-release.outputs.base-version }}
+      checkout-ref: v${{ needs.prepare-release.outputs.base-version }}
     secrets:
       registry-username: ${{ github.actor }}
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-to-production:
     needs:
-      - version-and-release
+      - prepare-release
       - build-release-docker-images
+      - test-and-coverage
     uses: ./.github/workflows/helm-deploy.yml
     with:
       environment: prod
-      image-tag: v${{ needs.version-and-release.outputs.release-version }}
+      image-tag: v${{ needs.prepare-release.outputs.base-version }}
       namespace: wanderer
     secrets:
       TWINGATE_SERVICE_KEY: ${{ secrets.TWINGATE_SERVICE_KEY }}
