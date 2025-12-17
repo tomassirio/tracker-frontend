@@ -1,14 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/repositories/profile_repository.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/services/auth_service.dart';
-
-@GenerateMocks([UserService, TripService, AuthService])
-import 'profile_repository_test_extended.mocks.dart';
 
 void main() {
   group('ProfileRepository - getUserProfile', () {
@@ -37,10 +32,11 @@ void main() {
         email: 'test@example.com',
         followersCount: 10,
         followingCount: 5,
+        tripsCount: 3,
+        createdAt: DateTime.now(),
       );
 
-      when(mockUserService.getUserById(userId))
-          .thenAnswer((_) async => expectedProfile);
+      mockUserService.mockProfileById = expectedProfile;
 
       // Act
       final result = await repository.getUserProfile(userId);
@@ -49,21 +45,73 @@ void main() {
       expect(result, equals(expectedProfile));
       expect(result.id, equals(userId));
       expect(result.username, equals('testuser'));
-      verify(mockUserService.getUserById(userId)).called(1);
+      expect(mockUserService.getUserByIdCalled, true);
     });
 
     test('getUserProfile throws error when user not found', () async {
       // Arrange
       const userId = 'nonexistent-user';
-      when(mockUserService.getUserById(userId))
-          .thenThrow(Exception('User not found'));
+      mockUserService.shouldThrowError = true;
 
       // Act & Assert
       expect(
         () => repository.getUserProfile(userId),
         throwsException,
       );
-      verify(mockUserService.getUserById(userId)).called(1);
+      expect(mockUserService.getUserByIdCalled, true);
     });
   });
+}
+
+// Mock UserService with getUserById support
+class MockUserService extends UserService {
+  UserProfile? mockProfile;
+  UserProfile? mockProfileById;
+  bool getMyProfileCalled = false;
+  bool getUserByIdCalled = false;
+  bool updateProfileCalled = false;
+  bool shouldThrowError = false;
+
+  @override
+  Future<UserProfile> getMyProfile() async {
+    getMyProfileCalled = true;
+
+    if (shouldThrowError) {
+      throw Exception('Failed to get profile');
+    }
+
+    return mockProfile!;
+  }
+
+  @override
+  Future<UserProfile> getUserById(String userId) async {
+    getUserByIdCalled = true;
+
+    if (shouldThrowError) {
+      throw Exception('User not found');
+    }
+
+    return mockProfileById!;
+  }
+
+  @override
+  Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
+    updateProfileCalled = true;
+
+    if (shouldThrowError) {
+      throw Exception('Failed to update profile');
+    }
+
+    return mockProfile!;
+  }
+}
+
+// Mock TripService
+class MockTripService extends TripService {
+  bool shouldThrowError = false;
+}
+
+// Mock AuthService
+class MockAuthService extends AuthService {
+  bool shouldThrowError = false;
 }
