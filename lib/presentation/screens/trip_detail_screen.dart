@@ -332,6 +332,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back to Home',
+        ),
       ),
       drawer: AppSidebar(
         username: _username,
