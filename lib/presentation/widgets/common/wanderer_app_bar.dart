@@ -14,8 +14,6 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onProfile;
   final VoidCallback? onSettings;
   final VoidCallback? onLogout;
-  final Widget? leading;
-  final bool automaticallyImplyLeading;
 
   const WandererAppBar({
     super.key,
@@ -29,19 +27,25 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onProfile,
     this.onSettings,
     this.onLogout,
-    this.leading,
-    this.automaticallyImplyLeading = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
       title: Row(
         children: [
-          const WandererLogo(size: 36),
+          InkWell(
+            onTap: () {
+              // Navigate to home screen by popping all routes until first route
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            borderRadius: BorderRadius.circular(18),
+            child: const Padding(
+              padding: EdgeInsets.all(4.0),
+              child: WandererLogo(size: 36),
+            ),
+          ),
           const SizedBox(width: 12),
           const Text(
             'Wanderer',
