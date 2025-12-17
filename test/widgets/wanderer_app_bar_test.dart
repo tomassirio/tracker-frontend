@@ -114,5 +114,35 @@ void main() {
 
       searchController.dispose();
     });
+
+    testWidgets(
+      'back button is visible when automaticallyImplyLeading is false',
+      (WidgetTester tester) async {
+        final searchController = TextEditingController();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: WandererAppBar(
+                searchController: searchController,
+                isLoggedIn: false,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {},
+                ),
+                automaticallyImplyLeading: false,
+              ),
+              drawer: const Drawer(child: Text('Drawer')),
+            ),
+          ),
+        );
+
+        // Verify back button is shown instead of drawer icon
+        expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+        expect(find.byIcon(Icons.menu), findsNothing);
+
+        searchController.dispose();
+      },
+    );
   });
 }

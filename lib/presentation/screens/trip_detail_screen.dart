@@ -337,6 +337,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           onPressed: () => Navigator.pop(context),
           tooltip: 'Back to Home',
         ),
+        automaticallyImplyLeading: false,
       ),
       drawer: AppSidebar(
         username: _username,

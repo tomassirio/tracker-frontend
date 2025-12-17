@@ -15,6 +15,7 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onSettings;
   final VoidCallback? onLogout;
   final Widget? leading;
+  final bool automaticallyImplyLeading;
 
   const WandererAppBar({
     super.key,
@@ -29,6 +30,7 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onSettings,
     this.onLogout,
     this.leading,
+    this.automaticallyImplyLeading = true,
   });
 
   @override
@@ -36,6 +38,7 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
       title: Row(
         children: [
           const WandererLogo(size: 36),
