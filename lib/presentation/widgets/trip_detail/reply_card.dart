@@ -50,12 +50,11 @@ class ReplyCard extends StatelessWidget {
                     InkWell(
                       onTap: () => _navigateToProfile(context),
                       child: Text(
-                        reply.username,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                        '@${reply.username}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
                           fontSize: 12,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
+                          color: Colors.grey[700],
                         ),
                       ),
                     ),

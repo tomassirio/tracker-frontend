@@ -238,11 +238,11 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
                         Icon(Icons.person, size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
-                          widget.trip.username,
-                          style: const TextStyle(
+                          '@${widget.trip.username}',
+                          style: TextStyle(
                             fontSize: 13,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
                           ),
                         ),
                       ],

@@ -44,12 +44,11 @@ class TripInfoCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      trip.username,
-                      style: const TextStyle(
+                      '@${trip.username}',
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
+                        color: Colors.grey[700],
                       ),
                     ),
                   ],

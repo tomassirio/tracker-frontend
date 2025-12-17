@@ -70,12 +70,11 @@ class CommentCard extends StatelessWidget {
                         InkWell(
                           onTap: () => _navigateToProfile(context),
                           child: Text(
-                            comment.username,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                            '@${comment.username}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
+                              color: Colors.grey[700],
                             ),
                           ),
                         ),

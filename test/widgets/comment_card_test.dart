@@ -34,7 +34,7 @@ void main() {
         ),
       );
 
-      expect(find.text('testuser'), findsOneWidget);
+      expect(find.text('@testuser'), findsOneWidget);
       expect(find.text('Test comment message'), findsOneWidget);
     });
 
@@ -67,14 +67,13 @@ void main() {
         ),
       );
 
-      // Find the username text
-      final usernameFinder = find.text('testuser');
+      // Find the username text with @ prefix
+      final usernameFinder = find.text('@testuser');
       expect(usernameFinder, findsOneWidget);
 
-      // Verify the username has the clickable styling (blue color and underline)
+      // Verify the username has the clickable styling
       final usernameWidget = tester.widget<Text>(usernameFinder);
-      expect(usernameWidget.style?.color, Colors.blue);
-      expect(usernameWidget.style?.decoration, TextDecoration.underline);
+      expect(usernameWidget.style?.fontWeight, FontWeight.w600);
 
       // Verify the username is wrapped in an InkWell (making it tappable)
       final inkWellFinder = find.ancestor(
