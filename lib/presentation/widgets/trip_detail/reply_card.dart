@@ -9,6 +9,15 @@ class ReplyCard extends StatelessWidget {
 
   const ReplyCard({super.key, required this.reply});
 
+  void _navigateToProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      PageTransitions.slideRight(
+        ProfileScreen(userId: reply.userId),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,14 +33,7 @@ class ReplyCard extends StatelessWidget {
           Row(
             children: [
               InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    PageTransitions.slideRight(
-                      ProfileScreen(userId: reply.userId),
-                    ),
-                  );
-                },
+                onTap: () => _navigateToProfile(context),
                 child: CircleAvatar(
                   radius: 12,
                   child: Text(
@@ -46,14 +48,7 @@ class ReplyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          PageTransitions.slideRight(
-                            ProfileScreen(userId: reply.userId),
-                          ),
-                        );
-                      },
+                      onTap: () => _navigateToProfile(context),
                       child: Text(
                         reply.username,
                         style: const TextStyle(

@@ -25,6 +25,15 @@ class CommentCard extends StatelessWidget {
     required this.onToggleReplies,
   });
 
+  void _navigateToProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      PageTransitions.slideRight(
+        ProfileScreen(userId: comment.userId),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isAuthor = comment.userId == tripUserId;
@@ -45,14 +54,7 @@ class CommentCard extends StatelessWidget {
           Row(
             children: [
               InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    PageTransitions.slideRight(
-                      ProfileScreen(userId: comment.userId),
-                    ),
-                  );
-                },
+                onTap: () => _navigateToProfile(context),
                 child: CircleAvatar(
                   radius: 16,
                   child: Text(comment.username[0].toUpperCase()),
@@ -66,14 +68,7 @@ class CommentCard extends StatelessWidget {
                     Row(
                       children: [
                         InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              PageTransitions.slideRight(
-                                ProfileScreen(userId: comment.userId),
-                              ),
-                            );
-                          },
+                          onTap: () => _navigateToProfile(context),
                           child: Text(
                             comment.username,
                             style: const TextStyle(
