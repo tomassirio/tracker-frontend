@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reply_card.dart';
+import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 
 /// Widget displaying a comment card with reactions and replies
 class CommentCard extends StatelessWidget {
@@ -42,51 +44,75 @@ class CommentCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 16,
-                child: Text(comment.username[0].toUpperCase()),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    PageTransitions.slideRight(
+                      ProfileScreen(userId: comment.userId),
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 16,
+                  child: Text(comment.username[0].toUpperCase()),
+                ),
               ),
               const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        comment.username,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      if (isAuthor) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[100],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'AUTHOR',
-                            style: TextStyle(
-                              fontSize: 10,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              PageTransitions.slideRight(
+                                ProfileScreen(userId: comment.userId),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            comment.username,
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
+                              fontSize: 14,
                               color: Colors.blue,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
+                        if (isAuthor) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[100],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'AUTHOR',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  Text(
-                    _formatTimestamp(comment.createdAt),
-                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                  ),
-                ],
+                    ),
+                    Text(
+                      _formatTimestamp(comment.createdAt),
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

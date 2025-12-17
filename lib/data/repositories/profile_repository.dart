@@ -23,6 +23,11 @@ class ProfileRepository {
     return await _userService.getMyProfile();
   }
 
+  /// Gets a specific user's profile by userId
+  Future<UserProfile> getUserProfile(String userId) async {
+    return await _userService.getUserById(userId);
+  }
+
   /// Updates the current user's profile
   Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
     return await _userService.updateProfile(request);
