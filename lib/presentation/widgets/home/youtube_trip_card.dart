@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../data/client/google_maps_api_client.dart';
 import '../../../data/client/google_routes_api_client.dart';
+import '../../screens/profile_screen.dart';
+import '../../helpers/page_transitions.dart';
 
 /// YouTube-style trip card with static map preview
 class YouTubeTripCard extends StatefulWidget {
@@ -221,15 +223,30 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
                   ),
                   const SizedBox(height: 8),
                   // Username and date
-                  Row(
-                    children: [
-                      Icon(Icons.person, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.trip.username,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-                      ),
-                    ],
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        PageTransitions.slideRight(
+                          ProfileScreen(userId: widget.trip.userId),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '@${widget.trip.username}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 4),
                   // Metadata row

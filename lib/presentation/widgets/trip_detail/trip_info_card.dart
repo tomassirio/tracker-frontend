@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 
 /// Widget displaying trip information card
 class TripInfoCard extends StatelessWidget {
@@ -25,16 +27,31 @@ class TripInfoCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              CircleAvatar(
-                radius: 16,
-                child: Text(trip.username[0].toUpperCase()),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                trip.username,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    PageTransitions.slideRight(
+                      ProfileScreen(userId: trip.userId),
+                    ),
+                  );
+                },
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      child: Text(trip.username[0].toUpperCase()),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '@${trip.username}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const Spacer(),

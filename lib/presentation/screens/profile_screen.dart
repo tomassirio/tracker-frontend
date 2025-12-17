@@ -17,7 +17,9 @@ import 'trip_detail_screen.dart';
 
 /// User profile screen showing user information, statistics, and trips
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String? userId;
+
+  const ProfileScreen({super.key, this.userId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -58,6 +60,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoggedIn = isLoggedIn;
       });
 
+      // If viewing another user's profile
+      if (widget.userId != null) {
+        final profile = await _repository.getUserProfile(widget.userId!);
+        setState(() {
+          _profile = profile;
+          _isLoadingProfile = false;
+        });
+
+        // Load user's trips
+        _loadUserTrips(profile.id);
+        return;
+      }
+
+      // Viewing own profile
       if (!isLoggedIn) {
         setState(() {
           _isLoadingProfile = false;
@@ -353,11 +369,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: _showEditProfileDialog,
-                  tooltip: 'Edit Profile',
-                ),
+                if (widget.userId == null) // Only show edit button for own profile
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: _showEditProfileDialog,
+                    tooltip: 'Edit Profile',
+                  ),
               ],
             ),
             if (_profile!.bio != null) ...[
