@@ -35,7 +35,17 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       title: Row(
         children: [
-          const WandererLogo(size: 36),
+          InkWell(
+            onTap: () {
+              // Navigate to home screen by popping all routes until first route
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            borderRadius: BorderRadius.circular(18),
+            child: const Padding(
+              padding: EdgeInsets.all(4.0),
+              child: WandererLogo(size: 36),
+            ),
+          ),
           const SizedBox(width: 12),
           const Text(
             'Wanderer',
