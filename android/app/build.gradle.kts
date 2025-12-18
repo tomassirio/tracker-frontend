@@ -28,6 +28,16 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // API endpoint configuration from environment variables
+        // These can be overridden at build time with: flutter build apk --dart-define=COMMAND_BASE_URL=...
+        // The app uses defaults in api_endpoints_android.dart if not provided
+        buildConfigField("String", "COMMAND_BASE_URL", "\"${System.getenv("COMMAND_BASE_URL") ?: ""}\"")
+        buildConfigField("String", "QUERY_BASE_URL", "\"${System.getenv("QUERY_BASE_URL") ?: ""}\"")
+        buildConfigField("String", "AUTH_BASE_URL", "\"${System.getenv("AUTH_BASE_URL") ?: ""}\"")
+
+        // Google Maps API Key from environment
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = System.getenv("GOOGLE_MAPS_API_KEY") ?: "YOUR_GOOGLE_MAPS_API_KEY_HERE"
     }
 
     buildTypes {

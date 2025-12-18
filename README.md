@@ -70,6 +70,8 @@ flutter run
 
 ### Running the App
 
+#### Web Version
+
 For local development with your Google Maps API key:
 
 ```bash
@@ -85,6 +87,17 @@ chmod +x dev.sh
 For detailed local development setup, see [LOCAL_DEV.md](LOCAL_DEV.md).
 
 For detailed UI setup instructions, including Google Maps API configuration, see [UI_SETUP.md](UI_SETUP.md).
+
+#### Android Version
+
+For running on Android:
+
+```bash
+# Run on Android emulator or connected device
+flutter run -d android
+```
+
+For detailed Android setup, configuration, and deployment instructions, see [ANDROID_SETUP.md](ANDROID_SETUP.md).
 
 ### Running Tests
 

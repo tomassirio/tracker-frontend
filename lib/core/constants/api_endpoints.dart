@@ -1,4 +1,4 @@
-import '../config/api_endpoints_stub.dart'
+import '../config/api_endpoints_android.dart'
     if (dart.library.js_interop) '../config/api_endpoints_web.dart';
 
 /// API endpoint constants
