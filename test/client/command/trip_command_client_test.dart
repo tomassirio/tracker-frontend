@@ -344,7 +344,10 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
 
-        final result = await tripCommandClient.createTripFromPlan('plan-123');
+        final result = await tripCommandClient.createTripFromPlan(
+          'plan-123',
+          Visibility.public,
+        );
 
         expect(result.id, 'trip-456');
         expect(result.name, 'Trip from Plan');
@@ -376,7 +379,8 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
 
-        await tripCommandClient.createTripFromPlan('plan-123');
+        await tripCommandClient.createTripFromPlan(
+            'plan-123', Visibility.public);
 
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
@@ -388,7 +392,8 @@ void main() {
         );
 
         expect(
-          () => tripCommandClient.createTripFromPlan('plan-123'),
+          () => tripCommandClient.createTripFromPlan(
+              'plan-123', Visibility.public),
           throwsException,
         );
       });
@@ -402,7 +407,8 @@ void main() {
           );
 
           expect(
-            () => tripCommandClient.createTripFromPlan('plan-123'),
+            () => tripCommandClient.createTripFromPlan(
+                'plan-123', Visibility.public),
             throwsException,
           );
         },

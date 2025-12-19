@@ -1,3 +1,4 @@
+import '../../core/constants/enums.dart';
 import '../models/trip_models.dart';
 import '../client/clients.dart';
 
@@ -83,8 +84,9 @@ class TripService {
   }
 
   /// Create trip from trip plan
-  Future<Trip> createTripFromPlan(String tripPlanId) async {
-    return await _tripCommandClient.createTripFromPlan(tripPlanId);
+  Future<Trip> createTripFromPlan(
+      String tripPlanId, Visibility visibility) async {
+    return await _tripCommandClient.createTripFromPlan(tripPlanId, visibility);
   }
 
   /// Send trip update (location, message)

@@ -164,7 +164,10 @@ void main() {
         final mockTrip = createMockTrip('trip-from-plan', 'Trip from Plan');
         mockTripCommandClient.mockTrip = mockTrip;
 
-        final result = await tripService.createTripFromPlan('plan-123');
+        final result = await tripService.createTripFromPlan(
+          'plan-123',
+          Visibility.public,
+        );
 
         expect(result.id, 'trip-from-plan');
         expect(result.name, 'Trip from Plan');
@@ -383,7 +386,8 @@ class MockTripCommandClient extends TripCommandClient {
   }
 
   @override
-  Future<Trip> createTripFromPlan(String tripPlanId) async {
+  Future<Trip> createTripFromPlan(
+      String tripPlanId, Visibility visibility) async {
     createTripFromPlanCalled = true;
     lastPlanId = tripPlanId;
     if (shouldThrowError) throw Exception('Failed to create trip from plan');

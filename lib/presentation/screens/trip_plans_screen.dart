@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Visibility;
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/trip_plan_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
@@ -146,25 +147,52 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   }
 
   Future<void> _handleCreateTripFromPlan(TripPlan plan) async {
-    final confirm = await showDialog<bool>(
+    // Show visibility selection dialog
+    final visibility = await showDialog<Visibility>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Create Trip'),
-        content: Text('Would you like to create a trip from "${plan.name}"?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Create a trip from "${plan.name}"'),
+            const SizedBox(height: 16),
+            const Text(
+              'Select visibility:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.public),
+              title: const Text('Public'),
+              subtitle: const Text('Visible to everyone'),
+              onTap: () => Navigator.pop(context, Visibility.public),
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text('Private'),
+              subtitle: const Text('Only visible to you'),
+              onTap: () => Navigator.pop(context, Visibility.private),
+            ),
+            ListTile(
+              leading: const Icon(Icons.shield),
+              title: const Text('Protected'),
+              subtitle: const Text('Visible to friends only'),
+              onTap: () => Navigator.pop(context, Visibility.protected),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context, null),
             child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Create'),
           ),
         ],
       ),
     );
 
-    if (confirm != true || !mounted) return;
+    if (visibility == null || !mounted) return;
 
     // Show loading dialog
     showDialog(
@@ -174,7 +202,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     );
 
     try {
-      await _tripService.createTripFromPlan(plan.id);
+      await _tripService.createTripFromPlan(plan.id, visibility);
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
         UiHelpers.showSuccessMessage(

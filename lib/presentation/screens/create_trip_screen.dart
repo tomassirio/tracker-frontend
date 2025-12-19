@@ -141,10 +141,49 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   Future<void> _createTripFromPlan() async {
     if (_selectedTripPlan == null) return;
 
+    // Show visibility selection dialog
+    final visibility = await showDialog<Visibility>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Visibility'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.public),
+              title: const Text('Public'),
+              subtitle: const Text('Visible to everyone'),
+              onTap: () => Navigator.pop(context, Visibility.public),
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text('Private'),
+              subtitle: const Text('Only visible to you'),
+              onTap: () => Navigator.pop(context, Visibility.private),
+            ),
+            ListTile(
+              leading: const Icon(Icons.shield),
+              title: const Text('Protected'),
+              subtitle: const Text('Visible to friends only'),
+              onTap: () => Navigator.pop(context, Visibility.protected),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (visibility == null || !mounted) return;
+
     setState(() => _isLoading = true);
 
     try {
-      await _tripService.createTripFromPlan(_selectedTripPlan!.id);
+      await _tripService.createTripFromPlan(_selectedTripPlan!.id, visibility);
 
       if (mounted) {
         UiHelpers.showSuccessMessage(
