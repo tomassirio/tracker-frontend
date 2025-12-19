@@ -47,7 +47,7 @@ jobs:
     uses: ./.github/workflows/docker-build.yml
     with:
       push-to-registry: true
-      image-tag: ci-test
+      image-tag: ci-test-${{ github.run_number }}
     secrets:
       registry-username: ${{ github.actor }}
       registry-password: ${{ secrets.GITHUB_TOKEN }}
@@ -57,7 +57,7 @@ jobs:
     uses: ./.github/workflows/helm-deploy.yml
     with:
       environment: dev
-      image-tag: ci-test
+      image-tag: ci-test-${{ github.run_number }}
       namespace: wanderer-dev
     secrets:
       TWINGATE_SERVICE_KEY: ${{ secrets.TWINGATE_SERVICE_KEY }}
