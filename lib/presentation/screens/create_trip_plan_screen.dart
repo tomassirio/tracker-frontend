@@ -331,7 +331,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      initialValue: _planType,
+                      value: _planType,
                       decoration: const InputDecoration(
                         labelText: 'Plan Type',
                         border: OutlineInputBorder(),

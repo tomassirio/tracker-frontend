@@ -230,7 +230,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                       )
                     else
                       DropdownButtonFormField<TripPlan>(
-                        initialValue: _selectedTripPlan,
+                        value: _selectedTripPlan,
                         decoration: const InputDecoration(
                           labelText: 'Select a trip plan (optional)',
                           border: OutlineInputBorder(),
