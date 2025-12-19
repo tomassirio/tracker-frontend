@@ -148,7 +148,7 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
                                   ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                      loadingProgress.expectedTotalBytes!
                                   : null,
                             ),
                           ),

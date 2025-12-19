@@ -7,7 +7,8 @@ class TripPlanCommandClient {
   final ApiClient _apiClient;
 
   TripPlanCommandClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+      : _apiClient =
+            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create trip plan
   /// Requires authentication (USER, ADMIN)

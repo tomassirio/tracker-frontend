@@ -25,9 +25,9 @@ class UserAchievement {
       );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'userId': userId,
-    'achievement': achievement.toJson(),
-    'unlockedAt': unlockedAt.toIso8601String(),
-  };
+        'id': id,
+        'userId': userId,
+        'achievement': achievement.toJson(),
+        'unlockedAt': unlockedAt.toIso8601String(),
+      };
 }

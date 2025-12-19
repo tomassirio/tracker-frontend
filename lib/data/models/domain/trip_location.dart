@@ -56,8 +56,7 @@ class TripLocation {
       longitude: (location?['lon'] ?? json['longitude'] ?? 0).toDouble(),
       message: json['message'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      timestamp:
-          DateTime.tryParse(json['timestamp'] as String? ?? '') ??
+      timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ??
           DateTime.now(),
       battery: json['battery'] as int?,
       reactions: reactionsList,
@@ -67,18 +66,18 @@ class TripLocation {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'latitude': latitude,
-    'longitude': longitude,
-    if (message != null) 'message': message,
-    if (imageUrl != null) 'imageUrl': imageUrl,
-    'timestamp': timestamp.toIso8601String(),
-    if (battery != null) 'battery': battery,
-    if (reactions != null)
-      'reactions': reactions!.map((r) => r.toJson()).toList(),
-    if (city != null) 'city': city,
-    if (country != null) 'country': country,
-  };
+        'id': id,
+        'latitude': latitude,
+        'longitude': longitude,
+        if (message != null) 'message': message,
+        if (imageUrl != null) 'imageUrl': imageUrl,
+        'timestamp': timestamp.toIso8601String(),
+        if (battery != null) 'battery': battery,
+        if (reactions != null)
+          'reactions': reactions!.map((r) => r.toJson()).toList(),
+        if (city != null) 'city': city,
+        if (country != null) 'country': country,
+      };
 
   /// Create a copy with updated place information
   TripLocation copyWith({

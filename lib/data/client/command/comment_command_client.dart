@@ -7,7 +7,8 @@ class CommentCommandClient {
   final ApiClient _apiClient;
 
   CommentCommandClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+      : _apiClient =
+            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create a new comment (top-level or reply)
   /// Requires authentication (USER, ADMIN)

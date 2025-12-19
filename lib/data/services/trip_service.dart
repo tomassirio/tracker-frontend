@@ -13,12 +13,12 @@ class TripService {
     TripCommandClient? tripCommandClient,
     TripPlanCommandClient? tripPlanCommandClient,
     TripUpdateCommandClient? tripUpdateCommandClient,
-  }) : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
-       _tripCommandClient = tripCommandClient ?? TripCommandClient(),
-       _tripPlanCommandClient =
-           tripPlanCommandClient ?? TripPlanCommandClient(),
-       _tripUpdateCommandClient =
-           tripUpdateCommandClient ?? TripUpdateCommandClient();
+  })  : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
+        _tripCommandClient = tripCommandClient ?? TripCommandClient(),
+        _tripPlanCommandClient =
+            tripPlanCommandClient ?? TripPlanCommandClient(),
+        _tripUpdateCommandClient =
+            tripUpdateCommandClient ?? TripUpdateCommandClient();
 
   // ===== Trip Query Operations =====
 

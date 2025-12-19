@@ -7,7 +7,7 @@ class TripQueryClient {
   final ApiClient _apiClient;
 
   TripQueryClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
+      : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
 
   /// Get trip by ID
   /// Requires authentication (visibility-dependent)

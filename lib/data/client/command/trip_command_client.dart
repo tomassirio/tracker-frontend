@@ -7,7 +7,8 @@ class TripCommandClient {
   final ApiClient _apiClient;
 
   TripCommandClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+      : _apiClient =
+            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create new trip
   /// Requires authentication (USER, ADMIN)

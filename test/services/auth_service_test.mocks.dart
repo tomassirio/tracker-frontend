@@ -23,12 +23,12 @@ import 'package:tracker_frontend/data/storage/token_storage.dart' as _i7;
 
 class _FakeAuthResponse_0 extends _i1.SmartFake implements _i2.AuthResponse {
   _FakeAuthResponse_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+      : super(parent, parentInvocation);
 }
 
 class _FakeUserProfile_1 extends _i1.SmartFake implements _i3.UserProfile {
   _FakeUserProfile_1(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+      : super(parent, parentInvocation);
 }
 
 /// A class which mocks [AuthClient].
@@ -42,71 +42,63 @@ class MockAuthClient extends _i1.Mock implements _i4.AuthClient {
   @override
   _i5.Future<_i2.AuthResponse> login(_i2.LoginRequest? request) =>
       (super.noSuchMethod(
-            Invocation.method(#login, [request]),
-            returnValue: _i5.Future<_i2.AuthResponse>.value(
-              _FakeAuthResponse_0(this, Invocation.method(#login, [request])),
-            ),
-          )
-          as _i5.Future<_i2.AuthResponse>);
+        Invocation.method(#login, [request]),
+        returnValue: _i5.Future<_i2.AuthResponse>.value(
+          _FakeAuthResponse_0(this, Invocation.method(#login, [request])),
+        ),
+      ) as _i5.Future<_i2.AuthResponse>);
 
   @override
   _i5.Future<_i2.AuthResponse> register(_i2.RegisterRequest? request) =>
       (super.noSuchMethod(
+        Invocation.method(#register, [request]),
+        returnValue: _i5.Future<_i2.AuthResponse>.value(
+          _FakeAuthResponse_0(
+            this,
             Invocation.method(#register, [request]),
-            returnValue: _i5.Future<_i2.AuthResponse>.value(
-              _FakeAuthResponse_0(
-                this,
-                Invocation.method(#register, [request]),
-              ),
-            ),
-          )
-          as _i5.Future<_i2.AuthResponse>);
+          ),
+        ),
+      ) as _i5.Future<_i2.AuthResponse>);
 
   @override
-  _i5.Future<void> logout() =>
-      (super.noSuchMethod(
-            Invocation.method(#logout, []),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
+  _i5.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(#logout, []),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
   _i5.Future<_i2.AuthResponse> refresh(_i2.RefreshTokenRequest? request) =>
       (super.noSuchMethod(
-            Invocation.method(#refresh, [request]),
-            returnValue: _i5.Future<_i2.AuthResponse>.value(
-              _FakeAuthResponse_0(this, Invocation.method(#refresh, [request])),
-            ),
-          )
-          as _i5.Future<_i2.AuthResponse>);
+        Invocation.method(#refresh, [request]),
+        returnValue: _i5.Future<_i2.AuthResponse>.value(
+          _FakeAuthResponse_0(this, Invocation.method(#refresh, [request])),
+        ),
+      ) as _i5.Future<_i2.AuthResponse>);
 
   @override
   _i5.Future<void> initiatePasswordReset(_i2.PasswordResetRequest? request) =>
       (super.noSuchMethod(
-            Invocation.method(#initiatePasswordReset, [request]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
+        Invocation.method(#initiatePasswordReset, [request]),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
   _i5.Future<void> completePasswordReset(_i2.PasswordResetRequest? request) =>
       (super.noSuchMethod(
-            Invocation.method(#completePasswordReset, [request]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
+        Invocation.method(#completePasswordReset, [request]),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
   _i5.Future<void> changePassword(_i2.PasswordChangeRequest? request) =>
       (super.noSuchMethod(
-            Invocation.method(#changePassword, [request]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
+        Invocation.method(#changePassword, [request]),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }
 
 /// A class which mocks [UserQueryClient].
@@ -120,84 +112,70 @@ class MockUserQueryClient extends _i1.Mock implements _i6.UserQueryClient {
   @override
   _i5.Future<_i3.UserProfile> getUserById(String? userId) =>
       (super.noSuchMethod(
+        Invocation.method(#getUserById, [userId]),
+        returnValue: _i5.Future<_i3.UserProfile>.value(
+          _FakeUserProfile_1(
+            this,
             Invocation.method(#getUserById, [userId]),
-            returnValue: _i5.Future<_i3.UserProfile>.value(
-              _FakeUserProfile_1(
-                this,
-                Invocation.method(#getUserById, [userId]),
-              ),
-            ),
-          )
-          as _i5.Future<_i3.UserProfile>);
+          ),
+        ),
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
   _i5.Future<_i3.UserProfile> getUserByUsername(String? username) =>
       (super.noSuchMethod(
+        Invocation.method(#getUserByUsername, [username]),
+        returnValue: _i5.Future<_i3.UserProfile>.value(
+          _FakeUserProfile_1(
+            this,
             Invocation.method(#getUserByUsername, [username]),
-            returnValue: _i5.Future<_i3.UserProfile>.value(
-              _FakeUserProfile_1(
-                this,
-                Invocation.method(#getUserByUsername, [username]),
-              ),
-            ),
-          )
-          as _i5.Future<_i3.UserProfile>);
+          ),
+        ),
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i5.Future<_i3.UserProfile> getCurrentUser() =>
-      (super.noSuchMethod(
-            Invocation.method(#getCurrentUser, []),
-            returnValue: _i5.Future<_i3.UserProfile>.value(
-              _FakeUserProfile_1(this, Invocation.method(#getCurrentUser, [])),
-            ),
-          )
-          as _i5.Future<_i3.UserProfile>);
+  _i5.Future<_i3.UserProfile> getCurrentUser() => (super.noSuchMethod(
+        Invocation.method(#getCurrentUser, []),
+        returnValue: _i5.Future<_i3.UserProfile>.value(
+          _FakeUserProfile_1(this, Invocation.method(#getCurrentUser, [])),
+        ),
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i5.Future<List<_i3.UserProfile>> getFriends() =>
-      (super.noSuchMethod(
-            Invocation.method(#getFriends, []),
-            returnValue: _i5.Future<List<_i3.UserProfile>>.value(
-              <_i3.UserProfile>[],
-            ),
-          )
-          as _i5.Future<List<_i3.UserProfile>>);
+  _i5.Future<List<_i3.UserProfile>> getFriends() => (super.noSuchMethod(
+        Invocation.method(#getFriends, []),
+        returnValue: _i5.Future<List<_i3.UserProfile>>.value(
+          <_i3.UserProfile>[],
+        ),
+      ) as _i5.Future<List<_i3.UserProfile>>);
 
   @override
-  _i5.Future<List<dynamic>> getReceivedFriendRequests() =>
-      (super.noSuchMethod(
-            Invocation.method(#getReceivedFriendRequests, []),
-            returnValue: _i5.Future<List<dynamic>>.value(<dynamic>[]),
-          )
-          as _i5.Future<List<dynamic>>);
+  _i5.Future<List<dynamic>> getReceivedFriendRequests() => (super.noSuchMethod(
+        Invocation.method(#getReceivedFriendRequests, []),
+        returnValue: _i5.Future<List<dynamic>>.value(<dynamic>[]),
+      ) as _i5.Future<List<dynamic>>);
 
   @override
-  _i5.Future<List<dynamic>> getSentFriendRequests() =>
-      (super.noSuchMethod(
-            Invocation.method(#getSentFriendRequests, []),
-            returnValue: _i5.Future<List<dynamic>>.value(<dynamic>[]),
-          )
-          as _i5.Future<List<dynamic>>);
+  _i5.Future<List<dynamic>> getSentFriendRequests() => (super.noSuchMethod(
+        Invocation.method(#getSentFriendRequests, []),
+        returnValue: _i5.Future<List<dynamic>>.value(<dynamic>[]),
+      ) as _i5.Future<List<dynamic>>);
 
   @override
-  _i5.Future<List<_i3.UserProfile>> getFollowing() =>
-      (super.noSuchMethod(
-            Invocation.method(#getFollowing, []),
-            returnValue: _i5.Future<List<_i3.UserProfile>>.value(
-              <_i3.UserProfile>[],
-            ),
-          )
-          as _i5.Future<List<_i3.UserProfile>>);
+  _i5.Future<List<_i3.UserProfile>> getFollowing() => (super.noSuchMethod(
+        Invocation.method(#getFollowing, []),
+        returnValue: _i5.Future<List<_i3.UserProfile>>.value(
+          <_i3.UserProfile>[],
+        ),
+      ) as _i5.Future<List<_i3.UserProfile>>);
 
   @override
-  _i5.Future<List<_i3.UserProfile>> getFollowers() =>
-      (super.noSuchMethod(
-            Invocation.method(#getFollowers, []),
-            returnValue: _i5.Future<List<_i3.UserProfile>>.value(
-              <_i3.UserProfile>[],
-            ),
-          )
-          as _i5.Future<List<_i3.UserProfile>>);
+  _i5.Future<List<_i3.UserProfile>> getFollowers() => (super.noSuchMethod(
+        Invocation.method(#getFollowers, []),
+        returnValue: _i5.Future<List<_i3.UserProfile>>.value(
+          <_i3.UserProfile>[],
+        ),
+      ) as _i5.Future<List<_i3.UserProfile>>);
 }
 
 /// A class which mocks [TokenStorage].
@@ -218,81 +196,64 @@ class MockTokenStorage extends _i1.Mock implements _i7.TokenStorage {
     String? username,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#saveTokens, [], {
-              #accessToken: accessToken,
-              #refreshToken: refreshToken,
-              #tokenType: tokenType,
-              #expiresIn: expiresIn,
-              #userId: userId,
-              #username: username,
-            }),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
+        Invocation.method(#saveTokens, [], {
+          #accessToken: accessToken,
+          #refreshToken: refreshToken,
+          #tokenType: tokenType,
+          #expiresIn: expiresIn,
+          #userId: userId,
+          #username: username,
+        }),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i5.Future<String?> getAccessToken() =>
-      (super.noSuchMethod(
-            Invocation.method(#getAccessToken, []),
-            returnValue: _i5.Future<String?>.value(),
-          )
-          as _i5.Future<String?>);
+  _i5.Future<String?> getAccessToken() => (super.noSuchMethod(
+        Invocation.method(#getAccessToken, []),
+        returnValue: _i5.Future<String?>.value(),
+      ) as _i5.Future<String?>);
 
   @override
-  _i5.Future<String?> getRefreshToken() =>
-      (super.noSuchMethod(
-            Invocation.method(#getRefreshToken, []),
-            returnValue: _i5.Future<String?>.value(),
-          )
-          as _i5.Future<String?>);
+  _i5.Future<String?> getRefreshToken() => (super.noSuchMethod(
+        Invocation.method(#getRefreshToken, []),
+        returnValue: _i5.Future<String?>.value(),
+      ) as _i5.Future<String?>);
 
   @override
-  _i5.Future<String?> getTokenType() =>
-      (super.noSuchMethod(
-            Invocation.method(#getTokenType, []),
-            returnValue: _i5.Future<String?>.value(),
-          )
-          as _i5.Future<String?>);
+  _i5.Future<String?> getTokenType() => (super.noSuchMethod(
+        Invocation.method(#getTokenType, []),
+        returnValue: _i5.Future<String?>.value(),
+      ) as _i5.Future<String?>);
 
   @override
-  _i5.Future<String?> getUserId() =>
-      (super.noSuchMethod(
-            Invocation.method(#getUserId, []),
-            returnValue: _i5.Future<String?>.value(),
-          )
-          as _i5.Future<String?>);
+  _i5.Future<String?> getUserId() => (super.noSuchMethod(
+        Invocation.method(#getUserId, []),
+        returnValue: _i5.Future<String?>.value(),
+      ) as _i5.Future<String?>);
 
   @override
-  _i5.Future<String?> getUsername() =>
-      (super.noSuchMethod(
-            Invocation.method(#getUsername, []),
-            returnValue: _i5.Future<String?>.value(),
-          )
-          as _i5.Future<String?>);
+  _i5.Future<String?> getUsername() => (super.noSuchMethod(
+        Invocation.method(#getUsername, []),
+        returnValue: _i5.Future<String?>.value(),
+      ) as _i5.Future<String?>);
 
   @override
-  _i5.Future<bool> isAccessTokenExpired() =>
-      (super.noSuchMethod(
-            Invocation.method(#isAccessTokenExpired, []),
-            returnValue: _i5.Future<bool>.value(false),
-          )
-          as _i5.Future<bool>);
+  _i5.Future<bool> isAccessTokenExpired() => (super.noSuchMethod(
+        Invocation.method(#isAccessTokenExpired, []),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
 
   @override
-  _i5.Future<bool> isLoggedIn() =>
-      (super.noSuchMethod(
-            Invocation.method(#isLoggedIn, []),
-            returnValue: _i5.Future<bool>.value(false),
-          )
-          as _i5.Future<bool>);
+  _i5.Future<bool> isLoggedIn() => (super.noSuchMethod(
+        Invocation.method(#isLoggedIn, []),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
 
   @override
-  _i5.Future<void> clearTokens() =>
-      (super.noSuchMethod(
-            Invocation.method(#clearTokens, []),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
+  _i5.Future<void> clearTokens() => (super.noSuchMethod(
+        Invocation.method(#clearTokens, []),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }

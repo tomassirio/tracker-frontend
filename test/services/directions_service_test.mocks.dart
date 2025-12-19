@@ -62,4 +62,3 @@ class MockGoogleRoutesApiClient extends _i1.Mock
         ),
       ) as _i3.Future<_i2.RouteResult>);
 }
-

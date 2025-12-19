@@ -13,9 +13,9 @@ class UpdateTripRequest {
   });
 
   Map<String, dynamic> toJson() => {
-    if (name != null) 'name': name,
-    if (description != null) 'description': description,
-    if (startDate != null) 'startDate': startDate!.toIso8601String(),
-    if (endDate != null) 'endDate': endDate!.toIso8601String(),
-  };
+        if (name != null) 'name': name,
+        if (description != null) 'description': description,
+        if (startDate != null) 'startDate': startDate!.toIso8601String(),
+        if (endDate != null) 'endDate': endDate!.toIso8601String(),
+      };
 }

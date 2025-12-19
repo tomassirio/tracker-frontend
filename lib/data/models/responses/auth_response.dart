@@ -24,20 +24,20 @@ class AuthResponse {
       expiresIn: (json['expiresIn'] ?? json['expires_in'] ?? 3600) is int
           ? json['expiresIn'] ?? json['expires_in'] ?? 3600
           : int.tryParse(
-                  (json['expiresIn'] ?? json['expires_in'] ?? 3600).toString(),
-                ) ??
-                3600,
+                (json['expiresIn'] ?? json['expires_in'] ?? 3600).toString(),
+              ) ??
+              3600,
       userId: json['userId'] ?? json['user_id'],
       username: json['username'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'access_token': accessToken,
-    'refresh_token': refreshToken,
-    'token_type': tokenType,
-    'expires_in': expiresIn,
-    if (userId != null) 'user_id': userId,
-    if (username != null) 'username': username,
-  };
+        'access_token': accessToken,
+        'refresh_token': refreshToken,
+        'token_type': tokenType,
+        'expires_in': expiresIn,
+        if (userId != null) 'user_id': userId,
+        if (username != null) 'username': username,
+      };
 }

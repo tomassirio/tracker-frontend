@@ -369,7 +369,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-                if (widget.userId == null) // Only show edit button for own profile
+                if (widget.userId ==
+                    null) // Only show edit button for own profile
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: _showEditProfileDialog,
@@ -696,7 +697,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
+                      loadingProgress.expectedTotalBytes!
                   : null,
               strokeWidth: 2,
             ),

@@ -334,7 +334,8 @@ void main() {
           },
           'tripDetails': {
             'startTimestamp': DateTime.now().toIso8601String(),
-            'endTimestamp': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+            'endTimestamp':
+                DateTime.now().add(const Duration(days: 7)).toIso8601String(),
             'startLocation': {'latitude': 40.7128, 'longitude': -74.0060},
             'endLocation': {'latitude': 34.0522, 'longitude': -118.2437},
             'waypoints': [],
@@ -395,7 +396,8 @@ void main() {
         );
       });
 
-      test('createTripFromPlan throws exception when user not authorized', () async {
+      test('createTripFromPlan throws exception when user not authorized',
+          () async {
         mockHttpClient.response = http.Response(
           '{"message":"User does not own this trip plan"}',
           403,

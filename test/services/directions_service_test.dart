@@ -184,7 +184,8 @@ void main() {
       test('can create service with any API key string', () {
         expect(() => DirectionsService('any-key'), returnsNormally);
         expect(() => DirectionsService(''), returnsNormally);
-        expect(() => DirectionsService('valid-looking-key-123'), returnsNormally);
+        expect(
+            () => DirectionsService('valid-looking-key-123'), returnsNormally);
       });
 
       test('multiple service instances work independently', () {
@@ -196,4 +197,3 @@ void main() {
     });
   });
 }
-

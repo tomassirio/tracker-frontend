@@ -10,9 +10,9 @@ class TripPlanService {
   TripPlanService({
     TripPlanCommandClient? tripPlanCommandClient,
     TripPlanQueryClient? tripPlanQueryClient,
-  }) : _tripPlanCommandClient =
-           tripPlanCommandClient ?? TripPlanCommandClient(),
-       _tripPlanQueryClient = tripPlanQueryClient ?? TripPlanQueryClient();
+  })  : _tripPlanCommandClient =
+            tripPlanCommandClient ?? TripPlanCommandClient(),
+        _tripPlanQueryClient = tripPlanQueryClient ?? TripPlanQueryClient();
 
   /// Get all trip plans for the current user
   Future<List<TripPlan>> getUserTripPlans() async {

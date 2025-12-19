@@ -9,8 +9,7 @@ class ApiEndpoints {
       getConfigValue('commandBaseUrl', '/api/command');
   static String get queryBaseUrl =>
       getConfigValue('queryBaseUrl', '/api/query');
-  static String get authBaseUrl =>
-      getConfigValue('authBaseUrl', '/api/auth');
+  static String get authBaseUrl => getConfigValue('authBaseUrl', '/api/auth');
 
   // Google Maps API key - read from window.appConfig
   static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
@@ -60,7 +59,8 @@ class ApiEndpoints {
   static String tripDelete(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
-  static String tripFromPlan(String tripPlanId) => '/trips/from-plan/$tripPlanId';
+  static String tripFromPlan(String tripPlanId) =>
+      '/trips/from-plan/$tripPlanId';
 
   // Trip Plan endpoints (use commandBaseUrl for commands, queryBaseUrl for queries)
   static const String tripPlans = '/trips/plans';

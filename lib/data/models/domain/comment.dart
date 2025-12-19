@@ -61,13 +61,11 @@ class Comment {
       reactionsCount: totalReactions,
       responsesCount:
           repliesList?.length ?? json['responsesCount'] as int? ?? 0,
-      createdAt:
-          DateTime.tryParse(
+      createdAt: DateTime.tryParse(
             json['timestamp'] as String? ?? json['createdAt'] as String? ?? '',
           ) ??
           DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(
+      updatedAt: DateTime.tryParse(
             json['updatedAt'] as String? ?? json['timestamp'] as String? ?? '',
           ) ??
           DateTime.now(),
@@ -75,18 +73,19 @@ class Comment {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'tripId': tripId,
-    'userId': userId,
-    'username': username,
-    if (userAvatarUrl != null) 'userAvatarUrl': userAvatarUrl,
-    'message': message,
-    if (parentCommentId != null) 'parentCommentId': parentCommentId,
-    if (reactions != null) 'reactions': reactions,
-    if (replies != null) 'replies': replies!.map((r) => r.toJson()).toList(),
-    'reactionsCount': reactionsCount,
-    'responsesCount': responsesCount,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-  };
+        'id': id,
+        'tripId': tripId,
+        'userId': userId,
+        'username': username,
+        if (userAvatarUrl != null) 'userAvatarUrl': userAvatarUrl,
+        'message': message,
+        if (parentCommentId != null) 'parentCommentId': parentCommentId,
+        if (reactions != null) 'reactions': reactions,
+        if (replies != null)
+          'replies': replies!.map((r) => r.toJson()).toList(),
+        'reactionsCount': reactionsCount,
+        'responsesCount': responsesCount,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+      };
 }

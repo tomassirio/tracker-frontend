@@ -44,8 +44,7 @@ class Trip {
     return Trip(
       id: json['id'] as String? ?? '',
       userId: json['userId'] as String? ?? '',
-      name:
-          json['name'] as String? ??
+      name: json['name'] as String? ??
           json['title'] as String? ??
           'Untitled Trip',
       username: json['username'] as String? ?? '',
@@ -66,33 +65,29 @@ class Trip {
           : null,
       locations: json['tripUpdates'] != null && json['tripUpdates'] is List
           ? (json['tripUpdates'] as List)
-                .where((loc) => loc != null)
-                .map(
-                  (loc) => TripLocation.fromJson(loc as Map<String, dynamic>),
-                )
-                .toList()
+              .where((loc) => loc != null)
+              .map(
+                (loc) => TripLocation.fromJson(loc as Map<String, dynamic>),
+              )
+              .toList()
           : null,
       comments: json['comments'] != null && json['comments'] is List
           ? (json['comments'] as List)
-                .where((comment) => comment != null)
-                .map(
-                  (comment) =>
-                      Comment.fromJson(comment as Map<String, dynamic>),
-                )
-                .toList()
+              .where((comment) => comment != null)
+              .map(
+                (comment) => Comment.fromJson(comment as Map<String, dynamic>),
+              )
+              .toList()
           : null,
-      commentsCount:
-          (json['comments'] as List?)?.length ??
+      commentsCount: (json['comments'] as List?)?.length ??
           (json['commentsCount'] as int?) ??
           0,
       reactionsCount: (json['reactionsCount'] as int?) ?? 0,
-      createdAt:
-          DateTime.tryParse(
+      createdAt: DateTime.tryParse(
             (json['creationTimestamp'] ?? json['createdAt']) as String? ?? '',
           ) ??
           DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(
+      updatedAt: DateTime.tryParse(
             (json['updatedAt'] ?? json['creationTimestamp']) as String? ?? '',
           ) ??
           DateTime.now(),
@@ -100,22 +95,22 @@ class Trip {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'userId': userId,
-    'name': name,
-    'username': username,
-    if (description != null) 'description': description,
-    'visibility': visibility.toJson(),
-    'status': status.toJson(),
-    if (startDate != null) 'startDate': startDate!.toIso8601String(),
-    if (endDate != null) 'endDate': endDate!.toIso8601String(),
-    if (locations != null)
-      'locations': locations!.map((loc) => loc.toJson()).toList(),
-    if (comments != null)
-      'comments': comments!.map((comment) => comment.toJson()).toList(),
-    'commentsCount': commentsCount,
-    'reactionsCount': reactionsCount,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-  };
+        'id': id,
+        'userId': userId,
+        'name': name,
+        'username': username,
+        if (description != null) 'description': description,
+        'visibility': visibility.toJson(),
+        'status': status.toJson(),
+        if (startDate != null) 'startDate': startDate!.toIso8601String(),
+        if (endDate != null) 'endDate': endDate!.toIso8601String(),
+        if (locations != null)
+          'locations': locations!.map((loc) => loc.toJson()).toList(),
+        if (comments != null)
+          'comments': comments!.map((comment) => comment.toJson()).toList(),
+        'commentsCount': commentsCount,
+        'reactionsCount': reactionsCount,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+      };
 }

@@ -6,7 +6,7 @@ class CreateCommentRequest {
   CreateCommentRequest({required this.message, this.parentCommentId});
 
   Map<String, dynamic> toJson() => {
-    'message': message,
-    'parentCommentId': parentCommentId,
-  };
+        'message': message,
+        'parentCommentId': parentCommentId,
+      };
 }

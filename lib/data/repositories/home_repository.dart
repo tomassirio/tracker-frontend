@@ -8,8 +8,8 @@ class HomeRepository {
   final AuthService _authService;
 
   HomeRepository({TripService? tripService, AuthService? authService})
-    : _tripService = tripService ?? TripService(),
-      _authService = authService ?? AuthService();
+      : _tripService = tripService ?? TripService(),
+        _authService = authService ?? AuthService();
 
   /// Gets the current user's username
   Future<String?> getCurrentUsername() async {

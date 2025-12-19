@@ -80,12 +80,12 @@ class TripMapHelper {
                     BitmapDescriptor.hueRed, // Start point - red
                   )
                 : i == locations.length - 1
-                ? BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueGreen, // End point - green
-                  )
-                : BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueOrange, // Waypoints - orange
-                  ),
+                    ? BitmapDescriptor.defaultMarkerWithHue(
+                        BitmapDescriptor.hueGreen, // End point - green
+                      )
+                    : BitmapDescriptor.defaultMarkerWithHue(
+                        BitmapDescriptor.hueOrange, // Waypoints - orange
+                      ),
           ),
         );
       }

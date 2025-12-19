@@ -5,7 +5,7 @@ class AdminService {
   final TripCommandClient _tripCommandClient;
 
   AdminService({TripCommandClient? tripCommandClient})
-    : _tripCommandClient = tripCommandClient ?? TripCommandClient();
+      : _tripCommandClient = tripCommandClient ?? TripCommandClient();
 
   /// Delete a trip (admin only)
   Future<void> deleteTrip(String tripId) async {

@@ -9,9 +9,9 @@ class GeoLocation {
   });
 
   Map<String, dynamic> toJson() => {
-    'latitude': latitude,
-    'longitude': longitude,
-  };
+        'latitude': latitude,
+        'longitude': longitude,
+      };
 }
 
 /// Request model for creating a trip plan matching backend API
@@ -37,13 +37,14 @@ class CreateTripPlanBackendRequest {
   });
 
   Map<String, dynamic> toJson() => {
-    'name': name,
-    'planType': planType,
-    'startDate': startDate.toIso8601String().split('T')[0], // LocalDate format
-    'endDate': endDate.toIso8601String().split('T')[0], // LocalDate format
-    'startLocation': startLocation.toJson(),
-    'endLocation': endLocation.toJson(),
-    'waypoints': waypoints.map((w) => w.toJson()).toList(),
-    if (metadata != null) 'metadata': metadata,
-  };
+        'name': name,
+        'planType': planType,
+        'startDate':
+            startDate.toIso8601String().split('T')[0], // LocalDate format
+        'endDate': endDate.toIso8601String().split('T')[0], // LocalDate format
+        'startLocation': startLocation.toJson(),
+        'endLocation': endLocation.toJson(),
+        'waypoints': waypoints.map((w) => w.toJson()).toList(),
+        if (metadata != null) 'metadata': metadata,
+      };
 }

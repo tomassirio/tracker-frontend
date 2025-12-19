@@ -230,7 +230,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                       )
                     else
                       DropdownButtonFormField<TripPlan>(
-                        value: _selectedTripPlan,
+                        initialValue: _selectedTripPlan,
                         decoration: const InputDecoration(
                           labelText: 'Select a trip plan (optional)',
                           border: OutlineInputBorder(),
@@ -254,36 +254,35 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                           });
                         },
                       ),
-                      if (_selectedTripPlan != null) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Selected Plan Details:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Type: ${_formatPlanType(_selectedTripPlan!.planType)}',
-                              ),
-                              if (_selectedTripPlan!.startDate != null &&
-                                  _selectedTripPlan!.endDate != null)
-                                Text(
-                                  'Dates: ${_formatDate(_selectedTripPlan!.startDate!)} - ${_formatDate(_selectedTripPlan!.endDate!)}',
-                                ),
-                            ],
-                          ),
+                    if (_selectedTripPlan != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Selected Plan Details:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Type: ${_formatPlanType(_selectedTripPlan!.planType)}',
+                            ),
+                            if (_selectedTripPlan!.startDate != null &&
+                                _selectedTripPlan!.endDate != null)
+                              Text(
+                                'Dates: ${_formatDate(_selectedTripPlan!.startDate!)} - ${_formatDate(_selectedTripPlan!.endDate!)}',
+                              ),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
