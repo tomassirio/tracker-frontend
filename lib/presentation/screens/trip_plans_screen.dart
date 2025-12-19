@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/trip_plan_service.dart';
+import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
@@ -21,6 +22,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   final TripPlanService _tripPlanService = TripPlanService();
   final HomeRepository _homeRepository = HomeRepository();
   final TextEditingController _searchController = TextEditingController();
+  late final TripService _tripService;
   List<TripPlan> _tripPlans = [];
   List<TripPlan> _filteredPlans = [];
   bool _isLoading = false;
@@ -33,6 +35,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   @override
   void initState() {
     super.initState();
+    _tripService = TripService();
     _loadUserInfo();
     _loadTripPlans();
     _searchController.addListener(_filterPlans);
@@ -135,6 +138,58 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     );
   }
 
+  Future<void> _handleCreateTripFromPlan(TripPlan plan) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Create Trip'),
+        content: Text(
+          'Would you like to create a trip from "${plan.name}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      await _tripService.createTripFromPlan(plan.id);
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        UiHelpers.showSuccessMessage(
+          context,
+          'Trip created successfully from plan!',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        UiHelpers.showErrorMessage(
+          context,
+          'Error creating trip: $e',
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,6 +219,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         isLoggedIn: _isLoggedIn,
         onRefresh: _loadTripPlans,
         onTripPlanTap: _handleTripPlanTap,
+        onCreateTripFromPlan: _handleCreateTripFromPlan,
         onLoginPressed: _navigateToAuth,
         onCreatePressed: _handleCreatePlan,
       ),

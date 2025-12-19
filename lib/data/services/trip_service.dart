@@ -82,6 +82,11 @@ class TripService {
     await _tripCommandClient.deleteTrip(tripId);
   }
 
+  /// Create trip from trip plan
+  Future<Trip> createTripFromPlan(String tripPlanId) async {
+    return await _tripCommandClient.createTripFromPlan(tripPlanId);
+  }
+
   /// Send trip update (location, message)
   Future<void> sendTripUpdate(String tripId, TripUpdateRequest request) async {
     await _tripUpdateCommandClient.createTripUpdate(tripId, request);

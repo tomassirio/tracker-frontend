@@ -65,4 +65,15 @@ class TripCommandClient {
     );
     _apiClient.handleNoContentResponse(response);
   }
+
+  /// Create trip from trip plan
+  /// Requires authentication (USER, ADMIN - owner only)
+  Future<Trip> createTripFromPlan(String tripPlanId) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.tripFromPlan(tripPlanId),
+      body: {},
+      requireAuth: true,
+    );
+    return _apiClient.handleResponse(response, Trip.fromJson);
+  }
 }

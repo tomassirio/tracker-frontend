@@ -60,6 +60,7 @@ class ApiEndpoints {
   static String tripDelete(String tripId) => '/trips/$tripId';
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
+  static String tripFromPlan(String tripPlanId) => '/trips/from-plan/$tripPlanId';
 
   // Trip Plan endpoints (use commandBaseUrl for commands, queryBaseUrl for queries)
   static const String tripPlans = '/trips/plans';

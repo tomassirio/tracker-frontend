@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/repositories/create_trip_repository.dart';
+import 'package:tracker_frontend/data/services/trip_plan_service.dart';
+import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/widgets/create_trip/create_trip_form.dart';
 
@@ -22,12 +25,39 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isLoading = false;
+  TripPlan? _selectedTripPlan;
+  List<TripPlan> _tripPlans = [];
+  bool _isLoadingPlans = false;
+  late final TripPlanService _tripPlanService;
+  late final TripService _tripService;
+
+  @override
+  void initState() {
+    super.initState();
+    _tripPlanService = TripPlanService();
+    _tripService = TripService();
+    _loadTripPlans();
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadTripPlans() async {
+    setState(() => _isLoadingPlans = true);
+    try {
+      final plans = await _tripPlanService.getUserTripPlans();
+      setState(() {
+        _tripPlans = plans;
+        _isLoadingPlans = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingPlans = false);
+      // Silently fail - user can still create trip manually
+    }
   }
 
   Future<void> _selectStartDate() async {
@@ -59,6 +89,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   }
 
   Future<void> _createTrip() async {
+    // If a trip plan is selected, create from plan
+    if (_selectedTripPlan != null) {
+      await _createTripFromPlan();
+      return;
+    }
+
+    // Otherwise, create trip normally
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -91,6 +128,32 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     }
   }
 
+  Future<void> _createTripFromPlan() async {
+    if (_selectedTripPlan == null) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await _tripService.createTripFromPlan(_selectedTripPlan!.id);
+
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+          context,
+          'Trip created from plan successfully!',
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error creating trip: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,32 +163,149 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: CreateTripForm(
-          formKey: _formKey,
-          titleController: _titleController,
-          descriptionController: _descriptionController,
-          selectedVisibility: _selectedVisibility,
-          startDate: _startDate,
-          endDate: _endDate,
-          isLoading: _isLoading,
-          onVisibilityChanged: (visibility) {
-            setState(() {
-              _selectedVisibility = visibility;
-            });
-          },
-          onSelectStartDate: _selectStartDate,
-          onSelectEndDate: _selectEndDate,
-          onClearStartDate: () {
-            setState(() {
-              _startDate = null;
-            });
-          },
-          onClearEndDate: () {
-            setState(() {
-              _endDate = null;
-            });
-          },
-          onSubmit: _createTrip,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Trip Plan Selector Section
+            if (_tripPlans.isNotEmpty) ...[
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.map_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Create from Trip Plan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<TripPlan>(
+                        value: _selectedTripPlan,
+                        decoration: const InputDecoration(
+                          labelText: 'Select a trip plan (optional)',
+                          border: OutlineInputBorder(),
+                          hintText: 'Choose a plan or create manually',
+                        ),
+                        items: [
+                          const DropdownMenuItem<TripPlan>(
+                            value: null,
+                            child: Text('None - Create manually'),
+                          ),
+                          ..._tripPlans.map((plan) {
+                            return DropdownMenuItem<TripPlan>(
+                              value: plan,
+                              child: Text(plan.name),
+                            );
+                          }),
+                        ],
+                        onChanged: (plan) {
+                          setState(() {
+                            _selectedTripPlan = plan;
+                          });
+                        },
+                      ),
+                      if (_selectedTripPlan != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Selected Plan Details:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text('Type: ${_selectedTripPlan!.planType}'),
+                              if (_selectedTripPlan!.startDate != null &&
+                                  _selectedTripPlan!.endDate != null)
+                                Text(
+                                  'Dates: ${_selectedTripPlan!.startDate!.month}/${_selectedTripPlan!.startDate!.day}/${_selectedTripPlan!.startDate!.year} - ${_selectedTripPlan!.endDate!.month}/${_selectedTripPlan!.endDate!.day}/${_selectedTripPlan!.endDate!.year}',
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (_selectedTripPlan != null)
+                const Divider(height: 32)
+              else
+                const Text(
+                  'Or create a trip manually:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              const SizedBox(height: 16),
+            ],
+            // Manual Trip Creation Form
+            if (_selectedTripPlan == null)
+              CreateTripForm(
+                formKey: _formKey,
+                titleController: _titleController,
+                descriptionController: _descriptionController,
+                selectedVisibility: _selectedVisibility,
+                startDate: _startDate,
+                endDate: _endDate,
+                isLoading: _isLoading,
+                onVisibilityChanged: (visibility) {
+                  setState(() {
+                    _selectedVisibility = visibility;
+                  });
+                },
+                onSelectStartDate: _selectStartDate,
+                onSelectEndDate: _selectEndDate,
+                onClearStartDate: () {
+                  setState(() {
+                    _startDate = null;
+                  });
+                },
+                onClearEndDate: () {
+                  setState(() {
+                    _endDate = null;
+                  });
+                },
+                onSubmit: _createTrip,
+              )
+            else
+              ElevatedButton(
+                onPressed: _isLoading ? null : _createTrip,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        'Create Trip from Plan',
+                        style: TextStyle(fontSize: 16),
+                      ),
+              ),
+          ],
         ),
       ),
     );

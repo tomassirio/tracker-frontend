@@ -5,8 +5,14 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 class TripPlanCard extends StatelessWidget {
   final TripPlan plan;
   final VoidCallback onTap;
+  final VoidCallback? onCreateTrip;
 
-  const TripPlanCard({super.key, required this.plan, required this.onTap});
+  const TripPlanCard({
+    super.key,
+    required this.plan,
+    required this.onTap,
+    this.onCreateTrip,
+  });
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
@@ -78,12 +84,24 @@ class TripPlanCard extends StatelessWidget {
               ),
               const Spacer(),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Created ${_formatDate(plan.createdTimestamp)}',
                     style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                   ),
+                  if (onCreateTrip != null)
+                    ElevatedButton.icon(
+                      onPressed: onCreateTrip,
+                      icon: const Icon(Icons.add_location, size: 16),
+                      label: const Text('Create Trip'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ],
