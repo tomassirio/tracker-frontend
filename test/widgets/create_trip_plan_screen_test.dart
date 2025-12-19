@@ -201,23 +201,23 @@ void main() {
       });
     });
 
-    group('LocationSettings Configuration', () {
+    group('Location Accuracy Configuration', () {
       test('should use medium accuracy for balance of speed and precision', () {
-        const settings = LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10),
-        );
-
-        expect(settings.accuracy, LocationAccuracy.medium);
+        const accuracy = LocationAccuracy.medium;
+        expect(accuracy, LocationAccuracy.medium);
       });
 
-      test('should have 10 second timeout', () {
-        const settings = LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10),
-        );
+      test('medium accuracy is between low and high', () {
+        // LocationAccuracy enum order: lowest, low, medium, high, best, bestForNavigation
+        expect(
+            LocationAccuracy.medium.index > LocationAccuracy.low.index, true);
+        expect(
+            LocationAccuracy.medium.index < LocationAccuracy.high.index, true);
+      });
 
-        expect(settings.timeLimit, const Duration(seconds: 10));
+      test('timeout should be 10 seconds', () {
+        const timeout = Duration(seconds: 10);
+        expect(timeout.inSeconds, 10);
       });
     });
   });

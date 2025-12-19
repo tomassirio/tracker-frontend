@@ -71,10 +71,10 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
       // Get current position
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10),
-        ),
+        desiredAccuracy: LocationAccuracy.medium,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Location timeout'),
       );
 
       final userLocation = LatLng(position.latitude, position.longitude);
