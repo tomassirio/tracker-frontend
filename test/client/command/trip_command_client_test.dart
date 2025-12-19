@@ -328,10 +328,7 @@ void main() {
           'title': 'Trip from Plan',
           'name': 'Trip from Plan',
           'description': 'Created from trip plan',
-          'tripSettings': {
-            'tripStatus': 'CREATED',
-            'visibility': 'PUBLIC',
-          },
+          'tripSettings': {'tripStatus': 'CREATED', 'visibility': 'PUBLIC'},
           'tripDetails': {
             'startTimestamp': DateTime.now().toIso8601String(),
             'endTimestamp':
@@ -396,18 +393,20 @@ void main() {
         );
       });
 
-      test('createTripFromPlan throws exception when user not authorized',
-          () async {
-        mockHttpClient.response = http.Response(
-          '{"message":"User does not own this trip plan"}',
-          403,
-        );
+      test(
+        'createTripFromPlan throws exception when user not authorized',
+        () async {
+          mockHttpClient.response = http.Response(
+            '{"message":"User does not own this trip plan"}',
+            403,
+          );
 
-        expect(
-          () => tripCommandClient.createTripFromPlan('plan-123'),
-          throwsException,
-        );
-      });
+          expect(
+            () => tripCommandClient.createTripFromPlan('plan-123'),
+            throwsException,
+          );
+        },
+      );
     });
 
     group('deleteTrip', () {

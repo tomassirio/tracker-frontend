@@ -3,15 +3,9 @@ class GeoLocation {
   final double lat;
   final double lon;
 
-  GeoLocation({
-    required this.lat,
-    required this.lon,
-  });
+  GeoLocation({required this.lat, required this.lon});
 
-  Map<String, dynamic> toJson() => {
-        'lat': lat,
-        'lon': lon,
-      };
+  Map<String, dynamic> toJson() => {'lat': lat, 'lon': lon};
 }
 
 /// Request model for creating a trip plan matching backend API

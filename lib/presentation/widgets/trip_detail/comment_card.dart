@@ -28,9 +28,7 @@ class CommentCard extends StatelessWidget {
   void _navigateToProfile(BuildContext context) {
     Navigator.push(
       context,
-      PageTransitions.slideRight(
-        ProfileScreen(userId: comment.userId),
-      ),
+      PageTransitions.slideRight(ProfileScreen(userId: comment.userId)),
     );
   }
 

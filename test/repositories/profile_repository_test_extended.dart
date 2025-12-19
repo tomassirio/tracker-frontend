@@ -54,10 +54,7 @@ void main() {
       mockUserService.shouldThrowError = true;
 
       // Act & Assert
-      expect(
-        () => repository.getUserProfile(userId),
-        throwsException,
-      );
+      expect(() => repository.getUserProfile(userId), throwsException);
       expect(mockUserService.getUserByIdCalled, true);
     });
   });

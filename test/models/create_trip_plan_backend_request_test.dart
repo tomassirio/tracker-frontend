@@ -3,38 +3,38 @@ import 'package:tracker_frontend/data/models/requests/create_trip_plan_backend_r
 
 void main() {
   group('GeoLocation', () {
-    test('creates GeoLocation with latitude and longitude', () {
-      final location = GeoLocation(latitude: 37.7749, longitude: -122.4194);
+    test('creates GeoLocation with lat and lon', () {
+      final location = GeoLocation(lat: 37.7749, lon: -122.4194);
 
-      expect(location.latitude, 37.7749);
-      expect(location.longitude, -122.4194);
+      expect(location.lat, 37.7749);
+      expect(location.lon, -122.4194);
     });
 
     test('toJson returns correct map', () {
-      final location = GeoLocation(latitude: 40.7128, longitude: -74.0060);
+      final location = GeoLocation(lat: 40.7128, lon: -74.0060);
 
       final json = location.toJson();
 
-      expect(json['latitude'], 40.7128);
-      expect(json['longitude'], -74.0060);
+      expect(json['lat'], 40.7128);
+      expect(json['lon'], -74.0060);
     });
 
     test('toJson handles zero coordinates', () {
-      final location = GeoLocation(latitude: 0.0, longitude: 0.0);
+      final location = GeoLocation(lat: 0.0, lon: 0.0);
 
       final json = location.toJson();
 
-      expect(json['latitude'], 0.0);
-      expect(json['longitude'], 0.0);
+      expect(json['lat'], 0.0);
+      expect(json['lon'], 0.0);
     });
 
     test('toJson handles negative coordinates', () {
-      final location = GeoLocation(latitude: -33.8688, longitude: 151.2093);
+      final location = GeoLocation(lat: -33.8688, lon: 151.2093);
 
       final json = location.toJson();
 
-      expect(json['latitude'], -33.8688);
-      expect(json['longitude'], 151.2093);
+      expect(json['lat'], -33.8688);
+      expect(json['lon'], 151.2093);
     });
   });
 
@@ -45,16 +45,16 @@ void main() {
         planType: 'ROAD_TRIP',
         startDate: DateTime(2025, 12, 20),
         endDate: DateTime(2025, 12, 25),
-        startLocation: GeoLocation(latitude: 37.7749, longitude: -122.4194),
-        endLocation: GeoLocation(latitude: 34.0522, longitude: -118.2437),
+        startLocation: GeoLocation(lat: 37.7749, lon: -122.4194),
+        endLocation: GeoLocation(lat: 34.0522, lon: -118.2437),
       );
 
       expect(request.name, 'Road Trip');
       expect(request.planType, 'ROAD_TRIP');
       expect(request.startDate, DateTime(2025, 12, 20));
       expect(request.endDate, DateTime(2025, 12, 25));
-      expect(request.startLocation.latitude, 37.7749);
-      expect(request.endLocation.latitude, 34.0522);
+      expect(request.startLocation.lat, 37.7749);
+      expect(request.endLocation.lat, 34.0522);
       expect(request.waypoints, isEmpty);
       expect(request.metadata, isNull);
     });
@@ -65,17 +65,17 @@ void main() {
         planType: 'MULTI_DAY',
         startDate: DateTime(2025, 1, 15),
         endDate: DateTime(2025, 1, 20),
-        startLocation: GeoLocation(latitude: 40.7128, longitude: -74.0060),
-        endLocation: GeoLocation(latitude: 42.3601, longitude: -71.0589),
+        startLocation: GeoLocation(lat: 40.7128, lon: -74.0060),
+        endLocation: GeoLocation(lat: 42.3601, lon: -71.0589),
         waypoints: [
-          GeoLocation(latitude: 41.8781, longitude: -87.6298),
-          GeoLocation(latitude: 39.7392, longitude: -104.9903),
+          GeoLocation(lat: 41.8781, lon: -87.6298),
+          GeoLocation(lat: 39.7392, lon: -104.9903),
         ],
       );
 
       expect(request.waypoints.length, 2);
-      expect(request.waypoints[0].latitude, 41.8781);
-      expect(request.waypoints[1].latitude, 39.7392);
+      expect(request.waypoints[0].lat, 41.8781);
+      expect(request.waypoints[1].lat, 39.7392);
     });
 
     test('creates request with metadata', () {
@@ -84,8 +84,8 @@ void main() {
         planType: 'SIMPLE',
         startDate: DateTime(2025, 6, 1),
         endDate: DateTime(2025, 6, 10),
-        startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
-        endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+        startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+        endLocation: GeoLocation(lat: 1.0, lon: 1.0),
         metadata: {'category': 'vacation', 'budget': 5000},
       );
 
@@ -101,8 +101,8 @@ void main() {
           planType: 'ROAD_TRIP',
           startDate: DateTime(2025, 3, 15),
           endDate: DateTime(2025, 3, 20),
-          startLocation: GeoLocation(latitude: 37.7749, longitude: -122.4194),
-          endLocation: GeoLocation(latitude: 34.0522, longitude: -118.2437),
+          startLocation: GeoLocation(lat: 37.7749, lon: -122.4194),
+          endLocation: GeoLocation(lat: 34.0522, lon: -118.2437),
         );
 
         final json = request.toJson();
@@ -111,10 +111,10 @@ void main() {
         expect(json['planType'], 'ROAD_TRIP');
         expect(json['startDate'], '2025-03-15');
         expect(json['endDate'], '2025-03-20');
-        expect(json['startLocation']['latitude'], 37.7749);
-        expect(json['startLocation']['longitude'], -122.4194);
-        expect(json['endLocation']['latitude'], 34.0522);
-        expect(json['endLocation']['longitude'], -118.2437);
+        expect(json['startLocation']['lat'], 37.7749);
+        expect(json['startLocation']['lon'], -122.4194);
+        expect(json['endLocation']['lat'], 34.0522);
+        expect(json['endLocation']['lon'], -118.2437);
         expect(json['waypoints'], isEmpty);
       });
 
@@ -124,8 +124,8 @@ void main() {
           planType: 'SIMPLE',
           startDate: DateTime(2025, 1, 5),
           endDate: DateTime(2025, 12, 31),
-          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
-          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
         );
 
         final json = request.toJson();
@@ -140,10 +140,10 @@ void main() {
           planType: 'MULTI_DAY',
           startDate: DateTime(2025, 5, 1),
           endDate: DateTime(2025, 5, 10),
-          startLocation: GeoLocation(latitude: 40.7128, longitude: -74.0060),
-          endLocation: GeoLocation(latitude: 42.3601, longitude: -71.0589),
+          startLocation: GeoLocation(lat: 40.7128, lon: -74.0060),
+          endLocation: GeoLocation(lat: 42.3601, lon: -71.0589),
           waypoints: [
-            GeoLocation(latitude: 41.2565, longitude: -95.9345),
+            GeoLocation(lat: 41.2565, lon: -95.9345),
           ],
         );
 
@@ -151,8 +151,8 @@ void main() {
 
         expect(json['waypoints'], isA<List>());
         expect(json['waypoints'].length, 1);
-        expect(json['waypoints'][0]['latitude'], 41.2565);
-        expect(json['waypoints'][0]['longitude'], -95.9345);
+        expect(json['waypoints'][0]['lat'], 41.2565);
+        expect(json['waypoints'][0]['lon'], -95.9345);
       });
 
       test('includes metadata when provided', () {
@@ -161,8 +161,8 @@ void main() {
           planType: 'SIMPLE',
           startDate: DateTime(2025, 7, 1),
           endDate: DateTime(2025, 7, 5),
-          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
-          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
           metadata: {'key': 'value', 'number': 42},
         );
 
@@ -179,8 +179,8 @@ void main() {
           planType: 'SIMPLE',
           startDate: DateTime(2025, 8, 1),
           endDate: DateTime(2025, 8, 5),
-          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
-          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
         );
 
         final json = request.toJson();

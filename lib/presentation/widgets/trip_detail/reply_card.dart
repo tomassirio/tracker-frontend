@@ -12,9 +12,7 @@ class ReplyCard extends StatelessWidget {
   void _navigateToProfile(BuildContext context) {
     Navigator.push(
       context,
-      PageTransitions.slideRight(
-        ProfileScreen(userId: reply.userId),
-      ),
+      PageTransitions.slideRight(ProfileScreen(userId: reply.userId)),
     );
   }
 

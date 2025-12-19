@@ -136,9 +136,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   Future<void> _handleCreatePlan() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CreateTripPlanScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const CreateTripPlanScreen()),
     );
 
     // Reload trip plans if a new one was created
@@ -152,9 +150,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Create Trip'),
-        content: Text(
-          'Would you like to create a trip from "${plan.name}"?',
-        ),
+        content: Text('Would you like to create a trip from "${plan.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -174,9 +170,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
@@ -191,10 +185,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     } catch (e) {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
-        UiHelpers.showErrorMessage(
-          context,
-          'Error creating trip: $e',
-        );
+        UiHelpers.showErrorMessage(context, 'Error creating trip: $e');
       }
     }
   }

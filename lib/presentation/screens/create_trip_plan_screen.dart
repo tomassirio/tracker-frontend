@@ -49,12 +49,20 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     setState(() {
       if (_startLocation == null) {
         _startLocation = location;
-        _addMarker(location, 'start', 'Start Location',
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen));
+        _addMarker(
+          location,
+          'start',
+          'Start Location',
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        );
       } else if (_endLocation == null) {
         _endLocation = location;
-        _addMarker(location, 'end', 'End Location',
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed));
+        _addMarker(
+          location,
+          'end',
+          'End Location',
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        );
       } else {
         // Add as waypoint
         final waypointNumber = _waypoints.length + 1;
@@ -70,13 +78,19 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   }
 
   void _addMarker(
-      LatLng location, String id, String title, BitmapDescriptor icon) {
-    _markers.add(Marker(
-      markerId: MarkerId(id),
-      position: location,
-      infoWindow: InfoWindow(title: title),
-      icon: icon,
-    ));
+    LatLng location,
+    String id,
+    String title,
+    BitmapDescriptor icon,
+  ) {
+    _markers.add(
+      Marker(
+        markerId: MarkerId(id),
+        position: location,
+        infoWindow: InfoWindow(title: title),
+        icon: icon,
+      ),
+    );
   }
 
   void _clearAllMarkers() {
@@ -92,8 +106,10 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     if (_waypoints.isNotEmpty) {
       setState(() {
         _waypoints.removeLast();
-        _markers.removeWhere((marker) =>
-            marker.markerId.value == 'waypoint_${_waypoints.length + 1}');
+        _markers.removeWhere(
+          (marker) =>
+              marker.markerId.value == 'waypoint_${_waypoints.length + 1}',
+        );
       });
     } else if (_endLocation != null) {
       setState(() {
@@ -154,10 +170,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     }
 
     if (_startDate == null || _endDate == null) {
-      UiHelpers.showErrorMessage(
-        context,
-        'Please select start and end dates',
-      );
+      UiHelpers.showErrorMessage(context, 'Please select start and end dates');
       return;
     }
 
@@ -184,10 +197,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
           lon: _endLocation!.longitude,
         ),
         waypoints: _waypoints
-            .map((loc) => GeoLocation(
-                  lat: loc.latitude,
-                  lon: loc.longitude,
-                ))
+            .map((loc) => GeoLocation(lat: loc.latitude, lon: loc.longitude))
             .toList(),
         metadata: metadata.isNotEmpty ? metadata : null,
       );
@@ -196,7 +206,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
       if (mounted) {
         UiHelpers.showSuccessMessage(
-            context, 'Trip plan created successfully!');
+          context,
+          'Trip plan created successfully!',
+        );
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -278,12 +290,21 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                           ),
                           const SizedBox(height: 8),
                           _buildLocationStatus(
-                              'Start', _startLocation != null, Colors.green),
+                            'Start',
+                            _startLocation != null,
+                            Colors.green,
+                          ),
                           _buildLocationStatus(
-                              'End', _endLocation != null, Colors.red),
+                            'End',
+                            _endLocation != null,
+                            Colors.red,
+                          ),
                           _buildLocationStatus(
-                              'Waypoints', _waypoints.isNotEmpty, Colors.blue,
-                              count: _waypoints.length),
+                            'Waypoints',
+                            _waypoints.isNotEmpty,
+                            Colors.blue,
+                            count: _waypoints.length,
+                          ),
                         ],
                       ),
                     ),
@@ -339,13 +360,21 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                       ),
                       items: const [
                         DropdownMenuItem(
-                            value: 'SIMPLE', child: Text('Simple')),
+                          value: 'SIMPLE',
+                          child: Text('Simple'),
+                        ),
                         DropdownMenuItem(
-                            value: 'MULTI_DAY', child: Text('Multi-Day')),
+                          value: 'MULTI_DAY',
+                          child: Text('Multi-Day'),
+                        ),
                         DropdownMenuItem(
-                            value: 'ROAD_TRIP', child: Text('Road Trip')),
+                          value: 'ROAD_TRIP',
+                          child: Text('Road Trip'),
+                        ),
                         DropdownMenuItem(
-                            value: 'HIKING', child: Text('Hiking')),
+                          value: 'HIKING',
+                          child: Text('Hiking'),
+                        ),
                       ],
                       onChanged: (value) {
                         setState(() {
@@ -360,9 +389,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                           child: OutlinedButton.icon(
                             onPressed: _selectStartDate,
                             icon: const Icon(Icons.calendar_today),
-                            label: Text(_startDate == null
-                                ? 'Start Date'
-                                : _formatDate(_startDate!)),
+                            label: Text(
+                              _startDate == null
+                                  ? 'Start Date'
+                                  : _formatDate(_startDate!),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -370,9 +401,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                           child: OutlinedButton.icon(
                             onPressed: _selectEndDate,
                             icon: const Icon(Icons.calendar_today),
-                            label: Text(_endDate == null
-                                ? 'End Date'
-                                : _formatDate(_endDate!)),
+                            label: Text(
+                              _endDate == null
+                                  ? 'End Date'
+                                  : _formatDate(_endDate!),
+                            ),
                           ),
                         ),
                       ],
@@ -418,8 +451,12 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     );
   }
 
-  Widget _buildLocationStatus(String label, bool isSet, Color color,
-      {int? count}) {
+  Widget _buildLocationStatus(
+    String label,
+    bool isSet,
+    Color color, {
+    int? count,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(

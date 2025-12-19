@@ -292,10 +292,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             else
               const Text(
                 'Or create a trip manually:',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
               ),
             const SizedBox(height: 16),
             // Manual Trip Creation Form

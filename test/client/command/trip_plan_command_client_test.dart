@@ -252,9 +252,7 @@ void main() {
           endDate: DateTime(2025, 12, 25),
           startLocation: GeoLocation(lat: 37.7749, lon: -122.4194),
           endLocation: GeoLocation(lat: 34.0522, lon: -118.2437),
-          waypoints: [
-            GeoLocation(lat: 36.7783, lon: -119.4179),
-          ],
+          waypoints: [GeoLocation(lat: 36.7783, lon: -119.4179)],
         );
         final responseBody = {
           'id': 'plan-456',
@@ -315,26 +313,28 @@ void main() {
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
 
-      test('createTripPlanBackend throws exception on validation error',
-          () async {
-        final request = CreateTripPlanBackendRequest(
-          name: '',
-          planType: 'INVALID',
-          startDate: DateTime(2025, 12, 25),
-          endDate: DateTime(2025, 12, 20), // End before start
-          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
-          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
-        );
-        mockHttpClient.response = http.Response(
-          '{"message":"Validation failed"}',
-          400,
-        );
+      test(
+        'createTripPlanBackend throws exception on validation error',
+        () async {
+          final request = CreateTripPlanBackendRequest(
+            name: '',
+            planType: 'INVALID',
+            startDate: DateTime(2025, 12, 25),
+            endDate: DateTime(2025, 12, 20), // End before start
+            startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+            endLocation: GeoLocation(lat: 1.0, lon: 1.0),
+          );
+          mockHttpClient.response = http.Response(
+            '{"message":"Validation failed"}',
+            400,
+          );
 
-        expect(
-          () => tripPlanCommandClient.createTripPlanBackend(request),
-          throwsException,
-        );
-      });
+          expect(
+            () => tripPlanCommandClient.createTripPlanBackend(request),
+            throwsException,
+          );
+        },
+      );
 
       test('createTripPlanBackend sends correct JSON body', () async {
         final request = CreateTripPlanBackendRequest(
@@ -367,8 +367,8 @@ void main() {
         expect(sentBody['planType'], 'MULTI_DAY');
         expect(sentBody['startDate'], '2025-01-15');
         expect(sentBody['endDate'], '2025-01-20');
-        expect(sentBody['startLocation']['latitude'], 40.7128);
-        expect(sentBody['startLocation']['longitude'], -74.0060);
+        expect(sentBody['startLocation']['lat'], 40.7128);
+        expect(sentBody['startLocation']['lon'], -74.0060);
         expect(sentBody['metadata']['category'], 'vacation');
       });
     });
