@@ -11,6 +11,7 @@ import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plans_content.dart';
 import 'auth_screen.dart';
 import 'create_trip_plan_screen.dart';
+import 'trip_detail_screen.dart';
 
 /// Trip Plans screen showing list of planned trips
 class TripPlansScreen extends StatefulWidget {
@@ -202,12 +203,19 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     );
 
     try {
-      await _tripService.createTripFromPlan(plan.id, visibility);
+      final trip = await _tripService.createTripFromPlan(plan.id, visibility);
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
         UiHelpers.showSuccessMessage(
           context,
           'Trip created successfully from plan!',
+        );
+        // Navigate to trip detail screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TripDetailScreen(trip: trip),
+          ),
         );
       }
     } catch (e) {

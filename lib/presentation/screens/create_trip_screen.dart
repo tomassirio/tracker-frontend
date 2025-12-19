@@ -6,6 +6,7 @@ import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/widgets/create_trip/create_trip_form.dart';
+import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
 
 /// Screen for creating a new trip
 class CreateTripScreen extends StatefulWidget {
@@ -183,14 +184,21 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _tripService.createTripFromPlan(_selectedTripPlan!.id, visibility);
+      final trip = await _tripService.createTripFromPlan(
+          _selectedTripPlan!.id, visibility);
 
       if (mounted) {
         UiHelpers.showSuccessMessage(
           context,
           'Trip created from plan successfully!',
         );
-        Navigator.pop(context, true);
+        // Navigate to trip detail screen, replacing current screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TripDetailScreen(trip: trip),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
