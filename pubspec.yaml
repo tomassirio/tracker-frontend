@@ -37,7 +37,7 @@ dependencies:
   http: ^1.2.0
   shared_preferences: ^2.2.2
   google_maps_flutter: ^2.5.0
-  google_maps_flutter_web: ^0.5.4+2
+  google_maps_flutter_web: ^0.5.10
   geolocator: ^14.0.2
   intl: ^0.20.2
 
