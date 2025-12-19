@@ -161,8 +161,9 @@ class TripPlanCard extends StatelessWidget {
                           Icon(
                             _getPlanTypeIcon(plan.planType),
                             size: 14,
-                            color:
-                                Theme.of(context).colorScheme.onPrimaryContainer,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
                           ),
                           const SizedBox(width: 4),
                           Text(

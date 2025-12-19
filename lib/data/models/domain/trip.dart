@@ -2,6 +2,30 @@ import '../../../core/constants/enums.dart';
 import 'comment.dart';
 import 'trip_location.dart';
 
+/// Simple location for planned waypoints
+class PlannedWaypoint {
+  final double latitude;
+  final double longitude;
+
+  PlannedWaypoint({required this.latitude, required this.longitude});
+
+  factory PlannedWaypoint.fromJson(Map<String, dynamic> json) {
+    return PlannedWaypoint(
+      latitude: (json['latitude'] as num?)?.toDouble() ??
+          (json['lat'] as num?)?.toDouble() ??
+          0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ??
+          (json['lon'] as num?)?.toDouble() ??
+          0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+}
+
 /// Trip model
 class Trip {
   final String id;
@@ -19,6 +43,10 @@ class Trip {
   final int reactionsCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+  // Planned route from trip plan
+  final PlannedWaypoint? plannedStartLocation;
+  final PlannedWaypoint? plannedEndLocation;
+  final List<PlannedWaypoint>? plannedWaypoints;
 
   Trip({
     required this.id,
@@ -36,10 +64,39 @@ class Trip {
     this.reactionsCount = 0,
     required this.createdAt,
     required this.updatedAt,
+    this.plannedStartLocation,
+    this.plannedEndLocation,
+    this.plannedWaypoints,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
     final tripSettings = json['tripSettings'] as Map<String, dynamic>?;
+    final tripDetails = json['tripDetails'] as Map<String, dynamic>?;
+
+    // Parse planned waypoints from tripDetails
+    PlannedWaypoint? plannedStart;
+    PlannedWaypoint? plannedEnd;
+    List<PlannedWaypoint>? plannedWaypoints;
+
+    if (tripDetails != null) {
+      if (tripDetails['startLocation'] != null) {
+        plannedStart = PlannedWaypoint.fromJson(
+          tripDetails['startLocation'] as Map<String, dynamic>,
+        );
+      }
+      if (tripDetails['endLocation'] != null) {
+        plannedEnd = PlannedWaypoint.fromJson(
+          tripDetails['endLocation'] as Map<String, dynamic>,
+        );
+      }
+      if (tripDetails['waypoints'] != null &&
+          tripDetails['waypoints'] is List) {
+        plannedWaypoints = (tripDetails['waypoints'] as List)
+            .where((wp) => wp != null)
+            .map((wp) => PlannedWaypoint.fromJson(wp as Map<String, dynamic>))
+            .toList();
+      }
+    }
 
     return Trip(
       id: json['id'] as String? ?? '',
@@ -91,6 +148,9 @@ class Trip {
             (json['updatedAt'] ?? json['creationTimestamp']) as String? ?? '',
           ) ??
           DateTime.now(),
+      plannedStartLocation: plannedStart,
+      plannedEndLocation: plannedEnd,
+      plannedWaypoints: plannedWaypoints,
     );
   }
 
@@ -112,5 +172,18 @@ class Trip {
         'reactionsCount': reactionsCount,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        if (plannedStartLocation != null)
+          'plannedStartLocation': plannedStartLocation!.toJson(),
+        if (plannedEndLocation != null)
+          'plannedEndLocation': plannedEndLocation!.toJson(),
+        if (plannedWaypoints != null)
+          'plannedWaypoints':
+              plannedWaypoints!.map((wp) => wp.toJson()).toList(),
       };
+
+  /// Check if trip has planned route from a trip plan
+  bool get hasPlannedRoute =>
+      plannedStartLocation != null ||
+      plannedEndLocation != null ||
+      (plannedWaypoints != null && plannedWaypoints!.isNotEmpty);
 }
