@@ -71,7 +71,7 @@ class TripPlansContent extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: 1.2,
+              childAspectRatio: 0.85, // Taller cards for map preview
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
