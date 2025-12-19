@@ -120,7 +120,7 @@ class TripPlanCard extends StatelessWidget {
           children: [
             // Map preview section
             Expanded(
-              flex: 5,
+              flex: 3,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -188,7 +188,7 @@ class TripPlanCard extends StatelessWidget {
 
             // Info section - compact
             Expanded(
-              flex: 3,
+              flex: 2,
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
