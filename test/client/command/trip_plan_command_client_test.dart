@@ -250,10 +250,10 @@ void main() {
           planType: 'ROAD_TRIP',
           startDate: DateTime(2025, 12, 20),
           endDate: DateTime(2025, 12, 25),
-          startLocation: GeoLocation(latitude: 37.7749, longitude: -122.4194),
-          endLocation: GeoLocation(latitude: 34.0522, longitude: -118.2437),
+          startLocation: GeoLocation(lat: 37.7749, lon: -122.4194),
+          endLocation: GeoLocation(lat: 34.0522, lon: -118.2437),
           waypoints: [
-            GeoLocation(latitude: 36.7783, longitude: -119.4179),
+            GeoLocation(lat: 36.7783, lon: -119.4179),
           ],
         );
         final responseBody = {
@@ -293,8 +293,8 @@ void main() {
           planType: 'SIMPLE',
           startDate: DateTime(2025, 12, 20),
           endDate: DateTime(2025, 12, 25),
-          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
-          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
         );
         final responseBody = {
           'id': 'plan-789',
@@ -322,8 +322,8 @@ void main() {
           planType: 'INVALID',
           startDate: DateTime(2025, 12, 25),
           endDate: DateTime(2025, 12, 20), // End before start
-          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
-          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
         );
         mockHttpClient.response = http.Response(
           '{"message":"Validation failed"}',
@@ -342,8 +342,8 @@ void main() {
           planType: 'MULTI_DAY',
           startDate: DateTime(2025, 1, 15),
           endDate: DateTime(2025, 1, 20),
-          startLocation: GeoLocation(latitude: 40.7128, longitude: -74.0060),
-          endLocation: GeoLocation(latitude: 42.3601, longitude: -71.0589),
+          startLocation: GeoLocation(lat: 40.7128, lon: -74.0060),
+          endLocation: GeoLocation(lat: 42.3601, lon: -71.0589),
           metadata: {'category': 'vacation'},
         );
         final responseBody = {
