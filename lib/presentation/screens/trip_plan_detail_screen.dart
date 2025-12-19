@@ -324,13 +324,12 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Map Section
-            Container(
-              height: 300,
+      body: Column(
+        children: [
+          // Map Section - takes remaining space
+          Expanded(
+            flex: 3,
+            child: Container(
               color: Colors.grey.shade200,
               child: hasMapData
                   ? GoogleMap(
@@ -371,231 +370,228 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                       ),
                     ),
             ),
-
-            // Details Section
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name
-                  if (_isEditing)
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                        border: OutlineInputBorder(),
+          ),
+          // Details Section - scrollable bottom section
+          Expanded(
+            flex: 2,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name
+                    if (_isEditing)
+                      TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                          border: OutlineInputBorder(),
+                        ),
+                      )
+                    else
+                      Text(
+                        _tripPlan.name,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    )
-                  else
-                    Text(
-                      _tripPlan.name,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 16),
+                    // Plan Type
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Plan Type',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            if (_isEditing)
+                              DropdownButtonFormField<String>(
+                                value: _selectedPlanType,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'SIMPLE',
+                                    child: Text('Simple'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'MULTI_DAY',
+                                    child: Text('Multi-Day'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'ROAD_TRIP',
+                                    child: Text('Road Trip'),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedPlanType = value);
+                                  }
+                                },
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Icon(
+                                    _getPlanTypeIcon(_tripPlan.planType),
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _formatPlanType(_tripPlan.planType),
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-
-                  const SizedBox(height: 16),
-
-                  // Plan Type
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Plan Type',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
+                    const SizedBox(height: 8),
+                    // Dates
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Dates',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          if (_isEditing)
-                            DropdownButtonFormField<String>(
-                              value: _selectedPlanType,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
+                            const SizedBox(height: 8),
+                            if (_isEditing) ...[
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: _selectStartDate,
+                                      icon: const Icon(Icons.calendar_today),
+                                      label: Text(
+                                        _startDate != null
+                                            ? _formatDate(_startDate!)
+                                            : 'Start Date',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: _selectEndDate,
+                                      icon: const Icon(Icons.calendar_today),
+                                      label: Text(
+                                        _endDate != null
+                                            ? _formatDate(_endDate!)
+                                            : 'End Date',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ] else ...[
+                              Row(
+                                children: [
+                                  const Icon(Icons.calendar_today, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _tripPlan.startDate != null &&
+                                            _tripPlan.endDate != null
+                                        ? '${_formatDate(_tripPlan.startDate!)} - ${_formatDate(_tripPlan.endDate!)}'
+                                        : 'No dates set',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Locations Summary
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Route',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildLocationRow(
+                              'Start',
+                              _tripPlan.startLocation,
+                              Colors.green,
+                            ),
+                            if (_tripPlan.waypoints.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                '${_tripPlan.waypoints.length} waypoint(s)',
+                                style: TextStyle(
+                                  color: Colors.orange.shade700,
+                                  fontSize: 14,
                                 ),
                               ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'SIMPLE',
-                                  child: Text('Simple'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'MULTI_DAY',
-                                  child: Text('Multi-Day'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'ROAD_TRIP',
-                                  child: Text('Road Trip'),
-                                ),
-                              ],
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() => _selectedPlanType = value);
-                                }
-                              },
-                            )
-                          else
-                            Row(
-                              children: [
-                                Icon(
-                                  _getPlanTypeIcon(_tripPlan.planType),
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _formatPlanType(_tripPlan.planType),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Dates
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Dates',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (_isEditing) ...[
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: _selectStartDate,
-                                    icon: const Icon(Icons.calendar_today),
-                                    label: Text(
-                                      _startDate != null
-                                          ? _formatDate(_startDate!)
-                                          : 'Start Date',
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: _selectEndDate,
-                                    icon: const Icon(Icons.calendar_today),
-                                    label: Text(
-                                      _endDate != null
-                                          ? _formatDate(_endDate!)
-                                          : 'End Date',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ] else ...[
-                            Row(
-                              children: [
-                                const Icon(Icons.calendar_today, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _tripPlan.startDate != null &&
-                                          _tripPlan.endDate != null
-                                      ? '${_formatDate(_tripPlan.startDate!)} - ${_formatDate(_tripPlan.endDate!)}'
-                                      : 'No dates set',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ],
+                            ],
+                            const SizedBox(height: 8),
+                            _buildLocationRow(
+                              'End',
+                              _tripPlan.endLocation,
+                              Colors.red,
                             ),
                           ],
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Locations Summary
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Route',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildLocationRow(
-                            'Start',
-                            _tripPlan.startLocation,
-                            Colors.green,
-                          ),
-                          if (_tripPlan.waypoints.isNotEmpty) ...[
-                            const SizedBox(height: 8),
+                    const SizedBox(height: 8),
+                    // Created Date
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.access_time, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              '${_tripPlan.waypoints.length} waypoint(s)',
+                              'Created: ${_formatDate(_tripPlan.createdTimestamp)}',
                               style: TextStyle(
-                                color: Colors.orange.shade700,
+                                color: Colors.grey.shade600,
                                 fontSize: 14,
                               ),
                             ),
                           ],
-                          const SizedBox(height: 8),
-                          _buildLocationRow(
-                            'End',
-                            _tripPlan.endLocation,
-                            Colors.red,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Created Date
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.access_time, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Created: ${_formatDate(_tripPlan.createdTimestamp)}',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

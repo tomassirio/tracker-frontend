@@ -158,7 +158,7 @@ class YouTubeHomeContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: 1,
+        childAspectRatio: 0.85, // Taller cards to show more of the map
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
