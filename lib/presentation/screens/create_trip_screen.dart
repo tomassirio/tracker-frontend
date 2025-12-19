@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/repositories/create_trip_repository.dart';
@@ -56,8 +57,22 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       });
     } catch (e) {
       setState(() => _isLoadingPlans = false);
-      // Silently fail - user can still create trip manually
+      // Log error but allow user to continue with manual trip creation
+      // User may not have any trip plans yet or may not be authenticated
+      debugPrint('Failed to load trip plans: $e');
     }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.month}/${date.day}/${date.year}';
+  }
+
+  String _formatPlanType(String planType) {
+    // Convert SIMPLE to Simple, MULTI_DAY to Multi Day, etc.
+    return planType
+        .split('_')
+        .map((word) => word[0] + word.substring(1).toLowerCase())
+        .join(' ');
   }
 
   Future<void> _selectStartDate() async {
@@ -232,11 +247,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
-                              Text('Type: ${_selectedTripPlan!.planType}'),
+                              Text(
+                                'Type: ${_formatPlanType(_selectedTripPlan!.planType)}',
+                              ),
                               if (_selectedTripPlan!.startDate != null &&
                                   _selectedTripPlan!.endDate != null)
                                 Text(
-                                  'Dates: ${_selectedTripPlan!.startDate!.month}/${_selectedTripPlan!.startDate!.day}/${_selectedTripPlan!.startDate!.year} - ${_selectedTripPlan!.endDate!.month}/${_selectedTripPlan!.endDate!.day}/${_selectedTripPlan!.endDate!.year}',
+                                  'Dates: ${_formatDate(_selectedTripPlan!.startDate!)} - ${_formatDate(_selectedTripPlan!.endDate!)}',
                                 ),
                             ],
                           ),
