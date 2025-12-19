@@ -63,7 +63,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         Marker(
           markerId: const MarkerId('start'),
           position: startLatLng,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: const InfoWindow(title: 'Start'),
         ),
       );
@@ -671,4 +672,3 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     );
   }
 }
-
