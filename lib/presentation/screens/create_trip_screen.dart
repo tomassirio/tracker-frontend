@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/repositories/create_trip_repository.dart';
@@ -28,7 +27,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   bool _isLoading = false;
   TripPlan? _selectedTripPlan;
   List<TripPlan> _tripPlans = [];
-  bool _isLoadingPlans = false;
   late final TripPlanService _tripPlanService;
   late final TripService _tripService;
 
@@ -48,15 +46,12 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   }
 
   Future<void> _loadTripPlans() async {
-    setState(() => _isLoadingPlans = true);
     try {
       final plans = await _tripPlanService.getUserTripPlans();
       setState(() {
         _tripPlans = plans;
-        _isLoadingPlans = false;
       });
     } catch (e) {
-      setState(() => _isLoadingPlans = false);
       // Log error but allow user to continue with manual trip creation
       // User may not have any trip plans yet or may not be authenticated
       debugPrint('Failed to load trip plans: $e');
