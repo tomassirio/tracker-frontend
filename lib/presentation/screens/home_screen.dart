@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
+import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
@@ -22,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HomeRepository _repository = HomeRepository();
+  final TripService _tripService = TripService();
   final TextEditingController _searchController = TextEditingController();
   List<Trip> _trips = [];
   List<Trip> _filteredTrips = [];
@@ -163,6 +165,46 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _handleDeleteTrip(Trip trip) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Trip'),
+        content: Text(
+          'Are you sure you want to delete "${trip.name}"? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      await _tripService.deleteTrip(trip.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Trip deleted');
+        await _loadTrips();
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error deleting trip: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,6 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: _loadTrips,
         onTripTap: _navigateToTripDetail,
         onLoginPressed: _navigateToAuth,
+        onDeleteTrip: _handleDeleteTrip, // Pass the delete handler
       ),
       floatingActionButton: _username != null
           ? FloatingActionButton.extended(

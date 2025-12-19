@@ -13,8 +13,14 @@ import '../../helpers/page_transitions.dart';
 class YouTubeTripCard extends StatefulWidget {
   final Trip trip;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
 
-  const YouTubeTripCard({super.key, required this.trip, required this.onTap});
+  const YouTubeTripCard({
+    super.key,
+    required this.trip,
+    required this.onTap,
+    this.onDelete,
+  });
 
   @override
   State<YouTubeTripCard> createState() => _YouTubeTripCardState();
@@ -289,6 +295,28 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
                       ),
                     ),
                   ),
+                  // Delete button overlay
+                  if (widget.onDelete != null)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Material(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: widget.onDelete,
+                          child: const Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

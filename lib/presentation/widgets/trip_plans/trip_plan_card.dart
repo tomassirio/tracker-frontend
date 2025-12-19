@@ -9,12 +9,14 @@ class TripPlanCard extends StatelessWidget {
   final TripPlan plan;
   final VoidCallback onTap;
   final VoidCallback? onCreateTrip;
+  final VoidCallback? onDelete;
 
   const TripPlanCard({
     super.key,
     required this.plan,
     required this.onTap,
     this.onCreateTrip,
+    this.onDelete,
   });
 
   String _formatDate(DateTime date) {
@@ -234,22 +236,37 @@ class TripPlanCard extends StatelessWidget {
                         ),
                       ),
                     const Spacer(),
-                    if (onCreateTrip != null)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: onCreateTrip,
-                          icon: const Icon(Icons.add_location, size: 16),
-                          label: const Text('Create Trip'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                    Row(
+                      children: [
+                        if (onCreateTrip != null)
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: onCreateTrip,
+                              icon: const Icon(Icons.add_location, size: 16),
+                              label: const Text('Create Trip'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                textStyle: const TextStyle(fontSize: 12),
+                              ),
                             ),
-                            textStyle: const TextStyle(fontSize: 12),
                           ),
-                        ),
-                      ),
+                        if (onCreateTrip != null && onDelete != null)
+                          const SizedBox(width: 8),
+                        if (onDelete != null)
+                          IconButton(
+                            onPressed: onDelete,
+                            icon: const Icon(Icons.delete_outline),
+                            color: Colors.red,
+                            tooltip: 'Delete Plan',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            iconSize: 24,
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),

@@ -236,6 +236,46 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     }
   }
 
+  Future<void> _handleDeletePlan(TripPlan plan) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Trip Plan'),
+        content: Text(
+          'Are you sure you want to delete "${plan.name}"? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      await _tripPlanService.deleteTripPlan(plan.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Trip plan deleted');
+        await _loadTripPlans();
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error deleting trip plan: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -266,6 +306,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         onRefresh: _loadTripPlans,
         onTripPlanTap: _handleTripPlanTap,
         onCreateTripFromPlan: _handleCreateTripFromPlan,
+        onDeletePlan: _handleDeletePlan,
         onLoginPressed: _navigateToAuth,
         onCreatePressed: _handleCreatePlan,
       ),
