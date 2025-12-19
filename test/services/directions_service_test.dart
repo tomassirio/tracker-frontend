@@ -80,19 +80,21 @@ void main() {
     });
 
     group('error handling and fallback behavior', () {
-      test('returns original waypoints when API fails with invalid key',
-          () async {
-        final serviceWithInvalidKey = DirectionsService('invalid-api-key');
-        final waypoints = [
-          const LatLng(37.7749, -122.4194),
-          const LatLng(37.7849, -122.4094),
-        ];
+      test(
+        'returns original waypoints when API fails with invalid key',
+        () async {
+          final serviceWithInvalidKey = DirectionsService('invalid-api-key');
+          final waypoints = [
+            const LatLng(37.7749, -122.4194),
+            const LatLng(37.7849, -122.4094),
+          ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
+          final result = await serviceWithInvalidKey.getDirections(waypoints);
 
-        // Should fallback to original waypoints on error
-        expect(result, waypoints);
-      });
+          // Should fallback to original waypoints on error
+          expect(result, waypoints);
+        },
+      );
 
       test('catches exceptions and returns original waypoints', () async {
         final serviceWithInvalidKey = DirectionsService('test-key-fail');
@@ -109,10 +111,7 @@ void main() {
       });
 
       test('handles edge case coordinates gracefully', () async {
-        final waypoints = [
-          const LatLng(0, 0),
-          const LatLng(0, 0),
-        ];
+        final waypoints = [const LatLng(0, 0), const LatLng(0, 0)];
 
         final result = await service.getDirections(waypoints);
 
@@ -121,10 +120,7 @@ void main() {
       });
 
       test('handles extreme latitude/longitude values', () async {
-        final waypoints = [
-          const LatLng(90, 180),
-          const LatLng(-90, -180),
-        ];
+        final waypoints = [const LatLng(90, 180), const LatLng(-90, -180)];
 
         final result = await service.getDirections(waypoints);
 
@@ -184,7 +180,10 @@ void main() {
       test('can create service with any API key string', () {
         expect(() => DirectionsService('any-key'), returnsNormally);
         expect(() => DirectionsService(''), returnsNormally);
-        expect(() => DirectionsService('valid-looking-key-123'), returnsNormally);
+        expect(
+          () => DirectionsService('valid-looking-key-123'),
+          returnsNormally,
+        );
       });
 
       test('multiple service instances work independently', () {
@@ -196,4 +195,3 @@ void main() {
     });
   });
 }
-

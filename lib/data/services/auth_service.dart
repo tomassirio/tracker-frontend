@@ -13,9 +13,9 @@ class AuthService {
     AuthClient? authClient,
     UserQueryClient? userQueryClient,
     TokenStorage? tokenStorage,
-  }) : _authClient = authClient ?? AuthClient(),
-       _userQueryClient = userQueryClient ?? UserQueryClient(),
-       _tokenStorage = tokenStorage ?? TokenStorage();
+  })  : _authClient = authClient ?? AuthClient(),
+        _userQueryClient = userQueryClient ?? UserQueryClient(),
+        _tokenStorage = tokenStorage ?? TokenStorage();
 
   /// Register a new user
   Future<AuthResponse> register(RegisterRequest request) async {

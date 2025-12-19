@@ -13,8 +13,14 @@ import '../../helpers/page_transitions.dart';
 class YouTubeTripCard extends StatefulWidget {
   final Trip trip;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
 
-  const YouTubeTripCard({super.key, required this.trip, required this.onTap});
+  const YouTubeTripCard({
+    super.key,
+    required this.trip,
+    required this.onTap,
+    this.onDelete,
+  });
 
   @override
   State<YouTubeTripCard> createState() => _YouTubeTripCardState();
@@ -89,39 +95,127 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
     }
   }
 
+  /// Check if trip has valid planned route
+  bool get _hasPlannedRoute {
+    return widget.trip.hasPlannedRoute;
+  }
+
   /// Generate static map image URL from Google Maps Static API
   String _generateStaticMapUrl() {
-    if (widget.trip.locations == null || widget.trip.locations!.isEmpty) {
-      // Return a default/empty map URL
-      return '';
+    // First try actual trip locations
+    if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) {
+      final firstLoc = widget.trip.locations!.first;
+      final lastLoc = widget.trip.locations!.last;
+
+      if (widget.trip.locations!.length == 1) {
+        // Single location
+        return _mapsClient.generateStaticMapUrl(
+          center: LatLng(firstLoc.latitude, firstLoc.longitude),
+          markers: [
+            MapMarker(
+              position: LatLng(firstLoc.latitude, firstLoc.longitude),
+              color: 'green',
+            ),
+          ],
+        );
+      } else {
+        // Multiple locations - show route
+        return _mapsClient.generateRouteMapUrl(
+          startPoint: LatLng(firstLoc.latitude, firstLoc.longitude),
+          endPoint: LatLng(lastLoc.latitude, lastLoc.longitude),
+          encodedPolyline: _encodedPolyline,
+        );
+      }
     }
 
-    final firstLoc = widget.trip.locations!.first;
-    final lastLoc = widget.trip.locations!.last;
+    // Fall back to planned route from trip plan
+    if (_hasPlannedRoute) {
+      return _generatePlannedRouteMapUrl();
+    }
 
-    if (widget.trip.locations!.length == 1) {
-      // Single location
-      return _mapsClient.generateStaticMapUrl(
-        center: LatLng(firstLoc.latitude, firstLoc.longitude),
-        markers: [
-          MapMarker(
-            position: LatLng(firstLoc.latitude, firstLoc.longitude),
-            color: 'green',
-          ),
-        ],
-      );
-    } else {
-      // Multiple locations - show route
+    // No location data
+    return '';
+  }
+
+  /// Generate static map URL for planned route
+  String _generatePlannedRouteMapUrl() {
+    final markers = <MapMarker>[];
+
+    // Add start marker (green with "S" label)
+    if (widget.trip.plannedStartLocation != null &&
+        widget.trip.plannedStartLocation!.latitude != 0 &&
+        widget.trip.plannedStartLocation!.longitude != 0) {
+      markers.add(MapMarker(
+        position: LatLng(
+          widget.trip.plannedStartLocation!.latitude,
+          widget.trip.plannedStartLocation!.longitude,
+        ),
+        color: 'green',
+        label: 'S',
+      ));
+    }
+
+    // Add waypoint markers (blue with numbered labels to distinguish from trip updates)
+    if (widget.trip.plannedWaypoints != null) {
+      for (int i = 0; i < widget.trip.plannedWaypoints!.length; i++) {
+        final wp = widget.trip.plannedWaypoints![i];
+        if (wp.latitude != 0 && wp.longitude != 0) {
+          markers.add(MapMarker(
+            position: LatLng(wp.latitude, wp.longitude),
+            color: 'blue',
+            label: '${i + 1}',
+          ));
+        }
+      }
+    }
+
+    // Add end marker (red with "E" label)
+    if (widget.trip.plannedEndLocation != null &&
+        widget.trip.plannedEndLocation!.latitude != 0 &&
+        widget.trip.plannedEndLocation!.longitude != 0) {
+      markers.add(MapMarker(
+        position: LatLng(
+          widget.trip.plannedEndLocation!.latitude,
+          widget.trip.plannedEndLocation!.longitude,
+        ),
+        color: 'red',
+        label: 'E',
+      ));
+    }
+
+    if (markers.isEmpty) return '';
+
+    // If we have start and end, use route map
+    if (widget.trip.plannedStartLocation != null &&
+        widget.trip.plannedEndLocation != null &&
+        widget.trip.plannedStartLocation!.latitude != 0 &&
+        widget.trip.plannedEndLocation!.latitude != 0) {
       return _mapsClient.generateRouteMapUrl(
-        startPoint: LatLng(firstLoc.latitude, firstLoc.longitude),
-        endPoint: LatLng(lastLoc.latitude, lastLoc.longitude),
-        encodedPolyline: _encodedPolyline,
+        startPoint: LatLng(
+          widget.trip.plannedStartLocation!.latitude,
+          widget.trip.plannedStartLocation!.longitude,
+        ),
+        endPoint: LatLng(
+          widget.trip.plannedEndLocation!.latitude,
+          widget.trip.plannedEndLocation!.longitude,
+        ),
       );
     }
+
+    // Otherwise show markers
+    return _mapsClient.generateStaticMapUrl(
+      center: markers.first.position,
+      markers: markers,
+      zoom: 10,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasMapData =
+        (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) ||
+            _hasPlannedRoute;
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -134,9 +228,8 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
               aspectRatio: 4 / 3,
               child: Stack(
                 children: [
-                  // Static map image - now actually loading!
-                  if (widget.trip.locations != null &&
-                      widget.trip.locations!.isNotEmpty)
+                  // Static map image - shows actual locations or planned route
+                  if (hasMapData)
                     Image.network(
                       _generateStaticMapUrl(),
                       fit: BoxFit.cover,
@@ -148,7 +241,7 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
                                   ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                      loadingProgress.expectedTotalBytes!
                                   : null,
                             ),
                           ),
@@ -202,6 +295,28 @@ class _YouTubeTripCardState extends State<YouTubeTripCard> {
                       ),
                     ),
                   ),
+                  // Delete button overlay
+                  if (widget.onDelete != null)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Material(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: widget.onDelete,
+                          child: const Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

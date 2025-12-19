@@ -11,4 +11,5 @@ export 'requests/change_status_request.dart';
 export 'domain/trip_plan.dart';
 export 'domain/planned_location.dart';
 export 'requests/create_trip_plan_request.dart';
+export 'requests/create_trip_plan_backend_request.dart';
 export 'requests/update_trip_plan_request.dart';

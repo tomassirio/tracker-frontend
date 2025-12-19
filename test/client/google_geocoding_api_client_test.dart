@@ -32,7 +32,10 @@ void main() {
 
         expect(placeInfo.city, 'New York');
         expect(placeInfo.country, 'United States');
-        expect(placeInfo.formattedAddress, '123 Main St, New York, NY 10001, USA');
+        expect(
+          placeInfo.formattedAddress,
+          '123 Main St, New York, NY 10001, USA',
+        );
         expect(placeInfo.displayName, 'New York, United States');
         expect(placeInfo.toString(), 'New York, United States');
       });
@@ -136,8 +139,8 @@ void main() {
       test('should handle multiple locations without throwing', () async {
         final locations = [
           const LatLng(40.7128, -74.0060), // New York
-          const LatLng(48.8566, 2.3522),   // Paris
-          const LatLng(51.5074, -0.1278),  // London
+          const LatLng(48.8566, 2.3522), // Paris
+          const LatLng(51.5074, -0.1278), // London
         ];
 
         // Should complete without throwing
@@ -175,7 +178,10 @@ void main() {
 
       setUp(() {
         mockHttpClient = MockClient();
-        clientWithMock = GoogleGeocodingApiClient(apiKey, httpClient: mockHttpClient);
+        clientWithMock = GoogleGeocodingApiClient(
+          apiKey,
+          httpClient: mockHttpClient,
+        );
       });
 
       test('should parse city from locality component', () async {
@@ -188,23 +194,25 @@ void main() {
                 {
                   'long_name': 'New York',
                   'short_name': 'NY',
-                  'types': ['locality', 'political']
+                  'types': ['locality', 'political'],
                 },
                 {
                   'long_name': 'United States',
                   'short_name': 'US',
-                  'types': ['country', 'political']
-                }
-              ]
-            }
-          ]
+                  'types': ['country', 'political'],
+                },
+              ],
+            },
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(40.7128, -74.0060));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(40.7128, -74.0060),
+        );
 
         expect(result, isNotNull);
         expect(result!.city, 'New York');
@@ -212,71 +220,81 @@ void main() {
         expect(result.formattedAddress, '123 Main St, New York, NY 10001, USA');
       });
 
-      test('should parse city from administrative_area_level_2 when locality not present', () async {
-        final mockResponse = {
-          'status': 'OK',
-          'results': [
-            {
-              'formatted_address': 'Los Angeles County, CA, USA',
-              'address_components': [
-                {
-                  'long_name': 'Los Angeles County',
-                  'short_name': 'Los Angeles County',
-                  'types': ['administrative_area_level_2', 'political']
-                },
-                {
-                  'long_name': 'United States',
-                  'short_name': 'US',
-                  'types': ['country', 'political']
-                }
-              ]
-            }
-          ]
-        };
+      test(
+        'should parse city from administrative_area_level_2 when locality not present',
+        () async {
+          final mockResponse = {
+            'status': 'OK',
+            'results': [
+              {
+                'formatted_address': 'Los Angeles County, CA, USA',
+                'address_components': [
+                  {
+                    'long_name': 'Los Angeles County',
+                    'short_name': 'Los Angeles County',
+                    'types': ['administrative_area_level_2', 'political'],
+                  },
+                  {
+                    'long_name': 'United States',
+                    'short_name': 'US',
+                    'types': ['country', 'political'],
+                  },
+                ],
+              },
+            ],
+          };
 
-        when(mockHttpClient.get(any)).thenAnswer(
-          (_) async => http.Response(json.encode(mockResponse), 200),
-        );
+          when(mockHttpClient.get(any)).thenAnswer(
+            (_) async => http.Response(json.encode(mockResponse), 200),
+          );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(34.0522, -118.2437));
+          final result = await clientWithMock.reverseGeocode(
+            const LatLng(34.0522, -118.2437),
+          );
 
-        expect(result, isNotNull);
-        expect(result!.city, 'Los Angeles County');
-        expect(result.country, 'United States');
-      });
+          expect(result, isNotNull);
+          expect(result!.city, 'Los Angeles County');
+          expect(result.country, 'United States');
+        },
+      );
 
-      test('should parse city from administrative_area_level_1 as fallback', () async {
-        final mockResponse = {
-          'status': 'OK',
-          'results': [
-            {
-              'formatted_address': 'California, USA',
-              'address_components': [
-                {
-                  'long_name': 'California',
-                  'short_name': 'CA',
-                  'types': ['administrative_area_level_1', 'political']
-                },
-                {
-                  'long_name': 'United States',
-                  'short_name': 'US',
-                  'types': ['country', 'political']
-                }
-              ]
-            }
-          ]
-        };
+      test(
+        'should parse city from administrative_area_level_1 as fallback',
+        () async {
+          final mockResponse = {
+            'status': 'OK',
+            'results': [
+              {
+                'formatted_address': 'California, USA',
+                'address_components': [
+                  {
+                    'long_name': 'California',
+                    'short_name': 'CA',
+                    'types': ['administrative_area_level_1', 'political'],
+                  },
+                  {
+                    'long_name': 'United States',
+                    'short_name': 'US',
+                    'types': ['country', 'political'],
+                  },
+                ],
+              },
+            ],
+          };
 
-        when(mockHttpClient.get(any)).thenAnswer(
-          (_) async => http.Response(json.encode(mockResponse), 200),
-        );
+          when(mockHttpClient.get(any)).thenAnswer(
+            (_) async => http.Response(json.encode(mockResponse), 200),
+          );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(36.7783, -119.4179));
+          final result = await clientWithMock.reverseGeocode(
+            const LatLng(36.7783, -119.4179),
+          );
 
-        expect(result, isNotNull);
-        expect(result!.city, 'California');
-        expect(result.country, 'United States');
-      });
+          expect(result, isNotNull);
+          expect(result!.city, 'California');
+          expect(result.country, 'United States');
+        },
+      );
 
       test('should prefer locality over administrative_area_level_2', () async {
         final mockResponse = {
@@ -288,28 +306,30 @@ void main() {
                 {
                   'long_name': 'San Francisco',
                   'short_name': 'SF',
-                  'types': ['locality', 'political']
+                  'types': ['locality', 'political'],
                 },
                 {
                   'long_name': 'San Francisco County',
                   'short_name': 'San Francisco County',
-                  'types': ['administrative_area_level_2', 'political']
+                  'types': ['administrative_area_level_2', 'political'],
                 },
                 {
                   'long_name': 'United States',
                   'short_name': 'US',
-                  'types': ['country', 'political']
-                }
-              ]
-            }
-          ]
+                  'types': ['country', 'political'],
+                },
+              ],
+            },
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(37.7749, -122.4194));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(37.7749, -122.4194),
+        );
 
         expect(result, isNotNull);
         expect(result!.city, 'San Francisco');
@@ -326,18 +346,20 @@ void main() {
                 {
                   'long_name': 'United States',
                   'short_name': 'US',
-                  'types': ['country', 'political']
-                }
-              ]
-            }
-          ]
+                  'types': ['country', 'political'],
+                },
+              ],
+            },
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(39.8283, -98.5795));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(39.8283, -98.5795),
+        );
 
         expect(result, isNull);
       });
@@ -352,18 +374,20 @@ void main() {
                 {
                   'long_name': 'Some City',
                   'short_name': 'Some City',
-                  'types': ['locality', 'political']
-                }
-              ]
-            }
-          ]
+                  'types': ['locality', 'political'],
+                },
+              ],
+            },
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(0.0, 0.0));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(0.0, 0.0),
+        );
 
         expect(result, isNull);
       });
@@ -372,18 +396,17 @@ void main() {
         final mockResponse = {
           'status': 'OK',
           'results': [
-            {
-              'formatted_address': 'Some Address',
-              'address_components': null
-            }
-          ]
+            {'formatted_address': 'Some Address', 'address_components': null},
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(0.0, 0.0));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(0.0, 0.0),
+        );
 
         expect(result, isNull);
       });
@@ -392,17 +415,17 @@ void main() {
         final mockResponse = {
           'status': 'OK',
           'results': [
-            {
-              'formatted_address': 'Some Address'
-            }
-          ]
+            {'formatted_address': 'Some Address'},
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(0.0, 0.0));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(0.0, 0.0),
+        );
 
         expect(result, isNull);
       });
@@ -412,58 +435,64 @@ void main() {
           'status': 'OK',
           'results': [
             {
-              'formatted_address': '1600 Amphitheatre Parkway, Mountain View, CA 94043, USA',
+              'formatted_address':
+                  '1600 Amphitheatre Parkway, Mountain View, CA 94043, USA',
               'address_components': [
                 {
                   'long_name': '1600',
                   'short_name': '1600',
-                  'types': ['street_number']
+                  'types': ['street_number'],
                 },
                 {
                   'long_name': 'Amphitheatre Parkway',
                   'short_name': 'Amphitheatre Pkwy',
-                  'types': ['route']
+                  'types': ['route'],
                 },
                 {
                   'long_name': 'Mountain View',
                   'short_name': 'Mountain View',
-                  'types': ['locality', 'political']
+                  'types': ['locality', 'political'],
                 },
                 {
                   'long_name': 'Santa Clara County',
                   'short_name': 'Santa Clara County',
-                  'types': ['administrative_area_level_2', 'political']
+                  'types': ['administrative_area_level_2', 'political'],
                 },
                 {
                   'long_name': 'California',
                   'short_name': 'CA',
-                  'types': ['administrative_area_level_1', 'political']
+                  'types': ['administrative_area_level_1', 'political'],
                 },
                 {
                   'long_name': 'United States',
                   'short_name': 'US',
-                  'types': ['country', 'political']
+                  'types': ['country', 'political'],
                 },
                 {
                   'long_name': '94043',
                   'short_name': '94043',
-                  'types': ['postal_code']
-                }
-              ]
-            }
-          ]
+                  'types': ['postal_code'],
+                },
+              ],
+            },
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(37.4224, -122.0842));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(37.4224, -122.0842),
+        );
 
         expect(result, isNotNull);
         expect(result!.city, 'Mountain View');
         expect(result.country, 'United States');
-        expect(result.formattedAddress, '1600 Amphitheatre Parkway, Mountain View, CA 94043, USA');
+        expect(
+          result.formattedAddress,
+          '1600 Amphitheatre Parkway, Mountain View, CA 94043, USA',
+        );
       });
 
       test('should handle international address (non-US)', () async {
@@ -476,23 +505,25 @@ void main() {
                 {
                   'long_name': 'Tokyo',
                   'short_name': 'Tokyo',
-                  'types': ['locality', 'political']
+                  'types': ['locality', 'political'],
                 },
                 {
                   'long_name': 'Japan',
                   'short_name': 'JP',
-                  'types': ['country', 'political']
-                }
-              ]
-            }
-          ]
+                  'types': ['country', 'political'],
+                },
+              ],
+            },
+          ],
         };
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(35.6762, 139.6503));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(35.6762, 139.6503),
+        );
 
         expect(result, isNotNull);
         expect(result!.city, 'Tokyo');
@@ -500,31 +531,29 @@ void main() {
       });
 
       test('should return null when status is not OK', () async {
-        final mockResponse = {
-          'status': 'ZERO_RESULTS',
-          'results': []
-        };
+        final mockResponse = {'status': 'ZERO_RESULTS', 'results': []};
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(0.0, 0.0));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(0.0, 0.0),
+        );
 
         expect(result, isNull);
       });
 
       test('should return null when results array is empty', () async {
-        final mockResponse = {
-          'status': 'OK',
-          'results': []
-        };
+        final mockResponse = {'status': 'OK', 'results': []};
 
         when(mockHttpClient.get(any)).thenAnswer(
           (_) async => http.Response(json.encode(mockResponse), 200),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(0.0, 0.0));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(0.0, 0.0),
+        );
 
         expect(result, isNull);
       });
@@ -534,27 +563,31 @@ void main() {
           (_) async => http.Response('{"error": "Invalid request"}', 400),
         );
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(40.7128, -74.0060));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(40.7128, -74.0060),
+        );
 
         expect(result, isNull);
       });
 
       test('should handle exception during HTTP request', () async {
-        when(mockHttpClient.get(any)).thenThrow(
-          Exception('Network error'),
-        );
+        when(mockHttpClient.get(any)).thenThrow(Exception('Network error'));
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(40.7128, -74.0060));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(40.7128, -74.0060),
+        );
 
         expect(result, isNull);
       });
 
       test('should handle malformed JSON response', () async {
-        when(mockHttpClient.get(any)).thenAnswer(
-          (_) async => http.Response('not valid json', 200),
-        );
+        when(
+          mockHttpClient.get(any),
+        ).thenAnswer((_) async => http.Response('not valid json', 200));
 
-        final result = await clientWithMock.reverseGeocode(const LatLng(40.7128, -74.0060));
+        final result = await clientWithMock.reverseGeocode(
+          const LatLng(40.7128, -74.0060),
+        );
 
         expect(result, isNull);
       });
@@ -577,4 +610,3 @@ void main() {
 // Note: Integration tests with actual API calls should be run separately
 // with a valid API key and proper mocking of HTTP responses.
 // These unit tests verify the client's structure and error handling.
-

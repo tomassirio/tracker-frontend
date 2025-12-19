@@ -7,7 +7,7 @@ class UserQueryClient {
   final ApiClient _apiClient;
 
   UserQueryClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
+      : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
 
   /// Get user by ID
   /// Requires authentication (ADMIN, USER)

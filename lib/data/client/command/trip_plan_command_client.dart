@@ -7,7 +7,8 @@ class TripPlanCommandClient {
   final ApiClient _apiClient;
 
   TripPlanCommandClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+      : _apiClient =
+            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create trip plan
   /// Requires authentication (USER, ADMIN)
@@ -42,5 +43,18 @@ class TripPlanCommandClient {
       requireAuth: true,
     );
     _apiClient.handleNoContentResponse(response);
+  }
+
+  /// Create trip plan using backend request model
+  /// Requires authentication (USER, ADMIN)
+  Future<TripPlan> createTripPlanBackend(
+    CreateTripPlanBackendRequest request,
+  ) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.tripPlans,
+      body: request.toJson(),
+      requireAuth: true,
+    );
+    return _apiClient.handleResponse(response, TripPlan.fromJson);
   }
 }

@@ -7,8 +7,8 @@ class UpdateProfileRequest {
   UpdateProfileRequest({this.displayName, this.bio, this.avatarUrl});
 
   Map<String, dynamic> toJson() => {
-    if (displayName != null) 'displayName': displayName,
-    if (bio != null) 'bio': bio,
-    if (avatarUrl != null) 'avatarUrl': avatarUrl,
-  };
+        if (displayName != null) 'displayName': displayName,
+        if (bio != null) 'bio': bio,
+        if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      };
 }

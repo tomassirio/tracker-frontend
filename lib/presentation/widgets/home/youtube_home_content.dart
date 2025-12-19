@@ -13,6 +13,7 @@ class YouTubeHomeContent extends StatelessWidget {
   final String? currentUserId;
   final Future<void> Function() onRefresh;
   final Function(Trip) onTripTap;
+  final Function(Trip)? onDeleteTrip;
   final VoidCallback? onLoginPressed;
 
   const YouTubeHomeContent({
@@ -24,6 +25,7 @@ class YouTubeHomeContent extends StatelessWidget {
     this.currentUserId,
     required this.onRefresh,
     required this.onTripTap,
+    this.onDeleteTrip,
     this.onLoginPressed,
   });
 
@@ -156,14 +158,23 @@ class YouTubeHomeContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: 1,
+        childAspectRatio: 0.85, // Taller cards to show more of the map
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
       itemCount: trips.length,
       itemBuilder: (context, index) {
         final trip = trips[index];
-        return YouTubeTripCard(trip: trip, onTap: () => onTripTap(trip));
+        // Only show delete button for user's own trips
+        final canDelete = isLoggedIn &&
+            currentUserId != null &&
+            trip.userId == currentUserId &&
+            onDeleteTrip != null;
+        return YouTubeTripCard(
+          trip: trip,
+          onTap: () => onTripTap(trip),
+          onDelete: canDelete ? () => onDeleteTrip!(trip) : null,
+        );
       },
     );
   }

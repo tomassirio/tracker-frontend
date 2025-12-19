@@ -1,4 +1,5 @@
 import '../../../core/constants/api_endpoints.dart';
+import '../../../core/constants/enums.dart';
 import '../../models/trip_models.dart';
 import '../api_client.dart';
 
@@ -7,7 +8,8 @@ class TripCommandClient {
   final ApiClient _apiClient;
 
   TripCommandClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+      : _apiClient =
+            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create new trip
   /// Requires authentication (USER, ADMIN)
@@ -64,5 +66,17 @@ class TripCommandClient {
       requireAuth: true,
     );
     _apiClient.handleNoContentResponse(response);
+  }
+
+  /// Create trip from trip plan
+  /// Requires authentication (USER, ADMIN - owner only)
+  Future<Trip> createTripFromPlan(
+      String tripPlanId, Visibility visibility) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.tripFromPlan(tripPlanId),
+      body: {'visibility': visibility.name.toUpperCase()},
+      requireAuth: true,
+    );
+    return _apiClient.handleResponse(response, Trip.fromJson);
   }
 }

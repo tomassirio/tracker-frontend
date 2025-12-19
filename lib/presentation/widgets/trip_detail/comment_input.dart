@@ -53,9 +53,8 @@ class CommentInput extends StatelessWidget {
                 child: TextField(
                   controller: controller,
                   decoration: InputDecoration(
-                    hintText: isReplyMode
-                        ? 'Write a reply...'
-                        : 'Write a comment...',
+                    hintText:
+                        isReplyMode ? 'Write a reply...' : 'Write a comment...',
                     border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,

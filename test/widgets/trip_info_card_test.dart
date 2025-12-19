@@ -23,9 +23,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: TripInfoCard(trip: trip),
-          ),
+          home: Scaffold(body: TripInfoCard(trip: trip)),
         ),
       );
 
@@ -51,9 +49,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: TripInfoCard(trip: trip),
-          ),
+          home: Scaffold(body: TripInfoCard(trip: trip)),
         ),
       );
 
@@ -91,9 +87,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: TripInfoCard(trip: trip),
-          ),
+          home: Scaffold(body: TripInfoCard(trip: trip)),
         ),
       );
 

@@ -319,6 +319,102 @@ void main() {
       });
     });
 
+    group('createTripFromPlan', () {
+      test('successful trip creation from plan returns Trip', () async {
+        final responseBody = {
+          'id': 'trip-456',
+          'userId': 'user-123',
+          'username': 'testuser',
+          'title': 'Trip from Plan',
+          'name': 'Trip from Plan',
+          'description': 'Created from trip plan',
+          'tripSettings': {'tripStatus': 'CREATED', 'visibility': 'PUBLIC'},
+          'tripDetails': {
+            'startTimestamp': DateTime.now().toIso8601String(),
+            'endTimestamp':
+                DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+            'startLocation': {'latitude': 40.7128, 'longitude': -74.0060},
+            'endLocation': {'latitude': 34.0522, 'longitude': -118.2437},
+            'waypoints': [],
+          },
+          'commentsCount': 0,
+          'reactionsCount': 0,
+          'createdAt': DateTime.now().toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+
+        final result = await tripCommandClient.createTripFromPlan(
+          'plan-123',
+          Visibility.public,
+        );
+
+        expect(result.id, 'trip-456');
+        expect(result.name, 'Trip from Plan');
+        expect(result.status, TripStatus.created);
+        expect(mockHttpClient.lastMethod, 'POST');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.tripFromPlan('plan-123')),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
+      });
+
+      test('createTripFromPlan requires authentication', () async {
+        final responseBody = {
+          'id': 'trip-456',
+          'userId': 'user-123',
+          'username': 'testuser',
+          'name': 'Trip from Plan',
+          'title': 'Trip from Plan',
+          'visibility': 'PUBLIC',
+          'status': 'CREATED',
+          'commentsCount': 0,
+          'reactionsCount': 0,
+          'createdAt': DateTime.now().toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+
+        await tripCommandClient.createTripFromPlan(
+            'plan-123', Visibility.public);
+
+        expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
+      });
+
+      test('createTripFromPlan throws exception when plan not found', () async {
+        mockHttpClient.response = http.Response(
+          '{"message":"TripPlan not found"}',
+          404,
+        );
+
+        expect(
+          () => tripCommandClient.createTripFromPlan(
+              'plan-123', Visibility.public),
+          throwsException,
+        );
+      });
+
+      test(
+        'createTripFromPlan throws exception when user not authorized',
+        () async {
+          mockHttpClient.response = http.Response(
+            '{"message":"User does not own this trip plan"}',
+            403,
+          );
+
+          expect(
+            () => tripCommandClient.createTripFromPlan(
+                'plan-123', Visibility.public),
+            throwsException,
+          );
+        },
+      );
+    });
+
     group('deleteTrip', () {
       test('successful trip deletion completes without error', () async {
         mockHttpClient.response = http.Response('', 204);

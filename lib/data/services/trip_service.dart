@@ -1,3 +1,4 @@
+import '../../core/constants/enums.dart';
 import '../models/trip_models.dart';
 import '../client/clients.dart';
 
@@ -13,12 +14,12 @@ class TripService {
     TripCommandClient? tripCommandClient,
     TripPlanCommandClient? tripPlanCommandClient,
     TripUpdateCommandClient? tripUpdateCommandClient,
-  }) : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
-       _tripCommandClient = tripCommandClient ?? TripCommandClient(),
-       _tripPlanCommandClient =
-           tripPlanCommandClient ?? TripPlanCommandClient(),
-       _tripUpdateCommandClient =
-           tripUpdateCommandClient ?? TripUpdateCommandClient();
+  })  : _tripQueryClient = tripQueryClient ?? TripQueryClient(),
+        _tripCommandClient = tripCommandClient ?? TripCommandClient(),
+        _tripPlanCommandClient =
+            tripPlanCommandClient ?? TripPlanCommandClient(),
+        _tripUpdateCommandClient =
+            tripUpdateCommandClient ?? TripUpdateCommandClient();
 
   // ===== Trip Query Operations =====
 
@@ -80,6 +81,12 @@ class TripService {
   /// Delete a trip
   Future<void> deleteTrip(String tripId) async {
     await _tripCommandClient.deleteTrip(tripId);
+  }
+
+  /// Create trip from trip plan
+  Future<Trip> createTripFromPlan(
+      String tripPlanId, Visibility visibility) async {
+    return await _tripCommandClient.createTripFromPlan(tripPlanId, visibility);
   }
 
   /// Send trip update (location, message)

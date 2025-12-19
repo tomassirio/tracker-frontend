@@ -66,9 +66,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
     // Initialize repository with geocoding client for place enrichment
     final apiKey = ApiEndpoints.googleMapsApiKey;
-    final geocodingClient = apiKey.isNotEmpty
-        ? GoogleGeocodingApiClient(apiKey)
-        : null;
+    final geocodingClient =
+        apiKey.isNotEmpty ? GoogleGeocodingApiClient(apiKey) : null;
     _repository = TripDetailRepository(geocodingClient: geocodingClient);
 
     _trip = widget.trip;

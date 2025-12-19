@@ -112,28 +112,29 @@ class CommentsSection extends StatelessWidget {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : comments.isEmpty
-                ? _buildEmptyCommentsState()
-                : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: comments.length,
-                    itemBuilder: (context, index) {
-                      final comment = comments[index];
-                      final isExpanded = expandedComments[comment.id] ?? false;
-                      final commentReplies = replies[comment.id] ?? [];
+                    ? _buildEmptyCommentsState()
+                    : ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) {
+                          final comment = comments[index];
+                          final isExpanded =
+                              expandedComments[comment.id] ?? false;
+                          final commentReplies = replies[comment.id] ?? [];
 
-                      return CommentCard(
-                        comment: comment,
-                        tripUserId: tripUserId,
-                        isExpanded: isExpanded,
-                        replies: commentReplies,
-                        onReact: () => onReact(comment.id),
-                        onReply: () => onReply(comment.id),
-                        onToggleReplies: () =>
-                            onToggleReplies(comment.id, isExpanded),
-                      );
-                    },
-                  ),
+                          return CommentCard(
+                            comment: comment,
+                            tripUserId: tripUserId,
+                            isExpanded: isExpanded,
+                            replies: commentReplies,
+                            onReact: () => onReact(comment.id),
+                            onReply: () => onReply(comment.id),
+                            onToggleReplies: () =>
+                                onToggleReplies(comment.id, isExpanded),
+                          );
+                        },
+                      ),
           ),
           // Comment input (disabled if not logged in)
           if (isLoggedIn)

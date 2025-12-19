@@ -17,13 +17,14 @@ class CreateTripPlanRequest {
   });
 
   Map<String, dynamic> toJson() => {
-    'name': name,
-    if (description != null) 'description': description,
-    if (plannedStartDate != null)
-      'plannedStartDate': plannedStartDate!.toIso8601String(),
-    if (plannedEndDate != null)
-      'plannedEndDate': plannedEndDate!.toIso8601String(),
-    if (plannedLocations != null)
-      'plannedLocations': plannedLocations!.map((loc) => loc.toJson()).toList(),
-  };
+        'name': name,
+        if (description != null) 'description': description,
+        if (plannedStartDate != null)
+          'plannedStartDate': plannedStartDate!.toIso8601String(),
+        if (plannedEndDate != null)
+          'plannedEndDate': plannedEndDate!.toIso8601String(),
+        if (plannedLocations != null)
+          'plannedLocations':
+              plannedLocations!.map((loc) => loc.toJson()).toList(),
+      };
 }

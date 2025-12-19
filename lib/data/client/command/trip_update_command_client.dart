@@ -7,7 +7,8 @@ class TripUpdateCommandClient {
   final ApiClient _apiClient;
 
   TripUpdateCommandClient({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
+      : _apiClient =
+            apiClient ?? ApiClient(baseUrl: ApiEndpoints.commandBaseUrl);
 
   /// Create trip update (location, battery, message)
   /// Requires authentication (USER, ADMIN - trip owner only)

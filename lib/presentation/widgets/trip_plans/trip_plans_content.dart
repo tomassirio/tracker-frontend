@@ -13,6 +13,8 @@ class TripPlansContent extends StatelessWidget {
   final bool isLoggedIn;
   final Future<void> Function() onRefresh;
   final Function(TripPlan) onTripPlanTap;
+  final Function(TripPlan)? onCreateTripFromPlan;
+  final Function(TripPlan)? onDeletePlan;
   final VoidCallback? onLoginPressed;
   final VoidCallback? onCreatePressed;
 
@@ -24,6 +26,8 @@ class TripPlansContent extends StatelessWidget {
     required this.isLoggedIn,
     required this.onRefresh,
     required this.onTripPlanTap,
+    this.onCreateTripFromPlan,
+    this.onDeletePlan,
     this.onLoginPressed,
     this.onCreatePressed,
   });
@@ -69,7 +73,7 @@ class TripPlansContent extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: 1.2,
+              childAspectRatio: 1.0, // Square cards for compact layout
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
@@ -78,6 +82,12 @@ class TripPlansContent extends StatelessWidget {
               return TripPlanCard(
                 plan: tripPlans[index],
                 onTap: () => onTripPlanTap(tripPlans[index]),
+                onCreateTrip: onCreateTripFromPlan != null
+                    ? () => onCreateTripFromPlan!(tripPlans[index])
+                    : null,
+                onDelete: onDeletePlan != null
+                    ? () => onDeletePlan!(tripPlans[index])
+                    : null,
               );
             },
           );

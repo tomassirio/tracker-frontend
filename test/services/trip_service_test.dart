@@ -160,6 +160,21 @@ void main() {
         expect(mockTripCommandClient.lastDeleteTripId, 'trip-1');
       });
 
+      test('createTripFromPlan creates trip from plan', () async {
+        final mockTrip = createMockTrip('trip-from-plan', 'Trip from Plan');
+        mockTripCommandClient.mockTrip = mockTrip;
+
+        final result = await tripService.createTripFromPlan(
+          'plan-123',
+          Visibility.public,
+        );
+
+        expect(result.id, 'trip-from-plan');
+        expect(result.name, 'Trip from Plan');
+        expect(mockTripCommandClient.createTripFromPlanCalled, true);
+        expect(mockTripCommandClient.lastPlanId, 'plan-123');
+      });
+
       test('sendTripUpdate sends update', () async {
         final request = TripUpdateRequest(
           latitude: 37.7749,
@@ -323,8 +338,10 @@ class MockTripCommandClient extends TripCommandClient {
   bool changeVisibilityCalled = false;
   bool changeStatusCalled = false;
   bool deleteTripCalled = false;
+  bool createTripFromPlanCalled = false;
   String? lastTripId;
   String? lastDeleteTripId;
+  String? lastPlanId;
   bool shouldThrowError = false;
 
   @override
@@ -366,6 +383,15 @@ class MockTripCommandClient extends TripCommandClient {
     deleteTripCalled = true;
     lastDeleteTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to delete trip');
+  }
+
+  @override
+  Future<Trip> createTripFromPlan(
+      String tripPlanId, Visibility visibility) async {
+    createTripFromPlanCalled = true;
+    lastPlanId = tripPlanId;
+    if (shouldThrowError) throw Exception('Failed to create trip from plan');
+    return mockTrip!;
   }
 }
 

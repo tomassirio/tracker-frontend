@@ -19,10 +19,10 @@ class TripDetailRepository {
     CommentService? commentService,
     AuthService? authService,
     GoogleGeocodingApiClient? geocodingClient,
-  }) : _tripService = tripService ?? TripService(),
-       _commentService = commentService ?? CommentService(),
-       _authService = authService ?? AuthService(),
-       _geocodingClient = geocodingClient;
+  })  : _tripService = tripService ?? TripService(),
+        _commentService = commentService ?? CommentService(),
+        _authService = authService ?? AuthService(),
+        _geocodingClient = geocodingClient;
 
   /// Loads top-level comments for a trip via API
   Future<List<Comment>> loadComments(String tripId) async {

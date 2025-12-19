@@ -9,8 +9,8 @@ class CommentService {
   CommentService({
     CommentQueryClient? commentQueryClient,
     CommentCommandClient? commentCommandClient,
-  }) : _commentQueryClient = commentQueryClient ?? CommentQueryClient(),
-       _commentCommandClient = commentCommandClient ?? CommentCommandClient();
+  })  : _commentQueryClient = commentQueryClient ?? CommentQueryClient(),
+        _commentCommandClient = commentCommandClient ?? CommentCommandClient();
 
   // ===== Comment Query Operations =====
 

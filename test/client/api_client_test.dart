@@ -74,9 +74,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test');
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
 
         // First request returns 401, then retry returns 200
         var getCallCount = 0;
@@ -162,9 +160,7 @@ void main() {
           mockTokenStorage.getRefreshToken(),
         ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
         when(
           mockHttpClient.post(
             refreshUri,
@@ -252,9 +248,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test');
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
 
         // Setup POST to test endpoint: first 401, then retry with 201
         var postCallCount = 0;
@@ -341,9 +335,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test/123');
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
 
         // PUT endpoint: first 401, then retry with 200
         var putCallCount = 0;
@@ -439,9 +431,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test/123');
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
 
         // PATCH endpoint: first 401, then retry with 200
         var patchCallCount = 0;
@@ -515,9 +505,7 @@ void main() {
         ).thenAnswer((_) async => 'refresh-token');
 
         final uri = Uri.parse('https://api.example.com/test/123');
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
 
         // DELETE endpoint: first 401, then retry with 204
         var deleteCallCount = 0;
@@ -572,9 +560,7 @@ void main() {
           mockTokenStorage.getRefreshToken(),
         ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
         when(
           mockHttpClient.post(
             refreshUri,
@@ -652,9 +638,7 @@ void main() {
           mockTokenStorage.getRefreshToken(),
         ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
         when(
           mockHttpClient.post(
             refreshUri,
@@ -687,9 +671,7 @@ void main() {
           mockTokenStorage.getRefreshToken(),
         ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
         when(
           mockHttpClient.post(
             refreshUri,
@@ -720,9 +702,7 @@ void main() {
           mockTokenStorage.getRefreshToken(),
         ).thenAnswer((_) async => 'refresh-token');
 
-        final refreshUri = Uri.parse(
-          '/api/auth/refresh',
-        );
+        final refreshUri = Uri.parse('/api/auth/refresh');
         when(
           mockHttpClient.post(
             refreshUri,
@@ -755,9 +735,7 @@ void main() {
             mockTokenStorage.getRefreshToken(),
           ).thenAnswer((_) async => 'refresh-token');
 
-          final refreshUri = Uri.parse(
-            '/api/auth/refresh',
-          );
+          final refreshUri = Uri.parse('/api/auth/refresh');
           when(
             mockHttpClient.post(
               refreshUri,
@@ -1029,9 +1007,7 @@ void main() {
             mockTokenStorage.getRefreshToken(),
           ).thenAnswer((_) async => 'old-refresh-token');
 
-          final refreshUri = Uri.parse(
-            '/api/auth/refresh',
-          );
+          final refreshUri = Uri.parse('/api/auth/refresh');
           when(
             mockHttpClient.post(
               refreshUri,

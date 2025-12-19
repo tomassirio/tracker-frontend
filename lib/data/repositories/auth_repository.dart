@@ -6,7 +6,7 @@ class AuthRepository {
   final AuthService _authService;
 
   AuthRepository({AuthService? authService})
-    : _authService = authService ?? AuthService();
+      : _authService = authService ?? AuthService();
 
   /// Logs in a user with username and password
   Future<void> login(String username, String password) async {

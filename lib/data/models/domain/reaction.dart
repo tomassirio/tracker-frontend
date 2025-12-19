@@ -17,18 +17,18 @@ class Reaction {
   });
 
   factory Reaction.fromJson(Map<String, dynamic> json) => Reaction(
-    id: json['id'] as String,
-    userId: json['userId'] as String,
-    username: json['username'] as String,
-    type: ReactionType.fromJson(json['type'] as String),
-    createdAt: DateTime.parse(json['createdAt'] as String),
-  );
+        id: json['id'] as String,
+        userId: json['userId'] as String,
+        username: json['username'] as String,
+        type: ReactionType.fromJson(json['type'] as String),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+      );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'userId': userId,
-    'username': username,
-    'type': type.toJson(),
-    'createdAt': createdAt.toIso8601String(),
-  };
+        'id': id,
+        'userId': userId,
+        'username': username,
+        'type': type.toJson(),
+        'createdAt': createdAt.toIso8601String(),
+      };
 }

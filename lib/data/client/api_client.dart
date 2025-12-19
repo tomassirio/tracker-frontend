@@ -16,8 +16,8 @@ class ApiClient {
     required this.baseUrl,
     http.Client? httpClient,
     TokenStorage? tokenStorage,
-  }) : _httpClient = httpClient ?? http.Client(),
-       _tokenStorage = tokenStorage ?? TokenStorage();
+  })  : _httpClient = httpClient ?? http.Client(),
+        _tokenStorage = tokenStorage ?? TokenStorage();
 
   /// GET request
   Future<http.Response> get(
