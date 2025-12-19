@@ -12,6 +12,7 @@ import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plans_cont
 import 'auth_screen.dart';
 import 'create_trip_plan_screen.dart';
 import 'trip_detail_screen.dart';
+import 'trip_plan_detail_screen.dart';
 
 /// Trip Plans screen showing list of planned trips
 class TripPlansScreen extends StatefulWidget {
@@ -130,9 +131,18 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     }
   }
 
-  void _handleTripPlanTap(TripPlan plan) {
-    // Trip plan details view not yet implemented
-    // For now, users can create trips from plans using the "Create Trip" button
+  Future<void> _handleTripPlanTap(TripPlan plan) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripPlanDetailScreen(tripPlan: plan),
+      ),
+    );
+
+    // Reload trip plans if the plan was modified or deleted
+    if (result == true && mounted) {
+      await _loadTripPlans();
+    }
   }
 
   Future<void> _handleCreatePlan() async {
