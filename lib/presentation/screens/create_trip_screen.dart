@@ -177,30 +177,58 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Trip Plan Selector Section
-            if (_tripPlans.isNotEmpty) ...[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.map_outlined,
-                            color: Theme.of(context).colorScheme.primary,
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.map_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Create from Trip Plan',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Create from Trip Plan',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (_tripPlans.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.orange.shade700,
+                              size: 20,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'You don\'t have any trip plans yet. Create a trip plan first to use this feature.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.orange.shade900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
                       DropdownButtonFormField<TripPlan>(
                         value: _selectedTripPlan,
                         decoration: const InputDecoration(
@@ -258,19 +286,19 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              if (_selectedTripPlan != null)
-                const Divider(height: 32)
-              else
-                const Text(
-                  'Or create a trip manually:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                  ),
+            ),
+            const SizedBox(height: 16),
+            if (_selectedTripPlan != null)
+              const Divider(height: 32)
+            else
+              const Text(
+                'Or create a trip manually:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
                 ),
-              const SizedBox(height: 16),
-            ],
+              ),
+            const SizedBox(height: 16),
             // Manual Trip Creation Form
             if (_selectedTripPlan == null)
               CreateTripForm(

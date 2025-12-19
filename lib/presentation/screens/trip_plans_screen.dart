@@ -128,14 +128,13 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   }
 
   void _handleTripPlanTap(TripPlan plan) {
-    UiHelpers.showSuccessMessage(context, 'Trip plan details coming soon!');
+    // Trip plan details view not yet implemented
+    // For now, users can create trips from plans using the "Create Trip" button
   }
 
   void _handleCreatePlan() {
-    UiHelpers.showSuccessMessage(
-      context,
-      'Create trip plan feature coming soon!',
-    );
+    // Trip plan creation not yet implemented
+    // This will be added in a future update with Google Maps integration
   }
 
   Future<void> _handleCreateTripFromPlan(TripPlan plan) async {
