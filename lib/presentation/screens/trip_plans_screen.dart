@@ -9,6 +9,7 @@ import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.da
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plans_content.dart';
 import 'auth_screen.dart';
+import 'create_trip_plan_screen.dart';
 
 /// Trip Plans screen showing list of planned trips
 class TripPlansScreen extends StatefulWidget {
@@ -132,9 +133,18 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     // For now, users can create trips from plans using the "Create Trip" button
   }
 
-  void _handleCreatePlan() {
-    // Trip plan creation not yet implemented
-    // This will be added in a future update with Google Maps integration
+  Future<void> _handleCreatePlan() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateTripPlanScreen(),
+      ),
+    );
+
+    // Reload trip plans if a new one was created
+    if (result == true && mounted) {
+      await _loadTripPlans();
+    }
   }
 
   Future<void> _handleCreateTripFromPlan(TripPlan plan) async {

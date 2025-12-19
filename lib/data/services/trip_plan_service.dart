@@ -41,4 +41,11 @@ class TripPlanService {
   Future<void> deleteTripPlan(String planId) async {
     await _tripPlanCommandClient.deleteTripPlan(planId);
   }
+
+  /// Create a trip plan using backend request model
+  Future<TripPlan> createTripPlanBackend(
+    CreateTripPlanBackendRequest request,
+  ) async {
+    return await _tripPlanCommandClient.createTripPlanBackend(request);
+  }
 }
