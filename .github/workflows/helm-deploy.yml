@@ -82,6 +82,7 @@ jobs:
             --set nameSuffix="${{ steps.config.outputs.name-suffix }}" \
             --set service.port=${{ steps.config.outputs.service-port }} \
             --set image.tag="${{ inputs.image-tag }}" \
+            --set image.pullPolicy="Always" \
             --set application.googleMapsApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
             --set application.commandBaseUrl="${{ steps.config.outputs.command-url }}" \
             --set application.queryBaseUrl="${{ steps.config.outputs.query-url }}" \
