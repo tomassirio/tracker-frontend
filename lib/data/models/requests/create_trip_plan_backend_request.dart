@@ -1,16 +1,16 @@
 /// GeoLocation model matching backend structure
 class GeoLocation {
-  final double latitude;
-  final double longitude;
+  final double lat;
+  final double lon;
 
   GeoLocation({
-    required this.latitude,
-    required this.longitude,
+    required this.lat,
+    required this.lon,
   });
 
   Map<String, dynamic> toJson() => {
-        'latitude': latitude,
-        'longitude': longitude,
+        'lat': lat,
+        'lon': lon,
       };
 }
 

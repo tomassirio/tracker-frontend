@@ -176,17 +176,17 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
         startDate: _startDate!,
         endDate: _endDate!,
         startLocation: GeoLocation(
-          latitude: _startLocation!.latitude,
-          longitude: _startLocation!.longitude,
+          lat: _startLocation!.latitude,
+          lon: _startLocation!.longitude,
         ),
         endLocation: GeoLocation(
-          latitude: _endLocation!.latitude,
-          longitude: _endLocation!.longitude,
+          lat: _endLocation!.latitude,
+          lon: _endLocation!.longitude,
         ),
         waypoints: _waypoints
             .map((loc) => GeoLocation(
-                  latitude: loc.latitude,
-                  longitude: loc.longitude,
+                  lat: loc.latitude,
+                  lon: loc.longitude,
                 ))
             .toList(),
         metadata: metadata.isNotEmpty ? metadata : null,
