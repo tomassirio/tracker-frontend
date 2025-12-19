@@ -242,6 +242,136 @@ void main() {
         },
       );
     });
+
+    group('createTripPlanBackend', () {
+      test('successful trip plan creation returns TripPlan', () async {
+        final request = CreateTripPlanBackendRequest(
+          name: 'Road Trip Plan',
+          planType: 'ROAD_TRIP',
+          startDate: DateTime(2025, 12, 20),
+          endDate: DateTime(2025, 12, 25),
+          startLocation: GeoLocation(latitude: 37.7749, longitude: -122.4194),
+          endLocation: GeoLocation(latitude: 34.0522, longitude: -118.2437),
+          waypoints: [
+            GeoLocation(latitude: 36.7783, longitude: -119.4179),
+          ],
+        );
+        final responseBody = {
+          'id': 'plan-456',
+          'userId': 'user-123',
+          'name': 'Road Trip Plan',
+          'planType': 'ROAD_TRIP',
+          'startDate': '2025-12-20',
+          'endDate': '2025-12-25',
+          'startLocation': {'lat': 37.7749, 'lon': -122.4194},
+          'endLocation': {'lat': 34.0522, 'lon': -118.2437},
+          'waypoints': [
+            {'lat': 36.7783, 'lon': -119.4179},
+          ],
+          'createdTimestamp': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+
+        final result = await tripPlanCommandClient.createTripPlanBackend(
+          request,
+        );
+
+        expect(result.id, 'plan-456');
+        expect(result.name, 'Road Trip Plan');
+        expect(result.planType, 'ROAD_TRIP');
+        expect(mockHttpClient.lastMethod, 'POST');
+        expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlans));
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
+      });
+
+      test('createTripPlanBackend requires authentication', () async {
+        final request = CreateTripPlanBackendRequest(
+          name: 'Test Plan',
+          planType: 'SIMPLE',
+          startDate: DateTime(2025, 12, 20),
+          endDate: DateTime(2025, 12, 25),
+          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
+          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+        );
+        final responseBody = {
+          'id': 'plan-789',
+          'userId': 'user-123',
+          'name': 'Test Plan',
+          'planType': 'SIMPLE',
+          'startDate': '2025-12-20',
+          'endDate': '2025-12-25',
+          'startLocation': {'lat': 0.0, 'lon': 0.0},
+          'endLocation': {'lat': 1.0, 'lon': 1.0},
+          'waypoints': [],
+          'createdTimestamp': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+
+        await tripPlanCommandClient.createTripPlanBackend(request);
+
+        expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
+      });
+
+      test('createTripPlanBackend throws exception on validation error',
+          () async {
+        final request = CreateTripPlanBackendRequest(
+          name: '',
+          planType: 'INVALID',
+          startDate: DateTime(2025, 12, 25),
+          endDate: DateTime(2025, 12, 20), // End before start
+          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
+          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+        );
+        mockHttpClient.response = http.Response(
+          '{"message":"Validation failed"}',
+          400,
+        );
+
+        expect(
+          () => tripPlanCommandClient.createTripPlanBackend(request),
+          throwsException,
+        );
+      });
+
+      test('createTripPlanBackend sends correct JSON body', () async {
+        final request = CreateTripPlanBackendRequest(
+          name: 'JSON Test Plan',
+          planType: 'MULTI_DAY',
+          startDate: DateTime(2025, 1, 15),
+          endDate: DateTime(2025, 1, 20),
+          startLocation: GeoLocation(latitude: 40.7128, longitude: -74.0060),
+          endLocation: GeoLocation(latitude: 42.3601, longitude: -71.0589),
+          metadata: {'category': 'vacation'},
+        );
+        final responseBody = {
+          'id': 'plan-json',
+          'userId': 'user-123',
+          'name': 'JSON Test Plan',
+          'planType': 'MULTI_DAY',
+          'startDate': '2025-01-15',
+          'endDate': '2025-01-20',
+          'startLocation': {'lat': 40.7128, 'lon': -74.0060},
+          'endLocation': {'lat': 42.3601, 'lon': -71.0589},
+          'waypoints': [],
+          'createdTimestamp': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+
+        await tripPlanCommandClient.createTripPlanBackend(request);
+
+        final sentBody = jsonDecode(mockHttpClient.lastBody!);
+        expect(sentBody['name'], 'JSON Test Plan');
+        expect(sentBody['planType'], 'MULTI_DAY');
+        expect(sentBody['startDate'], '2025-01-15');
+        expect(sentBody['endDate'], '2025-01-20');
+        expect(sentBody['startLocation']['latitude'], 40.7128);
+        expect(sentBody['startLocation']['longitude'], -74.0060);
+        expect(sentBody['metadata']['category'], 'vacation');
+      });
+    });
   });
 }
 

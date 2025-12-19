@@ -198,6 +198,66 @@ void main() {
         expect(fakeTripPlanCommandClient.deleteTripPlanCalled, true);
       });
     });
+
+    group('createTripPlanBackend', () {
+      test('creates trip plan using backend request model', () async {
+        final request = CreateTripPlanBackendRequest(
+          name: 'Road Trip',
+          planType: 'ROAD_TRIP',
+          startDate: DateTime(2025, 12, 20),
+          endDate: DateTime(2025, 12, 25),
+          startLocation: GeoLocation(latitude: 37.7749, longitude: -122.4194),
+          endLocation: GeoLocation(latitude: 34.0522, longitude: -118.2437),
+        );
+        final mockPlan = createMockTripPlan('plan-backend', 'Road Trip');
+        fakeTripPlanCommandClient.mockTripPlan = mockPlan;
+
+        final result = await tripPlanService.createTripPlanBackend(request);
+
+        expect(result.id, 'plan-backend');
+        expect(result.name, 'Road Trip');
+        expect(fakeTripPlanCommandClient.createTripPlanBackendCalled, true);
+      });
+
+      test('creates trip plan with waypoints', () async {
+        final request = CreateTripPlanBackendRequest(
+          name: 'Multi-Stop Trip',
+          planType: 'MULTI_DAY',
+          startDate: DateTime(2025, 1, 15),
+          endDate: DateTime(2025, 1, 20),
+          startLocation: GeoLocation(latitude: 40.7128, longitude: -74.0060),
+          endLocation: GeoLocation(latitude: 42.3601, longitude: -71.0589),
+          waypoints: [
+            GeoLocation(latitude: 41.8781, longitude: -87.6298),
+          ],
+        );
+        final mockPlan =
+            createMockTripPlan('plan-waypoints', 'Multi-Stop Trip');
+        fakeTripPlanCommandClient.mockTripPlan = mockPlan;
+
+        final result = await tripPlanService.createTripPlanBackend(request);
+
+        expect(result.id, 'plan-waypoints');
+        expect(fakeTripPlanCommandClient.createTripPlanBackendCalled, true);
+      });
+
+      test('throws exception on creation failure', () async {
+        final request = CreateTripPlanBackendRequest(
+          name: 'Failed Plan',
+          planType: 'SIMPLE',
+          startDate: DateTime(2025, 12, 20),
+          endDate: DateTime(2025, 12, 25),
+          startLocation: GeoLocation(latitude: 0.0, longitude: 0.0),
+          endLocation: GeoLocation(latitude: 1.0, longitude: 1.0),
+        );
+        fakeTripPlanCommandClient.shouldThrowError = true;
+
+        expect(
+          () => tripPlanService.createTripPlanBackend(request),
+          throwsException,
+        );
+      });
+    });
   });
 }
 
@@ -241,6 +301,7 @@ class FakeTripPlanQueryClient extends TripPlanQueryClient {
 class FakeTripPlanCommandClient extends TripPlanCommandClient {
   TripPlan? mockTripPlan;
   bool createTripPlanCalled = false;
+  bool createTripPlanBackendCalled = false;
   bool updateTripPlanCalled = false;
   bool deleteTripPlanCalled = false;
   String? lastPlanId;
@@ -251,6 +312,17 @@ class FakeTripPlanCommandClient extends TripPlanCommandClient {
   Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
     createTripPlanCalled = true;
     if (shouldThrowError) throw Exception('Failed to create trip plan');
+    return mockTripPlan!;
+  }
+
+  @override
+  Future<TripPlan> createTripPlanBackend(
+    CreateTripPlanBackendRequest request,
+  ) async {
+    createTripPlanBackendCalled = true;
+    if (shouldThrowError) {
+      throw Exception('Failed to create trip plan backend');
+    }
     return mockTripPlan!;
   }
 
