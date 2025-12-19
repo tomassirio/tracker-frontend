@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/requests/create_trip_plan_backend_request.dart';
 import 'package:tracker_frontend/data/services/trip_plan_service.dart';
@@ -24,14 +25,74 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   // Default to user's approximate location or a central location
   static const LatLng _defaultLocation = LatLng(40.7128, -74.0060); // New York
+  LatLng _initialCameraLocation = _defaultLocation;
   LatLng? _startLocation;
   LatLng? _endLocation;
+  bool _isLoadingLocation = true;
 
   String _planType = 'SIMPLE';
   DateTime? _startDate;
   DateTime? _endDate;
   int? _multiDayTripDays;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        // Location services are not enabled, use default
+        setState(() => _isLoadingLocation = false);
+        return;
+      }
+
+      // Check location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Permission denied, use default location
+          setState(() => _isLoadingLocation = false);
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        // Permission denied forever, use default location
+        setState(() => _isLoadingLocation = false);
+        return;
+      }
+
+      // Get current position
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      final userLocation = LatLng(position.latitude, position.longitude);
+
+      setState(() {
+        _initialCameraLocation = userLocation;
+        _isLoadingLocation = false;
+      });
+
+      // Move camera to user's location if map is already created
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(userLocation, 12),
+      );
+    } catch (e) {
+      // Error getting location, use default
+      setState(() => _isLoadingLocation = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -252,8 +313,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               children: [
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
-                    target: _defaultLocation,
-                    zoom: 10,
+                    target: _initialCameraLocation,
+                    zoom: 12,
                   ),
                   markers: _markers,
                   onMapCreated: _onMapCreated,
@@ -310,6 +371,29 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                     ),
                   ),
                 ),
+                // Loading overlay while getting location
+                if (_isLoadingLocation)
+                  Positioned(
+                    bottom: 16,
+                    left: 16,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('Getting your location...'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

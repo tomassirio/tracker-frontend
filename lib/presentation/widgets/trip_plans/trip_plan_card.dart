@@ -194,49 +194,54 @@ class TripPlanCard extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      plan.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    if (plan.startDate != null && plan.endDate != null)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 12,
-                            color: Colors.grey[600],
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          plan.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${_formatDate(plan.startDate!)} - ${_formatDate(plan.endDate!)}',
-                              style: TextStyle(
-                                fontSize: 12,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        if (plan.startDate != null && plan.endDate != null)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 12,
                                 color: Colors.grey[600],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  '${_formatDate(plan.startDate!)} - ${_formatDate(plan.endDate!)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Text(
+                            'No dates set',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                              fontStyle: FontStyle.italic,
                             ),
                           ),
-                        ],
-                      )
-                    else
-                      Text(
-                        'No dates set',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    const Spacer(),
+                      ],
+                    ),
                     Row(
                       children: [
                         if (onCreateTrip != null)
