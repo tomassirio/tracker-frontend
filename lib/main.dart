@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/presentation/screens/initial_screen.dart';
 
 void main() {
@@ -11,12 +12,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tracker',
+      title: 'Wanderer',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-        useMaterial3: true,
-      ),
+      theme: WandererTheme.lightTheme(),
       home: const InitialScreen(),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget displaying the timeline of trip updates
 class TripTimeline extends StatelessWidget {
@@ -17,7 +18,25 @@ class TripTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: WandererTheme.primaryOrange,
+              strokeWidth: 2,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Loading timeline...',
+              style: TextStyle(
+                color: WandererTheme.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     if (updates.isEmpty) {
@@ -27,14 +46,44 @@ class TripTimeline extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.timeline, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: WandererTheme.primaryOrange.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.timeline,
+                  size: 48,
+                  color: WandererTheme.primaryOrange,
+                ),
+              ),
+              const SizedBox(height: 20),
               Text(
                 'No updates yet',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: WandererTheme.textPrimary,
+                ),
               ),
               const SizedBox(height: 8),
-              TextButton(onPressed: onRefresh, child: const Text('Refresh')),
+              Text(
+                'Trip updates will appear here',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: WandererTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: onRefresh,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Refresh'),
+                style: TextButton.styleFrom(
+                  foregroundColor: WandererTheme.primaryOrange,
+                ),
+              ),
             ],
           ),
         ),
@@ -43,44 +92,80 @@ class TripTimeline extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
+      color: WandererTheme.primaryOrange,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: updates.length,
         itemBuilder: (context, index) {
           final update = updates[index];
           final isLast = index == updates.length - 1;
+          final isFirst = index == 0;
 
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: BoxShape.circle,
+              // Timeline connector
+              SizedBox(
+                width: 24,
+                child: Column(
+                  children: [
+                    // Connector line above (if not first)
+                    if (!isFirst)
+                      Container(
+                        width: 2,
+                        height: 8,
+                        color: WandererTheme.timelineConnector,
+                      ),
+                    // Timeline node
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: isFirst
+                            ? WandererTheme.primaryOrange
+                            : WandererTheme.timelineConnector,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isFirst
+                              ? WandererTheme.primaryOrange
+                              : Colors.grey.shade400,
+                          width: 2,
+                        ),
+                      ),
                     ),
-                  ),
-                  if (!isLast)
-                    Container(width: 2, height: 60, color: Colors.grey[300]),
-                ],
+                    // Connector line below (if not last)
+                    if (!isLast)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Container(
+                          width: 2,
+                          height: 80,
+                          color: WandererTheme.timelineConnector,
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(width: 12),
+              // Update card
               Expanded(
                 child: Container(
-                  margin: const EdgeInsets.only(bottom: 16),
+                  margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey[200]!),
+                    color: WandererTheme.backgroundCard,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isFirst
+                          ? WandererTheme.primaryOrange.withOpacity(0.3)
+                          : Colors.grey.shade200,
+                    ),
+                    boxShadow: isFirst ? WandererTheme.cardShadow : null,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Timestamp and battery in header row
+                      // Header: timestamp and battery
                       Row(
                         children: [
                           Expanded(
@@ -88,49 +173,63 @@ class TripTimeline extends StatelessWidget {
                               _formatTimestamp(update.timestamp),
                               style: TextStyle(
                                 fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w600,
+                                color: isFirst
+                                    ? WandererTheme.primaryOrange
+                                    : WandererTheme.textSecondary,
                               ),
                             ),
                           ),
                           if (update.battery != null)
-                            Row(
-                              children: [
-                                Icon(
-                                  _getBatteryIcon(update.battery!),
-                                  size: 14,
-                                  color: _getBatteryColor(update.battery!),
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  '${update.battery}%',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getBatteryColor(update.battery!)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _getBatteryIcon(update.battery!),
+                                    size: 12,
                                     color: _getBatteryColor(update.battery!),
-                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    '${update.battery}%',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: _getBatteryColor(update.battery!),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // Location with icon
+                      // Location
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
                             Icons.location_on,
                             size: 14,
-                            color: Colors.grey[600],
+                            color: WandererTheme.primaryOrange,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               update.displayLocation,
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[800],
+                                fontSize: 13,
+                                color: WandererTheme.textPrimary,
                                 fontWeight: update.city != null
                                     ? FontWeight.w500
                                     : FontWeight.normal,
@@ -144,17 +243,17 @@ class TripTimeline extends StatelessWidget {
                           update.message!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: WandererTheme.backgroundLight,
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: Colors.grey[300]!),
                           ),
                           child: Text(
                             update.message!,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[800],
+                              color: WandererTheme.textSecondary,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -168,14 +267,15 @@ class TripTimeline extends StatelessWidget {
                             Icon(
                               Icons.favorite,
                               size: 12,
-                              color: Colors.red[400],
+                              color: Colors.red.shade400,
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '${update.reactionCount} ${update.reactionCount == 1 ? 'reaction' : 'reactions'}',
+                              '${update.reactionCount}',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                                color: WandererTheme.textSecondary,
                               ),
                             ),
                           ],
