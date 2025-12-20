@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
@@ -52,118 +53,152 @@ class CommentsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Comments section header with sort options
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            color: Colors.white.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
           ),
-          child: Row(
+          child: Column(
             children: [
-              IconButton(
-                icon: Icon(
-                  isCollapsed ? Icons.expand_more : Icons.expand_less,
-                  size: 20,
+              // Comments section header with sort options
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.white.withOpacity(0.3),
+                    ),
+                  ),
                 ),
-                onPressed: onToggleCollapse,
-                tooltip: isCollapsed ? 'Expand comments' : 'Collapse comments',
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${comments.length} Comments',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              if (!isCollapsed)
-                PopupMenuButton<CommentSortOption>(
-                  icon: const Icon(Icons.sort),
-                  onSelected: onSortChanged,
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: CommentSortOption.latest,
-                      child: Text('Latest first'),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        isCollapsed ? Icons.expand_more : Icons.expand_less,
+                        size: 20,
+                      ),
+                      onPressed: onToggleCollapse,
+                      tooltip:
+                          isCollapsed ? 'Expand comments' : 'Collapse comments',
                     ),
-                    const PopupMenuItem(
-                      value: CommentSortOption.oldest,
-                      child: Text('Oldest first'),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${comments.length} Comments',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const PopupMenuItem(
-                      value: CommentSortOption.mostReplies,
-                      child: Text('Most replies'),
-                    ),
-                    const PopupMenuItem(
-                      value: CommentSortOption.mostReactions,
-                      child: Text('Most reactions'),
-                    ),
+                    const Spacer(),
+                    if (!isCollapsed)
+                      PopupMenuButton<CommentSortOption>(
+                        icon: const Icon(Icons.sort),
+                        onSelected: onSortChanged,
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: CommentSortOption.latest,
+                            child: Text('Latest first'),
+                          ),
+                          const PopupMenuItem(
+                            value: CommentSortOption.oldest,
+                            child: Text('Oldest first'),
+                          ),
+                          const PopupMenuItem(
+                            value: CommentSortOption.mostReplies,
+                            child: Text('Most replies'),
+                          ),
+                          const PopupMenuItem(
+                            value: CommentSortOption.mostReactions,
+                            child: Text('Most reactions'),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
+              ),
+              // Comments list - only show when not collapsed
+              if (!isCollapsed) ...[
+                Expanded(
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : comments.isEmpty
+                          ? _buildEmptyCommentsState()
+                          : ListView.builder(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = comments[index];
+                                final isExpanded =
+                                    expandedComments[comment.id] ?? false;
+                                final commentReplies =
+                                    replies[comment.id] ?? [];
+
+                                return CommentCard(
+                                  comment: comment,
+                                  tripUserId: tripUserId,
+                                  isExpanded: isExpanded,
+                                  replies: commentReplies,
+                                  onReact: () => onReact(comment.id),
+                                  onReply: () => onReply(comment.id),
+                                  onToggleReplies: () =>
+                                      onToggleReplies(comment.id, isExpanded),
+                                );
+                              },
+                            ),
+                ),
+                // Comment input (disabled if not logged in)
+                if (isLoggedIn)
+                  CommentInput(
+                    controller: commentController,
+                    isAddingComment: isAddingComment,
+                    isReplyMode: replyingToCommentId != null,
+                    onSend: onSendComment,
+                    onCancelReply: onCancelReply,
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      border: Border(
+                        top: BorderSide(
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Please log in to comment',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ],
           ),
         ),
-        // Comments list - only show when not collapsed
-        if (!isCollapsed) ...[
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : comments.isEmpty
-                    ? _buildEmptyCommentsState()
-                    : ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final comment = comments[index];
-                          final isExpanded =
-                              expandedComments[comment.id] ?? false;
-                          final commentReplies = replies[comment.id] ?? [];
-
-                          return CommentCard(
-                            comment: comment,
-                            tripUserId: tripUserId,
-                            isExpanded: isExpanded,
-                            replies: commentReplies,
-                            onReact: () => onReact(comment.id),
-                            onReply: () => onReply(comment.id),
-                            onToggleReplies: () =>
-                                onToggleReplies(comment.id, isExpanded),
-                          );
-                        },
-                      ),
-          ),
-          // Comment input (disabled if not logged in)
-          if (isLoggedIn)
-            CommentInput(
-              controller: commentController,
-              isAddingComment: isAddingComment,
-              isReplyMode: replyingToCommentId != null,
-              onSend: onSendComment,
-              onCancelReply: onCancelReply,
-            )
-          else
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border(top: BorderSide(color: Colors.grey[300]!)),
-              ),
-              child: const Center(
-                child: Text(
-                  'Please log in to comment',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ],
+      ),
     );
   }
 

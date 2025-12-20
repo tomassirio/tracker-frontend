@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/widgets/auth/auth_header.dart';
 import 'package:tracker_frontend/presentation/widgets/auth/auth_mode_toggle.dart';
@@ -38,79 +39,101 @@ class AuthForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AuthHeader(isLogin: isLogin),
-              const SizedBox(height: 32),
-
-              // Username field
-              UsernameField(controller: usernameController, isLogin: isLogin),
-              const SizedBox(height: 16),
-
-              // Email field (only for registration)
-              if (!isLogin) ...[
-                EmailField(controller: emailController),
-                const SizedBox(height: 16),
-              ],
-
-              // Password field
-              PasswordField(controller: passwordController, isLogin: isLogin),
-              const SizedBox(height: 16),
-
-              // Confirm password field (only for registration)
-              if (!isLogin) ...[
-                PasswordField(
-                  controller: confirmPasswordController,
-                  label: 'Confirm Password',
-                  isLogin: false,
-                  compareController: passwordController,
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Forgot password button (only for login)
-              if (isLogin)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: isLoading ? null : onForgotPassword,
-                    child: const Text('Forgot Password?'),
-                  ),
-                ),
-
-              // Error message
-              if (errorMessage != null) ...[
-                const SizedBox(height: 8),
-                ErrorMessage(message: errorMessage!),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Submit button
-              AuthSubmitButton(
-                isLogin: isLogin,
-                isLoading: isLoading,
-                onPressed: onSubmit,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.25),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1),
+                blurRadius: 30,
+                spreadRadius: 5,
               ),
-
-              const SizedBox(height: 16),
-
-              // Toggle login/register
-              AuthModeToggle(
-                isLogin: isLogin,
-                isLoading: isLoading,
-                onToggle: onToggleMode,
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 2,
               ),
             ],
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AuthHeader(isLogin: isLogin),
+                const SizedBox(height: 32),
+
+                // Username field
+                UsernameField(controller: usernameController, isLogin: isLogin),
+                const SizedBox(height: 16),
+
+                // Email field (only for registration)
+                if (!isLogin) ...[
+                  EmailField(controller: emailController),
+                  const SizedBox(height: 16),
+                ],
+
+                // Password field
+                PasswordField(controller: passwordController, isLogin: isLogin),
+                const SizedBox(height: 16),
+
+                // Confirm password field (only for registration)
+                if (!isLogin) ...[
+                  PasswordField(
+                    controller: confirmPasswordController,
+                    label: 'Confirm Password',
+                    isLogin: false,
+                    compareController: passwordController,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Forgot password button (only for login)
+                if (isLogin)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: isLoading ? null : onForgotPassword,
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+
+                // Error message
+                if (errorMessage != null) ...[
+                  const SizedBox(height: 8),
+                  ErrorMessage(message: errorMessage!),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Submit button
+                AuthSubmitButton(
+                  isLogin: isLogin,
+                  isLoading: isLoading,
+                  onPressed: onSubmit,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Toggle login/register
+                AuthModeToggle(
+                  isLogin: isLogin,
+                  isLoading: isLoading,
+                  onToggle: onToggleMode,
+                ),
+              ],
+            ),
           ),
         ),
       ),

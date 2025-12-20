@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reply_card.dart';
@@ -38,149 +39,176 @@ class CommentCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isAuthor ? Colors.blue[50] : Colors.white,
-        border: Border.all(
-          color: isAuthor ? Colors.blue[200]! : Colors.grey[300]!,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: () => _navigateToProfile(context),
-                child: CircleAvatar(
-                  radius: 16,
-                  child: Text(comment.username[0].toUpperCase()),
-                ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isAuthor
+                  ? Colors.blue.withOpacity(0.2)
+                  : Colors.white.withOpacity(0.4),
+              border: Border.all(
+                color: isAuthor
+                    ? Colors.blue.withOpacity(0.3)
+                    : Colors.white.withOpacity(0.3),
+                width: 1,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: () => _navigateToProfile(context),
-                          child: Text(
-                            '@${comment.username}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                        if (isAuthor) ...[
-                          const SizedBox(width: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[100],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'AUTHOR',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      _formatTimestamp(comment.createdAt),
-                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(comment.message, style: const TextStyle(fontSize: 14)),
-          const SizedBox(height: 8),
-          // Display reactions by type
-          if (comment.reactions != null && comment.reactions!.isNotEmpty) ...[
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: comment.reactions!.entries
-                  .where((entry) => entry.value > 0)
-                  .map((entry) => _buildReactionChip(entry.key, entry.value))
-                  .toList(),
-            ),
-            const SizedBox(height: 8),
-          ],
-          Row(
-            children: [
-              InkWell(
-                onTap: onReact,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add_reaction_outlined,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'React',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              InkWell(
-                onTap: onReply,
-                child: Row(
-                  children: [
-                    Icon(Icons.reply, size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    const Text('Reply', style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ),
-              if (comment.responsesCount > 0) ...[
-                const SizedBox(width: 16),
-                InkWell(
-                  onTap: onToggleReplies,
-                  child: Row(
-                    children: [
-                      Icon(
-                        isExpanded ? Icons.expand_less : Icons.expand_more,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${comment.responsesCount} ${comment.responsesCount == 1 ? 'reply' : 'replies'}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  spreadRadius: 2,
                 ),
               ],
-            ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () => _navigateToProfile(context),
+                      child: CircleAvatar(
+                        radius: 16,
+                        child: Text(comment.username[0].toUpperCase()),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () => _navigateToProfile(context),
+                                child: Text(
+                                  '@${comment.username}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                              if (isAuthor) ...[
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[100],
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'AUTHOR',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            _formatTimestamp(comment.createdAt),
+                            style: TextStyle(
+                                fontSize: 11, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(comment.message, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 8),
+                // Display reactions by type
+                if (comment.reactions != null &&
+                    comment.reactions!.isNotEmpty) ...[
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: comment.reactions!.entries
+                        .where((entry) => entry.value > 0)
+                        .map((entry) =>
+                            _buildReactionChip(entry.key, entry.value))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: onReact,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.add_reaction_outlined,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'React',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[700]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    InkWell(
+                      onTap: onReply,
+                      child: Row(
+                        children: [
+                          Icon(Icons.reply, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          const Text('Reply', style: TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    if (comment.responsesCount > 0) ...[
+                      const SizedBox(width: 16),
+                      InkWell(
+                        onTap: onToggleReplies,
+                        child: Row(
+                          children: [
+                            Icon(
+                              isExpanded
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${comment.responsesCount} ${comment.responsesCount == 1 ? 'reply' : 'replies'}',
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey[700]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (isExpanded && replies.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Divider(),
+                  ...replies.map((reply) => ReplyCard(reply: reply)),
+                ],
+              ],
+            ),
           ),
-          if (isExpanded && replies.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            const Divider(),
-            ...replies.map((reply) => ReplyCard(reply: reply)),
-          ],
-        ],
+        ),
       ),
     );
   }

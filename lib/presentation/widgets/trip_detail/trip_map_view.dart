@@ -99,6 +99,7 @@ class _TripMapViewState extends State<TripMapView> {
           ),
           markers: widget.markers,
           polylines: widget.polylines,
+          mapType: MapType.hybrid, // Use satellite/aerial view with labels
           onMapCreated: (controller) {
             try {
               setState(() {

@@ -113,35 +113,62 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
             colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
+              Color(0xFFFF9D42), // Bright warm orange/amber
+              Color(0xFFFF7E3D), // Mid orange
+              Color(0xFF4D7FBF), // Mid blue
+              Color(0xFF1E3A5F), // Deep rich blue
             ],
+            stops: [0.0, 0.3, 0.7, 1.0],
           ),
         ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: AuthForm(
-                formKey: _formKey,
-                isLogin: _isLogin,
-                isLoading: _isLoading,
-                errorMessage: _errorMessage,
-                usernameController: _usernameController,
-                emailController: _emailController,
-                passwordController: _passwordController,
-                confirmPasswordController: _confirmPasswordController,
-                onSubmit: _submit,
-                onToggleMode: _toggleMode,
-                onForgotPassword: _forgotPassword,
+        child: Stack(
+          children: [
+            // Light source effect from left side
+            Positioned(
+              left: -100,
+              top: MediaQuery.of(context).size.height / 2 - 200,
+              child: Container(
+                width: 400,
+                height: 400,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.3),
+                      Colors.white.withOpacity(0.1),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+            // Main content
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: AuthForm(
+                    formKey: _formKey,
+                    isLogin: _isLogin,
+                    isLoading: _isLoading,
+                    errorMessage: _errorMessage,
+                    usernameController: _usernameController,
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                    confirmPasswordController: _confirmPasswordController,
+                    onSubmit: _submit,
+                    onToggleMode: _toggleMode,
+                    onForgotPassword: _forgotPassword,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

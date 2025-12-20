@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_timeline.dart';
@@ -61,44 +62,74 @@ class TimelinePanel extends StatelessWidget {
 
     return SizedBox(
       width: 300, // Fixed width when expanded
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(left: BorderSide(color: Colors.grey[300]!)),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          bottomLeft: Radius.circular(16),
         ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7),
+              border: Border(
+                left: BorderSide(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 1.5,
+                ),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.timeline, size: 20),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Timeline',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_right, size: 20),
-                    onPressed: onToggleCollapse,
-                    tooltip: 'Collapse timeline',
-                  ),
-                ],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                bottomLeft: Radius.circular(16),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
             ),
-            Expanded(
-              child: TripTimeline(
-                updates: updates,
-                isLoading: isLoading,
-                onRefresh: onRefresh,
-              ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.timeline, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Timeline',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right, size: 20),
+                        onPressed: onToggleCollapse,
+                        tooltip: 'Collapse timeline',
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: TripTimeline(
+                    updates: updates,
+                    isLoading: isLoading,
+                    onRefresh: onRefresh,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
