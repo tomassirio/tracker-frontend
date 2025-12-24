@@ -56,19 +56,122 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   /// Updates map data using Directions API for road routing
   Future<void> _updateMapData() async {
     try {
-      final mapData =
-          await TripPlanMapHelper.createMapDataWithDirections(_tripPlan);
+      final mapData = await TripPlanMapHelper.createMapDataWithDirections(
+        _tripPlan,
+        onWaypointTap: _showWaypointOptions,
+      );
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     } catch (e) {
       // Fallback to straight lines if Directions API fails
-      final mapData = TripPlanMapHelper.createMapData(_tripPlan);
+      final mapData = TripPlanMapHelper.createMapData(
+        _tripPlan,
+        onWaypointTap: _showWaypointOptions,
+      );
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
+    }
+  }
+
+  /// Shows options for a waypoint (currently delete)
+  void _showWaypointOptions(int waypointIndex) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: Text('Delete Waypoint ${waypointIndex + 1}'),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDeleteWaypoint(waypointIndex);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Cancel'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Confirms and deletes a waypoint
+  Future<void> _confirmDeleteWaypoint(int waypointIndex) async {
+    final waypoint = _tripPlan.waypoints[waypointIndex];
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Waypoint'),
+        content: Text(
+          'Are you sure you want to delete Waypoint ${waypointIndex + 1} '
+          '(${waypoint.lat.toStringAsFixed(4)}, ${waypoint.lon.toStringAsFixed(4)})?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    await _deleteWaypoint(waypointIndex);
+  }
+
+  /// Deletes a waypoint and updates the trip plan
+  Future<void> _deleteWaypoint(int waypointIndex) async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Create new waypoints list without the deleted waypoint
+      final updatedWaypoints = List<PlanLocation>.from(_tripPlan.waypoints)
+        ..removeAt(waypointIndex);
+
+      final request = UpdateTripPlanRequest(
+        waypoints: updatedWaypoints,
+      );
+
+      final updatedPlan = await _tripPlanService.updateTripPlan(
+        _tripPlan.id,
+        request,
+      );
+
+      if (mounted) {
+        setState(() {
+          _tripPlan = updatedPlan;
+          _isLoading = false;
+        });
+        await _updateMapData();
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+            context,
+            'Waypoint ${waypointIndex + 1} deleted',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        UiHelpers.showErrorMessage(context, 'Error deleting waypoint: $e');
+      }
     }
   }
 

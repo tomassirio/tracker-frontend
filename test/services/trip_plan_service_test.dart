@@ -170,6 +170,21 @@ void main() {
 
         expect(fakeTripPlanCommandClient.lastPlanId, 'plan-xyz');
       });
+
+      test('updates trip plan with waypoints', () async {
+        final waypoints = [
+          PlanLocation(lat: 10.0, lon: 20.0),
+          PlanLocation(lat: 30.0, lon: 40.0),
+        ];
+        final request = UpdateTripPlanRequest(waypoints: waypoints);
+        final mockPlan = createMockTripPlan('plan-1', 'Plan with waypoints');
+        fakeTripPlanCommandClient.mockTripPlan = mockPlan;
+
+        final result = await tripPlanService.updateTripPlan('plan-1', request);
+
+        expect(result.id, 'plan-1');
+        expect(fakeTripPlanCommandClient.updateTripPlanCalled, true);
+      });
     });
 
     group('deleteTripPlan', () {

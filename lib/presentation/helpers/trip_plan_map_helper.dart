@@ -8,7 +8,11 @@ import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 /// Helper class for managing Google Maps markers and polylines for trip plans
 class TripPlanMapHelper {
   /// Creates markers and polylines from trip plan locations (straight lines fallback)
-  static TripPlanMapData createMapData(TripPlan tripPlan) {
+  /// [onWaypointTap] callback is called when a waypoint marker is tapped, providing the waypoint index
+  static TripPlanMapData createMapData(
+    TripPlan tripPlan, {
+    void Function(int waypointIndex)? onWaypointTap,
+  }) {
     final markers = <Marker>{};
     final polylines = <Polyline>{};
     final points = <LatLng>[];
@@ -46,6 +50,7 @@ class TripPlanMapHelper {
               BitmapDescriptor.hueOrange,
             ),
             infoWindow: InfoWindow(title: 'Waypoint ${i + 1}'),
+            onTap: onWaypointTap != null ? () => onWaypointTap(i) : null,
           ),
         );
         points.add(waypointLatLng);
@@ -88,9 +93,11 @@ class TripPlanMapHelper {
   }
 
   /// Creates markers and polylines using Google Directions API for real road routes
+  /// [onWaypointTap] callback is called when a waypoint marker is tapped, providing the waypoint index
   static Future<TripPlanMapData> createMapDataWithDirections(
-    TripPlan tripPlan,
-  ) async {
+    TripPlan tripPlan, {
+    void Function(int waypointIndex)? onWaypointTap,
+  }) async {
     final markers = <Marker>{};
     final polylines = <Polyline>{};
     final points = <LatLng>[];
@@ -128,6 +135,7 @@ class TripPlanMapHelper {
               BitmapDescriptor.hueOrange,
             ),
             infoWindow: InfoWindow(title: 'Waypoint ${i + 1}'),
+            onTap: onWaypointTap != null ? () => onWaypointTap(i) : null,
           ),
         );
         points.add(waypointLatLng);
