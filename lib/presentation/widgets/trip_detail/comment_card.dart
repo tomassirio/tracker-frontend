@@ -3,8 +3,9 @@ import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reply_card.dart';
 import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
-/// Widget displaying a comment card with reactions and replies
+/// Widget displaying a comment card with glassmorphism styling
 class CommentCard extends StatelessWidget {
   final Comment comment;
   final String tripUserId;
@@ -40,11 +41,15 @@ class CommentCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isAuthor ? Colors.blue[50] : Colors.white,
+        color: isAuthor
+            ? WandererTheme.primaryOrange.withOpacity(0.08)
+            : Colors.white.withOpacity(0.5),
         border: Border.all(
-          color: isAuthor ? Colors.blue[200]! : Colors.grey[300]!,
+          color: isAuthor
+              ? WandererTheme.primaryOrange.withOpacity(0.3)
+              : WandererTheme.glassBorderColor,
         ),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +77,7 @@ class CommentCard extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: WandererTheme.textPrimary,
                             ),
                           ),
                         ),
@@ -84,15 +89,16 @@ class CommentCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.blue[100],
+                              color:
+                                  WandererTheme.primaryOrange.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
+                            child: Text(
                               'AUTHOR',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                color: WandererTheme.primaryOrange,
                               ),
                             ),
                           ),
@@ -101,7 +107,8 @@ class CommentCard extends StatelessWidget {
                     ),
                     Text(
                       _formatTimestamp(comment.createdAt),
-                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      style: TextStyle(
+                          fontSize: 11, color: WandererTheme.textSecondary),
                     ),
                   ],
                 ),

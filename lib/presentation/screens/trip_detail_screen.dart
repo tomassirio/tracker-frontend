@@ -56,6 +56,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
   bool _isCommentsCollapsed = false;
+  bool _isTripInfoCollapsed = false;
 
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -341,27 +342,48 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return Row(
+          // Calculate dimensions for floating panels
+          final timelineWidth = _isTimelineCollapsed ? 88.0 : 352.0;
+          final leftPanelMaxWidth = constraints.maxWidth - timelineWidth - 32;
+          final leftPanelWidth = _isTripInfoCollapsed && _isCommentsCollapsed
+              ? 88.0
+              : leftPanelMaxWidth.clamp(300.0, 500.0);
+
+          return Stack(
             children: [
-              // Main column: Map, trip info, and comments
-              Expanded(
+              // Full-screen Map (background)
+              Positioned.fill(
+                child: TripMapView(
+                  initialLocation: TripMapHelper.getInitialLocation(_trip),
+                  initialZoom: TripMapHelper.getInitialZoom(_trip),
+                  markers: _markers,
+                  polylines: _polylines,
+                  onMapCreated: (controller) => _mapController = controller,
+                ),
+              ),
+
+              // Left side: Trip Info and Comments (floating glass panels)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: _isTripInfoCollapsed && _isCommentsCollapsed ? null : 0,
+                width: leftPanelWidth,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: _isTripInfoCollapsed && _isCommentsCollapsed
+                      ? MainAxisSize.min
+                      : MainAxisSize.max,
                   children: [
-                    // Map takes available space
-                    Expanded(
-                      child: TripMapView(
-                        initialLocation: TripMapHelper.getInitialLocation(
-                          _trip,
-                        ),
-                        initialZoom: TripMapHelper.getInitialZoom(_trip),
-                        markers: _markers,
-                        polylines: _polylines,
-                        onMapCreated: (controller) =>
-                            _mapController = controller,
-                      ),
+                    // Trip info section (floating glass card)
+                    TripInfoCard(
+                      trip: _trip,
+                      isCollapsed: _isTripInfoCollapsed,
+                      onToggleCollapse: () {
+                        setState(() {
+                          _isTripInfoCollapsed = !_isTripInfoCollapsed;
+                        });
+                      },
                     ),
-                    // Trip info section
-                    TripInfoCard(trip: _trip),
                     // Comments section - flexible height based on collapsed state
                     if (_isCommentsCollapsed)
                       CommentsSection(
@@ -393,7 +415,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       )
                     else
                       Expanded(
-                        flex: 1,
                         child: CommentsSection(
                           comments: _comments,
                           replies: _replies,
@@ -425,17 +446,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   ],
                 ),
               ),
-              // Timeline panel - width based on collapsed state
-              TimelinePanel(
-                updates: _tripUpdates,
-                isLoading: _isLoadingUpdates,
-                isCollapsed: _isTimelineCollapsed,
-                onToggleCollapse: () {
-                  setState(() {
-                    _isTimelineCollapsed = !_isTimelineCollapsed;
-                  });
-                },
-                onRefresh: _loadTripUpdates,
+
+              // Right side: Timeline panel (floating glass card)
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: _isTimelineCollapsed ? null : 0,
+                child: TimelinePanel(
+                  updates: _tripUpdates,
+                  isLoading: _isLoadingUpdates,
+                  isCollapsed: _isTimelineCollapsed,
+                  onToggleCollapse: () {
+                    setState(() {
+                      _isTimelineCollapsed = !_isTimelineCollapsed;
+                    });
+                  },
+                  onRefresh: _loadTripUpdates,
+                ),
               ),
             ],
           );

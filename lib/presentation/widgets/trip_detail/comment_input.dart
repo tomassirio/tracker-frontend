@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
-/// Widget for input field to add comments
+/// Widget for input field to add comments with glassmorphism styling
 class CommentInput extends StatelessWidget {
   final TextEditingController controller;
   final bool isAddingComment;
@@ -22,8 +23,17 @@ class CommentInput extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[300]!)),
+        color: Colors.white.withOpacity(0.5),
+        border: Border(
+          top: BorderSide(
+            color: WandererTheme.glassBorderColor,
+            width: 0.5,
+          ),
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,15 +41,27 @@ class CommentInput extends StatelessWidget {
           if (isReplyMode) ...[
             Row(
               children: [
-                const Icon(Icons.reply, size: 16),
+                Icon(
+                  Icons.reply,
+                  size: 16,
+                  color: WandererTheme.textSecondary,
+                ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'Replying to comment',
-                  style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: WandererTheme.textSecondary,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 16),
+                  icon: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: WandererTheme.textSecondary,
+                  ),
                   onPressed: onCancelReply,
                   tooltip: 'Cancel reply',
                 ),
@@ -55,7 +77,33 @@ class CommentInput extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText:
                         isReplyMode ? 'Write a reply...' : 'Write a comment...',
-                    border: const OutlineInputBorder(),
+                    hintStyle: TextStyle(
+                      color: WandererTheme.textTertiary,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.7),
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      borderSide: BorderSide(
+                        color: WandererTheme.glassBorderColor,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      borderSide: BorderSide(
+                        color: WandererTheme.glassBorderColor,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      borderSide: BorderSide(
+                        color: WandererTheme.primaryOrange,
+                        width: 1.5,
+                      ),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
@@ -67,15 +115,28 @@ class CommentInput extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton(
-                icon: isAddingComment
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.send),
-                onPressed: isAddingComment ? null : onSend,
+              Container(
+                decoration: BoxDecoration(
+                  color: WandererTheme.primaryOrange,
+                  borderRadius:
+                      BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                ),
+                child: IconButton(
+                  icon: isAddingComment
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                  onPressed: isAddingComment ? null : onSend,
+                ),
               ),
             ],
           ),
