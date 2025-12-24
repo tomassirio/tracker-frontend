@@ -135,7 +135,8 @@ class TimelinePanel extends StatelessWidget {
               children: [
                 // Header with glass styling
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.4),
                     borderRadius: BorderRadius.only(

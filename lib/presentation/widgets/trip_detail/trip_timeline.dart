@@ -156,7 +156,8 @@ class TripTimeline extends StatelessWidget {
                     color: isFirst
                         ? Colors.white.withOpacity(0.8)
                         : Colors.white.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                    borderRadius:
+                        BorderRadius.circular(WandererTheme.glassRadiusSmall),
                     border: Border.all(
                       color: isFirst
                           ? WandererTheme.primaryOrange.withOpacity(0.3)

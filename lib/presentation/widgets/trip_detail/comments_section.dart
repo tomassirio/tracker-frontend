@@ -164,7 +164,8 @@ class CommentsSection extends StatelessWidget {
               children: [
                 // Comments section header with glass styling
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.4),
                     borderRadius: BorderRadius.only(
@@ -263,7 +264,8 @@ class CommentsSection extends StatelessWidget {
                                 final comment = comments[index];
                                 final isExpanded =
                                     expandedComments[comment.id] ?? false;
-                                final commentReplies = replies[comment.id] ?? [];
+                                final commentReplies =
+                                    replies[comment.id] ?? [];
 
                                 return CommentCard(
                                   comment: comment,

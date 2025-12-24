@@ -345,8 +345,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Calculate dimensions for floating panels
           final timelineWidth = _isTimelineCollapsed ? 88.0 : 352.0;
           final leftPanelMaxWidth = constraints.maxWidth - timelineWidth - 32;
-          final leftPanelWidth = _isTripInfoCollapsed && _isCommentsCollapsed 
-              ? 88.0 
+          final leftPanelWidth = _isTripInfoCollapsed && _isCommentsCollapsed
+              ? 88.0
               : leftPanelMaxWidth.clamp(300.0, 500.0);
 
           return Stack(
@@ -370,8 +370,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 width: leftPanelWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: _isTripInfoCollapsed && _isCommentsCollapsed 
-                      ? MainAxisSize.min 
+                  mainAxisSize: _isTripInfoCollapsed && _isCommentsCollapsed
+                      ? MainAxisSize.min
                       : MainAxisSize.max,
                   children: [
                     // Trip info section (floating glass card)

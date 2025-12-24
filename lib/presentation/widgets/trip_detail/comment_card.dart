@@ -89,7 +89,8 @@ class CommentCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: WandererTheme.primaryOrange.withOpacity(0.15),
+                              color:
+                                  WandererTheme.primaryOrange.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -106,7 +107,8 @@ class CommentCard extends StatelessWidget {
                     ),
                     Text(
                       _formatTimestamp(comment.createdAt),
-                      style: TextStyle(fontSize: 11, color: WandererTheme.textSecondary),
+                      style: TextStyle(
+                          fontSize: 11, color: WandererTheme.textSecondary),
                     ),
                   ],
                 ),

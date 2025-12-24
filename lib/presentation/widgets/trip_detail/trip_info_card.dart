@@ -116,16 +116,17 @@ class TripInfoCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration:
-                          WandererTheme.statusChipDecoration(trip.status.toJson()),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: WandererTheme.statusChipDecoration(
+                          trip.status.toJson()),
                       child: Text(
                         trip.status.toJson().toUpperCase(),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: WandererTheme.statusTextColor(trip.status.toJson()),
+                          color: WandererTheme.statusTextColor(
+                              trip.status.toJson()),
                         ),
                       ),
                     ),
@@ -219,7 +220,8 @@ class TripInfoCard extends StatelessWidget {
                   ],
                 ),
                 // Description if present
-                if (trip.description != null && trip.description!.isNotEmpty) ...[
+                if (trip.description != null &&
+                    trip.description!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,

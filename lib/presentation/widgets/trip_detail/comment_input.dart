@@ -83,19 +83,22 @@ class CommentInput extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white.withOpacity(0.7),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
                       borderSide: BorderSide(
                         color: WandererTheme.glassBorderColor,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
                       borderSide: BorderSide(
                         color: WandererTheme.glassBorderColor,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
                       borderSide: BorderSide(
                         color: WandererTheme.primaryOrange,
                         width: 1.5,
@@ -115,7 +118,8 @@ class CommentInput extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   color: WandererTheme.primaryOrange,
-                  borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                  borderRadius:
+                      BorderRadius.circular(WandererTheme.glassRadiusSmall),
                 ),
                 child: IconButton(
                   icon: isAddingComment

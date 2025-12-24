@@ -23,7 +23,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: TripInfoCard(trip: trip)),
+          home: Scaffold(
+            body: TripInfoCard(
+              trip: trip,
+              isCollapsed: false,
+              onToggleCollapse: () {},
+            ),
+          ),
         ),
       );
 
@@ -49,7 +55,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: TripInfoCard(trip: trip)),
+          home: Scaffold(
+            body: TripInfoCard(
+              trip: trip,
+              isCollapsed: false,
+              onToggleCollapse: () {},
+            ),
+          ),
         ),
       );
 
@@ -87,7 +99,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: TripInfoCard(trip: trip)),
+          home: Scaffold(
+            body: TripInfoCard(
+              trip: trip,
+              isCollapsed: false,
+              onToggleCollapse: () {},
+            ),
+          ),
         ),
       );
 
