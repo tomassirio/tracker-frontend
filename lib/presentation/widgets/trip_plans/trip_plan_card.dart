@@ -117,10 +117,11 @@ class TripPlanCard extends StatelessWidget {
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Map preview section
-            Expanded(
-              flex: 3,
+            // Map preview section with fixed aspect ratio
+            AspectRatio(
+              aspectRatio: 4 / 3,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -186,95 +187,55 @@ class TripPlanCard extends StatelessWidget {
               ),
             ),
 
-            // Info section - compact
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          plan.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        if (plan.startDate != null && plan.endDate != null)
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                size: 12,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  '${_formatDate(plan.startDate!)} - ${_formatDate(plan.endDate!)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Text(
-                            'No dates set',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                      ],
+            // Info section - compact with fixed padding
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    plan.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  if (plan.startDate != null && plan.endDate != null)
                     Row(
                       children: [
-                        if (onCreateTrip != null)
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: onCreateTrip,
-                              icon: const Icon(Icons.add_location, size: 16),
-                              label: const Text('Create Trip'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                textStyle: const TextStyle(fontSize: 12),
-                              ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 12,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '${_formatDate(plan.startDate!)} - ${_formatDate(plan.endDate!)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        if (onCreateTrip != null && onDelete != null)
-                          const SizedBox(width: 8),
-                        if (onDelete != null)
-                          IconButton(
-                            onPressed: onDelete,
-                            icon: const Icon(Icons.delete_outline),
-                            color: Colors.red,
-                            tooltip: 'Delete Plan',
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            iconSize: 24,
-                          ),
+                        ),
                       ],
+                    )
+                  else
+                    Text(
+                      'No dates set',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],

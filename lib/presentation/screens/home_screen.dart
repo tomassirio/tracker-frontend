@@ -5,7 +5,7 @@ import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
-import 'package:tracker_frontend/presentation/widgets/home/youtube_home_content.dart';
+import 'package:tracker_frontend/presentation/widgets/home/home_content.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'create_trip_screen.dart';
@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onLogout: _logout,
         onSettings: _handleSettings,
       ),
-      body: YouTubeHomeContent(
+      body: HomeContent(
         isLoading: _isLoading,
         error: _error,
         trips: _filteredTrips,
