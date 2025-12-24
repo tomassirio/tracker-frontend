@@ -153,14 +153,15 @@ class TripTimeline extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: WandererTheme.backgroundCard,
-                    borderRadius: BorderRadius.circular(10),
+                    color: isFirst
+                        ? Colors.white.withOpacity(0.8)
+                        : Colors.white.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(WandererTheme.glassRadiusSmall),
                     border: Border.all(
                       color: isFirst
                           ? WandererTheme.primaryOrange.withOpacity(0.3)
-                          : Colors.grey.shade200,
+                          : WandererTheme.glassBorderColor,
                     ),
-                    boxShadow: isFirst ? WandererTheme.cardShadow : null,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 /// Wanderer App Theme Configuration
 /// Inspired by modern trip tracking UI with warm orange/amber tones
+/// Enhanced with Glassmorphism design
 class WandererTheme {
   // Primary Colors
   static const Color primaryOrange = Color(0xFFE07830); // Main orange
@@ -37,6 +39,26 @@ class WandererTheme {
   static const Color timelineNodeActive = Color(0xFFE07830);
   static const Color timelineNodeCompleted = Color(0xFF4CAF50);
 
+  // ========================================
+  // GLASSMORPHISM DESIGN SYSTEM
+  // ========================================
+
+  // Glass Colors - Semi-transparent backgrounds
+  static Color glassBackground = Colors.white.withOpacity(0.85);
+  static Color glassBackgroundLight = Colors.white.withOpacity(0.75);
+  static Color glassBackgroundDark = Colors.white.withOpacity(0.92);
+  static Color glassBorderColor = Colors.white.withOpacity(0.4);
+  static Color glassHighlight = Colors.white.withOpacity(0.6);
+
+  // Glass Blur Amount
+  static const double glassBlurSigma = 20.0;
+  static const double glassBlurSigmaLight = 12.0;
+
+  // Glass Border Radius
+  static const double glassRadius = 16.0;
+  static const double glassRadiusSmall = 12.0;
+  static const double glassRadiusLarge = 20.0;
+
   // Shadows
   static List<BoxShadow> cardShadow = [
     BoxShadow(
@@ -53,6 +75,109 @@ class WandererTheme {
       offset: const Offset(0, 4),
     ),
   ];
+
+  // Floating Shadow - More diffused for glassmorphism floating effect
+  static List<BoxShadow> floatingShadow = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.08),
+      blurRadius: 24,
+      spreadRadius: 0,
+      offset: const Offset(0, 8),
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.04),
+      blurRadius: 48,
+      spreadRadius: 0,
+      offset: const Offset(0, 16),
+    ),
+  ];
+
+  // Glass panel shadow - subtle all-around glow
+  static List<BoxShadow> glassShadow = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.1),
+      blurRadius: 32,
+      spreadRadius: -4,
+      offset: const Offset(0, 12),
+    ),
+  ];
+
+  /// Creates a glass-style BoxDecoration with semi-transparent background
+  /// and subtle border for the "frosted glass" edge effect
+  static BoxDecoration glassDecoration({
+    double radius = glassRadius,
+    Color? backgroundColor,
+    bool showBorder = true,
+    List<BoxShadow>? shadow,
+  }) {
+    return BoxDecoration(
+      color: backgroundColor ?? glassBackground,
+      borderRadius: BorderRadius.circular(radius),
+      border: showBorder
+          ? Border.all(
+              color: glassBorderColor,
+              width: 1,
+            )
+          : null,
+      boxShadow: shadow ?? floatingShadow,
+    );
+  }
+
+  /// Creates a glass decoration with only specific borders (for docked panels)
+  static BoxDecoration glassDecorationWithBorders({
+    Color? backgroundColor,
+    BorderRadius? borderRadius,
+    Border? border,
+    List<BoxShadow>? shadow,
+  }) {
+    return BoxDecoration(
+      color: backgroundColor ?? glassBackground,
+      borderRadius: borderRadius,
+      border: border,
+      boxShadow: shadow ?? glassShadow,
+    );
+  }
+
+  /// Wraps a widget with frosted glass blur effect
+  /// Use inside a ClipRRect for proper edge clipping
+  static Widget glassContainer({
+    required Widget child,
+    double blurSigma = glassBlurSigma,
+    double radius = glassRadius,
+    Color? backgroundColor,
+    bool showBorder = true,
+    List<BoxShadow>? shadow,
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? margin,
+  }) {
+    return Container(
+      margin: margin,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: shadow ?? floatingShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          child: Container(
+            padding: padding,
+            decoration: BoxDecoration(
+              color: backgroundColor ?? glassBackground,
+              borderRadius: BorderRadius.circular(radius),
+              border: showBorder
+                  ? Border.all(
+                      color: glassBorderColor,
+                      width: 1,
+                    )
+                  : null,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
 
   /// Get the light theme
   static ThemeData lightTheme() {

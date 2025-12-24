@@ -1,11 +1,14 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_input.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 enum CommentSortOption { latest, oldest, mostReplies, mostReactions }
 
-/// Widget displaying the full comments section with header, list, and input
+/// Widget displaying the full comments section with glassmorphism design
+/// Supports collapsible bubble state
 class CommentsSection extends StatelessWidget {
   final List<Comment> comments;
   final Map<String, List<Comment>> replies;
@@ -52,118 +55,265 @@ class CommentsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Comments section header with sort options
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-          ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(
-                  isCollapsed ? Icons.expand_more : Icons.expand_less,
-                  size: 20,
-                ),
-                onPressed: onToggleCollapse,
-                tooltip: isCollapsed ? 'Expand comments' : 'Collapse comments',
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${comments.length} Comments',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              if (!isCollapsed)
-                PopupMenuButton<CommentSortOption>(
-                  icon: const Icon(Icons.sort),
-                  onSelected: onSortChanged,
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: CommentSortOption.latest,
-                      child: Text('Latest first'),
-                    ),
-                    const PopupMenuItem(
-                      value: CommentSortOption.oldest,
-                      child: Text('Oldest first'),
-                    ),
-                    const PopupMenuItem(
-                      value: CommentSortOption.mostReplies,
-                      child: Text('Most replies'),
-                    ),
-                    const PopupMenuItem(
-                      value: CommentSortOption.mostReactions,
-                      child: Text('Most reactions'),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-        // Comments list - only show when not collapsed
-        if (!isCollapsed) ...[
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : comments.isEmpty
-                    ? _buildEmptyCommentsState()
-                    : ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final comment = comments[index];
-                          final isExpanded =
-                              expandedComments[comment.id] ?? false;
-                          final commentReplies = replies[comment.id] ?? [];
+    if (isCollapsed) {
+      return _buildCollapsedBubble();
+    }
+    return _buildExpandedSection();
+  }
 
-                          return CommentCard(
-                            comment: comment,
-                            tripUserId: tripUserId,
-                            isExpanded: isExpanded,
-                            replies: commentReplies,
-                            onReact: () => onReact(comment.id),
-                            onReply: () => onReply(comment.id),
-                            onToggleReplies: () =>
-                                onToggleReplies(comment.id, isExpanded),
-                          );
-                        },
-                      ),
+  /// Collapsed state - floating bubble with comment icon and count badge
+  Widget _buildCollapsedBubble() {
+    return Container(
+      margin: const EdgeInsets.only(left: 16, bottom: 16),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: WandererTheme.floatingShadow,
+      ),
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: WandererTheme.glassBlurSigma,
+            sigmaY: WandererTheme.glassBlurSigma,
           ),
-          // Comment input (disabled if not logged in)
-          if (isLoggedIn)
-            CommentInput(
-              controller: commentController,
-              isAddingComment: isAddingComment,
-              isReplyMode: replyingToCommentId != null,
-              onSend: onSendComment,
-              onCancelReply: onCancelReply,
-            )
-          else
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border(top: BorderSide(color: Colors.grey[300]!)),
-              ),
-              child: const Center(
-                child: Text(
-                  'Please log in to comment',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
+          child: Material(
+            color: WandererTheme.glassBackground,
+            shape: CircleBorder(
+              side: BorderSide(
+                color: WandererTheme.glassBorderColor,
+                width: 1,
               ),
             ),
-        ],
-      ],
+            child: InkWell(
+              onTap: onToggleCollapse,
+              customBorder: const CircleBorder(),
+              child: Stack(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.chat_bubble_outline,
+                      size: 24,
+                      color: WandererTheme.primaryOrange,
+                    ),
+                  ),
+                  // Badge with count
+                  if (comments.isNotEmpty)
+                    Positioned(
+                      right: 4,
+                      top: 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: WandererTheme.primaryOrange,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Center(
+                          child: Text(
+                            comments.length > 99 ? '99+' : '${comments.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Expanded state - full comments section
+  Widget _buildExpandedSection() {
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+        boxShadow: WandererTheme.floatingShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: WandererTheme.glassBlurSigma,
+            sigmaY: WandererTheme.glassBlurSigma,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: WandererTheme.glassBackground,
+              borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+              border: Border.all(
+                color: WandererTheme.glassBorderColor,
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                // Comments section header with glass styling
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.4),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(WandererTheme.glassRadius),
+                      topRight: Radius.circular(WandererTheme.glassRadius),
+                    ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: WandererTheme.glassBorderColor,
+                        width: 0.5,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 18,
+                        color: WandererTheme.primaryOrange,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${comments.length} Comments',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: WandererTheme.textPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      PopupMenuButton<CommentSortOption>(
+                        icon: Icon(
+                          Icons.sort,
+                          size: 20,
+                          color: WandererTheme.textSecondary,
+                        ),
+                        onSelected: onSortChanged,
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: CommentSortOption.latest,
+                            child: Text('Latest first'),
+                          ),
+                          const PopupMenuItem(
+                            value: CommentSortOption.oldest,
+                            child: Text('Oldest first'),
+                          ),
+                          const PopupMenuItem(
+                            value: CommentSortOption.mostReplies,
+                            child: Text('Most replies'),
+                          ),
+                          const PopupMenuItem(
+                            value: CommentSortOption.mostReactions,
+                            child: Text('Most reactions'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.remove,
+                            size: 18,
+                            color: WandererTheme.textSecondary,
+                          ),
+                          onPressed: onToggleCollapse,
+                          tooltip: 'Minimize',
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Comments list
+                Expanded(
+                  child: isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: WandererTheme.primaryOrange,
+                          ),
+                        )
+                      : comments.isEmpty
+                          ? _buildEmptyCommentsState()
+                          : ListView.builder(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = comments[index];
+                                final isExpanded =
+                                    expandedComments[comment.id] ?? false;
+                                final commentReplies = replies[comment.id] ?? [];
+
+                                return CommentCard(
+                                  comment: comment,
+                                  tripUserId: tripUserId,
+                                  isExpanded: isExpanded,
+                                  replies: commentReplies,
+                                  onReact: () => onReact(comment.id),
+                                  onReply: () => onReply(comment.id),
+                                  onToggleReplies: () =>
+                                      onToggleReplies(comment.id, isExpanded),
+                                );
+                              },
+                            ),
+                ),
+                // Comment input (disabled if not logged in)
+                if (isLoggedIn)
+                  CommentInput(
+                    controller: commentController,
+                    isAddingComment: isAddingComment,
+                    isReplyMode: replyingToCommentId != null,
+                    onSend: onSendComment,
+                    onCancelReply: onCancelReply,
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.4),
+                      border: Border(
+                        top: BorderSide(
+                          color: WandererTheme.glassBorderColor,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Please log in to comment',
+                        style: TextStyle(
+                          color: WandererTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -174,18 +324,28 @@ class CommentsSection extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.comment_outlined, size: 64, color: Colors.grey[400]),
+            Icon(
+              Icons.comment_outlined,
+              size: 64,
+              color: WandererTheme.textTertiary,
+            ),
             const SizedBox(height: 16),
             Text(
               'No comments yet',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              style: TextStyle(
+                fontSize: 18,
+                color: WandererTheme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               isLoggedIn
                   ? 'Be the first to comment!'
                   : 'Log in to add a comment',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: TextStyle(
+                fontSize: 14,
+                color: WandererTheme.textTertiary,
+              ),
             ),
           ],
         ),
