@@ -1,4 +1,5 @@
 import '../domain/planned_location.dart';
+import '../domain/trip_plan.dart';
 
 /// Request model for updating a trip plan
 class UpdateTripPlanRequest {
@@ -7,6 +8,7 @@ class UpdateTripPlanRequest {
   final DateTime? plannedStartDate;
   final DateTime? plannedEndDate;
   final List<PlannedLocation>? plannedLocations;
+  final List<PlanLocation>? waypoints;
 
   UpdateTripPlanRequest({
     this.name,
@@ -14,6 +16,7 @@ class UpdateTripPlanRequest {
     this.plannedStartDate,
     this.plannedEndDate,
     this.plannedLocations,
+    this.waypoints,
   });
 
   Map<String, dynamic> toJson() => {
@@ -26,5 +29,7 @@ class UpdateTripPlanRequest {
         if (plannedLocations != null)
           'plannedLocations':
               plannedLocations!.map((loc) => loc.toJson()).toList(),
+        if (waypoints != null)
+          'waypoints': waypoints!.map((loc) => loc.toJson()).toList(),
       };
 }
