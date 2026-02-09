@@ -87,7 +87,7 @@ class TripInfoCard extends StatelessWidget {
             sigmaY: WandererTheme.glassBlurSigma,
           ),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: WandererTheme.glassBackground,
               borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
@@ -108,7 +108,7 @@ class TripInfoCard extends StatelessWidget {
                       child: Text(
                         trip.name,
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: WandererTheme.textPrimary,
                         ),
@@ -117,13 +117,13 @@ class TripInfoCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                          horizontal: 8, vertical: 2),
                       decoration: WandererTheme.statusChipDecoration(
                           trip.status.toJson()),
                       child: Text(
                         trip.status.toJson().toUpperCase(),
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: WandererTheme.statusTextColor(
                               trip.status.toJson()),
@@ -133,28 +133,26 @@ class TripInfoCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     // Collapse button
                     Container(
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: IconButton(
                         icon: Icon(
                           Icons.remove,
-                          size: 18,
+                          size: 16,
                           color: WandererTheme.textSecondary,
                         ),
                         onPressed: onToggleCollapse,
                         tooltip: 'Minimize',
-                        constraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
-                        ),
                         padding: EdgeInsets.zero,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 // User info row
                 InkWell(
                   onTap: () {
@@ -167,27 +165,27 @@ class TripInfoCard extends StatelessWidget {
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircleAvatar(
-                          radius: 14,
+                          radius: 12,
                           backgroundColor: WandererTheme.primaryOrange,
                           child: Text(
                             trip.username[0].toUpperCase(),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 10,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Text(
                           '@${trip.username}',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: WandererTheme.primaryOrange,
                           ),
@@ -195,14 +193,14 @@ class TripInfoCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Icon(
                           Icons.chevron_right,
-                          size: 16,
+                          size: 14,
                           color: WandererTheme.primaryOrange,
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 // Stats row
                 Row(
                   children: [
@@ -211,7 +209,7 @@ class TripInfoCard extends StatelessWidget {
                       '${trip.commentsCount}',
                       'comments',
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 16),
                     _buildStatItem(
                       _getVisibilityIcon(trip.visibility.toJson()),
                       trip.visibility.toJson(),
@@ -222,10 +220,10 @@ class TripInfoCard extends StatelessWidget {
                 // Description if present
                 if (trip.description != null &&
                     trip.description!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(8),
@@ -237,9 +235,9 @@ class TripInfoCard extends StatelessWidget {
                     child: Text(
                       trip.description!,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: WandererTheme.textSecondary,
-                        height: 1.4,
+                        height: 1.3,
                       ),
                     ),
                   ),

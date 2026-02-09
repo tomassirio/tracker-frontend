@@ -121,7 +121,7 @@ class TripPlanCard extends StatelessWidget {
           children: [
             // Map preview section with fixed aspect ratio
             AspectRatio(
-              aspectRatio: 4 / 3,
+              aspectRatio: 16 / 9,
               child: Stack(
                 fit: StackFit.expand,
                 children: [

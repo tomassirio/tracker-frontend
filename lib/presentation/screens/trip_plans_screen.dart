@@ -310,6 +310,13 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         onLoginPressed: _navigateToAuth,
         onCreatePressed: _handleCreatePlan,
       ),
+      floatingActionButton: _isLoggedIn && !_isLoading && _tripPlans.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: _handleCreatePlan,
+              backgroundColor: Theme.of(context).primaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }
