@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for controlling trip status (start/pause/resume/finish)
 /// Only shown on mobile (not web) and only for trip owners
@@ -39,7 +39,7 @@ class TripStatusControl extends StatelessWidget {
             context: context,
             label: currentStatus == TripStatus.created ? 'Start Trip' : 'Resume',
             icon: Icons.play_arrow,
-            color: Colors.green,
+            color: WandererTheme.statusCreated,
             onPressed: () => onStatusChange(TripStatus.inProgress),
           ),
         if (currentStatus == TripStatus.inProgress) ...[
@@ -47,7 +47,7 @@ class TripStatusControl extends StatelessWidget {
             context: context,
             label: 'Pause',
             icon: Icons.pause,
-            color: Colors.orange,
+            color: WandererTheme.statusInProgress,
             onPressed: () => onStatusChange(TripStatus.paused),
           ),
           const SizedBox(width: 8),
@@ -55,7 +55,7 @@ class TripStatusControl extends StatelessWidget {
             context: context,
             label: 'Finish',
             icon: Icons.check,
-            color: Colors.blue,
+            color: WandererTheme.statusCompleted,
             onPressed: () => onStatusChange(TripStatus.finished),
           ),
         ],
