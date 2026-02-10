@@ -161,6 +161,7 @@ class CommentsSection extends StatelessWidget {
               ),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Comments section header with glass styling
                 Container(
@@ -247,17 +248,21 @@ class CommentsSection extends StatelessWidget {
                   ),
                 ),
                 // Comments list
-                Expanded(
+                Flexible(
                   child: isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(
-                            color: WandererTheme.primaryOrange,
+                      ? const SizedBox(
+                          height: 100,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: WandererTheme.primaryOrange,
+                            ),
                           ),
                         )
                       : comments.isEmpty
                           ? _buildEmptyCommentsState()
                           : ListView.builder(
                               controller: scrollController,
+                              shrinkWrap: true,
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               itemCount: comments.length,
                               itemBuilder: (context, index) {

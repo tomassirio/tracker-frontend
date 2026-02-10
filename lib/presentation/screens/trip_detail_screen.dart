@@ -5,6 +5,7 @@ import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
@@ -291,10 +292,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isChangingStatus = true);
 
     try {
-      final updatedTrip = await _repository.changeTripStatus(_trip.id, newStatus);
+      final updatedTrip =
+          await _repository.changeTripStatus(_trip.id, newStatus);
 
       setState(() {
-        _trip = updatedTrip;
+        // Preserve username if backend didn't return it
+        if (updatedTrip.username.isEmpty && _trip.username.isNotEmpty) {
+          _trip = updatedTrip.copyWith(username: _trip.username);
+        } else {
+          _trip = updatedTrip;
+        }
         _isChangingStatus = false;
       });
 

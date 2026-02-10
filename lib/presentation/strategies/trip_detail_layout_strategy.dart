@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel.dart';

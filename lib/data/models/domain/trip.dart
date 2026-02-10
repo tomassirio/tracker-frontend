@@ -186,4 +186,48 @@ class Trip {
       plannedStartLocation != null ||
       plannedEndLocation != null ||
       (plannedWaypoints != null && plannedWaypoints!.isNotEmpty);
+
+  /// Creates a copy of this Trip with the given fields replaced with new values.
+  /// Useful for merging updated trip data while preserving existing fields.
+  Trip copyWith({
+    String? id,
+    String? userId,
+    String? name,
+    String? username,
+    String? description,
+    Visibility? visibility,
+    TripStatus? status,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<TripLocation>? locations,
+    List<Comment>? comments,
+    int? commentsCount,
+    int? reactionsCount,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    PlannedWaypoint? plannedStartLocation,
+    PlannedWaypoint? plannedEndLocation,
+    List<PlannedWaypoint>? plannedWaypoints,
+  }) {
+    return Trip(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      username: username ?? this.username,
+      description: description ?? this.description,
+      visibility: visibility ?? this.visibility,
+      status: status ?? this.status,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      locations: locations ?? this.locations,
+      comments: comments ?? this.comments,
+      commentsCount: commentsCount ?? this.commentsCount,
+      reactionsCount: reactionsCount ?? this.reactionsCount,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      plannedStartLocation: plannedStartLocation ?? this.plannedStartLocation,
+      plannedEndLocation: plannedEndLocation ?? this.plannedEndLocation,
+      plannedWaypoints: plannedWaypoints ?? this.plannedWaypoints,
+    );
+  }
 }

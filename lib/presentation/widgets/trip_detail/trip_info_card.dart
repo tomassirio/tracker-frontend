@@ -181,7 +181,9 @@ class TripInfoCard extends StatelessWidget {
                           radius: 12,
                           backgroundColor: WandererTheme.primaryOrange,
                           child: Text(
-                            trip.username[0].toUpperCase(),
+                            trip.username.isNotEmpty
+                                ? trip.username[0].toUpperCase()
+                                : '?',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,

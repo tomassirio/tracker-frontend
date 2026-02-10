@@ -42,7 +42,8 @@ class TripStatusControl extends StatelessWidget {
             currentStatus == TripStatus.paused)
           _buildButton(
             context: context,
-            label: currentStatus == TripStatus.created ? 'Start Trip' : 'Resume',
+            label:
+                currentStatus == TripStatus.created ? 'Start Trip' : 'Resume',
             icon: Icons.play_arrow,
             color: WandererTheme.statusCreated,
             onPressed: () => onStatusChange(TripStatus.inProgress),

@@ -41,7 +41,7 @@ class ProfileMenu extends StatelessWidget {
                     CircleAvatar(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       child: Text(
-                        username[0].toUpperCase(),
+                        username.isNotEmpty ? username[0].toUpperCase() : '?',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
