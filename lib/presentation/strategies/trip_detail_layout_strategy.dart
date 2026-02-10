@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
@@ -25,6 +26,8 @@ class TripDetailLayoutData {
   final TextEditingController commentController;
   final ScrollController scrollController;
   final String? replyingToCommentId;
+  final String? currentUserId;
+  final bool isChangingStatus;
 
   // Callbacks
   final VoidCallback onToggleTripInfo;
@@ -37,6 +40,7 @@ class TripDetailLayoutData {
   final Function(String, bool) onToggleReplies;
   final VoidCallback onSendComment;
   final VoidCallback onCancelReply;
+  final Function(TripStatus)? onStatusChange;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -55,6 +59,8 @@ class TripDetailLayoutData {
     required this.commentController,
     required this.scrollController,
     this.replyingToCommentId,
+    this.currentUserId,
+    this.isChangingStatus = false,
     required this.onToggleTripInfo,
     required this.onToggleComments,
     required this.onToggleTimeline,
@@ -65,6 +71,7 @@ class TripDetailLayoutData {
     required this.onToggleReplies,
     required this.onSendComment,
     required this.onCancelReply,
+    this.onStatusChange,
   });
 }
 
@@ -95,6 +102,9 @@ abstract class TripDetailLayoutStrategy {
       trip: data.trip,
       isCollapsed: data.isTripInfoCollapsed,
       onToggleCollapse: data.onToggleTripInfo,
+      currentUserId: data.currentUserId,
+      isChangingStatus: data.isChangingStatus,
+      onStatusChange: data.onStatusChange,
     );
   }
 

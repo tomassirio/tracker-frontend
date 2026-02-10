@@ -35,7 +35,9 @@ class ReplyCard extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 12,
                   child: Text(
-                    reply.username[0].toUpperCase(),
+                    reply.username.isNotEmpty
+                        ? reply.username[0].toUpperCase()
+                        : '?',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),

@@ -60,7 +60,11 @@ class CommentCard extends StatelessWidget {
                 onTap: () => _navigateToProfile(context),
                 child: CircleAvatar(
                   radius: 16,
-                  child: Text(comment.username[0].toUpperCase()),
+                  child: Text(
+                    comment.username.isNotEmpty
+                        ? comment.username[0].toUpperCase()
+                        : '?',
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
