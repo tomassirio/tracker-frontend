@@ -5,19 +5,32 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class GoogleMapsApiClient {
   final String _apiKey;
 
+  /// Default width for static map images
+  static const int defaultMapWidth = 600;
+
+  /// Aspect ratio for card previews (16:9)
+  static const double cardAspectRatio = 16 / 9;
+
+  /// Default size for card preview maps (16:9 aspect ratio)
+  static String get defaultCardSize =>
+      '${defaultMapWidth}x${(defaultMapWidth / cardAspectRatio).round()}';
+
+  /// Size for square thumbnail maps (1:1 aspect ratio)
+  static String get defaultSquareSize => '${defaultMapWidth}x$defaultMapWidth';
+
   GoogleMapsApiClient(this._apiKey);
 
   /// Generate a static map image URL
   ///
   /// Parameters:
   /// - [center]: Center point of the map
-  /// - [size]: Image size in format "widthxheight" (e.g., "600x450")
+  /// - [size]: Image size in format "widthxheight" (defaults to 16:9 aspect ratio)
   /// - [markers]: List of markers to display
   /// - [path]: Optional path/polyline to display
   /// - [zoom]: Optional zoom level (if null, auto-zooms to fit content)
   String generateStaticMapUrl({
     required LatLng center,
-    String size = '600x450',
+    String? size,
     List<MapMarker>? markers,
     MapPath? path,
     int? zoom,
@@ -28,8 +41,8 @@ class GoogleMapsApiClient {
     // Center
     params.add('center=${center.latitude},${center.longitude}');
 
-    // Size
-    params.add('size=$size');
+    // Size (default to 16:9 card aspect ratio)
+    params.add('size=${size ?? defaultCardSize}');
 
     // Zoom (optional)
     if (zoom != null) {
@@ -59,7 +72,7 @@ class GoogleMapsApiClient {
     required LatLng startPoint,
     required LatLng endPoint,
     String? encodedPolyline,
-    String size = '600x450',
+    String? size,
     String startLabel = 'A',
     String endLabel = 'B',
     String startColor = 'green',
