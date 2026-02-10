@@ -11,18 +11,25 @@ class TripStatusControl extends StatelessWidget {
   final bool isLoading;
   final Function(TripStatus) onStatusChange;
 
+  /// Whether running on web platform. Defaults to [kIsWeb].
+  /// Can be overridden for testing purposes.
+  final bool? isWeb;
+
   const TripStatusControl({
     super.key,
     required this.currentStatus,
     required this.isOwner,
     required this.isLoading,
     required this.onStatusChange,
+    this.isWeb,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveIsWeb = isWeb ?? kIsWeb;
+
     // Only show on mobile (not web)
-    if (kIsWeb) {
+    if (effectiveIsWeb) {
       return const SizedBox.shrink();
     }
 
