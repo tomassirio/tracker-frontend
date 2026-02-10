@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -47,6 +48,11 @@ class GoogleRoutesApiClient {
     List<LatLng> waypoints,
     String travelMode,
   ) async {
+    developer.log(
+      'Calling Routes API with ${waypoints.length} waypoints, API key present: ${_apiKey.isNotEmpty}, key length: ${_apiKey.length}',
+      name: 'GoogleRoutesApiClient',
+    );
+
     final url = Uri.parse(
       'https://routes.googleapis.com/directions/v2:computeRoutes',
     );
@@ -104,6 +110,11 @@ class GoogleRoutesApiClient {
       body: json.encode(requestBody),
     );
 
+    developer.log(
+      'Routes API response: ${response.statusCode}',
+      name: 'GoogleRoutesApiClient',
+    );
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
@@ -129,6 +140,10 @@ class GoogleRoutesApiClient {
       }
       throw Exception('No routes found in Routes API response');
     } else {
+      developer.log(
+        'Routes API error: ${response.statusCode} - ${response.body}',
+        name: 'GoogleRoutesApiClient',
+      );
       throw Exception('Routes API HTTP error: ${response.statusCode}');
     }
   }

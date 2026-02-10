@@ -157,7 +157,7 @@ class HomeContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.85, // Taller cards to show more of the map
+        childAspectRatio: 1.1, // Adjusted to prevent overflow
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),

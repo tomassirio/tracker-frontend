@@ -11,11 +11,10 @@ import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
+import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 import 'auth_screen.dart';
 import 'profile_screen.dart';
 
@@ -57,6 +56,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isTimelineCollapsed = false;
   bool _isCommentsCollapsed = false;
   bool _isTripInfoCollapsed = false;
+  bool _hasInitializedPanelStates = false;
 
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -77,6 +77,31 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadUserInfo();
     _loadComments();
     _loadTripUpdates();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize panel states based on screen size (only once)
+    if (!_hasInitializedPanelStates) {
+      _hasInitializedPanelStates = true;
+      final screenWidth = MediaQuery.of(context).size.width;
+      final isMobile = screenWidth < 600;
+
+      if (isMobile) {
+        // On mobile, collapse all panels by default so map is visible
+        // Use post-frame callback to ensure setState works properly
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _isTimelineCollapsed = true;
+              _isCommentsCollapsed = true;
+              _isTripInfoCollapsed = true;
+            });
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -342,12 +367,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Calculate dimensions for floating panels
-          final timelineWidth = _isTimelineCollapsed ? 88.0 : 352.0;
-          final leftPanelMaxWidth = constraints.maxWidth - timelineWidth - 32;
-          final leftPanelWidth = _isTripInfoCollapsed && _isCommentsCollapsed
-              ? 88.0
-              : leftPanelMaxWidth.clamp(300.0, 500.0);
+          // Get the appropriate layout strategy based on screen size
+          final isMobile =
+              TripDetailLayoutStrategyFactory.isMobile(constraints.maxWidth);
+          final strategy =
+              TripDetailLayoutStrategyFactory.getStrategy(constraints.maxWidth);
+
+          // Create layout data with all state and callbacks
+          final layoutData = _createLayoutData(isMobile);
+
+          // Calculate dimensions using strategy
+          final leftPanelWidth =
+              strategy.calculateLeftPanelWidth(constraints, layoutData);
 
           return Stack(
             children: [
@@ -366,108 +397,112 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               Positioned(
                 left: 0,
                 top: 0,
-                bottom: _isTripInfoCollapsed && _isCommentsCollapsed ? null : 0,
+                bottom: strategy.shouldLeftPanelStretchToBottom(layoutData)
+                    ? 0
+                    : null,
                 width: leftPanelWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: _isTripInfoCollapsed && _isCommentsCollapsed
-                      ? MainAxisSize.min
-                      : MainAxisSize.max,
-                  children: [
-                    // Trip info section (floating glass card)
-                    TripInfoCard(
-                      trip: _trip,
-                      isCollapsed: _isTripInfoCollapsed,
-                      onToggleCollapse: () {
-                        setState(() {
-                          _isTripInfoCollapsed = !_isTripInfoCollapsed;
-                        });
-                      },
-                    ),
-                    // Comments section - flexible height based on collapsed state
-                    if (_isCommentsCollapsed)
-                      CommentsSection(
-                        comments: _comments,
-                        replies: _replies,
-                        expandedComments: _expandedComments,
-                        tripUserId: _trip.userId,
-                        isLoading: _isLoadingComments,
-                        isLoggedIn: _isLoggedIn,
-                        isAddingComment: _isAddingComment,
-                        isCollapsed: _isCommentsCollapsed,
-                        sortOption: _sortOption,
-                        commentController: _commentController,
-                        scrollController: _scrollController,
-                        replyingToCommentId: _replyingToCommentId,
-                        onToggleCollapse: () {
-                          setState(() {
-                            _isCommentsCollapsed = !_isCommentsCollapsed;
-                          });
-                        },
-                        onSortChanged: _changeSortOption,
-                        onReact: _showReactionPicker,
-                        onReply: _handleReply,
-                        onToggleReplies: _handleToggleReplies,
-                        onSendComment: _addComment,
-                        onCancelReply: () {
-                          setState(() => _replyingToCommentId = null);
-                        },
-                      )
-                    else
-                      Expanded(
-                        child: CommentsSection(
-                          comments: _comments,
-                          replies: _replies,
-                          expandedComments: _expandedComments,
-                          tripUserId: _trip.userId,
-                          isLoading: _isLoadingComments,
-                          isLoggedIn: _isLoggedIn,
-                          isAddingComment: _isAddingComment,
-                          isCollapsed: _isCommentsCollapsed,
-                          sortOption: _sortOption,
-                          commentController: _commentController,
-                          scrollController: _scrollController,
-                          replyingToCommentId: _replyingToCommentId,
-                          onToggleCollapse: () {
-                            setState(() {
-                              _isCommentsCollapsed = !_isCommentsCollapsed;
-                            });
-                          },
-                          onSortChanged: _changeSortOption,
-                          onReact: _showReactionPicker,
-                          onReply: _handleReply,
-                          onToggleReplies: _handleToggleReplies,
-                          onSendComment: _addComment,
-                          onCancelReply: () {
-                            setState(() => _replyingToCommentId = null);
-                          },
-                        ),
-                      ),
-                  ],
-                ),
+                child: strategy.buildLeftPanel(constraints, layoutData),
               ),
 
               // Right side: Timeline panel (floating glass card)
               Positioned(
                 right: 0,
                 top: 0,
-                bottom: _isTimelineCollapsed ? null : 0,
-                child: TimelinePanel(
-                  updates: _tripUpdates,
-                  isLoading: _isLoadingUpdates,
-                  isCollapsed: _isTimelineCollapsed,
-                  onToggleCollapse: () {
-                    setState(() {
-                      _isTimelineCollapsed = !_isTimelineCollapsed;
-                    });
-                  },
-                  onRefresh: _loadTripUpdates,
-                ),
+                bottom: strategy.shouldTimelinePanelStretchToBottom(layoutData)
+                    ? 0
+                    : null,
+                child: strategy.buildTimelinePanel(constraints, layoutData),
               ),
             ],
           );
         },
       ),
     );
+  }
+
+  /// Creates the layout data object with all state and callbacks
+  TripDetailLayoutData _createLayoutData(bool isMobile) {
+    return TripDetailLayoutData(
+      trip: _trip,
+      comments: _comments,
+      replies: _replies,
+      expandedComments: _expandedComments,
+      tripUpdates: _tripUpdates,
+      isLoadingComments: _isLoadingComments,
+      isLoadingUpdates: _isLoadingUpdates,
+      isLoggedIn: _isLoggedIn,
+      isAddingComment: _isAddingComment,
+      isTimelineCollapsed: _isTimelineCollapsed,
+      isCommentsCollapsed: _isCommentsCollapsed,
+      isTripInfoCollapsed: _isTripInfoCollapsed,
+      sortOption: _sortOption,
+      commentController: _commentController,
+      scrollController: _scrollController,
+      replyingToCommentId: _replyingToCommentId,
+      onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
+      onToggleComments: () => _handleToggleComments(isMobile),
+      onToggleTimeline: () => _handleToggleTimeline(isMobile),
+      onRefreshTimeline: _loadTripUpdates,
+      onSortChanged: _changeSortOption,
+      onReact: _showReactionPicker,
+      onReply: _handleReply,
+      onToggleReplies: _handleToggleReplies,
+      onSendComment: _addComment,
+      onCancelReply: () => setState(() => _replyingToCommentId = null),
+    );
+  }
+
+  /// Handle trip info panel toggle with mobile-specific behavior
+  void _handleToggleTripInfo(bool isMobile) {
+    setState(() {
+      if (_isTripInfoCollapsed) {
+        // Opening
+        _isTripInfoCollapsed = false;
+        if (isMobile) {
+          // Close other panels on mobile
+          _isCommentsCollapsed = true;
+          _isTimelineCollapsed = true;
+        }
+      } else {
+        // Closing
+        _isTripInfoCollapsed = true;
+      }
+    });
+  }
+
+  /// Handle comments panel toggle with mobile-specific behavior
+  void _handleToggleComments(bool isMobile) {
+    setState(() {
+      if (_isCommentsCollapsed) {
+        // Opening
+        _isCommentsCollapsed = false;
+        if (isMobile) {
+          // Close other panels on mobile
+          _isTripInfoCollapsed = true;
+          _isTimelineCollapsed = true;
+        }
+      } else {
+        // Closing
+        _isCommentsCollapsed = true;
+      }
+    });
+  }
+
+  /// Handle timeline panel toggle with mobile-specific behavior
+  void _handleToggleTimeline(bool isMobile) {
+    setState(() {
+      if (_isTimelineCollapsed) {
+        // Opening
+        _isTimelineCollapsed = false;
+        if (isMobile) {
+          // Close other panels on mobile
+          _isTripInfoCollapsed = true;
+          _isCommentsCollapsed = true;
+        }
+      } else {
+        // Closing
+        _isTimelineCollapsed = true;
+      }
+    });
   }
 }

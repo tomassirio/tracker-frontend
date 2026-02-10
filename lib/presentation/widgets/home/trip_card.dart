@@ -222,9 +222,9 @@ class _TripCardState extends State<TripCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Static map preview (4:3 aspect ratio)
+            // Static map preview (16:9 aspect ratio)
             AspectRatio(
-              aspectRatio: 4 / 3,
+              aspectRatio: 16 / 9,
               child: Stack(
                 children: [
                   // Static map image - shows actual locations or planned route
@@ -321,7 +321,7 @@ class _TripCardState extends State<TripCard> {
             ),
             // Trip info section
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
