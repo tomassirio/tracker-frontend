@@ -226,9 +226,6 @@ void main() {
     testWidgets('disables buttons when isLoading is true', (
       WidgetTester tester,
     ) async {
-      // Skip on web
-      if (kIsWeb) return;
-
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -237,15 +234,30 @@ void main() {
               isOwner: true,
               isLoading: true,
               onStatusChange: (_) {},
+              isWeb: false, // Explicitly set for testing
             ),
           ),
         ),
       );
 
-      final button = tester.widget<ElevatedButton>(
-        find.byType(ElevatedButton),
+      // Verify "Start Trip" button text exists
+      expect(find.text('Start Trip'), findsOneWidget);
+
+      // ElevatedButton.icon creates _ElevatedButtonWithIcon internally
+      // Find the button by looking for ButtonStyleButton (parent class)
+      final buttonFinder = find.byWidgetPredicate(
+        (widget) => widget.runtimeType.toString() == '_ElevatedButtonWithIcon',
       );
-      expect(button.onPressed, isNull);
+      expect(buttonFinder, findsOneWidget);
+
+      // Get the widget and check onPressed is null (disabled)
+      final button = tester.widget(buttonFinder);
+      // Access onPressed via reflection-like approach
+      expect(
+        (button as dynamic).onPressed,
+        isNull,
+        reason: 'Button should be disabled when isLoading is true',
+      );
     });
   });
 }
