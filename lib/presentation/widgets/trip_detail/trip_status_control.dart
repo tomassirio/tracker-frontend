@@ -21,8 +21,13 @@ class TripStatusControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only show on mobile (not web) and only for trip owners
-    if (kIsWeb || !isOwner) {
+    // Only show on mobile (not web)
+    if (kIsWeb) {
+      return const SizedBox.shrink();
+    }
+
+    // Only show for trip owners
+    if (!isOwner) {
       return const SizedBox.shrink();
     }
 
