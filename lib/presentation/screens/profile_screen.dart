@@ -557,7 +557,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
             color: 'green',
           ),
         ],
-        size: '240x240',
+        size: GoogleMapsApiClient.defaultSquareSize,
       );
     } else {
       // Multiple locations - show route
@@ -565,7 +565,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
         startPoint: LatLng(firstLoc.latitude, firstLoc.longitude),
         endPoint: LatLng(lastLoc.latitude, lastLoc.longitude),
         encodedPolyline: _encodedPolyline,
-        size: '240x240',
+        size: GoogleMapsApiClient.defaultSquareSize,
       );
     }
   }
