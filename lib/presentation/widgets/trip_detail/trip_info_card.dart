@@ -4,6 +4,8 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
 
 /// Widget displaying trip information card with glassmorphism design
 /// Supports collapsible state that shows as a floating bubble
@@ -11,12 +13,18 @@ class TripInfoCard extends StatelessWidget {
   final Trip trip;
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
+  final String? currentUserId;
+  final bool isChangingStatus;
+  final Function(TripStatus)? onStatusChange;
 
   const TripInfoCard({
     super.key,
     required this.trip,
     required this.isCollapsed,
     required this.onToggleCollapse,
+    this.currentUserId,
+    this.isChangingStatus = false,
+    this.onStatusChange,
   });
 
   @override
@@ -240,6 +248,16 @@ class TripInfoCard extends StatelessWidget {
                         height: 1.3,
                       ),
                     ),
+                  ),
+                ],
+                // Trip status control (mobile only, owner only)
+                if (onStatusChange != null && currentUserId != null) ...[
+                  const SizedBox(height: 8),
+                  TripStatusControl(
+                    currentStatus: trip.status,
+                    isOwner: trip.userId == currentUserId,
+                    isLoading: isChangingStatus,
+                    onStatusChange: onStatusChange!,
                   ),
                 ],
               ],

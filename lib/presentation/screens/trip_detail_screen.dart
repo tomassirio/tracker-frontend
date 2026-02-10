@@ -46,6 +46,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoadingComments = false;
   bool _isAddingComment = false;
   bool _isLoggedIn = false;
+  bool _isChangingStatus = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
@@ -277,6 +278,52 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  Future<void> _changeTripStatus(TripStatus newStatus) async {
+    // Validate that user is the trip owner
+    if (_userId == null || _trip.userId != _userId) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Only trip owner can change status');
+      }
+      return;
+    }
+
+    setState(() => _isChangingStatus = true);
+
+    try {
+      final updatedTrip = await _repository.changeTripStatus(_trip.id, newStatus);
+
+      setState(() {
+        _trip = updatedTrip;
+        _isChangingStatus = false;
+      });
+
+      if (mounted) {
+        String message;
+        switch (newStatus) {
+          case TripStatus.inProgress:
+            message = 'Trip started!';
+            break;
+          case TripStatus.paused:
+            message = 'Trip paused';
+            break;
+          case TripStatus.finished:
+            message = 'Trip finished!';
+            break;
+          case TripStatus.created:
+            message = 'Trip status updated';
+            break;
+        }
+        UiHelpers.showSuccessMessage(context, message);
+      }
+    } catch (e) {
+      setState(() => _isChangingStatus = false);
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error changing status: $e');
+      }
+    }
+  }
+
   void _showReactionPicker(String commentId) {
     showModalBottomSheet(
       context: context,
@@ -439,6 +486,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       commentController: _commentController,
       scrollController: _scrollController,
       replyingToCommentId: _replyingToCommentId,
+      currentUserId: _userId,
+      isChangingStatus: _isChangingStatus,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
@@ -449,6 +498,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onToggleReplies: _handleToggleReplies,
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
+      onStatusChange: _changeTripStatus,
     );
   }
 
