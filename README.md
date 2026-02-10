@@ -98,6 +98,57 @@ Run specific test file:
 flutter test test/models/auth_models_test.dart
 ```
 
+### Building for Android (APK)
+
+To build an APK for Android devices, you need to configure the production API URLs via `--dart-define` flags:
+
+```bash
+# Build release APK with production URLs
+flutter build apk --release \
+  --dart-define=COMMAND_BASE_URL=https://wanderer.tomassir.io/api/command \
+  --dart-define=QUERY_BASE_URL=https://wanderer.tomassir.io/api/query \
+  --dart-define=AUTH_BASE_URL=https://wanderer.tomassir.io/api/auth \
+  --dart-define=GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+The built APK will be located at `build/app/outputs/flutter-apk/app-release.apk`.
+
+#### Build Variants
+
+```bash
+# Debug build (for development/testing)
+flutter build apk --debug \
+  --dart-define=COMMAND_BASE_URL=https://wanderer.tomassir.io/api/command \
+  --dart-define=QUERY_BASE_URL=https://wanderer.tomassir.io/api/query \
+  --dart-define=AUTH_BASE_URL=https://wanderer.tomassir.io/api/auth
+
+# Split APKs by ABI (smaller file sizes)
+flutter build apk --release --split-per-abi \
+  --dart-define=COMMAND_BASE_URL=https://wanderer.tomassir.io/api/command \
+  --dart-define=QUERY_BASE_URL=https://wanderer.tomassir.io/api/query \
+  --dart-define=AUTH_BASE_URL=https://wanderer.tomassir.io/api/auth \
+  --dart-define=GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+
+# Build App Bundle for Google Play Store
+flutter build appbundle --release \
+  --dart-define=COMMAND_BASE_URL=https://wanderer.tomassir.io/api/command \
+  --dart-define=QUERY_BASE_URL=https://wanderer.tomassir.io/api/query \
+  --dart-define=AUTH_BASE_URL=https://wanderer.tomassir.io/api/auth \
+  --dart-define=GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+#### Installing the APK
+
+```bash
+# Install directly to connected device
+flutter install
+
+# Or using adb
+adb install build/app/outputs/flutter-apk/app-release.apk
+```
+
+> **Note**: Without the `--dart-define` flags, the app will use relative paths (e.g., `/api/command`) which only work in web deployments behind a reverse proxy. Mobile apps require the full production URLs.
+
 ## API Documentation
 
 The application integrates with the Tracker backend API. All API endpoints are defined in `lib/core/constants/api_endpoints.dart`.
