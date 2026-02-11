@@ -2,7 +2,16 @@
     <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Background location for automatic trip updates (Android 10+) -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- Internet permission -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Foreground service permission for background work (Android 9+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Wake lock to keep background tasks running -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Receive boot completed to restart tasks after device restart -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     
     <application
         android:label="tracker_frontend"
@@ -13,6 +22,18 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+        
+        <!-- WorkManager initialization -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup" 
+                tools:node="remove" />
+        </provider>
         
         <activity
             android:name=".MainActivity"

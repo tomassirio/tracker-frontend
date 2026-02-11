@@ -62,6 +62,28 @@ void main() {
         expect(trip.reactionsCount, 10);
       });
 
+      test('fromJson parses updateRefresh from tripSettings', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'name': 'My Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'tripSettings': {
+            'tripStatus': 'IN_PROGRESS',
+            'visibility': 'PUBLIC',
+            'updateRefresh': 3600, // 1 hour in seconds
+          },
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.updateRefresh, 3600);
+        expect(trip.status, TripStatus.inProgress);
+      });
+
       test('toJson converts Trip correctly', () {
         final trip = Trip(
           id: 'trip123',
