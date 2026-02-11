@@ -7,12 +7,14 @@ class TripTimeline extends StatelessWidget {
   final List<TripLocation> updates;
   final bool isLoading;
   final VoidCallback onRefresh;
+  final Function(TripLocation)? onUpdateTap;
 
   const TripTimeline({
     super.key,
     required this.updates,
     required this.isLoading,
     required this.onRefresh,
+    this.onUpdateTap,
   });
 
   @override
@@ -149,24 +151,26 @@ class TripTimeline extends StatelessWidget {
               const SizedBox(width: 12),
               // Update card
               Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isFirst
-                        ? Colors.white.withOpacity(0.8)
-                        : Colors.white.withOpacity(0.5),
-                    borderRadius:
-                        BorderRadius.circular(WandererTheme.glassRadiusSmall),
-                    border: Border.all(
+                child: GestureDetector(
+                  onTap: onUpdateTap != null ? () => onUpdateTap!(update) : null,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
                       color: isFirst
-                          ? WandererTheme.primaryOrange.withOpacity(0.3)
-                          : WandererTheme.glassBorderColor,
+                          ? Colors.white.withOpacity(0.8)
+                          : Colors.white.withOpacity(0.5),
+                      borderRadius:
+                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                      border: Border.all(
+                        color: isFirst
+                            ? WandererTheme.primaryOrange.withOpacity(0.3)
+                            : WandererTheme.glassBorderColor,
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                       // Header: timestamp and battery
                       Row(
                         children: [
@@ -283,12 +287,13 @@ class TripTimeline extends StatelessWidget {
                           ],
                         ),
                       ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
+                    ], // closes Column children
+                    ), // closes Column
+                  ), // closes Container
+                ), // closes GestureDetector
+              ), // closes Expanded
+            ], // closes Row children
+          ); // closes Row
         },
       ),
     );

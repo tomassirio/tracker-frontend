@@ -117,8 +117,8 @@ void main() {
 
         final json = request.toJson();
 
-        expect(json['latitude'], 40.7128);
-        expect(json['longitude'], -74.0060);
+        expect(json['location']['lat'], 40.7128);
+        expect(json['location']['lon'], -74.0060);
         expect(json['message'], 'Hello from NYC!');
       });
     });

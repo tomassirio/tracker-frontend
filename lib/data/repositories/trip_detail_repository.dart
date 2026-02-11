@@ -3,6 +3,7 @@ import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/comment_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/services/trip_update_service.dart';
 import 'package:tracker_frontend/data/services/auth_service.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
@@ -12,16 +13,19 @@ class TripDetailRepository {
   final TripService _tripService;
   final CommentService _commentService;
   final AuthService _authService;
+  final TripUpdateService _tripUpdateService;
   final GoogleGeocodingApiClient? _geocodingClient;
 
   TripDetailRepository({
     TripService? tripService,
     CommentService? commentService,
     AuthService? authService,
+    TripUpdateService? tripUpdateService,
     GoogleGeocodingApiClient? geocodingClient,
   })  : _tripService = tripService ?? TripService(),
         _commentService = commentService ?? CommentService(),
         _authService = authService ?? AuthService(),
+        _tripUpdateService = tripUpdateService ?? TripUpdateService(),
         _geocodingClient = geocodingClient;
 
   /// Loads top-level comments for a trip via API
@@ -145,5 +149,15 @@ class TripDetailRepository {
     }
 
     return enrichedUpdates;
+  }
+
+  /// Sends a manual trip update with current location and battery
+  /// Returns true if successful, false otherwise
+  Future<bool> sendTripUpdate(String tripId, {String? message}) async {
+    return await _tripUpdateService.sendUpdate(
+      tripId: tripId,
+      message: message,
+      isAutomatic: false,
+    );
   }
 }

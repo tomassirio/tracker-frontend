@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
@@ -6,6 +8,7 @@ import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
@@ -58,10 +61,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isTimelineCollapsed = false;
   bool _isCommentsCollapsed = false;
   bool _isTripInfoCollapsed = false;
+  bool _isTripUpdateCollapsed = true;
+  bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
 
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  /// Check if we're on Android (the only platform supporting background updates)
+  bool get _isAndroid => !kIsWeb && Platform.isAndroid;
+
+  /// Check if trip update panel should be shown
+  /// Only on Android, for trip owner, when trip is in progress
+  bool get _showTripUpdatePanel =>
+      _isAndroid &&
+      _userId != null &&
+      _trip.userId == _userId &&
+      _trip.status == TripStatus.inProgress;
 
   @override
   void initState() {
@@ -305,6 +321,21 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         _isChangingStatus = false;
       });
 
+      // Manage background updates based on new status (Android only)
+      if (_isAndroid) {
+        final backgroundManager = BackgroundUpdateManager();
+        if (newStatus == TripStatus.inProgress) {
+          // Start automatic updates when trip starts/resumes
+          await backgroundManager.startAutoUpdates(
+            _trip.id,
+            _trip.effectiveUpdateRefresh,
+          );
+        } else {
+          // Stop automatic updates when trip is paused/finished
+          await backgroundManager.stopAutoUpdates(_trip.id);
+        }
+      }
+
       if (mounted) {
         String message;
         switch (newStatus) {
@@ -350,6 +381,52 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       setState(() => _expandedComments[commentId] = false);
     } else {
       _loadReplies(commentId);
+    }
+  }
+
+  void _handleToggleTripUpdate() {
+    setState(() => _isTripUpdateCollapsed = !_isTripUpdateCollapsed);
+  }
+
+  Future<void> _sendManualUpdate(String? message) async {
+    setState(() => _isSendingUpdate = true);
+
+    try {
+      final success =
+          await _repository.sendTripUpdate(_trip.id, message: message);
+
+      if (mounted) {
+        if (success) {
+          UiHelpers.showSuccessMessage(context, 'Update sent successfully!');
+          // Refresh timeline to show the new update
+          await _loadTripUpdates();
+        } else {
+          UiHelpers.showErrorMessage(
+            context,
+            'Failed to send update. Check location permissions.',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error sending update: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSendingUpdate = false);
+      }
+    }
+  }
+
+  /// Handle tap on a timeline update - animate map to that location
+  void _handleTimelineUpdateTap(TripLocation update) {
+    if (_mapController != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(update.latitude, update.longitude),
+          15.0, // Zoom level for a good view of the location
+        ),
+      );
     }
   }
 
@@ -489,16 +566,21 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isTimelineCollapsed: _isTimelineCollapsed,
       isCommentsCollapsed: _isCommentsCollapsed,
       isTripInfoCollapsed: _isTripInfoCollapsed,
+      isTripUpdateCollapsed: _isTripUpdateCollapsed,
+      isSendingUpdate: _isSendingUpdate,
       sortOption: _sortOption,
       commentController: _commentController,
       scrollController: _scrollController,
       replyingToCommentId: _replyingToCommentId,
       currentUserId: _userId,
       isChangingStatus: _isChangingStatus,
+      showTripUpdatePanel: _showTripUpdatePanel,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
+      onToggleTripUpdate: _handleToggleTripUpdate,
       onRefreshTimeline: _loadTripUpdates,
+      onTimelineUpdateTap: _handleTimelineUpdateTap,
       onSortChanged: _changeSortOption,
       onReact: _showReactionPicker,
       onReply: _handleReply,
@@ -506,6 +588,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
+      onSendTripUpdate: _sendManualUpdate,
     );
   }
 

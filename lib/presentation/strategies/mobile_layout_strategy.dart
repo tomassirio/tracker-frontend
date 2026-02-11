@@ -79,15 +79,34 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
   Widget buildTimelinePanel(
       BoxConstraints constraints, TripDetailLayoutData data) {
     final timelinePanel = createTimelinePanel(data);
+    final tripUpdatePanel =
+        data.showTripUpdatePanel ? createTripUpdatePanel(data) : null;
+
     if (!data.isTimelineCollapsed) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: constraints.maxHeight * 0.6,
-          maxWidth: constraints.maxWidth * _expandedWidthRatio,
-        ),
-        child: timelinePanel,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: constraints.maxHeight * 0.6,
+              maxWidth: constraints.maxWidth * _expandedWidthRatio,
+            ),
+            child: timelinePanel,
+          ),
+          if (tripUpdatePanel != null) tripUpdatePanel,
+        ],
       );
     }
-    return timelinePanel;
+
+    // Both collapsed - show as column of bubbles
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        timelinePanel,
+        if (tripUpdatePanel != null) tripUpdatePanel,
+      ],
+    );
   }
 }
