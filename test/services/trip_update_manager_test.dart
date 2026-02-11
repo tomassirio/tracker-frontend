@@ -5,10 +5,10 @@ import 'package:tracker_frontend/core/constants/enums.dart';
 
 void main() {
   group('TripUpdateManager', () {
-    test('initialize does not throw', () async {
+    test('initialize completes successfully', () async {
       // This test just verifies that initialization can be called
       // In a real environment, WorkManager would be initialized
-      expect(() => TripUpdateManager.initialize(), returnsNormally);
+      await expectLater(TripUpdateManager.initialize(), completes);
     });
 
     test('TripUpdateManager can be instantiated', () {

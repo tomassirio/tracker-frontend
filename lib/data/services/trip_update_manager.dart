@@ -39,7 +39,8 @@ class TripUpdateManager {
 
     // Register periodic task with WorkManager
     // The frequency is in minutes, so convert seconds to minutes
-    final frequencyMinutes = (trip.updateRefresh! / 60).ceil();
+    // Use round to maintain the intended update frequency
+    final frequencyMinutes = (trip.updateRefresh! / 60).round();
 
     // WorkManager requires minimum 15 minutes for periodic tasks
     // If the interval is less, we'll use a one-off task and reschedule

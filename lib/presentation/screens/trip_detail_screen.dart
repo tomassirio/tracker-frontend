@@ -117,8 +117,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _scrollController.dispose();
     _searchController.dispose();
     _mapController?.dispose();
-    // Stop automatic updates when leaving the screen
-    _updateManager.stopAutomaticUpdates(_trip.id);
+    // Note: Don't stop automatic updates here - they should continue
+    // in the background. Updates are stopped when trip status changes
+    // to paused or finished in _changeTripStatus method.
     super.dispose();
   }
 
