@@ -4,6 +4,7 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
+import 'package:tracker_frontend/data/services/trip_update_manager.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
@@ -13,6 +14,7 @@ import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/manual_trip_update_dialog.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
@@ -31,6 +33,7 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
+  late final TripUpdateManager _updateManager;
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
   late Trip _trip;
@@ -72,6 +75,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final geocodingClient =
         apiKey.isNotEmpty ? GoogleGeocodingApiClient(apiKey) : null;
     _repository = TripDetailRepository(geocodingClient: geocodingClient);
+    _updateManager = TripUpdateManager();
 
     _trip = widget.trip;
     _updateMapData();
@@ -79,6 +83,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadUserInfo();
     _loadComments();
     _loadTripUpdates();
+    _initializeAutomaticUpdates();
   }
 
   @override
@@ -112,6 +117,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _scrollController.dispose();
     _searchController.dispose();
     _mapController?.dispose();
+    // Stop automatic updates when leaving the screen
+    _updateManager.stopAutomaticUpdates(_trip.id);
     super.dispose();
   }
 
@@ -146,6 +153,81 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       if (mounted) {
         UiHelpers.showErrorMessage(context, 'Error loading updates: $e');
       }
+    }
+  }
+
+  /// Initialize automatic updates based on trip status
+  Future<void> _initializeAutomaticUpdates() async {
+    // Only start automatic updates if trip is in progress
+    if (_trip.status == TripStatus.inProgress && _trip.updateRefresh != null) {
+      try {
+        // Request location permissions if not already granted
+        final hasPermission = await _updateManager.hasLocationPermissions();
+        if (!hasPermission) {
+          final granted = await _updateManager.requestLocationPermissions();
+          if (!granted && mounted) {
+            UiHelpers.showErrorMessage(
+              context,
+              'Location permissions are required for automatic updates',
+            );
+            return;
+          }
+        }
+        
+        // Start automatic updates
+        await _updateManager.startAutomaticUpdates(_trip);
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+            context,
+            'Error starting automatic updates: $e',
+          );
+        }
+      }
+    }
+  }
+
+  /// Show manual trip update dialog
+  Future<void> _showManualUpdateDialog() async {
+    // Check if user is trip owner
+    if (_userId == null || _trip.userId != _userId) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+          context,
+          'Only trip owner can send updates',
+        );
+      }
+      return;
+    }
+
+    // Show dialog
+    showDialog(
+      context: context,
+      builder: (context) => ManualTripUpdateDialog(
+        onSendUpdate: (message) => _sendManualUpdate(message),
+      ),
+    );
+  }
+
+  /// Send a manual trip update with user's message
+  Future<void> _sendManualUpdate(String message) async {
+    try {
+      await _updateManager.sendManualUpdate(
+        tripId: _trip.id,
+        message: message,
+      );
+      
+      // Reload trip updates to show the new one
+      await _loadTripUpdates();
+      
+      // Refresh the trip to get latest data
+      final updatedTrip = await _repository.loadTrip(_trip.id);
+      setState(() {
+        _trip = updatedTrip;
+      });
+      await _updateMapData();
+    } catch (e) {
+      rethrow; // Let the dialog handle the error
     }
   }
 
@@ -304,6 +386,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         }
         _isChangingStatus = false;
       });
+
+      // Handle automatic updates based on status
+      if (newStatus == TripStatus.inProgress) {
+        // Start automatic updates when trip starts
+        await _initializeAutomaticUpdates();
+      } else {
+        // Stop automatic updates when trip is paused or finished
+        await _updateManager.stopAutomaticUpdates(_trip.id);
+      }
 
       if (mounted) {
         String message;
@@ -471,7 +562,25 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           );
         },
       ),
+      floatingActionButton: _shouldShowManualUpdateButton()
+          ? FloatingActionButton.extended(
+              onPressed: _showManualUpdateDialog,
+              icon: const Icon(Icons.add_location),
+              label: const Text('Send Update'),
+              backgroundColor: Theme.of(context).primaryColor,
+            )
+          : null,
     );
+  }
+
+  /// Check if manual update button should be shown
+  /// Only show if user is trip owner and trip is in progress or paused
+  bool _shouldShowManualUpdateButton() {
+    if (_userId == null || _trip.userId != _userId) {
+      return false;
+    }
+    return _trip.status == TripStatus.inProgress ||
+        _trip.status == TripStatus.paused;
   }
 
   /// Creates the layout data object with all state and callbacks

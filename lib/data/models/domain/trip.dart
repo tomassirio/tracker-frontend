@@ -43,6 +43,7 @@ class Trip {
   final int reactionsCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int? updateRefresh; // interval in seconds for automatic location updates
   // Planned route from trip plan
   final PlannedWaypoint? plannedStartLocation;
   final PlannedWaypoint? plannedEndLocation;
@@ -64,6 +65,7 @@ class Trip {
     this.reactionsCount = 0,
     required this.createdAt,
     required this.updatedAt,
+    this.updateRefresh,
     this.plannedStartLocation,
     this.plannedEndLocation,
     this.plannedWaypoints,
@@ -148,6 +150,7 @@ class Trip {
             (json['updatedAt'] ?? json['creationTimestamp']) as String? ?? '',
           ) ??
           DateTime.now(),
+      updateRefresh: tripSettings?['updateRefresh'] as int?,
       plannedStartLocation: plannedStart,
       plannedEndLocation: plannedEnd,
       plannedWaypoints: plannedWaypoints,
@@ -172,6 +175,7 @@ class Trip {
         'reactionsCount': reactionsCount,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        if (updateRefresh != null) 'updateRefresh': updateRefresh,
         if (plannedStartLocation != null)
           'plannedStartLocation': plannedStartLocation!.toJson(),
         if (plannedEndLocation != null)
@@ -205,6 +209,7 @@ class Trip {
     int? reactionsCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? updateRefresh,
     PlannedWaypoint? plannedStartLocation,
     PlannedWaypoint? plannedEndLocation,
     List<PlannedWaypoint>? plannedWaypoints,
@@ -225,6 +230,7 @@ class Trip {
       reactionsCount: reactionsCount ?? this.reactionsCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      updateRefresh: updateRefresh ?? this.updateRefresh,
       plannedStartLocation: plannedStartLocation ?? this.plannedStartLocation,
       plannedEndLocation: plannedEndLocation ?? this.plannedEndLocation,
       plannedWaypoints: plannedWaypoints ?? this.plannedWaypoints,
