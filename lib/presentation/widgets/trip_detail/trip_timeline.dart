@@ -152,7 +152,8 @@ class TripTimeline extends StatelessWidget {
               // Update card
               Expanded(
                 child: GestureDetector(
-                  onTap: onUpdateTap != null ? () => onUpdateTap!(update) : null,
+                  onTap:
+                      onUpdateTap != null ? () => onUpdateTap!(update) : null,
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(12),
@@ -171,123 +172,124 @@ class TripTimeline extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                      // Header: timestamp and battery
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _formatTimestamp(update.timestamp),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: isFirst
-                                    ? WandererTheme.primaryOrange
-                                    : WandererTheme.textSecondary,
-                              ),
-                            ),
-                          ),
-                          if (update.battery != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getBatteryColor(update.battery!)
-                                    .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    _getBatteryIcon(update.battery!),
-                                    size: 12,
-                                    color: _getBatteryColor(update.battery!),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '${update.battery}%',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: _getBatteryColor(update.battery!),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Location
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 14,
-                            color: WandererTheme.primaryOrange,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              update.displayLocation,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: WandererTheme.textPrimary,
-                                fontWeight: update.city != null
-                                    ? FontWeight.w500
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Message if present
-                      if (update.message != null &&
-                          update.message!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: WandererTheme.backgroundLight,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            update.message!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: WandererTheme.textSecondary,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
-                      ],
-                      // Reactions if present
-                      if (update.reactionCount > 0) ...[
-                        const SizedBox(height: 8),
+                        // Header: timestamp and battery
                         Row(
                           children: [
+                            Expanded(
+                              child: Text(
+                                _formatTimestamp(update.timestamp),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isFirst
+                                      ? WandererTheme.primaryOrange
+                                      : WandererTheme.textSecondary,
+                                ),
+                              ),
+                            ),
+                            if (update.battery != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getBatteryColor(update.battery!)
+                                      .withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _getBatteryIcon(update.battery!),
+                                      size: 12,
+                                      color: _getBatteryColor(update.battery!),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '${update.battery}%',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color:
+                                            _getBatteryColor(update.battery!),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Location
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Icon(
-                              Icons.favorite,
-                              size: 12,
-                              color: Colors.red.shade400,
+                              Icons.location_on,
+                              size: 14,
+                              color: WandererTheme.primaryOrange,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              '${update.reactionCount}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: WandererTheme.textSecondary,
+                            Expanded(
+                              child: Text(
+                                update.displayLocation,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: WandererTheme.textPrimary,
+                                  fontWeight: update.city != null
+                                      ? FontWeight.w500
+                                      : FontWeight.normal,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ], // closes Column children
+                        // Message if present
+                        if (update.message != null &&
+                            update.message!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: WandererTheme.backgroundLight,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              update.message!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: WandererTheme.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                        // Reactions if present
+                        if (update.reactionCount > 0) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.favorite,
+                                size: 12,
+                                color: Colors.red.shade400,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${update.reactionCount}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: WandererTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ], // closes Column children
                     ), // closes Column
                   ), // closes Container
                 ), // closes GestureDetector
