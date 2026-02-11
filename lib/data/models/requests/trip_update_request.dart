@@ -15,8 +15,10 @@ class TripUpdateRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'latitude': latitude,
-        'longitude': longitude,
+        'location': {
+          'lat': latitude,
+          'lon': longitude,
+        },
         if (message != null) 'message': message,
         if (imageUrl != null) 'imageUrl': imageUrl,
         if (battery != null) 'battery': battery,

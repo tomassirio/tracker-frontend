@@ -13,6 +13,7 @@ class TimelinePanel extends StatelessWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
   final VoidCallback onRefresh;
+  final Function(TripLocation)? onUpdateTap;
 
   const TimelinePanel({
     super.key,
@@ -21,6 +22,7 @@ class TimelinePanel extends StatelessWidget {
     required this.isCollapsed,
     required this.onToggleCollapse,
     required this.onRefresh,
+    this.onUpdateTap,
   });
 
   @override
@@ -204,6 +206,7 @@ class TimelinePanel extends StatelessWidget {
                     updates: updates,
                     isLoading: isLoading,
                     onRefresh: onRefresh,
+                    onUpdateTap: onUpdateTap,
                   ),
                 ),
               ],

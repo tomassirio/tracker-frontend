@@ -55,6 +55,25 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
   @override
   Widget buildTimelinePanel(
       BoxConstraints constraints, TripDetailLayoutData data) {
-    return createTimelinePanel(data);
+    final timelinePanel = createTimelinePanel(data);
+    final tripUpdatePanel =
+        data.showTripUpdatePanel ? createTripUpdatePanel(data) : null;
+
+    if (tripUpdatePanel == null) {
+      return timelinePanel;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize:
+          data.isTimelineCollapsed ? MainAxisSize.min : MainAxisSize.max,
+      children: [
+        if (data.isTimelineCollapsed)
+          timelinePanel
+        else
+          Expanded(child: timelinePanel),
+        tripUpdatePanel,
+      ],
+    );
   }
 }

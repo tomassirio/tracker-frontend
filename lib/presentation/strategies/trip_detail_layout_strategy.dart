@@ -5,6 +5,7 @@ import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_update_panel.dart';
 import 'package:tracker_frontend/presentation/strategies/mobile_layout_strategy.dart';
 import 'package:tracker_frontend/presentation/strategies/desktop_layout_strategy.dart';
 
@@ -22,18 +23,24 @@ class TripDetailLayoutData {
   final bool isTimelineCollapsed;
   final bool isCommentsCollapsed;
   final bool isTripInfoCollapsed;
+  final bool isTripUpdateCollapsed;
+  final bool isSendingUpdate;
   final CommentSortOption sortOption;
   final TextEditingController commentController;
   final ScrollController scrollController;
   final String? replyingToCommentId;
   final String? currentUserId;
   final bool isChangingStatus;
+  final bool
+      showTripUpdatePanel; // Only show on Android for owner when trip is in progress
 
   // Callbacks
   final VoidCallback onToggleTripInfo;
   final VoidCallback onToggleComments;
   final VoidCallback onToggleTimeline;
+  final VoidCallback onToggleTripUpdate;
   final VoidCallback onRefreshTimeline;
+  final Function(TripLocation)? onTimelineUpdateTap;
   final Function(CommentSortOption) onSortChanged;
   final Function(String) onReact;
   final Function(String) onReply;
@@ -41,6 +48,7 @@ class TripDetailLayoutData {
   final VoidCallback onSendComment;
   final VoidCallback onCancelReply;
   final Function(TripStatus)? onStatusChange;
+  final Future<void> Function(String? message) onSendTripUpdate;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -55,16 +63,21 @@ class TripDetailLayoutData {
     required this.isTimelineCollapsed,
     required this.isCommentsCollapsed,
     required this.isTripInfoCollapsed,
+    required this.isTripUpdateCollapsed,
+    required this.isSendingUpdate,
     required this.sortOption,
     required this.commentController,
     required this.scrollController,
     this.replyingToCommentId,
     this.currentUserId,
     this.isChangingStatus = false,
+    this.showTripUpdatePanel = false,
     required this.onToggleTripInfo,
     required this.onToggleComments,
     required this.onToggleTimeline,
+    required this.onToggleTripUpdate,
     required this.onRefreshTimeline,
+    this.onTimelineUpdateTap,
     required this.onSortChanged,
     required this.onReact,
     required this.onReply,
@@ -72,6 +85,7 @@ class TripDetailLayoutData {
     required this.onSendComment,
     required this.onCancelReply,
     this.onStatusChange,
+    required this.onSendTripUpdate,
   });
 }
 
@@ -143,6 +157,18 @@ abstract class TripDetailLayoutStrategy {
       isCollapsed: data.isTimelineCollapsed,
       onToggleCollapse: data.onToggleTimeline,
       onRefresh: data.onRefreshTimeline,
+      onUpdateTap: data.onTimelineUpdateTap,
+    );
+  }
+
+  /// Helper to create TripUpdatePanel with proper callbacks
+  @protected
+  TripUpdatePanel createTripUpdatePanel(TripDetailLayoutData data) {
+    return TripUpdatePanel(
+      isCollapsed: data.isTripUpdateCollapsed,
+      isLoading: data.isSendingUpdate,
+      onToggleCollapse: data.onToggleTripUpdate,
+      onSendUpdate: data.onSendTripUpdate,
     );
   }
 }
