@@ -142,7 +142,6 @@ class TripUpdateManager {
       await tripService.sendTripUpdate(tripId, request);
     } catch (e) {
       // Silent fail for background task
-      print('Error sending automatic update: $e');
     }
   }
 
@@ -176,7 +175,6 @@ class TripUpdateManager {
         ),
       );
     } catch (e) {
-      print('Error getting location: $e');
       return null;
     }
   }
@@ -211,7 +209,6 @@ class TripUpdateManager {
     try {
       return await _battery.batteryLevel;
     } catch (e) {
-      print('Error getting battery level: $e');
       return null;
     }
   }
