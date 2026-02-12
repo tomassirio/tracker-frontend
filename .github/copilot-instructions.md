@@ -5,9 +5,12 @@
 **tracker-frontend** is a Flutter mobile/web app for tracking trips and adventures. Clean architecture with data, presentation, and core layers.
 
 **Key Stats:**
-- Flutter 3.27.1, Dart ^3.9.2
+- Flutter 3.27.1, Dart ^3.5.0
+- Version: 1.0.19-SNAPSHOT (auto-managed by CI)
 - 34 models, 6 services, 26 tests
+- Coverage: ~31% (targeting improvement)
 - Web deployment on port 51538 via nginx/Docker
+- State Management: StatefulWidget with setState (no external state management)
 
 ## Critical Build & Test Commands
 
@@ -173,7 +176,152 @@ flutter test --verbose                           # Verbose
 make test-watch                                  # Watch mode
 ```
 
-Coverage: ~41%. CI uploads to Codecov.
+Coverage: ~31%. CI uploads to Codecov. Target: Maintain/improve coverage with each PR.
+
+## Coding Standards & Conventions
+
+### Dart/Flutter Best Practices
+
+1. **Linting**: Uses `flutter_lints ^5.0.0` (strict analysis rules in `analysis_options.yaml`)
+2. **Formatting**: Dart standard formatting (2-space indent, 80-char line limit where practical)
+3. **Naming**: 
+   - Classes/Enums: PascalCase (e.g., `TripService`, `Visibility`)
+   - Files: snake_case (e.g., `trip_service.dart`, `auth_models.dart`)
+   - Variables/functions: camelCase (e.g., `userId`, `loadTrips()`)
+   - Constants: lowerCamelCase for final, SCREAMING_SNAKE_CASE for compile-time constants
+4. **Structure**: 
+   - One class per file (except tightly coupled helpers)
+   - Test files mirror lib/ structure with `_test.dart` suffix
+   - Models in `lib/data/models/`, services in `lib/data/services/`
+5. **State Management**: StatefulWidget with `setState` (no Provider/BLoC/Riverpod)
+6. **Imports**: Group by SDK → package → relative, alphabetize within groups
+
+### Code Quality Requirements
+
+- **Zero warnings**: `flutter analyze` must pass with no warnings
+- **Test coverage**: Add tests for new features (maintain or improve 31% baseline)
+- **Comments**: Only when necessary (complex logic, API contracts, TODO with issue number)
+- **Error handling**: Use try-catch with meaningful error messages, propagate errors up to UI layer
+
+## Security & Best Practices
+
+### API Keys & Secrets
+
+1. **Never commit secrets**: `.env` files are gitignored
+2. **Google Maps API Key**: 
+   - Development: Store in `.env` file at repo root
+   - Production: Injected at runtime via environment variables
+   - Web deployment: Injected via `docker-entrypoint.sh` into `index.html`
+3. **Authentication tokens**: Stored securely in `SharedPreferences` (see `lib/data/storage/`)
+4. **Environment variables**: Use placeholders in `web/index.html` (e.g., `{{GOOGLE_MAPS_API_KEY}}`)
+
+### Secure Coding Practices
+
+1. **Input validation**: Validate all user inputs before API calls
+2. **HTTPS**: All API calls use HTTPS in production
+3. **Token handling**: JWT tokens stored securely, cleared on logout
+4. **Error messages**: Don't expose sensitive info in error messages shown to users
+5. **Dependencies**: Keep packages updated, review security advisories
+
+## Contribution Guidelines
+
+### Branching Strategy
+
+- **master**: Production-ready code (protected, auto-deploys to production)
+- **feature branches**: `feature/<issue-number>-<short-description>` or `copilot/<task-name>`
+- **hotfix branches**: `hotfix/<description>` for urgent production fixes
+
+### Pull Request Process
+
+1. **Before creating PR**:
+   - Run `make verify` to ensure formatting, analysis, and tests pass
+   - Test locally (web: `./dev.sh`, mobile: `flutter run`)
+   - Ensure coverage doesn't decrease significantly
+2. **PR naming**: Use descriptive titles with emoji prefix (e.g., "✨ Add trip sharing feature", "🐛 Fix map marker crash")
+3. **PR description**: Include:
+   - What changed and why
+   - Testing performed
+   - Screenshots for UI changes
+   - Related issue number
+4. **CI checks**: All workflows must pass (format check, analyze, tests, Docker build)
+5. **Code review**: Wait for review approval before merging
+6. **Merging**: Squash and merge to keep history clean
+
+### Commit Message Format
+
+- Use conventional commits style: `type(scope): description`
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+- Examples:
+  - `feat(trips): add real-time location tracking`
+  - `fix(auth): resolve token refresh bug`
+  - `docs(readme): update installation instructions`
+
+## IDE Setup & Debugging
+
+### Recommended IDEs
+
+- **VS Code** with extensions:
+  - Flutter
+  - Dart
+  - Error Lens
+  - Better Comments
+- **Android Studio** with Flutter plugin
+
+### Debugging
+
+1. **Web debugging**: 
+   - Use Chrome DevTools (F12)
+   - Flutter DevTools: `flutter run -d chrome` then press 'v' for DevTools
+2. **Mobile debugging**:
+   - Set breakpoints in IDE
+   - Use `flutter run` with connected device/emulator
+   - Hot reload: Press 'r' in terminal
+   - Hot restart: Press 'R' in terminal
+3. **Logs**: Use `debugPrint()` for debug logging (stripped in release builds)
+
+## Backend Integration
+
+### API Endpoints
+
+- **Development** (default in `dev.sh`):
+  - Command API: `http://localhost:8081/api/1`
+  - Query API: `http://localhost:8082/api/1`
+  - Auth API: `http://localhost:8083/api/1`
+- **Production**: 
+  - Set via environment variables (`COMMAND_BASE_URL`, `QUERY_BASE_URL`, `AUTH_BASE_URL`)
+  - See `lib/core/constants/api_endpoints.dart` for conditional imports
+
+### API Documentation
+
+- Backend API docs: Contact backend team or see backend repository
+- All API models defined in `lib/data/models/`
+- All API services in `lib/data/services/`
+
+## Common Development Tasks
+
+### Adding a New Screen
+
+1. Create screen file in `lib/presentation/screens/my_screen.dart`
+2. Extend `StatefulWidget` (or `StatelessWidget` if no state needed)
+3. Add navigation from existing screen using `Navigator.push()` with custom page transition
+4. Import in parent screen and add routing logic
+5. Add tests in `test/presentation/screens/my_screen_test.dart`
+
+### Adding a New API Service
+
+1. Define request/response models in `lib/data/models/`
+2. Create service class in `lib/data/services/my_service.dart`
+3. Use `BaseClient` for HTTP calls (handles auth tokens automatically)
+4. Add error handling for all endpoints
+5. Add unit tests in `test/services/my_service_test.dart`
+6. Use `mockito` for mocking HTTP calls in tests
+
+### Adding a New Model
+
+1. Create model class in appropriate subdirectory of `lib/data/models/`
+2. Implement `toJson()` and `fromJson()` methods for serialization
+3. Add required fields with types (avoid nullable unless API allows null)
+4. Add tests in `test/models/my_model_test.dart` to verify serialization
 
 ## Dependencies
 
@@ -190,14 +338,22 @@ Coverage: ~41%. CI uploads to Codecov.
 6. **Test Docker locally**: `make docker` before pushing
 7. **Preserve placeholders** in `web/index.html`: `{{GOOGLE_MAPS_API_KEY}}`, etc.
 8. **Zero warnings required**: `flutter analyze` must be clean
-9. **Add tests**: Maintain/improve 41% coverage
+9. **Add tests**: Maintain/improve 31% coverage baseline
 10. **Follow structure**: Models in `lib/data/models/`, services in `lib/data/services/`, etc.
 
-## Trust These Instructions
+## When to Use These Instructions
 
-These instructions are comprehensive and tested. Only search for additional information if:
+**ALWAYS follow these instructions for:**
+- Building, testing, and deploying the application
+- Understanding project structure and architecture
+- Setting up development environment
+- Following coding standards and security practices
+- Creating pull requests and contributing code
+
+**Search for additional information only if:**
 - These instructions are incomplete for your specific task
 - You encounter an error not documented here
 - You need to understand implementation details beyond structure
+- You need to integrate with new external services or APIs
 
-For standard build, test, and deployment tasks, follow these instructions exactly.
+For standard build, test, and deployment tasks, trust and follow these instructions exactly.
