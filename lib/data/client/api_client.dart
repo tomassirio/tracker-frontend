@@ -84,6 +84,42 @@ class ApiClient {
     return response;
   }
 
+  /// POST request with raw body (for sending plain values like enums)
+  Future<http.Response> postRaw(
+    String endpoint, {
+    required dynamic body,
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.post(
+      uri,
+      headers: requestHeaders,
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401 && requireAuth) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.post(
+          uri,
+          headers: newHeaders,
+          body: jsonEncode(body),
+        );
+      }
+    }
+
+    return response;
+  }
+
   /// PUT request
   Future<http.Response> put(
     String endpoint, {

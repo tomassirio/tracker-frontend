@@ -72,9 +72,9 @@ class TripCommandClient {
   /// Requires authentication (USER, ADMIN - owner only)
   Future<Trip> createTripFromPlan(
       String tripPlanId, Visibility visibility) async {
-    final response = await _apiClient.post(
+    final response = await _apiClient.postRaw(
       ApiEndpoints.tripFromPlan(tripPlanId),
-      body: {'visibility': visibility.name.toUpperCase()},
+      body: visibility.toJson(),
       requireAuth: true,
     );
     return _apiClient.handleResponse(response, Trip.fromJson);
