@@ -13,6 +13,7 @@ class WebSocketService {
 
   WebSocketClient? _client;
   StreamSubscription? _messageSubscription;
+  StreamSubscription<WebSocketConnectionState>? _connectionStateSubscription;
 
   final _eventController = StreamController<WebSocketEvent>.broadcast();
   final _tripEventControllers = <String, StreamController<WebSocketEvent>>{};
@@ -38,8 +39,27 @@ class WebSocketService {
 
     _messageSubscription = _client!.messages.listen(_handleMessage);
 
+    // Listen for connection state changes to resubscribe when reconnected
+    _connectionStateSubscription =
+        _client!.connectionState.listen(_handleConnectionStateChange);
+
     _isInitialized = true;
     debugPrint('WebSocketService: Initialized');
+  }
+
+  void _handleConnectionStateChange(WebSocketConnectionState state) {
+    debugPrint('WebSocketService: Connection state changed to $state');
+    if (state == WebSocketConnectionState.connected) {
+      // Subscribe to all pending trips when connection is established
+      _subscribeToAllPendingTrips();
+    }
+  }
+
+  void _subscribeToAllPendingTrips() {
+    for (final tripId in _subscribedTrips) {
+      _client?.subscribe(ApiEndpoints.wsTripTopic(tripId));
+      debugPrint('WebSocketService: Subscribed to trip $tripId');
+    }
   }
 
   /// Connect to the WebSocket server
@@ -49,11 +69,8 @@ class WebSocketService {
     }
 
     await _client?.connect();
-
-    // Resubscribe to all previously subscribed trips
-    for (final tripId in _subscribedTrips) {
-      _client?.subscribe(ApiEndpoints.wsTripTopic(tripId));
-    }
+    // Note: Subscriptions are handled by _handleConnectionStateChange
+    // when the connection is established
   }
 
   /// Disconnect from the WebSocket server
@@ -152,6 +169,7 @@ class WebSocketService {
   /// Dispose of the service
   void dispose() {
     _messageSubscription?.cancel();
+    _connectionStateSubscription?.cancel();
     _client?.dispose();
     _eventController.close();
 

@@ -104,6 +104,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _initWebSocket() async {
+    // Connect to WebSocket server first
+    await _webSocketService.connect();
     // Subscribe to events for this specific trip
     final tripStream = _webSocketService.subscribeToTrip(_trip.id);
     _wsSubscription = tripStream.listen(_handleWebSocketEvent);
