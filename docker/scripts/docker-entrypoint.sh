@@ -25,15 +25,18 @@ fi
 COMMAND_URL="${COMMAND_BASE_URL:-/api/command}"
 QUERY_URL="${QUERY_BASE_URL:-/api/query}"
 AUTH_URL="${AUTH_BASE_URL:-/api/auth}"
+WS_URL="${WS_BASE_URL:-/ws}"
 
 echo "Injecting backend URLs into index.html"
 echo "  Command Base URL: ${COMMAND_URL}"
 echo "  Query Base URL: ${QUERY_URL}"
 echo "  Auth Base URL: ${AUTH_URL}"
+echo "  WebSocket Base URL: ${WS_URL}"
 
 sed -i "s|{{COMMAND_BASE_URL}}|${COMMAND_URL}|g" "${INDEX_FILE}"
 sed -i "s|{{QUERY_BASE_URL}}|${QUERY_URL}|g" "${INDEX_FILE}"
 sed -i "s|{{AUTH_BASE_URL}}|${AUTH_URL}|g" "${INDEX_FILE}"
+sed -i "s|{{WS_BASE_URL}}|${WS_URL}|g" "${INDEX_FILE}"
 
 echo "Starting nginx..."
 exec nginx -g "daemon off;"
