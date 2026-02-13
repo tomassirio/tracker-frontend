@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
 
 /// Header widget with logo and title for auth screen
 class AuthHeader extends StatelessWidget {
@@ -10,11 +11,7 @@ class AuthHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(
-          Icons.explore,
-          size: 64,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        const WandererLogo(size: 80),
         const SizedBox(height: 16),
         Text(
           isLogin ? 'Welcome Back!' : 'Create Account',

@@ -33,3 +33,15 @@ String getConfigValue(String key, String defaultValue) {
       return defaultValue;
   }
 }
+
+/// Gets the WebSocket URL for non-web platforms
+/// For relative paths, constructs full URL using localhost as default
+String getWebSocketUrl(String relativePath) {
+  // For mobile/desktop, use localhost as default for development
+  // In production, this should be configured via --dart-define
+  const wsBaseUrl = String.fromEnvironment('WS_BASE_URL');
+  if (wsBaseUrl.isNotEmpty) {
+    return wsBaseUrl + relativePath;
+  }
+  return 'ws://localhost:8080$relativePath';
+}
