@@ -154,6 +154,15 @@ class WebSocketClient {
         return;
       }
 
+      // Detect if we received HTML instead of JSON (wrong routing - frontend served instead of backend)
+      if (messageStr.trimLeft().startsWith('<!DOCTYPE') ||
+          messageStr.trimLeft().startsWith('<html')) {
+        debugPrint(
+            'WebSocket: ERROR - Received HTML instead of JSON. The /ws endpoint is being served by the frontend nginx instead of the backend WebSocket server. Check your ingress/proxy configuration.');
+        _handleError('WebSocket endpoint misconfigured - receiving HTML');
+        return;
+      }
+
       final Map<String, dynamic> data = jsonDecode(messageStr);
       debugPrint('WebSocket: Received message: ${data['type']}');
       _messageController.add(data);
