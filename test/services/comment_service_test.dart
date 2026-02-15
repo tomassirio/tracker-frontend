@@ -18,13 +18,11 @@ void main() {
     group('addComment', () {
       test('adds top-level comment successfully', () async {
         final request = CreateCommentRequest(message: 'Test comment');
-        final mockComment = createMockComment('comment-123', null);
-        mockCommentCommandClient.mockComment = mockComment;
+        mockCommentCommandClient.mockCommentId = 'comment-123';
 
         final result = await commentService.addComment('trip-1', request);
 
-        expect(result.id, 'comment-123');
-        expect(result.parentCommentId, null);
+        expect(result, 'comment-123');
         expect(mockCommentCommandClient.createCommentCalled, true);
         expect(mockCommentCommandClient.lastTripId, 'trip-1');
         expect(mockCommentCommandClient.lastRequest?.message, 'Test comment');
@@ -35,13 +33,11 @@ void main() {
           message: 'Reply comment',
           parentCommentId: 'parent-1',
         );
-        final mockComment = createMockComment('comment-456', 'parent-1');
-        mockCommentCommandClient.mockComment = mockComment;
+        mockCommentCommandClient.mockCommentId = 'comment-456';
 
         final result = await commentService.addComment('trip-1', request);
 
-        expect(result.id, 'comment-456');
-        expect(result.parentCommentId, 'parent-1');
+        expect(result, 'comment-456');
         expect(
           mockCommentCommandClient.lastRequest?.parentCommentId,
           'parent-1',
@@ -62,9 +58,11 @@ void main() {
     group('addReaction', () {
       test('adds laugh reaction successfully', () async {
         final request = AddReactionRequest(reactionType: ReactionType.laugh);
+        mockCommentCommandClient.mockCommentId = 'comment-1';
 
-        await commentService.addReaction('comment-1', request);
+        final result = await commentService.addReaction('comment-1', request);
 
+        expect(result, 'comment-1');
         expect(mockCommentCommandClient.addReactionCalled, true);
         expect(mockCommentCommandClient.lastCommentId, 'comment-1');
         expect(
@@ -75,9 +73,11 @@ void main() {
 
       test('adds heart reaction successfully', () async {
         final request = AddReactionRequest(reactionType: ReactionType.heart);
+        mockCommentCommandClient.mockCommentId = 'comment-2';
 
-        await commentService.addReaction('comment-2', request);
+        final result = await commentService.addReaction('comment-2', request);
 
+        expect(result, 'comment-2');
         expect(
           mockCommentCommandClient.lastReactionRequest?.reactionType,
           ReactionType.heart,
@@ -86,9 +86,11 @@ void main() {
 
       test('adds laugh reaction successfully', () async {
         final request = AddReactionRequest(reactionType: ReactionType.laugh);
+        mockCommentCommandClient.mockCommentId = 'comment-3';
 
-        await commentService.addReaction('comment-3', request);
+        final result = await commentService.addReaction('comment-3', request);
 
+        expect(result, 'comment-3');
         expect(
           mockCommentCommandClient.lastReactionRequest?.reactionType,
           ReactionType.laugh,
@@ -97,9 +99,11 @@ void main() {
 
       test('adds anger reaction successfully', () async {
         final request = AddReactionRequest(reactionType: ReactionType.anger);
+        mockCommentCommandClient.mockCommentId = 'comment-4';
 
-        await commentService.addReaction('comment-4', request);
+        final result = await commentService.addReaction('comment-4', request);
 
+        expect(result, 'comment-4');
         expect(
           mockCommentCommandClient.lastReactionRequest?.reactionType,
           ReactionType.anger,
@@ -108,9 +112,11 @@ void main() {
 
       test('adds sad reaction successfully', () async {
         final request = AddReactionRequest(reactionType: ReactionType.sad);
+        mockCommentCommandClient.mockCommentId = 'comment-5';
 
-        await commentService.addReaction('comment-5', request);
+        final result = await commentService.addReaction('comment-5', request);
 
+        expect(result, 'comment-5');
         expect(
           mockCommentCommandClient.lastReactionRequest?.reactionType,
           ReactionType.sad,
@@ -119,9 +125,11 @@ void main() {
 
       test('adds smiley reaction successfully', () async {
         final request = AddReactionRequest(reactionType: ReactionType.smiley);
+        mockCommentCommandClient.mockCommentId = 'comment-6';
 
-        await commentService.addReaction('comment-6', request);
+        final result = await commentService.addReaction('comment-6', request);
 
+        expect(result, 'comment-6');
         expect(
           mockCommentCommandClient.lastReactionRequest?.reactionType,
           ReactionType.smiley,
@@ -141,8 +149,11 @@ void main() {
 
     group('removeReaction', () {
       test('removes reaction successfully', () async {
-        await commentService.removeReaction('comment-1');
+        mockCommentCommandClient.mockCommentId = 'comment-1';
 
+        final result = await commentService.removeReaction('comment-1');
+
+        expect(result, 'comment-1');
         expect(mockCommentCommandClient.removeReactionCalled, true);
         expect(mockCommentCommandClient.lastCommentIdForRemove, 'comment-1');
       });
@@ -190,7 +201,7 @@ Comment createMockComment(String id, String? parentCommentId) {
 
 // Mock CommentCommandClient
 class MockCommentCommandClient extends CommentCommandClient {
-  Comment? mockComment;
+  String? mockCommentId;
   bool createCommentCalled = false;
   bool addReactionCalled = false;
   bool removeReactionCalled = false;
@@ -202,7 +213,7 @@ class MockCommentCommandClient extends CommentCommandClient {
   bool shouldThrowError = false;
 
   @override
-  Future<Comment> createComment(
+  Future<String> createComment(
     String tripId,
     CreateCommentRequest request,
   ) async {
@@ -210,21 +221,23 @@ class MockCommentCommandClient extends CommentCommandClient {
     lastTripId = tripId;
     lastRequest = request;
     if (shouldThrowError) throw Exception('Failed to create comment');
-    return mockComment!;
+    return mockCommentId!;
   }
 
   @override
-  Future<void> addReaction(String commentId, AddReactionRequest request) async {
+  Future<String> addReaction(String commentId, AddReactionRequest request) async {
     addReactionCalled = true;
     lastCommentId = commentId;
     lastReactionRequest = request;
     if (shouldThrowError) throw Exception('Failed to add reaction');
+    return mockCommentId!;
   }
 
   @override
-  Future<void> removeReaction(String commentId) async {
+  Future<String> removeReaction(String commentId) async {
     removeReactionCalled = true;
     lastCommentIdForRemove = commentId;
     if (shouldThrowError) throw Exception('Failed to remove reaction');
+    return mockCommentId!;
   }
 }

@@ -102,75 +102,64 @@ void main() {
           name: 'New Trip',
           visibility: Visibility.public,
         );
-        final mockTrip = createMockTrip('trip-new', 'New Trip');
-        mockTripCommandClient.mockTrip = mockTrip;
+        mockTripCommandClient.mockTripId = 'trip-new';
 
         final result = await tripService.createTrip(request);
 
-        expect(result.id, 'trip-new');
+        expect(result, 'trip-new');
         expect(mockTripCommandClient.createTripCalled, true);
       });
 
       test('updateTrip updates existing trip', () async {
         final request = UpdateTripRequest(name: 'Updated Trip');
-        final mockTrip = createMockTrip('trip-1', 'Updated Trip');
-        mockTripCommandClient.mockTrip = mockTrip;
+        mockTripCommandClient.mockTripId = 'trip-1';
 
         final result = await tripService.updateTrip('trip-1', request);
 
-        expect(result.name, 'Updated Trip');
+        expect(result, 'trip-1');
         expect(mockTripCommandClient.updateTripCalled, true);
         expect(mockTripCommandClient.lastTripId, 'trip-1');
       });
 
       test('changeVisibility changes trip visibility', () async {
         final request = ChangeVisibilityRequest(visibility: Visibility.private);
-        final mockTrip = createMockTrip(
-          'trip-1',
-          'Trip',
-          visibility: Visibility.private,
-        );
-        mockTripCommandClient.mockTrip = mockTrip;
+        mockTripCommandClient.mockTripId = 'trip-1';
 
         final result = await tripService.changeVisibility('trip-1', request);
 
-        expect(result.visibility, Visibility.private);
+        expect(result, 'trip-1');
         expect(mockTripCommandClient.changeVisibilityCalled, true);
       });
 
       test('changeStatus changes trip status', () async {
         final request = ChangeStatusRequest(status: TripStatus.created);
-        final mockTrip = createMockTrip(
-          'trip-1',
-          'Trip',
-          status: TripStatus.created,
-        );
-        mockTripCommandClient.mockTrip = mockTrip;
+        mockTripCommandClient.mockTripId = 'trip-1';
 
         final result = await tripService.changeStatus('trip-1', request);
 
-        expect(result.status, TripStatus.created);
+        expect(result, 'trip-1');
         expect(mockTripCommandClient.changeStatusCalled, true);
       });
 
       test('deleteTrip deletes trip', () async {
-        await tripService.deleteTrip('trip-1');
+        mockTripCommandClient.mockTripId = 'trip-1';
 
+        final result = await tripService.deleteTrip('trip-1');
+
+        expect(result, 'trip-1');
         expect(mockTripCommandClient.deleteTripCalled, true);
         expect(mockTripCommandClient.lastDeleteTripId, 'trip-1');
       });
 
       test('createTripFromPlan creates trip from plan', () async {
-        final mockTrip = createMockTrip('trip-from-plan', 'Trip from Plan');
-        mockTripCommandClient.mockTrip = mockTrip;
+        mockTripCommandClient.mockTripId = 'trip-from-plan';
 
         final result = await tripService.createTripFromPlan(
           'plan-123',
           Visibility.public,
         );
 
-        expect(result.id, 'trip-from-plan');
-        expect(result.name, 'Trip from Plan');
+        expect(result, 'trip-from-plan');
         expect(mockTripCommandClient.createTripFromPlanCalled, true);
         expect(mockTripCommandClient.lastPlanId, 'plan-123');
       });
@@ -181,9 +170,11 @@ void main() {
           longitude: -122.4194,
           message: 'Update message',
         );
+        mockTripUpdateCommandClient.mockTripUpdateId = 'update-123';
 
-        await tripService.sendTripUpdate('trip-1', request);
+        final result = await tripService.sendTripUpdate('trip-1', request);
 
+        expect(result, 'update-123');
         expect(mockTripUpdateCommandClient.createTripUpdateCalled, true);
         expect(mockTripUpdateCommandClient.lastTripId, 'trip-1');
       });
@@ -192,29 +183,30 @@ void main() {
     group('Trip Plan Operations', () {
       test('createTripPlan creates new plan', () async {
         final request = CreateTripPlanRequest(name: 'Plan 1');
-        final mockPlan = createMockTripPlan('plan-1', 'Plan 1');
-        mockTripPlanCommandClient.mockTripPlan = mockPlan;
+        mockTripPlanCommandClient.mockTripPlanId = 'plan-1';
 
         final result = await tripService.createTripPlan(request);
 
-        expect(result.id, 'plan-1');
+        expect(result, 'plan-1');
         expect(mockTripPlanCommandClient.createTripPlanCalled, true);
       });
 
       test('updateTripPlan updates existing plan', () async {
         final request = UpdateTripPlanRequest(name: 'Updated Plan');
-        final mockPlan = createMockTripPlan('plan-1', 'Updated Plan');
-        mockTripPlanCommandClient.mockTripPlan = mockPlan;
+        mockTripPlanCommandClient.mockTripPlanId = 'plan-1';
 
         final result = await tripService.updateTripPlan('plan-1', request);
 
-        expect(result.name, 'Updated Plan');
+        expect(result, 'plan-1');
         expect(mockTripPlanCommandClient.updateTripPlanCalled, true);
       });
 
       test('deleteTripPlan deletes plan', () async {
-        await tripService.deleteTripPlan('plan-1');
+        mockTripPlanCommandClient.mockTripPlanId = 'plan-1';
 
+        final result = await tripService.deleteTripPlan('plan-1');
+
+        expect(result, 'plan-1');
         expect(mockTripPlanCommandClient.deleteTripPlanCalled, true);
         expect(mockTripPlanCommandClient.lastPlanId, 'plan-1');
       });
@@ -332,7 +324,7 @@ class MockTripQueryClient extends TripQueryClient {
 
 // Mock TripCommandClient
 class MockTripCommandClient extends TripCommandClient {
-  Trip? mockTrip;
+  String? mockTripId;
   bool createTripCalled = false;
   bool updateTripCalled = false;
   bool changeVisibilityCalled = false;
@@ -345,59 +337,60 @@ class MockTripCommandClient extends TripCommandClient {
   bool shouldThrowError = false;
 
   @override
-  Future<Trip> createTrip(CreateTripRequest request) async {
+  Future<String> createTrip(CreateTripRequest request) async {
     createTripCalled = true;
     if (shouldThrowError) throw Exception('Failed to create trip');
-    return mockTrip!;
+    return mockTripId!;
   }
 
   @override
-  Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
+  Future<String> updateTrip(String tripId, UpdateTripRequest request) async {
     updateTripCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to update trip');
-    return mockTrip!;
+    return mockTripId!;
   }
 
   @override
-  Future<Trip> changeVisibility(
+  Future<String> changeVisibility(
     String tripId,
     ChangeVisibilityRequest request,
   ) async {
     changeVisibilityCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to change visibility');
-    return mockTrip!;
+    return mockTripId!;
   }
 
   @override
-  Future<Trip> changeStatus(String tripId, ChangeStatusRequest request) async {
+  Future<String> changeStatus(String tripId, ChangeStatusRequest request) async {
     changeStatusCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to change status');
-    return mockTrip!;
+    return mockTripId!;
   }
 
   @override
-  Future<void> deleteTrip(String tripId) async {
+  Future<String> deleteTrip(String tripId) async {
     deleteTripCalled = true;
     lastDeleteTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to delete trip');
+    return mockTripId!;
   }
 
   @override
-  Future<Trip> createTripFromPlan(
+  Future<String> createTripFromPlan(
       String tripPlanId, Visibility visibility) async {
     createTripFromPlanCalled = true;
     lastPlanId = tripPlanId;
     if (shouldThrowError) throw Exception('Failed to create trip from plan');
-    return mockTrip!;
+    return mockTripId!;
   }
 }
 
 // Mock TripPlanCommandClient
 class MockTripPlanCommandClient extends TripPlanCommandClient {
-  TripPlan? mockTripPlan;
+  String? mockTripPlanId;
   bool createTripPlanCalled = false;
   bool updateTripPlanCalled = false;
   bool deleteTripPlanCalled = false;
@@ -405,44 +398,47 @@ class MockTripPlanCommandClient extends TripPlanCommandClient {
   bool shouldThrowError = false;
 
   @override
-  Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
+  Future<String> createTripPlan(CreateTripPlanRequest request) async {
     createTripPlanCalled = true;
     if (shouldThrowError) throw Exception('Failed to create plan');
-    return mockTripPlan!;
+    return mockTripPlanId!;
   }
 
   @override
-  Future<TripPlan> updateTripPlan(
+  Future<String> updateTripPlan(
     String planId,
     UpdateTripPlanRequest request,
   ) async {
     updateTripPlanCalled = true;
     lastPlanId = planId;
     if (shouldThrowError) throw Exception('Failed to update plan');
-    return mockTripPlan!;
+    return mockTripPlanId!;
   }
 
   @override
-  Future<void> deleteTripPlan(String planId) async {
+  Future<String> deleteTripPlan(String planId) async {
     deleteTripPlanCalled = true;
     lastPlanId = planId;
     if (shouldThrowError) throw Exception('Failed to delete plan');
+    return mockTripPlanId!;
   }
 }
 
 // Mock TripUpdateCommandClient
 class MockTripUpdateCommandClient extends TripUpdateCommandClient {
+  String? mockTripUpdateId;
   bool createTripUpdateCalled = false;
   String? lastTripId;
   bool shouldThrowError = false;
 
   @override
-  Future<void> createTripUpdate(
+  Future<String> createTripUpdate(
     String tripId,
     TripUpdateRequest request,
   ) async {
     createTripUpdateCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to create update');
+    return mockTripUpdateId!;
   }
 }
