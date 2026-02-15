@@ -17,7 +17,9 @@ class WebSocketService {
 
   final _eventController = StreamController<WebSocketEvent>.broadcast();
   final _tripEventControllers = <String, StreamController<WebSocketEvent>>{};
+  final _userEventControllers = <String, StreamController<WebSocketEvent>>{};
   final Set<String> _subscribedTrips = {};
+  final Set<String> _subscribedUsers = {};
 
   bool _isInitialized = false;
 
@@ -50,8 +52,9 @@ class WebSocketService {
   void _handleConnectionStateChange(WebSocketConnectionState state) {
     debugPrint('WebSocketService: Connection state changed to $state');
     if (state == WebSocketConnectionState.connected) {
-      // Subscribe to all pending trips when connection is established
+      // Subscribe to all pending subscriptions when connection is established
       _subscribeToAllPendingTrips();
+      _subscribeToAllPendingUsers();
     }
   }
 
@@ -59,6 +62,13 @@ class WebSocketService {
     for (final tripId in _subscribedTrips) {
       _client?.subscribe(ApiEndpoints.wsTripTopic(tripId));
       debugPrint('WebSocketService: Subscribed to trip $tripId');
+    }
+  }
+
+  void _subscribeToAllPendingUsers() {
+    for (final userId in _subscribedUsers) {
+      _client?.subscribe(ApiEndpoints.wsUserTopic(userId));
+      debugPrint('WebSocketService: Subscribed to user $userId');
     }
   }
 
@@ -126,6 +136,47 @@ class WebSocketService {
     }
   }
 
+  /// Subscribe to events for a specific user
+  Stream<WebSocketEvent> subscribeToUser(String userId) {
+    if (!_userEventControllers.containsKey(userId)) {
+      _userEventControllers[userId] =
+          StreamController<WebSocketEvent>.broadcast();
+    }
+
+    if (!_subscribedUsers.contains(userId)) {
+      _subscribedUsers.add(userId);
+      if (isConnected) {
+        _client?.subscribe(ApiEndpoints.wsUserTopic(userId));
+        debugPrint('WebSocketService: Subscribed to user $userId');
+      }
+    }
+
+    return _userEventControllers[userId]!.stream;
+  }
+
+  /// Unsubscribe from events for a specific user
+  void unsubscribeFromUser(String userId) {
+    if (_subscribedUsers.contains(userId)) {
+      _subscribedUsers.remove(userId);
+      if (isConnected) {
+        _client?.unsubscribe(ApiEndpoints.wsUserTopic(userId));
+        debugPrint('WebSocketService: Unsubscribed from user $userId');
+      }
+    }
+
+    // Close and remove the controller
+    _userEventControllers[userId]?.close();
+    _userEventControllers.remove(userId);
+  }
+
+  /// Unsubscribe from all users
+  void unsubscribeFromAllUsers() {
+    final userIds = List<String>.from(_subscribedUsers);
+    for (final userId in userIds) {
+      unsubscribeFromUser(userId);
+    }
+  }
+
   void _handleMessage(Map<String, dynamic> data) {
     try {
       final event = _parseEvent(data);
@@ -139,10 +190,27 @@ class WebSocketService {
         _tripEventControllers[event.tripId]!.add(event);
       }
 
+      // Emit to user-specific streams for user relationship events
+      if (event is UserFollowedEvent) {
+        // Send to both follower and followed users
+        _emitToUserStream(event.followerId, event);
+        _emitToUserStream(event.followedId, event);
+      } else if (event is FriendRequestSentEvent) {
+        // Send to both sender and receiver
+        _emitToUserStream(event.senderId, event);
+        _emitToUserStream(event.receiverId, event);
+      }
+
       debugPrint(
           'WebSocketService: Processed event ${event.type} for trip ${event.tripId}');
     } catch (e) {
       debugPrint('WebSocketService: Error handling message: $e');
+    }
+  }
+
+  void _emitToUserStream(String userId, WebSocketEvent event) {
+    if (_userEventControllers.containsKey(userId)) {
+      _userEventControllers[userId]!.add(event);
     }
   }
 
@@ -151,16 +219,49 @@ class WebSocketService {
     final type = WebSocketEvent.parseEventType(typeStr);
 
     switch (type) {
-      case WebSocketEventType.tripStatusChanged:
-        return TripStatusChangedEvent.fromJson(data);
+      // Trip events
+      case WebSocketEventType.tripCreated:
+        return TripCreatedEvent.fromJson(data);
       case WebSocketEventType.tripUpdated:
         return TripUpdatedEvent.fromJson(data);
+      case WebSocketEventType.tripDeleted:
+        return TripDeletedEvent.fromJson(data);
+      case WebSocketEventType.tripStatusChanged:
+        return TripStatusChangedEvent.fromJson(data);
+      case WebSocketEventType.tripVisibilityChanged:
+        return TripVisibilityChangedEvent.fromJson(data);
+      
+      // Trip update events
+      case WebSocketEventType.tripUpdateCreated:
+        return TripUpdateCreatedEvent.fromJson(data);
+      
+      // Comment events
       case WebSocketEventType.commentAdded:
         return CommentAddedEvent.fromJson(data);
+      case WebSocketEventType.commentReaction:
+        // Check if it's an addition or removal
+        final payload = data['payload'] as Map<String, dynamic>? ?? data;
+        final added = payload['added'] as bool? ?? true;
+        return CommentReactionEvent.fromJson(data, isRemoval: !added);
       case WebSocketEventType.commentReactionAdded:
         return CommentReactionEvent.fromJson(data, isRemoval: false);
       case WebSocketEventType.commentReactionRemoved:
         return CommentReactionEvent.fromJson(data, isRemoval: true);
+      
+      // Trip plan events
+      case WebSocketEventType.tripPlanCreated:
+        return TripPlanCreatedEvent.fromJson(data);
+      case WebSocketEventType.tripPlanUpdated:
+        return TripPlanUpdatedEvent.fromJson(data);
+      case WebSocketEventType.tripPlanDeleted:
+        return TripPlanDeletedEvent.fromJson(data);
+      
+      // User relationship events
+      case WebSocketEventType.userFollowed:
+        return UserFollowedEvent.fromJson(data);
+      case WebSocketEventType.friendRequestSent:
+        return FriendRequestSentEvent.fromJson(data);
+      
       default:
         return WebSocketEvent.fromJson(data);
     }
@@ -178,6 +279,12 @@ class WebSocketService {
     }
     _tripEventControllers.clear();
     _subscribedTrips.clear();
+
+    for (final controller in _userEventControllers.values) {
+      controller.close();
+    }
+    _userEventControllers.clear();
+    _subscribedUsers.clear();
 
     _isInitialized = false;
     debugPrint('WebSocketService: Disposed');

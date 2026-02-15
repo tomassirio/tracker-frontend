@@ -56,17 +56,20 @@ class TripService {
   // ===== Trip Command Operations =====
 
   /// Create a new trip
-  Future<Trip> createTrip(CreateTripRequest request) async {
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> createTrip(CreateTripRequest request) async {
     return await _tripCommandClient.createTrip(request);
   }
 
   /// Update a trip
-  Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> updateTrip(String tripId, UpdateTripRequest request) async {
     return await _tripCommandClient.updateTrip(tripId, request);
   }
 
   /// Change trip visibility
-  Future<Trip> changeVisibility(
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> changeVisibility(
     String tripId,
     ChangeVisibilityRequest request,
   ) async {
@@ -74,35 +77,41 @@ class TripService {
   }
 
   /// Change trip status (start/pause/finish)
-  Future<Trip> changeStatus(String tripId, ChangeStatusRequest request) async {
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> changeStatus(String tripId, ChangeStatusRequest request) async {
     return await _tripCommandClient.changeStatus(tripId, request);
   }
 
   /// Delete a trip
-  Future<void> deleteTrip(String tripId) async {
-    await _tripCommandClient.deleteTrip(tripId);
+  /// Returns the trip ID immediately. Deletion will be confirmed via WebSocket.
+  Future<String> deleteTrip(String tripId) async {
+    return await _tripCommandClient.deleteTrip(tripId);
   }
 
   /// Create trip from trip plan
-  Future<Trip> createTripFromPlan(
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> createTripFromPlan(
       String tripPlanId, Visibility visibility) async {
     return await _tripCommandClient.createTripFromPlan(tripPlanId, visibility);
   }
 
   /// Send trip update (location, message)
-  Future<void> sendTripUpdate(String tripId, TripUpdateRequest request) async {
-    await _tripUpdateCommandClient.createTripUpdate(tripId, request);
+  /// Returns the trip update ID immediately. Full data will be delivered via WebSocket.
+  Future<String> sendTripUpdate(String tripId, TripUpdateRequest request) async {
+    return await _tripUpdateCommandClient.createTripUpdate(tripId, request);
   }
 
   // ===== Trip Plan Operations =====
 
   /// Create a trip plan
-  Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createTripPlan(CreateTripPlanRequest request) async {
     return await _tripPlanCommandClient.createTripPlan(request);
   }
 
   /// Update a trip plan
-  Future<TripPlan> updateTripPlan(
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> updateTripPlan(
     String planId,
     UpdateTripPlanRequest request,
   ) async {
@@ -110,8 +119,9 @@ class TripService {
   }
 
   /// Delete a trip plan
-  Future<void> deleteTripPlan(String planId) async {
-    await _tripPlanCommandClient.deleteTripPlan(planId);
+  /// Returns the trip plan ID immediately. Deletion will be confirmed via WebSocket.
+  Future<String> deleteTripPlan(String planId) async {
+    return await _tripPlanCommandClient.deleteTripPlan(planId);
   }
 
   // ===== Trip Updates Operations =====
