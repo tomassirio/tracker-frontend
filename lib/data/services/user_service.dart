@@ -78,7 +78,7 @@ class UserService {
   }
 
   /// Unfollow a user
-  /// Returns confirmation immediately. Event will be delivered via WebSocket.
+  /// Returns the ID from the response. Event will be delivered via WebSocket.
   Future<String> unfollowUser(String userId) async {
     return await _userCommandClient.unfollowUser(userId);
   }

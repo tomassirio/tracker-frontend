@@ -71,7 +71,7 @@ class UserCommandClient {
 
   /// Unfollow a user
   /// Requires authentication (USER, ADMIN)
-  /// Returns empty string immediately. Confirmation will be delivered via WebSocket.
+  /// Returns the ID from the response. Confirmation will be delivered via WebSocket.
   Future<String> unfollowUser(String followedId) async {
     final response = await _apiClient.delete(
       ApiEndpoints.usersUnfollow(followedId),
