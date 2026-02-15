@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
@@ -27,16 +28,20 @@ void main() {
     });
 
     group('createTripUpdate', () {
-      test('successful location update completes without error', () async {
+      test('successful location update returns trip update ID', () async {
         final request = TripUpdateRequest(
           latitude: 40.7128,
           longitude: -74.0060,
           message: 'Arrived in New York',
         );
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'update-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await tripUpdateCommandClient.createTripUpdate('trip-123', request);
+        final result = await tripUpdateCommandClient.createTripUpdate('trip-123', request);
 
+        expect(result, 'update-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -55,7 +60,10 @@ void main() {
           latitude: 40.7128,
           longitude: -74.0060,
         );
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'update-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripUpdateCommandClient.createTripUpdate('trip-123', request);
 
@@ -68,7 +76,10 @@ void main() {
           longitude: -74.0060,
           battery: 85,
         );
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'update-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripUpdateCommandClient.createTripUpdate('trip-123', request);
 
@@ -81,7 +92,10 @@ void main() {
           longitude: 80,
           message: 'Taking a break',
         );
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'update-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripUpdateCommandClient.createTripUpdate('trip-123', request);
 

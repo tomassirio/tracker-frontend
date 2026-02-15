@@ -28,23 +28,19 @@ void main() {
     });
 
     group('createComment', () {
-      test('successful comment creation returns Comment', () async {
+      test('successful comment creation returns comment ID', () async {
         final request = CreateCommentRequest(message: 'Great trip!');
         final responseBody = {
           'id': 'comment-123',
-          'message': 'Great trip!',
-          'userId': 'user-123',
-          'tripId': 'trip-123',
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await commentCommandClient.createComment(
           'trip-123',
           request,
         );
 
-        expect(result.id, 'comment-123');
-        expect(result.message, 'Great trip!');
+        expect(result, 'comment-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -63,24 +59,24 @@ void main() {
         );
         final responseBody = {
           'id': 'comment-789',
-          'message': 'Thanks!',
-          'parentCommentId': 'comment-456',
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await commentCommandClient.createComment(
           'trip-123',
           request,
         );
 
-        expect(result.id, 'comment-789');
-        expect(result.parentCommentId, 'comment-456');
+        expect(result, 'comment-789');
         expect(mockHttpClient.lastBody, contains('comment-456'));
       });
 
       test('createComment requires authentication', () async {
         final request = CreateCommentRequest(message: 'Nice!');
-        mockHttpClient.response = http.Response('{}', 201);
+        final responseBody = {
+          'id': 'comment-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await commentCommandClient.createComment('trip-123', request);
 
@@ -115,12 +111,16 @@ void main() {
     });
 
     group('addReaction', () {
-      test('successful reaction addition completes without error', () async {
+      test('successful reaction addition returns reaction ID', () async {
         final request = AddReactionRequest(reactionType: ReactionType.heart);
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'reaction-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await commentCommandClient.addReaction('comment-123', request);
+        final result = await commentCommandClient.addReaction('comment-123', request);
 
+        expect(result, 'reaction-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -140,7 +140,10 @@ void main() {
           final request = AddReactionRequest(
             reactionType: ReactionType.fromJson(reaction),
           );
-          mockHttpClient.response = http.Response('', 204);
+          final responseBody = {
+            'id': 'reaction-123',
+          };
+          mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
           await commentCommandClient.addReaction('comment-123', request);
 
@@ -150,7 +153,10 @@ void main() {
 
       test('addReaction requires authentication', () async {
         final request = AddReactionRequest(reactionType: ReactionType.heart);
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'reaction-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await commentCommandClient.addReaction('comment-123', request);
 
@@ -172,11 +178,15 @@ void main() {
     });
 
     group('removeReaction', () {
-      test('successful reaction removal completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test('successful reaction removal returns reaction ID', () async {
+        final responseBody = {
+          'id': 'reaction-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await commentCommandClient.removeReaction('comment-123');
+        final result = await commentCommandClient.removeReaction('comment-123');
 
+        expect(result, 'reaction-123');
         expect(mockHttpClient.lastMethod, 'DELETE');
         expect(
           mockHttpClient.lastUri?.path,
@@ -189,7 +199,10 @@ void main() {
       });
 
       test('removeReaction requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'reaction-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await commentCommandClient.removeReaction('comment-123');
 

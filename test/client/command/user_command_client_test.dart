@@ -90,11 +90,15 @@ void main() {
     });
 
     group('sendFriendRequest', () {
-      test('successful friend request send completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test('successful friend request send returns request ID', () async {
+        final responseBody = {
+          'id': 'request-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await userCommandClient.sendFriendRequest('user-456');
+        final result = await userCommandClient.sendFriendRequest('user-456');
 
+        expect(result, 'request-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -108,7 +112,10 @@ void main() {
       });
 
       test('sendFriendRequest requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'request-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await userCommandClient.sendFriendRequest('user-456');
 
@@ -130,12 +137,16 @@ void main() {
 
     group('acceptFriendRequest', () {
       test(
-        'successful friend request acceptance completes without error',
+        'successful friend request acceptance returns request ID',
         () async {
-          mockHttpClient.response = http.Response('', 204);
+          final responseBody = {
+            'id': 'request-123',
+          };
+          mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-          await userCommandClient.acceptFriendRequest('request-123');
+          final result = await userCommandClient.acceptFriendRequest('request-123');
 
+          expect(result, 'request-123');
           expect(mockHttpClient.lastMethod, 'POST');
           expect(
             mockHttpClient.lastUri?.path,
@@ -149,7 +160,10 @@ void main() {
       );
 
       test('acceptFriendRequest requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'request-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await userCommandClient.acceptFriendRequest('request-123');
 
@@ -171,12 +185,16 @@ void main() {
 
     group('declineFriendRequest', () {
       test(
-        'successful friend request decline completes without error',
+        'successful friend request decline returns request ID',
         () async {
-          mockHttpClient.response = http.Response('', 204);
+          final responseBody = {
+            'id': 'request-123',
+          };
+          mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-          await userCommandClient.declineFriendRequest('request-123');
+          final result = await userCommandClient.declineFriendRequest('request-123');
 
+          expect(result, 'request-123');
           expect(mockHttpClient.lastMethod, 'POST');
           expect(
             mockHttpClient.lastUri?.path,
@@ -190,7 +208,10 @@ void main() {
       );
 
       test('declineFriendRequest requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'request-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await userCommandClient.declineFriendRequest('request-123');
 
@@ -211,11 +232,15 @@ void main() {
     });
 
     group('followUser', () {
-      test('successful user follow completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test('successful user follow returns follow ID', () async {
+        final responseBody = {
+          'id': 'follow-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await userCommandClient.followUser('user-789');
+        final result = await userCommandClient.followUser('user-789');
 
+        expect(result, 'follow-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -229,7 +254,10 @@ void main() {
       });
 
       test('followUser requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'follow-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await userCommandClient.followUser('user-789');
 
@@ -259,11 +287,15 @@ void main() {
     });
 
     group('unfollowUser', () {
-      test('successful user unfollow completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test('successful user unfollow returns unfollow ID', () async {
+        final responseBody = {
+          'id': 'unfollow-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await userCommandClient.unfollowUser('user-789');
+        final result = await userCommandClient.unfollowUser('user-789');
 
+        expect(result, 'unfollow-123');
         expect(mockHttpClient.lastMethod, 'DELETE');
         expect(
           mockHttpClient.lastUri?.path,
@@ -276,7 +308,10 @@ void main() {
       });
 
       test('unfollowUser requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'unfollow-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await userCommandClient.unfollowUser('user-789');
 

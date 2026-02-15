@@ -28,30 +28,19 @@ void main() {
     });
 
     group('createTripPlan', () {
-      test('successful trip plan creation returns TripPlan', () async {
+      test('successful trip plan creation returns trip plan ID', () async {
         final request = CreateTripPlanRequest(
           name: 'Day 1 Plan',
           description: 'Visit the museum',
         );
         final responseBody = {
           'id': 'plan-123',
-          'userId': 'user-123',
-          'name': 'Day 1 Plan',
-          'planType': 'SIMPLE',
-          'startDate': '2025-11-20',
-          'endDate': '2025-11-25',
-          'startLocation': {'lat': 0.1, 'lon': 0.1},
-          'endLocation': {'lat': 0.2, 'lon': 0.2},
-          'waypoints': [],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripPlanCommandClient.createTripPlan(request);
 
-        expect(result.id, 'plan-123');
-        expect(result.name, 'Day 1 Plan');
-        expect(result.planType, 'SIMPLE');
+        expect(result, 'plan-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlans));
         expect(
@@ -64,18 +53,9 @@ void main() {
         final request = CreateTripPlanRequest(name: 'Day 1 Plan');
         final responseBody = {
           'id': 'plan-123',
-          'userId': 'user-123',
-          'name': 'Day 1 Plan',
-          'planType': 'SIMPLE',
-          'startDate': '2025-11-20',
-          'endDate': '2025-11-25',
-          'startLocation': {'lat': 0.1, 'lon': 0.1},
-          'endLocation': {'lat': 0.2, 'lon': 0.2},
-          'waypoints': [],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
 
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripPlanCommandClient.createTripPlan(request);
 
@@ -97,34 +77,22 @@ void main() {
     });
 
     group('updateTripPlan', () {
-      test('successful trip plan update returns updated TripPlan', () async {
+      test('successful trip plan update returns trip plan ID', () async {
         final request = UpdateTripPlanRequest(
           name: 'Updated Plan',
           description: 'Updated description',
         );
         final responseBody = {
           'id': 'plan-123',
-          'userId': 'user-123',
-          'name': 'Updated Plan',
-          'planType': 'SIMPLE',
-          'startDate': '2025-11-20',
-          'endDate': '2025-11-25',
-          'startLocation': {'lat': 0.1, 'lon': 0.1},
-          'endLocation': {'lat': 0.2, 'lon': 0.2},
-          'waypoints': [],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripPlanCommandClient.updateTripPlan(
           'plan-123',
           request,
         );
 
-        expect(result.id, 'plan-123');
-        expect(result.userId, 'user-123');
-        expect(result.name, 'Updated Plan');
-        expect(result.planType, 'SIMPLE');
+        expect(result, 'plan-123');
         expect(mockHttpClient.lastMethod, 'PUT');
         expect(
           mockHttpClient.lastUri?.path,
@@ -140,17 +108,8 @@ void main() {
         final request = UpdateTripPlanRequest(name: 'Updated Plan');
         final responseBody = {
           'id': 'plan-123',
-          'userId': 'user-123',
-          'name': 'Updated Plan',
-          'planType': 'SIMPLE',
-          'startDate': '2025-11-20',
-          'endDate': '2025-11-25',
-          'startLocation': {'lat': 0.1, 'lon': 0.1},
-          'endLocation': {'lat': 0.2, 'lon': 0.2},
-          'waypoints': [],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripPlanCommandClient.updateTripPlan('plan-123', request);
 
@@ -172,11 +131,15 @@ void main() {
     });
 
     group('deleteTripPlan', () {
-      test('successful trip plan deletion completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test('successful trip plan deletion returns trip plan ID', () async {
+        final responseBody = {
+          'id': 'plan-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await tripPlanCommandClient.deleteTripPlan('plan-123');
+        final result = await tripPlanCommandClient.deleteTripPlan('plan-123');
 
+        expect(result, 'plan-123');
         expect(mockHttpClient.lastMethod, 'DELETE');
         expect(
           mockHttpClient.lastUri?.path,
@@ -189,7 +152,10 @@ void main() {
       });
 
       test('deleteTripPlan requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'plan-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripPlanCommandClient.deleteTripPlan('plan-123');
 
@@ -244,7 +210,7 @@ void main() {
     });
 
     group('createTripPlanBackend', () {
-      test('successful trip plan creation returns TripPlan', () async {
+      test('successful trip plan creation returns trip plan ID', () async {
         final request = CreateTripPlanBackendRequest(
           name: 'Road Trip Plan',
           planType: 'ROAD_TRIP',
@@ -256,27 +222,14 @@ void main() {
         );
         final responseBody = {
           'id': 'plan-456',
-          'userId': 'user-123',
-          'name': 'Road Trip Plan',
-          'planType': 'ROAD_TRIP',
-          'startDate': '2025-12-20',
-          'endDate': '2025-12-25',
-          'startLocation': {'lat': 37.7749, 'lon': -122.4194},
-          'endLocation': {'lat': 34.0522, 'lon': -118.2437},
-          'waypoints': [
-            {'lat': 36.7783, 'lon': -119.4179},
-          ],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripPlanCommandClient.createTripPlanBackend(
           request,
         );
 
-        expect(result.id, 'plan-456');
-        expect(result.name, 'Road Trip Plan');
-        expect(result.planType, 'ROAD_TRIP');
+        expect(result, 'plan-456');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(mockHttpClient.lastUri?.path, endsWith(ApiEndpoints.tripPlans));
         expect(
@@ -296,17 +249,8 @@ void main() {
         );
         final responseBody = {
           'id': 'plan-789',
-          'userId': 'user-123',
-          'name': 'Test Plan',
-          'planType': 'SIMPLE',
-          'startDate': '2025-12-20',
-          'endDate': '2025-12-25',
-          'startLocation': {'lat': 0.0, 'lon': 0.0},
-          'endLocation': {'lat': 1.0, 'lon': 1.0},
-          'waypoints': [],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripPlanCommandClient.createTripPlanBackend(request);
 
@@ -348,17 +292,8 @@ void main() {
         );
         final responseBody = {
           'id': 'plan-json',
-          'userId': 'user-123',
-          'name': 'JSON Test Plan',
-          'planType': 'MULTI_DAY',
-          'startDate': '2025-01-15',
-          'endDate': '2025-01-20',
-          'startLocation': {'lat': 40.7128, 'lon': -74.0060},
-          'endLocation': {'lat': 42.3601, 'lon': -71.0589},
-          'waypoints': [],
-          'createdTimestamp': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripPlanCommandClient.createTripPlanBackend(request);
 
