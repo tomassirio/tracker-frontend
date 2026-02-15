@@ -189,7 +189,7 @@ class WebSocketClient {
         body: jsonEncode({'refreshToken': refreshToken}),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
         final newAccessToken = data['accessToken'] ?? data['access_token'];
