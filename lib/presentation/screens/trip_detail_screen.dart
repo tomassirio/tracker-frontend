@@ -341,9 +341,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   /// Load the current user's social relationship with the trip owner
   Future<void> _loadSocialStatus() async {
     try {
-      // Check if following the trip owner
-      final following = await _userService.getFollowing();
-      final isFollowing = following.any((f) => f.followedId == _trip.userId);
+      // Get the trip owner's profile - this includes isFollowing from the API
+      final tripOwnerProfile = await _userService.getUserById(_trip.userId);
+      final isFollowing = tripOwnerProfile.isFollowing;
 
       // Check if already sent a friend request to the trip owner
       final sentRequests = await _userService.getSentFriendRequests();
