@@ -20,6 +20,7 @@ class TripInfoCard extends StatelessWidget {
   final VoidCallback? onSendFriendRequest;
   final bool isFollowing;
   final bool hasSentFriendRequest;
+  final bool isAlreadyFriends;
 
   const TripInfoCard({
     super.key,
@@ -33,6 +34,7 @@ class TripInfoCard extends StatelessWidget {
     this.onSendFriendRequest,
     this.isFollowing = false,
     this.hasSentFriendRequest = false,
+    this.isAlreadyFriends = false,
   });
 
   @override
@@ -254,26 +256,55 @@ class TripInfoCard extends StatelessWidget {
                         Container(
                           height: 28,
                           decoration: BoxDecoration(
-                            color: hasSentFriendRequest
-                                ? Colors.orange.withOpacity(0.7)
-                                : Colors.white.withOpacity(0.5),
+                            color: isAlreadyFriends
+                                ? Colors.green.withOpacity(0.7)
+                                : hasSentFriendRequest
+                                    ? Colors.orange.withOpacity(0.7)
+                                    : Colors.white.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: IconButton(
-                            icon: Icon(
-                              hasSentFriendRequest
-                                  ? Icons.person_add_disabled
-                                  : Icons.person_add_alt,
-                              size: 16,
-                              color: hasSentFriendRequest ? Colors.white : null,
-                            ),
-                            onPressed: onSendFriendRequest,
-                            tooltip: hasSentFriendRequest
-                                ? 'Cancel Friend Request'
-                                : 'Send Friend Request',
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            constraints: const BoxConstraints(),
-                          ),
+                          child: isAlreadyFriends
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.people,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Friends',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : IconButton(
+                                  icon: Icon(
+                                    hasSentFriendRequest
+                                        ? Icons.person_add_disabled
+                                        : Icons.person_add_alt,
+                                    size: 16,
+                                    color: hasSentFriendRequest
+                                        ? Colors.white
+                                        : null,
+                                  ),
+                                  onPressed: onSendFriendRequest,
+                                  tooltip: hasSentFriendRequest
+                                      ? 'Cancel Friend Request'
+                                      : 'Send Friend Request',
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  constraints: const BoxConstraints(),
+                                ),
                         ),
                       ],
                     ],

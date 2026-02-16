@@ -50,4 +50,15 @@ class UiHelpers {
       ),
     );
   }
+
+  /// Shows an info snackbar
+  static void showInfoMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 }

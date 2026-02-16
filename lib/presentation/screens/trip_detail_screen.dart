@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
@@ -67,6 +68,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   // Track social interactions
   bool _isFollowingTripOwner = false;
   bool _hasSentFriendRequest = false;
+  bool _isAlreadyFriends = false;
 
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
@@ -329,6 +331,41 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _username = username;
       _userId = userId;
     });
+
+    // If logged in and viewing another user's trip, check social status
+    if (userId != null && _trip.userId != userId) {
+      await _loadSocialStatus();
+    }
+  }
+
+  /// Load the current user's social relationship with the trip owner
+  Future<void> _loadSocialStatus() async {
+    try {
+      // Check if following the trip owner
+      final following = await _userService.getFollowing();
+      final isFollowing = following.any((f) => f.followedId == _trip.userId);
+
+      // Check if already sent a friend request to the trip owner
+      final sentRequests = await _userService.getSentFriendRequests();
+      final hasSentRequest = sentRequests.any(
+        (r) =>
+            r.receiverId == _trip.userId &&
+            r.status == FriendRequestStatus.pending,
+      );
+
+      // Check if already friends with the trip owner
+      final friends = await _userService.getFriends();
+      final isAlreadyFriends = friends.any((f) => f.friendId == _trip.userId);
+
+      setState(() {
+        _isFollowingTripOwner = isFollowing;
+        _hasSentFriendRequest = hasSentRequest;
+        _isAlreadyFriends = isAlreadyFriends;
+      });
+    } catch (e) {
+      // Silently fail - social features are optional
+      debugPrint('Failed to load social status: $e');
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -696,6 +733,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _handleSendFriendRequestToTripOwner() async {
     if (!_isLoggedIn || _trip.userId == _userId) return;
 
+    // Don't allow if already friends
+    if (_isAlreadyFriends) {
+      if (mounted) {
+        UiHelpers.showInfoMessage(
+            context, 'You are already friends with @${_trip.username}');
+      }
+      return;
+    }
+
     // Toggle between send and cancel
     if (_hasSentFriendRequest) {
       setState(() {
@@ -827,6 +873,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       showTripUpdatePanel: _showTripUpdatePanel,
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
+      isAlreadyFriends: _isAlreadyFriends,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
