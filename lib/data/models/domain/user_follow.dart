@@ -19,7 +19,8 @@ class UserFollow {
       followerId: json['followerId'] as String? ?? '',
       followedId: json['followedId'] as String? ?? '',
       // Use DateTime.now() as fallback for consistency with existing models
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 

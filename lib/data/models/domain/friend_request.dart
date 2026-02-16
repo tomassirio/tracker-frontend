@@ -22,10 +22,13 @@ class FriendRequest {
       id: json['id'] as String? ?? '',
       senderId: json['senderId'] as String? ?? '',
       receiverId: json['receiverId'] as String? ?? '',
-      status: FriendRequestStatus.fromString(json['status'] as String? ?? 'PENDING'),
+      status: FriendRequestStatus.fromString(
+          json['status'] as String? ?? 'PENDING'),
       // Use DateTime.now() as fallback for consistency with existing models
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 

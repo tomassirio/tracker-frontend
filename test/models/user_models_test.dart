@@ -49,15 +49,36 @@ void main() {
         final declinedJson = {'status': 'DECLINED'};
 
         expect(
-          FriendRequest.fromJson({...pendingJson, 'id': '1', 'senderId': '2', 'receiverId': '3', 'createdAt': '2024-01-15T10:30:00Z', 'updatedAt': '2024-01-15T10:30:00Z'}).status,
+          FriendRequest.fromJson({
+            ...pendingJson,
+            'id': '1',
+            'senderId': '2',
+            'receiverId': '3',
+            'createdAt': '2024-01-15T10:30:00Z',
+            'updatedAt': '2024-01-15T10:30:00Z'
+          }).status,
           FriendRequestStatus.pending,
         );
         expect(
-          FriendRequest.fromJson({...acceptedJson, 'id': '1', 'senderId': '2', 'receiverId': '3', 'createdAt': '2024-01-15T10:30:00Z', 'updatedAt': '2024-01-15T10:30:00Z'}).status,
+          FriendRequest.fromJson({
+            ...acceptedJson,
+            'id': '1',
+            'senderId': '2',
+            'receiverId': '3',
+            'createdAt': '2024-01-15T10:30:00Z',
+            'updatedAt': '2024-01-15T10:30:00Z'
+          }).status,
           FriendRequestStatus.accepted,
         );
         expect(
-          FriendRequest.fromJson({...declinedJson, 'id': '1', 'senderId': '2', 'receiverId': '3', 'createdAt': '2024-01-15T10:30:00Z', 'updatedAt': '2024-01-15T10:30:00Z'}).status,
+          FriendRequest.fromJson({
+            ...declinedJson,
+            'id': '1',
+            'senderId': '2',
+            'receiverId': '3',
+            'createdAt': '2024-01-15T10:30:00Z',
+            'updatedAt': '2024-01-15T10:30:00Z'
+          }).status,
           FriendRequestStatus.declined,
         );
       });

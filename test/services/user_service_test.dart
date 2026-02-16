@@ -102,8 +102,8 @@ void main() {
     group('getFriends', () {
       test('returns list of friends', () async {
         final mockFriends = [
-          createMockUserProfile('user-1', 'friend1'),
-          createMockUserProfile('user-2', 'friend2'),
+          Friendship(userId: 'current-user', friendId: 'friend-1'),
+          Friendship(userId: 'current-user', friendId: 'friend-2'),
         ];
 
         when(
@@ -113,8 +113,8 @@ void main() {
         final result = await userService.getFriends();
 
         expect(result.length, 2);
-        expect(result[0].username, 'friend1');
-        expect(result[1].username, 'friend2');
+        expect(result[0].friendId, 'friend-1');
+        expect(result[1].friendId, 'friend-2');
         verify(mockUserQueryClient.getFriends()).called(1);
       });
 
@@ -139,8 +139,22 @@ void main() {
     group('getReceivedFriendRequests', () {
       test('returns list of received friend requests', () async {
         final mockRequests = [
-          {'id': 'req-1', 'from': 'user-1'},
-          {'id': 'req-2', 'from': 'user-2'},
+          FriendRequest(
+            id: 'req-1',
+            senderId: 'user-1',
+            receiverId: 'current-user',
+            status: FriendRequestStatus.pending,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          FriendRequest(
+            id: 'req-2',
+            senderId: 'user-2',
+            receiverId: 'current-user',
+            status: FriendRequestStatus.pending,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
         ];
 
         when(
@@ -175,8 +189,22 @@ void main() {
     group('getSentFriendRequests', () {
       test('returns list of sent friend requests', () async {
         final mockRequests = [
-          {'id': 'req-3', 'to': 'user-3'},
-          {'id': 'req-4', 'to': 'user-4'},
+          FriendRequest(
+            id: 'req-3',
+            senderId: 'current-user',
+            receiverId: 'user-3',
+            status: FriendRequestStatus.pending,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          FriendRequest(
+            id: 'req-4',
+            senderId: 'current-user',
+            receiverId: 'user-4',
+            status: FriendRequestStatus.pending,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
         ];
 
         when(
@@ -211,8 +239,18 @@ void main() {
     group('getFollowing', () {
       test('returns list of users being followed', () async {
         final mockFollowing = [
-          createMockUserProfile('user-5', 'following1'),
-          createMockUserProfile('user-6', 'following2'),
+          UserFollow(
+            id: 'follow-1',
+            followerId: 'current-user',
+            followedId: 'user-5',
+            createdAt: DateTime.now(),
+          ),
+          UserFollow(
+            id: 'follow-2',
+            followerId: 'current-user',
+            followedId: 'user-6',
+            createdAt: DateTime.now(),
+          ),
         ];
 
         when(
@@ -222,8 +260,8 @@ void main() {
         final result = await userService.getFollowing();
 
         expect(result.length, 2);
-        expect(result[0].username, 'following1');
-        expect(result[1].username, 'following2');
+        expect(result[0].followedId, 'user-5');
+        expect(result[1].followedId, 'user-6');
         verify(mockUserQueryClient.getFollowing()).called(1);
       });
 
@@ -247,8 +285,18 @@ void main() {
     group('getFollowers', () {
       test('returns list of followers', () async {
         final mockFollowers = [
-          createMockUserProfile('user-7', 'follower1'),
-          createMockUserProfile('user-8', 'follower2'),
+          UserFollow(
+            id: 'follow-3',
+            followerId: 'user-7',
+            followedId: 'current-user',
+            createdAt: DateTime.now(),
+          ),
+          UserFollow(
+            id: 'follow-4',
+            followerId: 'user-8',
+            followedId: 'current-user',
+            createdAt: DateTime.now(),
+          ),
         ];
 
         when(
@@ -258,8 +306,8 @@ void main() {
         final result = await userService.getFollowers();
 
         expect(result.length, 2);
-        expect(result[0].username, 'follower1');
-        expect(result[1].username, 'follower2');
+        expect(result[0].followerId, 'user-7');
+        expect(result[1].followerId, 'user-8');
         verify(mockUserQueryClient.getFollowers()).called(1);
       });
 

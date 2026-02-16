@@ -80,11 +80,11 @@ void main() {
       });
 
       test('usersFollowsFollowing path is correct', () {
-        expect(ApiEndpoints.usersFollowsFollowing, '/users/follows/following');
+        expect(ApiEndpoints.usersFollowsFollowing, '/users/following');
       });
 
       test('usersFollowsFollowers path is correct', () {
-        expect(ApiEndpoints.usersFollowsFollowers, '/users/follows/followers');
+        expect(ApiEndpoints.usersFollowsFollowers, '/users/followers');
       });
     });
 

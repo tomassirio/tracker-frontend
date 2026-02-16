@@ -240,20 +240,6 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     }
   }
 
-  Future<void> _handleSendFriendRequest(String userId) async {
-    try {
-      await _userService.sendFriendRequest(userId);
-      if (mounted) {
-        UiHelpers.showSuccessMessage(context, 'Friend request sent!');
-        await _loadData();
-      }
-    } catch (e) {
-      if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to send friend request: $e');
-      }
-    }
-  }
-
   Future<void> _handleAcceptFriendRequest(String requestId) async {
     try {
       await _userService.acceptFriendRequest(requestId);
@@ -263,7 +249,8 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
       }
     } catch (e) {
       if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to accept friend request: $e');
+        UiHelpers.showErrorMessage(
+            context, 'Failed to accept friend request: $e');
       }
     }
   }
@@ -277,7 +264,8 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
       }
     } catch (e) {
       if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to decline friend request: $e');
+        UiHelpers.showErrorMessage(
+            context, 'Failed to decline friend request: $e');
       }
     }
   }
@@ -486,8 +474,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
                   ? Text(profile!.displayName!)
                   : null,
               trailing: ElevatedButton(
-                onPressed: () =>
-                    _handleFollowUser(follower.followerId),
+                onPressed: () => _handleFollowUser(follower.followerId),
                 child: const Text('Follow Back'),
               ),
             ),
@@ -539,8 +526,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
                   ? Text(profile!.displayName!)
                   : null,
               trailing: ElevatedButton(
-                onPressed: () =>
-                    _handleUnfollowUser(following.followedId),
+                onPressed: () => _handleUnfollowUser(following.followedId),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey,
                 ),
@@ -619,8 +605,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (profile?.displayName != null)
-                    Text(profile!.displayName!),
+                  if (profile?.displayName != null) Text(profile!.displayName!),
                   Text(
                     'Sent ${_formatDate(request.createdAt)}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -688,8 +673,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (profile?.displayName != null)
-                    Text(profile!.displayName!),
+                  if (profile?.displayName != null) Text(profile!.displayName!),
                   Text(
                     'Sent ${_formatDate(request.createdAt)}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
