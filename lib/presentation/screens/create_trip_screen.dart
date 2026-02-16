@@ -114,7 +114,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _repository.createTrip(
+      final tripId = await _repository.createTrip(
         name: _titleController.text.trim(),
         description: _descriptionController.text.trim().isEmpty
             ? null
@@ -124,9 +124,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         endDate: _endDate,
       );
 
+      // Fetch the created trip to get full details
+      final trip = await _repository.getTripById(tripId);
+
       if (mounted) {
         UiHelpers.showSuccessMessage(context, 'Trip created successfully!');
-        Navigator.pop(context, true);
+        // Navigate to trip detail screen, replacing current screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TripDetailScreen(trip: trip),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

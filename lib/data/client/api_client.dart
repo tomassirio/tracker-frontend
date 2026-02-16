@@ -369,24 +369,37 @@ class ApiClient {
   }
 
   /// Handle 202 Accepted response from async operations
-  /// Returns the ID from the response body { "id": "..." }
+  /// Returns the ID from the response body - supports both plain string ID
+  /// and JSON object { "id": "..." } formats
   String handleAcceptedResponse(http.Response response) {
-    if (response.statusCode == 202) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final id = data['id'] as String?;
-      if (id == null || id.isEmpty) {
-        throw Exception('Invalid 202 response: missing id field');
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final body = response.body.trim();
+      if (body.isEmpty) {
+        throw Exception('Invalid response: empty body');
       }
-      return id;
-    } else if (response.statusCode >= 200 && response.statusCode < 300) {
-      // For backwards compatibility, also accept other 2xx codes
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final id = data['id'] as String?;
-      if (id != null && id.isNotEmpty) {
-        return id;
+
+      // Try to decode as JSON first
+      final decoded = jsonDecode(body);
+
+      // If it's a plain string (UUID directly), return it
+      if (decoded is String) {
+        if (decoded.isEmpty) {
+          throw Exception('Invalid response: empty id string');
+        }
+        return decoded;
       }
-      // If no id field but has a known ID field name variant
-      throw Exception('Response does not contain an id field');
+
+      // If it's a Map, extract the id field
+      if (decoded is Map<String, dynamic>) {
+        final id = decoded['id'] as String?;
+        if (id != null && id.isNotEmpty) {
+          return id;
+        }
+        throw Exception('Response does not contain an id field');
+      }
+
+      throw Exception(
+          'Invalid response format: expected string or object with id');
     } else {
       throw _handleError(response);
     }

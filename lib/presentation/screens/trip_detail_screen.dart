@@ -7,7 +7,6 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
@@ -38,7 +37,6 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
-  late final TripService _tripService;
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
@@ -95,7 +93,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final geocodingClient =
         apiKey.isNotEmpty ? GoogleGeocodingApiClient(apiKey) : null;
     _repository = TripDetailRepository(geocodingClient: geocodingClient);
-    _tripService = TripService();
 
     _trip = widget.trip;
     _updateMapData();
@@ -194,8 +191,92 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleCommentReaction(CommentReactionEvent event) {
-    // Refresh comments to get updated reaction counts
-    _loadComments();
+    // Update local state directly from WebSocket event instead of making a GET request
+    setState(() {
+      // Find and update the comment in top-level comments
+      final commentIndex = _comments.indexWhere((c) => c.id == event.commentId);
+      if (commentIndex != -1) {
+        final comment = _comments[commentIndex];
+        final updatedReactions = Map<String, int>.from(comment.reactions ?? {});
+
+        if (event.isRemoval) {
+          // Decrement reaction count
+          final currentCount = updatedReactions[event.reactionType] ?? 0;
+          if (currentCount > 1) {
+            updatedReactions[event.reactionType] = currentCount - 1;
+          } else {
+            updatedReactions.remove(event.reactionType);
+          }
+        } else {
+          // Increment reaction count
+          updatedReactions[event.reactionType] =
+              (updatedReactions[event.reactionType] ?? 0) + 1;
+        }
+
+        // Calculate new total reactions count
+        final newReactionsCount =
+            updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+        _comments[commentIndex] = Comment(
+          id: comment.id,
+          tripId: comment.tripId,
+          userId: comment.userId,
+          username: comment.username,
+          userAvatarUrl: comment.userAvatarUrl,
+          message: comment.message,
+          parentCommentId: comment.parentCommentId,
+          reactions: updatedReactions.isEmpty ? null : updatedReactions,
+          replies: comment.replies,
+          reactionsCount: newReactionsCount,
+          responsesCount: comment.responsesCount,
+          createdAt: comment.createdAt,
+          updatedAt: comment.updatedAt,
+        );
+        return;
+      }
+
+      // Check in replies
+      for (final parentId in _replies.keys) {
+        final replies = _replies[parentId]!;
+        final replyIndex = replies.indexWhere((c) => c.id == event.commentId);
+        if (replyIndex != -1) {
+          final reply = replies[replyIndex];
+          final updatedReactions = Map<String, int>.from(reply.reactions ?? {});
+
+          if (event.isRemoval) {
+            final currentCount = updatedReactions[event.reactionType] ?? 0;
+            if (currentCount > 1) {
+              updatedReactions[event.reactionType] = currentCount - 1;
+            } else {
+              updatedReactions.remove(event.reactionType);
+            }
+          } else {
+            updatedReactions[event.reactionType] =
+                (updatedReactions[event.reactionType] ?? 0) + 1;
+          }
+
+          final newReactionsCount =
+              updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+          _replies[parentId]![replyIndex] = Comment(
+            id: reply.id,
+            tripId: reply.tripId,
+            userId: reply.userId,
+            username: reply.username,
+            userAvatarUrl: reply.userAvatarUrl,
+            message: reply.message,
+            parentCommentId: reply.parentCommentId,
+            reactions: updatedReactions.isEmpty ? null : updatedReactions,
+            replies: reply.replies,
+            reactionsCount: newReactionsCount,
+            responsesCount: reply.responsesCount,
+            createdAt: reply.createdAt,
+            updatedAt: reply.updatedAt,
+          );
+          return;
+        }
+      }
+    });
   }
 
   @override
@@ -410,11 +491,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     try {
       await _repository.changeTripStatus(_trip.id, newStatus);
 
-      // Fetch the updated trip to get full details
-      final updatedTrip = await _tripService.getTripById(_trip.id);
-
+      // Update local state optimistically - WebSocket will confirm the change
       setState(() {
-        _trip = updatedTrip;
+        _trip = _trip.copyWith(status: newStatus);
         _isChangingStatus = false;
       });
 
