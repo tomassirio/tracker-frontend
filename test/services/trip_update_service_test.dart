@@ -58,7 +58,7 @@ class MockTripUpdateCommandClient extends TripUpdateCommandClient {
   MockTripUpdateCommandClient() : super();
 
   @override
-  Future<void> createTripUpdate(
+  Future<String> createTripUpdate(
     String tripId,
     TripUpdateRequest request,
   ) async {
@@ -66,5 +66,6 @@ class MockTripUpdateCommandClient extends TripUpdateCommandClient {
     lastTripId = tripId;
     lastRequest = request;
     if (shouldThrowError) throw Exception('Failed to create update');
+    return 'update-123';
   }
 }

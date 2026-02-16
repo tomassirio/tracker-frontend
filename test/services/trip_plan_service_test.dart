@@ -94,8 +94,7 @@ void main() {
 
         final result = await tripPlanService.createTripPlan(request);
 
-        expect(result.id, 'plan-new');
-        expect(result.name, 'New Trip Plan');
+        expect(result, 'plan-new');
         expect(fakeTripPlanCommandClient.createTripPlanCalled, true);
       });
 
@@ -112,7 +111,7 @@ void main() {
 
         final result = await tripPlanService.createTripPlan(request);
 
-        expect(result.id, 'plan-dated');
+        expect(result, 'plan-dated');
         expect(fakeTripPlanCommandClient.createTripPlanCalled, true);
       });
 
@@ -135,7 +134,7 @@ void main() {
 
         final result = await tripPlanService.updateTripPlan('plan-1', request);
 
-        expect(result.name, 'Updated Plan Name');
+        expect(result, 'plan-1');
         expect(fakeTripPlanCommandClient.updateTripPlanCalled, true);
         expect(fakeTripPlanCommandClient.lastPlanId, 'plan-1');
       });
@@ -147,7 +146,7 @@ void main() {
 
         final result = await tripPlanService.updateTripPlan('plan-2', request);
 
-        expect(result.id, 'plan-2');
+        expect(result, 'plan-2');
         expect(fakeTripPlanCommandClient.lastPlanId, 'plan-2');
       });
 
@@ -182,7 +181,7 @@ void main() {
 
         final result = await tripPlanService.updateTripPlan('plan-1', request);
 
-        expect(result.id, 'plan-1');
+        expect(result, 'plan-1');
         expect(fakeTripPlanCommandClient.updateTripPlanCalled, true);
       });
     });
@@ -324,38 +323,39 @@ class FakeTripPlanCommandClient extends TripPlanCommandClient {
   bool shouldThrowError = false;
 
   @override
-  Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
+  Future<String> createTripPlan(CreateTripPlanRequest request) async {
     createTripPlanCalled = true;
     if (shouldThrowError) throw Exception('Failed to create trip plan');
-    return mockTripPlan!;
+    return mockTripPlan!.id;
   }
 
   @override
-  Future<TripPlan> createTripPlanBackend(
+  Future<String> createTripPlanBackend(
     CreateTripPlanBackendRequest request,
   ) async {
     createTripPlanBackendCalled = true;
     if (shouldThrowError) {
       throw Exception('Failed to create trip plan backend');
     }
-    return mockTripPlan!;
+    return mockTripPlan!.id;
   }
 
   @override
-  Future<TripPlan> updateTripPlan(
+  Future<String> updateTripPlan(
     String planId,
     UpdateTripPlanRequest request,
   ) async {
     updateTripPlanCalled = true;
     lastPlanId = planId;
     if (shouldThrowError) throw Exception('Failed to update trip plan');
-    return mockTripPlan!;
+    return mockTripPlan!.id;
   }
 
   @override
-  Future<void> deleteTripPlan(String planId) async {
+  Future<String> deleteTripPlan(String planId) async {
     deleteTripPlanCalled = true;
     lastDeletedPlanId = planId;
     if (shouldThrowError) throw Exception('Failed to delete trip plan');
+    return planId;
   }
 }
