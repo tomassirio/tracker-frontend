@@ -12,7 +12,8 @@ class CommentCommandClient {
 
   /// Create a new comment (top-level or reply)
   /// Requires authentication (USER, ADMIN)
-  Future<Comment> createComment(
+  /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createComment(
     String tripId,
     CreateCommentRequest request,
   ) async {
@@ -21,27 +22,30 @@ class CommentCommandClient {
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, Comment.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Add a reaction to a comment
   /// Requires authentication (USER, ADMIN)
-  Future<void> addReaction(String commentId, AddReactionRequest request) async {
+  /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
+  Future<String> addReaction(
+      String commentId, AddReactionRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.commentReactions(commentId),
       body: request.toJson(),
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Remove a reaction from a comment
   /// Requires authentication (USER, ADMIN)
-  Future<void> removeReaction(String commentId) async {
+  /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
+  Future<String> removeReaction(String commentId) async {
     final response = await _apiClient.delete(
       ApiEndpoints.commentReactions(commentId),
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 }

@@ -2,11 +2,39 @@ import '../../../core/constants/enums.dart';
 
 /// Types of WebSocket events
 enum WebSocketEventType {
-  tripStatusChanged,
+  // Trip events
+  tripCreated,
   tripUpdated,
+  tripDeleted,
+  tripStatusChanged,
+  tripVisibilityChanged,
+  tripMetadataUpdated,
+
+  // Trip update events
+  tripUpdateCreated,
+
+  // Comment events
   commentAdded,
+  commentReaction,
+
+  // Trip plan events
+  tripPlanCreated,
+  tripPlanUpdated,
+  tripPlanDeleted,
+
+  // User relationship events
+  userFollowed,
+  userUnfollowed,
+  friendRequestSent,
+  friendRequestAccepted,
+  friendRequestDeclined,
+  friendshipCreated,
+  friendshipRemoved,
+
+  // Legacy events for backwards compatibility
   commentReactionAdded,
   commentReactionRemoved,
+
   unknown,
 }
 
@@ -27,16 +55,58 @@ class WebSocketEvent {
   /// Parse event type from string
   static WebSocketEventType parseEventType(String? typeStr) {
     switch (typeStr?.toUpperCase()) {
-      case 'TRIP_STATUS_CHANGED':
-        return WebSocketEventType.tripStatusChanged;
+      // Trip events
+      case 'TRIP_CREATED':
+        return WebSocketEventType.tripCreated;
       case 'TRIP_UPDATED':
         return WebSocketEventType.tripUpdated;
+      case 'TRIP_DELETED':
+        return WebSocketEventType.tripDeleted;
+      case 'TRIP_STATUS_CHANGED':
+        return WebSocketEventType.tripStatusChanged;
+      case 'TRIP_VISIBILITY_CHANGED':
+        return WebSocketEventType.tripVisibilityChanged;
+      case 'TRIP_METADATA_UPDATED':
+        return WebSocketEventType.tripMetadataUpdated;
+
+      // Trip update events
+      case 'TRIP_UPDATE_CREATED':
+        return WebSocketEventType.tripUpdateCreated;
+
+      // Comment events
       case 'COMMENT_ADDED':
         return WebSocketEventType.commentAdded;
+      case 'COMMENT_REACTION':
+        return WebSocketEventType.commentReaction;
       case 'COMMENT_REACTION_ADDED':
         return WebSocketEventType.commentReactionAdded;
       case 'COMMENT_REACTION_REMOVED':
         return WebSocketEventType.commentReactionRemoved;
+
+      // Trip plan events
+      case 'TRIP_PLAN_CREATED':
+        return WebSocketEventType.tripPlanCreated;
+      case 'TRIP_PLAN_UPDATED':
+        return WebSocketEventType.tripPlanUpdated;
+      case 'TRIP_PLAN_DELETED':
+        return WebSocketEventType.tripPlanDeleted;
+
+      // User relationship events
+      case 'USER_FOLLOWED':
+        return WebSocketEventType.userFollowed;
+      case 'USER_UNFOLLOWED':
+        return WebSocketEventType.userUnfollowed;
+      case 'FRIEND_REQUEST_SENT':
+        return WebSocketEventType.friendRequestSent;
+      case 'FRIEND_REQUEST_ACCEPTED':
+        return WebSocketEventType.friendRequestAccepted;
+      case 'FRIEND_REQUEST_DECLINED':
+        return WebSocketEventType.friendRequestDeclined;
+      case 'FRIENDSHIP_CREATED':
+        return WebSocketEventType.friendshipCreated;
+      case 'FRIENDSHIP_REMOVED':
+        return WebSocketEventType.friendshipRemoved;
+
       default:
         return WebSocketEventType.unknown;
     }
@@ -215,6 +285,285 @@ class CommentReactionEvent extends WebSocketEvent {
       reactionType: payload['reactionType'] as String? ?? '',
       userId: payload['userId'] as String? ?? '',
       isRemoval: isRemoval,
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip creation
+class TripCreatedEvent extends WebSocketEvent {
+  final String tripName;
+  final String ownerId;
+  final String visibility;
+
+  TripCreatedEvent({
+    required String tripId,
+    required this.tripName,
+    required this.ownerId,
+    required this.visibility,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripCreated,
+          tripId: tripId,
+        );
+
+  factory TripCreatedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripCreatedEvent(
+      tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
+      tripName: payload['tripName'] as String? ?? '',
+      ownerId: payload['ownerId'] as String? ?? '',
+      visibility: payload['visibility'] as String? ?? 'PRIVATE',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip deletion
+class TripDeletedEvent extends WebSocketEvent {
+  TripDeletedEvent({
+    required String tripId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripDeleted,
+          tripId: tripId,
+        );
+
+  factory TripDeletedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripDeletedEvent(
+      tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip visibility changes
+class TripVisibilityChangedEvent extends WebSocketEvent {
+  final String newVisibility;
+  final String? previousVisibility;
+
+  TripVisibilityChangedEvent({
+    required String tripId,
+    required this.newVisibility,
+    this.previousVisibility,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripVisibilityChanged,
+          tripId: tripId,
+        );
+
+  factory TripVisibilityChangedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripVisibilityChangedEvent(
+      tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
+      newVisibility: payload['newVisibility'] as String? ?? 'PRIVATE',
+      previousVisibility: payload['previousVisibility'] as String?,
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip update creation (location updates)
+class TripUpdateCreatedEvent extends WebSocketEvent {
+  final String tripUpdateId;
+  final double? latitude;
+  final double? longitude;
+  final int? batteryLevel;
+  final String? message;
+
+  TripUpdateCreatedEvent({
+    required String tripId,
+    required this.tripUpdateId,
+    this.latitude,
+    this.longitude,
+    this.batteryLevel,
+    this.message,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripUpdateCreated,
+          tripId: tripId,
+        );
+
+  factory TripUpdateCreatedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+    final location = payload['location'] as Map<String, dynamic>?;
+
+    return TripUpdateCreatedEvent(
+      tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
+      tripUpdateId: payload['tripUpdateId'] as String? ?? '',
+      latitude: location != null
+          ? (location['latitude'] as num?)?.toDouble()
+          : (payload['latitude'] as num?)?.toDouble(),
+      longitude: location != null
+          ? (location['longitude'] as num?)?.toDouble()
+          : (payload['longitude'] as num?)?.toDouble(),
+      batteryLevel: payload['batteryLevel'] as int?,
+      message: payload['message'] as String?,
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip plan creation
+class TripPlanCreatedEvent extends WebSocketEvent {
+  final String tripPlanId;
+  final String planName;
+  final String ownerId;
+
+  TripPlanCreatedEvent({
+    required this.tripPlanId,
+    required this.planName,
+    required this.ownerId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripPlanCreated,
+        );
+
+  factory TripPlanCreatedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripPlanCreatedEvent(
+      tripPlanId:
+          payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
+      planName: payload['planName'] as String? ?? '',
+      ownerId: payload['ownerId'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip plan update
+class TripPlanUpdatedEvent extends WebSocketEvent {
+  final String tripPlanId;
+
+  TripPlanUpdatedEvent({
+    required this.tripPlanId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripPlanUpdated,
+        );
+
+  factory TripPlanUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripPlanUpdatedEvent(
+      tripPlanId:
+          payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip plan deletion
+class TripPlanDeletedEvent extends WebSocketEvent {
+  final String tripPlanId;
+
+  TripPlanDeletedEvent({
+    required this.tripPlanId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripPlanDeleted,
+        );
+
+  factory TripPlanDeletedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripPlanDeletedEvent(
+      tripPlanId:
+          payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for user follow
+class UserFollowedEvent extends WebSocketEvent {
+  final String followerId;
+  final String followedId;
+
+  UserFollowedEvent({
+    required this.followerId,
+    required this.followedId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.userFollowed,
+        );
+
+  factory UserFollowedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return UserFollowedEvent(
+      followerId:
+          payload['followerId'] as String? ?? payload['id'] as String? ?? '',
+      followedId: payload['followedId'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for friend request
+class FriendRequestSentEvent extends WebSocketEvent {
+  final String requestId;
+  final String senderId;
+  final String receiverId;
+
+  FriendRequestSentEvent({
+    required this.requestId,
+    required this.senderId,
+    required this.receiverId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.friendRequestSent,
+        );
+
+  factory FriendRequestSentEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return FriendRequestSentEvent(
+      requestId:
+          payload['requestId'] as String? ?? payload['id'] as String? ?? '',
+      senderId: payload['senderId'] as String? ?? '',
+      receiverId: payload['receiverId'] as String? ?? '',
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)

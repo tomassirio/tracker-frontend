@@ -12,18 +12,20 @@ class TripPlanCommandClient {
 
   /// Create trip plan
   /// Requires authentication (USER, ADMIN)
-  Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createTripPlan(CreateTripPlanRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.tripPlans,
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, TripPlan.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Update trip plan
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<TripPlan> updateTripPlan(
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> updateTripPlan(
     String planId,
     UpdateTripPlanRequest request,
   ) async {
@@ -32,22 +34,24 @@ class TripPlanCommandClient {
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, TripPlan.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Delete trip plan
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<void> deleteTripPlan(String planId) async {
+  /// Returns the trip plan ID immediately. Deletion will be confirmed via WebSocket.
+  Future<String> deleteTripPlan(String planId) async {
     final response = await _apiClient.delete(
       ApiEndpoints.tripPlanById(planId),
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Create trip plan using backend request model
   /// Requires authentication (USER, ADMIN)
-  Future<TripPlan> createTripPlanBackend(
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createTripPlanBackend(
     CreateTripPlanBackendRequest request,
   ) async {
     final response = await _apiClient.post(
@@ -55,6 +59,6 @@ class TripPlanCommandClient {
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, TripPlan.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 }

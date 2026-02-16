@@ -29,33 +29,19 @@ void main() {
     });
 
     group('createTrip', () {
-      test('successful trip creation returns Trip', () async {
+      test('successful trip creation returns trip ID', () async {
         final request = CreateTripRequest(
           name: 'My Trip',
           description: 'A great adventure',
         );
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'My Trip',
-          'title': 'My Trip',
-          'description': 'A great adventure',
-          'status': 'CREATED',
-          'visibility': 'PRIVATE',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripCommandClient.createTrip(request);
 
-        expect(result.id, 'trip-123');
-        expect(result.name, 'My Trip');
-        expect(result.visibility, Visibility.private);
-        expect(result.status, TripStatus.created);
+        expect(result, 'trip-123');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -74,17 +60,8 @@ void main() {
         );
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'My Trip',
-          'visibility': 'PRIVATE',
-          'status': 'CREATED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripCommandClient.createTrip(request);
 
@@ -106,31 +83,19 @@ void main() {
     });
 
     group('updateTrip', () {
-      test('successful trip update returns updated Trip', () async {
+      test('successful trip update returns trip ID', () async {
         final request = UpdateTripRequest(
           name: 'Updated Trip',
           description: 'Updated description',
         );
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'Updated Trip',
-          'title': 'Updated Trip',
-          'description': 'Updated description',
-          'visibility': 'PRIVATE',
-          'status': 'CREATED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripCommandClient.updateTrip('trip-123', request);
 
-        expect(result.id, 'trip-123');
-        expect(result.name, 'Updated Trip');
+        expect(result, 'trip-123');
         expect(mockHttpClient.lastMethod, 'PUT');
         expect(
           mockHttpClient.lastUri?.path,
@@ -146,17 +111,8 @@ void main() {
         final request = UpdateTripRequest(name: 'Updated Trip');
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'Updated Trip',
-          'visibility': 'PRIVATE',
-          'status': 'CREATED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripCommandClient.updateTrip('trip-123', request);
 
@@ -178,30 +134,19 @@ void main() {
     });
 
     group('changeVisibility', () {
-      test('successful visibility change returns updated Trip', () async {
+      test('successful visibility change returns trip ID', () async {
         final request = ChangeVisibilityRequest(visibility: Visibility.public);
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'My Trip',
-          'title': 'My Trip',
-          'visibility': 'PUBLIC',
-          'status': 'CREATED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripCommandClient.changeVisibility(
           'trip-123',
           request,
         );
 
-        expect(result.id, 'trip-123');
-        expect(result.visibility, Visibility.public);
+        expect(result, 'trip-123');
         expect(mockHttpClient.lastMethod, 'PATCH');
         expect(
           mockHttpClient.lastUri?.path,
@@ -217,17 +162,8 @@ void main() {
         final request = ChangeVisibilityRequest(visibility: Visibility.public);
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'My Trip',
-          'visibility': 'PUBLIC',
-          'status': 'CREATED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripCommandClient.changeVisibility('trip-123', request);
 
@@ -249,30 +185,19 @@ void main() {
     });
 
     group('changeStatus', () {
-      test('successful status change returns updated Trip', () async {
+      test('successful status change returns trip ID', () async {
         final request = ChangeStatusRequest(status: TripStatus.inProgress);
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'My Trip',
-          'title': 'My Trip',
-          'visibility': 'PRIVATE',
-          'status': 'IN_PROGRESS',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripCommandClient.changeStatus(
           'trip-123',
           request,
         );
 
-        expect(result.id, 'trip-123');
-        expect(result.status, TripStatus.inProgress);
+        expect(result, 'trip-123');
         expect(mockHttpClient.lastMethod, 'PATCH');
         expect(
           mockHttpClient.lastUri?.path,
@@ -288,17 +213,8 @@ void main() {
         final request = ChangeStatusRequest(status: TripStatus.finished);
         final responseBody = {
           'id': 'trip-123',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'My Trip',
-          'visibility': 'PRIVATE',
-          'status': 'FINISHED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripCommandClient.changeStatus('trip-123', request);
 
@@ -320,38 +236,18 @@ void main() {
     });
 
     group('createTripFromPlan', () {
-      test('successful trip creation from plan returns Trip', () async {
+      test('successful trip creation from plan returns trip ID', () async {
         final responseBody = {
           'id': 'trip-456',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'title': 'Trip from Plan',
-          'name': 'Trip from Plan',
-          'description': 'Created from trip plan',
-          'tripSettings': {'tripStatus': 'CREATED', 'visibility': 'PUBLIC'},
-          'tripDetails': {
-            'startTimestamp': DateTime.now().toIso8601String(),
-            'endTimestamp':
-                DateTime.now().add(const Duration(days: 7)).toIso8601String(),
-            'startLocation': {'latitude': 40.7128, 'longitude': -74.0060},
-            'endLocation': {'latitude': 34.0522, 'longitude': -118.2437},
-            'waypoints': [],
-          },
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await tripCommandClient.createTripFromPlan(
           'plan-123',
           Visibility.public,
         );
 
-        expect(result.id, 'trip-456');
-        expect(result.name, 'Trip from Plan');
-        expect(result.status, TripStatus.created);
+        expect(result, 'trip-456');
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -366,18 +262,8 @@ void main() {
       test('createTripFromPlan requires authentication', () async {
         final responseBody = {
           'id': 'trip-456',
-          'userId': 'user-123',
-          'username': 'testuser',
-          'name': 'Trip from Plan',
-          'title': 'Trip from Plan',
-          'visibility': 'PUBLIC',
-          'status': 'CREATED',
-          'commentsCount': 0,
-          'reactionsCount': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripCommandClient.createTripFromPlan(
             'plan-123', Visibility.public);
@@ -416,11 +302,15 @@ void main() {
     });
 
     group('deleteTrip', () {
-      test('successful trip deletion completes without error', () async {
-        mockHttpClient.response = http.Response('', 204);
+      test('successful trip deletion returns trip ID', () async {
+        final responseBody = {
+          'id': 'trip-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await tripCommandClient.deleteTrip('trip-123');
+        final result = await tripCommandClient.deleteTrip('trip-123');
 
+        expect(result, 'trip-123');
         expect(mockHttpClient.lastMethod, 'DELETE');
         expect(
           mockHttpClient.lastUri?.path,
@@ -433,7 +323,10 @@ void main() {
       });
 
       test('deleteTrip requires authentication', () async {
-        mockHttpClient.response = http.Response('', 204);
+        final responseBody = {
+          'id': 'trip-123',
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         await tripCommandClient.deleteTrip('trip-123');
 

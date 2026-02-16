@@ -72,12 +72,13 @@ class MockTripCommandClient extends TripCommandClient {
   String errorMessage = 'Trip command failed';
 
   @override
-  Future<void> deleteTrip(String tripId) async {
+  Future<String> deleteTrip(String tripId) async {
     deleteTripCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) {
       throw Exception(errorMessage);
     }
+    return tripId;
   }
 }
 

@@ -25,12 +25,14 @@ class TripPlanService {
   }
 
   /// Create a new trip plan
-  Future<TripPlan> createTripPlan(CreateTripPlanRequest request) async {
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createTripPlan(CreateTripPlanRequest request) async {
     return await _tripPlanCommandClient.createTripPlan(request);
   }
 
   /// Update an existing trip plan
-  Future<TripPlan> updateTripPlan(
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> updateTripPlan(
     String planId,
     UpdateTripPlanRequest request,
   ) async {
@@ -38,12 +40,14 @@ class TripPlanService {
   }
 
   /// Delete a trip plan
-  Future<void> deleteTripPlan(String planId) async {
-    await _tripPlanCommandClient.deleteTripPlan(planId);
+  /// Returns the trip plan ID immediately. Deletion will be confirmed via WebSocket.
+  Future<String> deleteTripPlan(String planId) async {
+    return await _tripPlanCommandClient.deleteTripPlan(planId);
   }
 
   /// Create a trip plan using backend request model
-  Future<TripPlan> createTripPlanBackend(
+  /// Returns the trip plan ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createTripPlanBackend(
     CreateTripPlanBackendRequest request,
   ) async {
     return await _tripPlanCommandClient.createTripPlanBackend(request);

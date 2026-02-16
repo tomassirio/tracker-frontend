@@ -368,6 +368,30 @@ class ApiClient {
     // Success - no content to return
   }
 
+  /// Handle 202 Accepted response from async operations
+  /// Returns the ID from the response body { "id": "..." }
+  String handleAcceptedResponse(http.Response response) {
+    if (response.statusCode == 202) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final id = data['id'] as String?;
+      if (id == null || id.isEmpty) {
+        throw Exception('Invalid 202 response: missing id field');
+      }
+      return id;
+    } else if (response.statusCode >= 200 && response.statusCode < 300) {
+      // For backwards compatibility, also accept other 2xx codes
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final id = data['id'] as String?;
+      if (id != null && id.isNotEmpty) {
+        return id;
+      }
+      // If no id field but has a known ID field name variant
+      throw Exception('Response does not contain an id field');
+    } else {
+      throw _handleError(response);
+    }
+  }
+
   /// Handle errors from API
   Exception _handleError(http.Response response) {
     try {

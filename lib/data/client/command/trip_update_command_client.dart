@@ -12,7 +12,8 @@ class TripUpdateCommandClient {
 
   /// Create trip update (location, battery, message)
   /// Requires authentication (USER, ADMIN - trip owner only)
-  Future<void> createTripUpdate(
+  /// Returns the trip update ID immediately. Full data will be delivered via WebSocket.
+  Future<String> createTripUpdate(
     String tripId,
     TripUpdateRequest request,
   ) async {
@@ -21,6 +22,6 @@ class TripUpdateCommandClient {
       body: request.toJson(),
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 }

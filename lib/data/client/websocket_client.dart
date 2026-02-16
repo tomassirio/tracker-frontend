@@ -214,7 +214,8 @@ class WebSocketClient {
         debugPrint('WebSocket: Token refreshed successfully');
         return true;
       } else {
-        debugPrint('WebSocket: Token refresh failed with ${response.statusCode}');
+        debugPrint(
+            'WebSocket: Token refresh failed with ${response.statusCode}');
         return false;
       }
     } catch (e) {

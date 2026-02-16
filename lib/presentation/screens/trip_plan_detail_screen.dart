@@ -149,10 +149,13 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         waypoints: updatedWaypoints,
       );
 
-      final updatedPlan = await _tripPlanService.updateTripPlan(
+      final planId = await _tripPlanService.updateTripPlan(
         _tripPlan.id,
         request,
       );
+
+      // Fetch the updated plan to get full details
+      final updatedPlan = await _tripPlanService.getTripPlanById(planId);
 
       if (mounted) {
         setState(() {
@@ -222,10 +225,13 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         plannedEndDate: _endDate,
       );
 
-      final updatedPlan = await _tripPlanService.updateTripPlan(
+      final planId = await _tripPlanService.updateTripPlan(
         _tripPlan.id,
         request,
       );
+
+      // Fetch the updated plan to get full details
+      final updatedPlan = await _tripPlanService.getTripPlanById(planId);
 
       if (mounted) {
         setState(() {

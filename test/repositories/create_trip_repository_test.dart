@@ -155,7 +155,7 @@ class MockTripService extends TripService {
   String errorMessage = 'Failed to create trip';
 
   @override
-  Future<Trip> createTrip(CreateTripRequest request) async {
+  Future<String> createTrip(CreateTripRequest request) async {
     createTripCalled = true;
     lastCreateRequest = request;
 
@@ -163,21 +163,7 @@ class MockTripService extends TripService {
       throw Exception(errorMessage);
     }
 
-    // Return a mock trip
-    return Trip(
-      id: 'trip-123',
-      userId: 'user-123',
-      name: request.name,
-      username: 'testuser',
-      visibility: request.visibility,
-      status: TripStatus.created,
-      commentsCount: 0,
-      reactionsCount: 0,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      description: request.description,
-      startDate: request.startDate,
-      endDate: request.endDate,
-    );
+    // Return a mock trip ID
+    return 'trip-123';
   }
 }

@@ -23,56 +23,61 @@ class UserCommandClient {
 
   /// Send a friend request
   /// Requires authentication (USER, ADMIN)
-  Future<void> sendFriendRequest(String userId) async {
+  /// Returns the request ID immediately. Full data will be delivered via WebSocket.
+  Future<String> sendFriendRequest(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFriendRequests,
       body: {'userId': userId},
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Accept a friend request
   /// Requires authentication (USER, ADMIN)
-  Future<void> acceptFriendRequest(String requestId) async {
+  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> acceptFriendRequest(String requestId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFriendRequestAccept(requestId),
       body: {},
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Decline a friend request
   /// Requires authentication (USER, ADMIN)
-  Future<void> declineFriendRequest(String requestId) async {
+  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> declineFriendRequest(String requestId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFriendRequestDecline(requestId),
       body: {},
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Follow a user
   /// Requires authentication (USER, ADMIN)
-  Future<void> followUser(String userId) async {
+  /// Returns the follow ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> followUser(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFollows,
       body: {'userId': userId},
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Unfollow a user
   /// Requires authentication (USER, ADMIN)
-  Future<void> unfollowUser(String followedId) async {
+  /// Returns the ID from the response. Confirmation will be delivered via WebSocket.
+  Future<String> unfollowUser(String followedId) async {
     final response = await _apiClient.delete(
       ApiEndpoints.usersUnfollow(followedId),
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Update current user's profile

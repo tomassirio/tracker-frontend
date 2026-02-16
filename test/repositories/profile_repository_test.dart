@@ -294,26 +294,27 @@ class MockTripService extends TripService {
   }
 
   @override
-  Future<Trip> createTrip(CreateTripRequest request) async {
+  Future<String> createTrip(CreateTripRequest request) async {
     if (shouldThrowError) {
       throw Exception('Failed to create trip');
     }
-    return mockTrips.first;
+    return 'trip-123';
   }
 
   @override
-  Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
+  Future<String> updateTrip(String tripId, UpdateTripRequest request) async {
     if (shouldThrowError) {
       throw Exception('Failed to update trip');
     }
-    return mockTrips.first;
+    return tripId;
   }
 
   @override
-  Future<void> deleteTrip(String tripId) async {
+  Future<String> deleteTrip(String tripId) async {
     if (shouldThrowError) {
       throw Exception('Failed to delete trip');
     }
+    return tripId;
   }
 }
 

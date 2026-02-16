@@ -54,28 +54,33 @@ class UserService {
   }
 
   /// Send a friend request
-  Future<void> sendFriendRequest(String userId) async {
-    await _userCommandClient.sendFriendRequest(userId);
+  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> sendFriendRequest(String userId) async {
+    return await _userCommandClient.sendFriendRequest(userId);
   }
 
   /// Accept a friend request
-  Future<void> acceptFriendRequest(String requestId) async {
-    await _userCommandClient.acceptFriendRequest(requestId);
+  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> acceptFriendRequest(String requestId) async {
+    return await _userCommandClient.acceptFriendRequest(requestId);
   }
 
   /// Decline a friend request
-  Future<void> declineFriendRequest(String requestId) async {
-    await _userCommandClient.declineFriendRequest(requestId);
+  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> declineFriendRequest(String requestId) async {
+    return await _userCommandClient.declineFriendRequest(requestId);
   }
 
   /// Follow a user
-  Future<void> followUser(String userId) async {
-    await _userCommandClient.followUser(userId);
+  /// Returns the follow ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> followUser(String userId) async {
+    return await _userCommandClient.followUser(userId);
   }
 
   /// Unfollow a user
-  Future<void> unfollowUser(String userId) async {
-    await _userCommandClient.unfollowUser(userId);
+  /// Returns the ID from the response. Event will be delivered via WebSocket.
+  Future<String> unfollowUser(String userId) async {
+    return await _userCommandClient.unfollowUser(userId);
   }
 
   /// Update current user's profile

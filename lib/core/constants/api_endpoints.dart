@@ -80,5 +80,5 @@ class ApiEndpoints {
 
   // WebSocket topics
   static String wsTripTopic(String tripId) => '/topic/trips/$tripId';
-  static const String wsUserTopic = '/user/queue/notifications';
+  static String wsUserTopic(String userId) => '/topic/users/$userId';
 }

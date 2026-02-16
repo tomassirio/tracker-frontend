@@ -213,7 +213,11 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     );
 
     try {
-      final trip = await _tripService.createTripFromPlan(plan.id, visibility);
+      final tripId = await _tripService.createTripFromPlan(plan.id, visibility);
+
+      // Fetch the created trip to get full details
+      final trip = await _tripService.getTripById(tripId);
+
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
         UiHelpers.showSuccessMessage(
