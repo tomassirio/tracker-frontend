@@ -207,7 +207,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
       MaterialPageRoute(builder: (context) => const AuthScreen()),
     );
 
-    if (result == true || mounted) {
+    if (result == true && mounted) {
       await _loadData();
     }
   }

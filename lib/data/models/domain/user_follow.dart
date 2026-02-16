@@ -14,9 +14,11 @@ class UserFollow {
 
   factory UserFollow.fromJson(Map<String, dynamic> json) {
     return UserFollow(
+      // Use empty strings as fallback for consistency with UserProfile pattern
       id: json['id'] as String? ?? '',
       followerId: json['followerId'] as String? ?? '',
       followedId: json['followedId'] as String? ?? '',
+      // Use DateTime.now() as fallback for consistency with existing models
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
     );
   }
