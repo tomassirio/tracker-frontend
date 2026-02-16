@@ -133,20 +133,20 @@ void main() {
     group('addComment', () {
       test('adds a top-level comment successfully', () async {
         when(
-          mockCommentService.addComment('trip-1', any),
+          mockCommentService.addComment('trip-1', any<CreateCommentRequest>()),
         ).thenAnswer((_) async => 'new-comment');
 
         final result = await repository.addComment('trip-1', 'Test message');
 
         expect(result, 'new-comment');
-        verify(mockCommentService.addComment('trip-1', any)).called(1);
+        verify(mockCommentService.addComment('trip-1', any<CreateCommentRequest>())).called(1);
       });
     });
 
     group('addReply', () {
       test('adds a reply to a comment successfully', () async {
         when(
-          mockCommentService.addComment('trip-1', any),
+          mockCommentService.addComment('trip-1', any<CreateCommentRequest>()),
         ).thenAnswer((_) async => 'new-reply');
 
         final result = await repository.addReply(
@@ -190,17 +190,17 @@ void main() {
     group('addReaction', () {
       test('adds reaction to a comment successfully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any),
+          mockCommentService.addReaction('comment-1', any<AddReactionRequest>()),
         ).thenAnswer((_) async => 'comment-1');
 
         await repository.addReaction('comment-1', ReactionType.heart);
 
-        verify(mockCommentService.addReaction('comment-1', any)).called(1);
+        verify(mockCommentService.addReaction('comment-1', any<AddReactionRequest>())).called(1);
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any),
+          mockCommentService.addReaction('comment-1', any<AddReactionRequest>()),
         ).thenThrow(Exception('API Error'));
 
         expect(
@@ -233,7 +233,7 @@ void main() {
     group('changeTripStatus', () {
       test('changes trip status successfully', () async {
         when(
-          mockTripService.changeStatus('trip-1', any),
+          mockTripService.changeStatus('trip-1', any<ChangeStatusRequest>()),
         ).thenAnswer((_) async => 'trip-1');
 
         final result = await repository.changeTripStatus(
@@ -242,12 +242,12 @@ void main() {
         );
 
         expect(result, 'trip-1');
-        verify(mockTripService.changeStatus('trip-1', any)).called(1);
+        verify(mockTripService.changeStatus('trip-1', any<ChangeStatusRequest>())).called(1);
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockTripService.changeStatus('trip-1', any),
+          mockTripService.changeStatus('trip-1', any<ChangeStatusRequest>()),
         ).thenThrow(Exception('API Error'));
 
         expect(
