@@ -14,6 +14,7 @@ import '../../data/client/google_routes_api_client.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
 import 'trip_detail_screen.dart';
+import 'friends_followers_screen.dart';
 
 /// User profile screen showing user information, statistics, and trips
 class ProfileScreen extends StatefulWidget {
@@ -149,6 +150,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(
       context,
       PageTransitions.slideUp(TripDetailScreen(trip: trip)),
+    );
+  }
+
+  void _navigateToFriendsFollowers() {
+    Navigator.push(
+      context,
+      PageTransitions.slideUp(const FriendsFollowersScreen()),
     );
   }
 
@@ -392,36 +400,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatCard('Trips', _userTrips.length.toString()),
-        _buildStatCard('Followers', _profile!.followersCount.toString()),
-        _buildStatCard('Following', _profile!.followingCount.toString()),
+        _buildStatCard('Trips', _userTrips.length.toString(), null),
+        _buildStatCard('Followers', _profile!.followersCount.toString(),
+            _navigateToFriendsFollowers),
+        _buildStatCard('Following', _profile!.followingCount.toString(),
+            _navigateToFriendsFollowers),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+  Widget _buildStatCard(String label, String value, VoidCallback? onTap) {
+    final card = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ],
         ),
       ),
+    );
+
+    return Expanded(
+      child: onTap != null
+          ? InkWell(
+              onTap: onTap,
+              child: card,
+            )
+          : card,
     );
   }
 
