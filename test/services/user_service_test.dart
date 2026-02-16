@@ -294,7 +294,7 @@ void main() {
 
       test('handles errors when sending friend request', () async {
         when(
-          mockUserCommandClient.sendFriendRequest(anyThat(isA<String>())),
+          mockUserCommandClient.sendFriendRequest(any),
         ).thenThrow(Exception('Failed to send request'));
 
         expect(
@@ -329,7 +329,7 @@ void main() {
 
       test('handles errors when accepting friend request', () async {
         when(
-          mockUserCommandClient.acceptFriendRequest(anyThat(isA<String>())),
+          mockUserCommandClient.acceptFriendRequest(any),
         ).thenThrow(Exception('Failed to accept request'));
 
         expect(
@@ -364,7 +364,7 @@ void main() {
 
       test('handles errors when declining friend request', () async {
         when(
-          mockUserCommandClient.declineFriendRequest(anyThat(isA<String>())),
+          mockUserCommandClient.declineFriendRequest(any),
         ).thenThrow(Exception('Failed to decline request'));
 
         expect(
@@ -399,7 +399,7 @@ void main() {
 
       test('handles errors when following user', () async {
         when(
-          mockUserCommandClient.followUser(anyThat(isA<String>())),
+          mockUserCommandClient.followUser(any),
         ).thenThrow(Exception('Failed to follow user'));
 
         expect(() => userService.followUser('user-123'), throwsException);
@@ -431,7 +431,7 @@ void main() {
 
       test('handles errors when unfollowing user', () async {
         when(
-          mockUserCommandClient.unfollowUser(anyThat(isA<String>())),
+          mockUserCommandClient.unfollowUser(any),
         ).thenThrow(Exception('Failed to unfollow user'));
 
         expect(() => userService.unfollowUser('user-123'), throwsException);
