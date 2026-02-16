@@ -10,7 +10,8 @@ class CreateTripRepository {
       : _tripService = tripService ?? TripService();
 
   /// Creates a new trip
-  Future<void> createTrip({
+  /// Returns the trip ID immediately. Full trip data can be fetched separately.
+  Future<String> createTrip({
     required String name,
     String? description,
     required Visibility visibility,
@@ -25,6 +26,11 @@ class CreateTripRepository {
       endDate: endDate,
     );
 
-    await _tripService.createTrip(request);
+    return await _tripService.createTrip(request);
+  }
+
+  /// Gets a trip by ID
+  Future<Trip> getTripById(String tripId) async {
+    return await _tripService.getTripById(tripId);
   }
 }

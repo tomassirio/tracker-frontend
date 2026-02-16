@@ -7,7 +7,6 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
@@ -38,7 +37,6 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
-  late final TripService _tripService;
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
@@ -95,7 +93,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final geocodingClient =
         apiKey.isNotEmpty ? GoogleGeocodingApiClient(apiKey) : null;
     _repository = TripDetailRepository(geocodingClient: geocodingClient);
-    _tripService = TripService();
 
     _trip = widget.trip;
     _updateMapData();
@@ -494,11 +491,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     try {
       await _repository.changeTripStatus(_trip.id, newStatus);
 
-      // Fetch the updated trip to get full details
-      final updatedTrip = await _tripService.getTripById(_trip.id);
-
+      // Update local state optimistically - WebSocket will confirm the change
       setState(() {
-        _trip = updatedTrip;
+        _trip = _trip.copyWith(status: newStatus);
         _isChangingStatus = false;
       });
 
