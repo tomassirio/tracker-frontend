@@ -33,8 +33,8 @@ class ApiEndpoints {
   static const String usersFriendRequestsReceived =
       '/users/friends/requests/received';
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
-  static const String usersFollowsFollowing = '/users/follows/following';
-  static const String usersFollowsFollowers = '/users/follows/followers';
+  static const String usersFollowsFollowing = '/users/following';
+  static const String usersFollowsFollowers = '/users/followers';
 
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';

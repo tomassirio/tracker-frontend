@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingTrips = false;
   String? _error;
   bool _isLoggedIn = false;
-  final int _selectedSidebarIndex = 3; // Profile is index 3
+  final int _selectedSidebarIndex = 4; // Profile is index 4
 
   @override
   void initState() {

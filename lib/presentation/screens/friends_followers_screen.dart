@@ -41,6 +41,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
   String? _error;
   UserProfile? _currentUser;
   bool _isLoggedIn = false;
+  final int _selectedSidebarIndex = 2; // Friends is index 2
 
   @override
   void initState() {
@@ -299,7 +300,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
       drawer: AppSidebar(
         username: _currentUser?.username,
         userId: _currentUser?.id,
-        selectedIndex: -1,
+        selectedIndex: _selectedSidebarIndex,
         onLogout: () {},
         onSettings: () {},
       ),

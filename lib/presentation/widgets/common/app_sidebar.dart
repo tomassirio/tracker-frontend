@@ -4,6 +4,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
 import 'package:tracker_frontend/presentation/screens/trip_plans_screen.dart';
 import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
+import 'package:tracker_frontend/presentation/screens/friends_followers_screen.dart';
 
 /// Sidebar navigation for the app
 class AppSidebar extends StatelessWidget {
@@ -65,10 +66,17 @@ class AppSidebar extends StatelessWidget {
         );
         break;
       case 2:
+        // Navigate to Friends & Followers
+        Navigator.push(
+          context,
+          PageTransitions.slideUp(const FriendsFollowersScreen()),
+        );
+        break;
+      case 3:
         // Achievements coming soon
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
         break;
-      case 3:
+      case 4:
         // Navigate to Profile (right of home)
         Navigator.push(
           context,
@@ -118,18 +126,25 @@ class AppSidebar extends StatelessWidget {
             onTap: isLoggedIn ? () => _handleNavigation(context, 1) : null,
           ),
           ListTile(
-            leading: const Icon(Icons.emoji_events),
-            title: const Text('Achievements'),
+            leading: const Icon(Icons.people),
+            title: const Text('Friends'),
             selected: selectedIndex == 2,
             enabled: isLoggedIn,
             onTap: isLoggedIn ? () => _handleNavigation(context, 2) : null,
           ),
           ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('My Profile'),
+            leading: const Icon(Icons.emoji_events),
+            title: const Text('Achievements'),
             selected: selectedIndex == 3,
             enabled: isLoggedIn,
             onTap: isLoggedIn ? () => _handleNavigation(context, 3) : null,
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('My Profile'),
+            selected: selectedIndex == 4,
+            enabled: isLoggedIn,
+            onTap: isLoggedIn ? () => _handleNavigation(context, 4) : null,
           ),
           const Divider(),
           if (isLoggedIn) ...[
