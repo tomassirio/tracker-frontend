@@ -237,7 +237,9 @@ class TripInfoCard extends StatelessWidget {
                           ),
                           child: IconButton(
                             icon: Icon(
-                              isFollowing ? Icons.person_remove : Icons.person_add,
+                              isFollowing
+                                  ? Icons.person_remove
+                                  : Icons.person_add,
                               size: 16,
                               color: isFollowing ? Colors.white : null,
                             ),
@@ -269,24 +271,6 @@ class TripInfoCard extends StatelessWidget {
                             tooltip: hasSentFriendRequest
                                 ? 'Cancel Friend Request'
                                 : 'Send Friend Request',
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            constraints: const BoxConstraints(),
-                          ),
-                        ),
-                      ],
-                    ],
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.person_add_alt,
-                              size: 16,
-                            ),
-                            onPressed: onSendFriendRequest,
-                            tooltip: 'Send Friend Request',
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             constraints: const BoxConstraints(),
                           ),

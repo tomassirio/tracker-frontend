@@ -37,7 +37,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingTrips = false;
   String? _error;
   bool _isLoggedIn = false;
-  bool _hasSentFriendRequest = false; // Track if friend request was sent locally
+  bool _hasSentFriendRequest =
+      false; // Track if friend request was sent locally
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   @override

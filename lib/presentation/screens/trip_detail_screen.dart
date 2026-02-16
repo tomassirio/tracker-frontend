@@ -63,7 +63,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
   String? _username;
   String? _userId;
-  
+
   // Track social interactions
   bool _isFollowingTripOwner = false;
   bool _hasSentFriendRequest = false;
