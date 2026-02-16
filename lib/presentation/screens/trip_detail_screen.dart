@@ -346,25 +346,22 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
     try {
       if (_replyingToCommentId != null) {
-        final reply = await _repository.addReply(
+        final replyId = await _repository.addReply(
           _trip.id,
           _replyingToCommentId!,
           message,
         );
 
+        // Clear the reply state - the comment will arrive via WebSocket
         setState(() {
-          _replies[_replyingToCommentId!] = [
-            ...?_replies[_replyingToCommentId!],
-            reply,
-          ];
           _commentController.clear();
           _replyingToCommentId = null;
         });
       } else {
-        final comment = await _repository.addComment(_trip.id, message);
+        final commentId = await _repository.addComment(_trip.id, message);
 
+        // Clear the input - the comment will arrive via WebSocket
         setState(() {
-          _comments.insert(0, comment);
           _commentController.clear();
         });
       }
@@ -408,16 +405,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isChangingStatus = true);
 
     try {
-      final updatedTrip =
-          await _repository.changeTripStatus(_trip.id, newStatus);
+      final tripId = await _repository.changeTripStatus(_trip.id, newStatus);
+
+      // Fetch the updated trip to get full details
+      final updatedTrip = await _repository.loadTrip(_trip.id);
 
       setState(() {
-        // Preserve username if backend didn't return it
-        if (updatedTrip.username.isEmpty && _trip.username.isNotEmpty) {
-          _trip = updatedTrip.copyWith(username: _trip.username);
-        } else {
-          _trip = updatedTrip;
-        }
+        _trip = updatedTrip;
         _isChangingStatus = false;
       });
 

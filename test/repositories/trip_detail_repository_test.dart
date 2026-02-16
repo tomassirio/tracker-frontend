@@ -132,26 +132,22 @@ void main() {
 
     group('addComment', () {
       test('adds a top-level comment successfully', () async {
-        final newComment = createMockComment('new-comment', null);
-
         when(
-          mockCommentService.addComment('trip-1', any),
-        ).thenAnswer((_) async => newComment);
+          mockCommentService.addComment('trip-1', anyThat(isA<CreateCommentRequest>())),
+        ).thenAnswer((_) async => 'new-comment');
 
         final result = await repository.addComment('trip-1', 'Test message');
 
-        expect(result.id, 'new-comment');
-        verify(mockCommentService.addComment('trip-1', any)).called(1);
+        expect(result, 'new-comment');
+        verify(mockCommentService.addComment('trip-1', anyThat(isA<CreateCommentRequest>()))).called(1);
       });
     });
 
     group('addReply', () {
       test('adds a reply to a comment successfully', () async {
-        final newReply = createMockComment('new-reply', 'parent-1');
-
         when(
-          mockCommentService.addComment('trip-1', any),
-        ).thenAnswer((_) async => newReply);
+          mockCommentService.addComment('trip-1', anyThat(isA<CreateCommentRequest>())),
+        ).thenAnswer((_) async => 'new-reply');
 
         final result = await repository.addReply(
           'trip-1',
@@ -159,8 +155,7 @@ void main() {
           'Reply message',
         );
 
-        expect(result.id, 'new-reply');
-        expect(result.parentCommentId, 'parent-1');
+        expect(result, 'new-reply');
       });
     });
 
@@ -195,17 +190,17 @@ void main() {
     group('addReaction', () {
       test('adds reaction to a comment successfully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any),
-        ).thenAnswer((_) async => {});
+          mockCommentService.addReaction('comment-1', anyThat(isA<AddReactionRequest>())),
+        ).thenAnswer((_) async => 'comment-1');
 
         await repository.addReaction('comment-1', ReactionType.heart);
 
-        verify(mockCommentService.addReaction('comment-1', any)).called(1);
+        verify(mockCommentService.addReaction('comment-1', anyThat(isA<AddReactionRequest>()))).called(1);
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any),
+          mockCommentService.addReaction('comment-1', anyThat(isA<AddReactionRequest>())),
         ).thenThrow(Exception('API Error'));
 
         expect(
@@ -219,7 +214,7 @@ void main() {
       test('removes reaction from a comment successfully', () async {
         when(
           mockCommentService.removeReaction('comment-1'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'comment-1');
 
         await repository.removeReaction('comment-1');
 
@@ -237,25 +232,22 @@ void main() {
 
     group('changeTripStatus', () {
       test('changes trip status successfully', () async {
-        final updatedTrip = createMockTrip('trip-1', TripStatus.inProgress);
-
         when(
-          mockTripService.changeStatus('trip-1', any),
-        ).thenAnswer((_) async => updatedTrip);
+          mockTripService.changeStatus('trip-1', anyThat(isA<ChangeStatusRequest>())),
+        ).thenAnswer((_) async => 'trip-1');
 
         final result = await repository.changeTripStatus(
           'trip-1',
           TripStatus.inProgress,
         );
 
-        expect(result.id, 'trip-1');
-        expect(result.status, TripStatus.inProgress);
-        verify(mockTripService.changeStatus('trip-1', any)).called(1);
+        expect(result, 'trip-1');
+        verify(mockTripService.changeStatus('trip-1', anyThat(isA<ChangeStatusRequest>()))).called(1);
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockTripService.changeStatus('trip-1', any),
+          mockTripService.changeStatus('trip-1', anyThat(isA<ChangeStatusRequest>())),
         ).thenThrow(Exception('API Error'));
 
         expect(
