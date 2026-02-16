@@ -194,8 +194,92 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleCommentReaction(CommentReactionEvent event) {
-    // Refresh comments to get updated reaction counts
-    _loadComments();
+    // Update local state directly from WebSocket event instead of making a GET request
+    setState(() {
+      // Find and update the comment in top-level comments
+      final commentIndex = _comments.indexWhere((c) => c.id == event.commentId);
+      if (commentIndex != -1) {
+        final comment = _comments[commentIndex];
+        final updatedReactions = Map<String, int>.from(comment.reactions ?? {});
+
+        if (event.isRemoval) {
+          // Decrement reaction count
+          final currentCount = updatedReactions[event.reactionType] ?? 0;
+          if (currentCount > 1) {
+            updatedReactions[event.reactionType] = currentCount - 1;
+          } else {
+            updatedReactions.remove(event.reactionType);
+          }
+        } else {
+          // Increment reaction count
+          updatedReactions[event.reactionType] =
+              (updatedReactions[event.reactionType] ?? 0) + 1;
+        }
+
+        // Calculate new total reactions count
+        final newReactionsCount =
+            updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+        _comments[commentIndex] = Comment(
+          id: comment.id,
+          tripId: comment.tripId,
+          userId: comment.userId,
+          username: comment.username,
+          userAvatarUrl: comment.userAvatarUrl,
+          message: comment.message,
+          parentCommentId: comment.parentCommentId,
+          reactions: updatedReactions.isEmpty ? null : updatedReactions,
+          replies: comment.replies,
+          reactionsCount: newReactionsCount,
+          responsesCount: comment.responsesCount,
+          createdAt: comment.createdAt,
+          updatedAt: comment.updatedAt,
+        );
+        return;
+      }
+
+      // Check in replies
+      for (final parentId in _replies.keys) {
+        final replies = _replies[parentId]!;
+        final replyIndex = replies.indexWhere((c) => c.id == event.commentId);
+        if (replyIndex != -1) {
+          final reply = replies[replyIndex];
+          final updatedReactions = Map<String, int>.from(reply.reactions ?? {});
+
+          if (event.isRemoval) {
+            final currentCount = updatedReactions[event.reactionType] ?? 0;
+            if (currentCount > 1) {
+              updatedReactions[event.reactionType] = currentCount - 1;
+            } else {
+              updatedReactions.remove(event.reactionType);
+            }
+          } else {
+            updatedReactions[event.reactionType] =
+                (updatedReactions[event.reactionType] ?? 0) + 1;
+          }
+
+          final newReactionsCount =
+              updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+          _replies[parentId]![replyIndex] = Comment(
+            id: reply.id,
+            tripId: reply.tripId,
+            userId: reply.userId,
+            username: reply.username,
+            userAvatarUrl: reply.userAvatarUrl,
+            message: reply.message,
+            parentCommentId: reply.parentCommentId,
+            reactions: updatedReactions.isEmpty ? null : updatedReactions,
+            replies: reply.replies,
+            reactionsCount: newReactionsCount,
+            responsesCount: reply.responsesCount,
+            createdAt: reply.createdAt,
+            updatedAt: reply.updatedAt,
+          );
+          return;
+        }
+      }
+    });
   }
 
   @override
