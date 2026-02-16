@@ -41,53 +41,54 @@ class UserQueryClient {
 
   /// Get user's friends list
   /// Requires authentication (USER, ADMIN)
-  Future<List<UserProfile>> getFriends() async {
+  /// Returns a list of friendships (userId and friendId pairs)
+  Future<List<Friendship>> getFriends() async {
     final response = await _apiClient.get(
       ApiEndpoints.usersFriends,
       requireAuth: true,
     );
-    return _apiClient.handleListResponse(response, UserProfile.fromJson);
+    return _apiClient.handleListResponse(response, Friendship.fromJson);
   }
 
   /// Get pending received friend requests
   /// Requires authentication (USER, ADMIN)
-  Future<List<dynamic>> getReceivedFriendRequests() async {
+  Future<List<FriendRequest>> getReceivedFriendRequests() async {
     final response = await _apiClient.get(
       ApiEndpoints.usersFriendRequestsReceived,
       requireAuth: true,
     );
-    // Note: Update return type based on actual FriendRequest model
-    return _apiClient.handleListResponse(response, (json) => json);
+    return _apiClient.handleListResponse(response, FriendRequest.fromJson);
   }
 
   /// Get pending sent friend requests
   /// Requires authentication (USER, ADMIN)
-  Future<List<dynamic>> getSentFriendRequests() async {
+  Future<List<FriendRequest>> getSentFriendRequests() async {
     final response = await _apiClient.get(
       ApiEndpoints.usersFriendRequestsSent,
       requireAuth: true,
     );
-    // Note: Update return type based on actual FriendRequest model
-    return _apiClient.handleListResponse(response, (json) => json);
+    return _apiClient.handleListResponse(response, FriendRequest.fromJson);
   }
 
   /// Get users that current user follows
   /// Requires authentication (USER, ADMIN)
-  Future<List<UserProfile>> getFollowing() async {
+  /// Returns a list of follow relationships
+  Future<List<UserFollow>> getFollowing() async {
     final response = await _apiClient.get(
       ApiEndpoints.usersFollowsFollowing,
       requireAuth: true,
     );
-    return _apiClient.handleListResponse(response, UserProfile.fromJson);
+    return _apiClient.handleListResponse(response, UserFollow.fromJson);
   }
 
   /// Get users that follow current user
   /// Requires authentication (USER, ADMIN)
-  Future<List<UserProfile>> getFollowers() async {
+  /// Returns a list of follow relationships
+  Future<List<UserFollow>> getFollowers() async {
     final response = await _apiClient.get(
       ApiEndpoints.usersFollowsFollowers,
       requireAuth: true,
     );
-    return _apiClient.handleListResponse(response, UserProfile.fromJson);
+    return _apiClient.handleListResponse(response, UserFollow.fromJson);
   }
 }

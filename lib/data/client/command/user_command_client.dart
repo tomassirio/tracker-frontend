@@ -27,7 +27,7 @@ class UserCommandClient {
   Future<String> sendFriendRequest(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFriendRequests,
-      body: {'userId': userId},
+      body: {'receiverId': userId},
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);
@@ -63,7 +63,7 @@ class UserCommandClient {
   Future<String> followUser(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFollows,
-      body: {'userId': userId},
+      body: {'followedId': userId},
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);
