@@ -63,6 +63,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
   String? _username;
   String? _userId;
+  
+  // Track social interactions
+  bool _isFollowingTripOwner = false;
+  bool _hasSentFriendRequest = false;
 
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
@@ -655,15 +659,36 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _handleFollowTripOwner() async {
     if (!_isLoggedIn || _trip.userId == _userId) return;
 
-    try {
-      await _userService.followUser(_trip.userId);
-      if (mounted) {
-        UiHelpers.showSuccessMessage(
-            context, 'You are now following @${_trip.username}');
+    // Toggle between follow and unfollow
+    if (_isFollowingTripOwner) {
+      try {
+        await _userService.unfollowUser(_trip.userId);
+        setState(() {
+          _isFollowingTripOwner = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'Unfollowed @${_trip.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to unfollow user: $e');
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+    } else {
+      try {
+        await _userService.followUser(_trip.userId);
+        setState(() {
+          _isFollowingTripOwner = true;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are now following @${_trip.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+        }
       }
     }
   }
@@ -671,8 +696,22 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _handleSendFriendRequestToTripOwner() async {
     if (!_isLoggedIn || _trip.userId == _userId) return;
 
+    // Toggle between send and cancel
+    if (_hasSentFriendRequest) {
+      setState(() {
+        _hasSentFriendRequest = false;
+      });
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+      }
+      return;
+    }
+
     try {
       await _userService.sendFriendRequest(_trip.userId);
+      setState(() {
+        _hasSentFriendRequest = true;
+      });
       if (mounted) {
         UiHelpers.showSuccessMessage(
             context, 'Friend request sent to @${_trip.username}');
@@ -786,6 +825,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       currentUserId: _userId,
       isChangingStatus: _isChangingStatus,
       showTripUpdatePanel: _showTripUpdatePanel,
+      isFollowingTripOwner: _isFollowingTripOwner,
+      hasSentFriendRequest: _hasSentFriendRequest,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),

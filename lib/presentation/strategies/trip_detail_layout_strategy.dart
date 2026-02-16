@@ -33,6 +33,8 @@ class TripDetailLayoutData {
   final bool isChangingStatus;
   final bool
       showTripUpdatePanel; // Only show on Android for owner when trip is in progress
+  final bool isFollowingTripOwner; // Track if following trip owner
+  final bool hasSentFriendRequest; // Track if friend request sent
 
   // Callbacks
   final VoidCallback onToggleTripInfo;
@@ -74,6 +76,8 @@ class TripDetailLayoutData {
     this.currentUserId,
     this.isChangingStatus = false,
     this.showTripUpdatePanel = false,
+    this.isFollowingTripOwner = false,
+    this.hasSentFriendRequest = false,
     required this.onToggleTripInfo,
     required this.onToggleComments,
     required this.onToggleTimeline,
@@ -125,6 +129,8 @@ abstract class TripDetailLayoutStrategy {
       onStatusChange: data.onStatusChange,
       onFollowUser: data.onFollowTripOwner,
       onSendFriendRequest: data.onSendFriendRequestToTripOwner,
+      isFollowing: data.isFollowingTripOwner,
+      hasSentFriendRequest: data.hasSentFriendRequest,
     );
   }
 

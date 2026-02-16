@@ -37,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingTrips = false;
   String? _error;
   bool _isLoggedIn = false;
+  bool _hasSentFriendRequest = false; // Track if friend request was sent locally
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   @override
@@ -282,8 +283,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleSendFriendRequest() async {
     if (_profile == null) return;
 
+    // If already sent, this acts as a cancel (just toggle state locally)
+    if (_hasSentFriendRequest) {
+      setState(() {
+        _hasSentFriendRequest = false;
+      });
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+      }
+      return;
+    }
+
     try {
       await _userService.sendFriendRequest(_profile!.id);
+      setState(() {
+        _hasSentFriendRequest = true;
+      });
       if (mounted) {
         UiHelpers.showSuccessMessage(
             context, 'Friend request sent to ${_profile!.username}');
@@ -477,11 +492,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ? _handleUnfollowUser
                             : _handleFollowUser,
                         tooltip: _profile!.isFollowing ? 'Unfollow' : 'Follow',
+                        color: _profile!.isFollowing ? Colors.blue : null,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.person_add_alt),
+                        icon: Icon(
+                          _hasSentFriendRequest
+                              ? Icons.person_add_disabled
+                              : Icons.person_add_alt,
+                        ),
                         onPressed: _handleSendFriendRequest,
-                        tooltip: 'Send Friend Request',
+                        tooltip: _hasSentFriendRequest
+                            ? 'Cancel Friend Request'
+                            : 'Send Friend Request',
+                        color: _hasSentFriendRequest ? Colors.orange : null,
                       ),
                     ],
                   ),

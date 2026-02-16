@@ -18,6 +18,8 @@ class TripInfoCard extends StatelessWidget {
   final Function(TripStatus)? onStatusChange;
   final VoidCallback? onFollowUser;
   final VoidCallback? onSendFriendRequest;
+  final bool isFollowing;
+  final bool hasSentFriendRequest;
 
   const TripInfoCard({
     super.key,
@@ -29,6 +31,8 @@ class TripInfoCard extends StatelessWidget {
     this.onStatusChange,
     this.onFollowUser,
     this.onSendFriendRequest,
+    this.isFollowing = false,
+    this.hasSentFriendRequest = false,
   });
 
   @override
@@ -226,16 +230,19 @@ class TripInfoCard extends StatelessWidget {
                         Container(
                           height: 28,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.5),
+                            color: isFollowing
+                                ? Colors.blue.withOpacity(0.7)
+                                : Colors.white.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: IconButton(
-                            icon: const Icon(
-                              Icons.person_add,
+                            icon: Icon(
+                              isFollowing ? Icons.person_remove : Icons.person_add,
                               size: 16,
+                              color: isFollowing ? Colors.white : null,
                             ),
                             onPressed: onFollowUser,
-                            tooltip: 'Follow',
+                            tooltip: isFollowing ? 'Unfollow' : 'Follow',
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             constraints: const BoxConstraints(),
                           ),
@@ -243,6 +250,31 @@ class TripInfoCard extends StatelessWidget {
                       if (onSendFriendRequest != null) ...[
                         const SizedBox(width: 4),
                         Container(
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: hasSentFriendRequest
+                                ? Colors.orange.withOpacity(0.7)
+                                : Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              hasSentFriendRequest
+                                  ? Icons.person_add_disabled
+                                  : Icons.person_add_alt,
+                              size: 16,
+                              color: hasSentFriendRequest ? Colors.white : null,
+                            ),
+                            onPressed: onSendFriendRequest,
+                            tooltip: hasSentFriendRequest
+                                ? 'Cancel Friend Request'
+                                : 'Send Friend Request',
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ),
+                      ],
+                    ],
                           height: 28,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.5),
