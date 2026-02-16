@@ -37,6 +37,7 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
+  final UserService _userService = UserService();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
@@ -650,6 +651,39 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  Future<void> _handleFollowTripOwner() async {
+    if (!_isLoggedIn || _trip.userId == _userId) return;
+
+    try {
+      await _userService.followUser(_trip.userId);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+            context, 'You are now following @${_trip.username}');
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+      }
+    }
+  }
+
+  Future<void> _handleSendFriendRequestToTripOwner() async {
+    if (!_isLoggedIn || _trip.userId == _userId) return;
+
+    try {
+      await _userService.sendFriendRequest(_trip.userId);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+            context, 'Friend request sent to @${_trip.username}');
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Failed to send friend request: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -765,6 +799,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
       onSendTripUpdate: _sendManualUpdate,
+      onFollowTripOwner:
+          _trip.userId != _userId ? _handleFollowTripOwner : null,
+      onSendFriendRequestToTripOwner: _trip.userId != _userId
+          ? _handleSendFriendRequestToTripOwner
+          : null,
     );
   }
 

@@ -49,6 +49,8 @@ class TripDetailLayoutData {
   final VoidCallback onCancelReply;
   final Function(TripStatus)? onStatusChange;
   final Future<void> Function(String? message) onSendTripUpdate;
+  final VoidCallback? onFollowTripOwner;
+  final VoidCallback? onSendFriendRequestToTripOwner;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -86,6 +88,8 @@ class TripDetailLayoutData {
     required this.onCancelReply,
     this.onStatusChange,
     required this.onSendTripUpdate,
+    this.onFollowTripOwner,
+    this.onSendFriendRequestToTripOwner,
   });
 }
 
@@ -119,6 +123,8 @@ abstract class TripDetailLayoutStrategy {
       currentUserId: data.currentUserId,
       isChangingStatus: data.isChangingStatus,
       onStatusChange: data.onStatusChange,
+      onFollowUser: data.onFollowTripOwner,
+      onSendFriendRequest: data.onSendFriendRequestToTripOwner,
     );
   }
 

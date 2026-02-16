@@ -16,6 +16,8 @@ class TripInfoCard extends StatelessWidget {
   final String? currentUserId;
   final bool isChangingStatus;
   final Function(TripStatus)? onStatusChange;
+  final VoidCallback? onFollowUser;
+  final VoidCallback? onSendFriendRequest;
 
   const TripInfoCard({
     super.key,
@@ -25,6 +27,8 @@ class TripInfoCard extends StatelessWidget {
     this.currentUserId,
     this.isChangingStatus = false,
     this.onStatusChange,
+    this.onFollowUser,
+    this.onSendFriendRequest,
   });
 
   @override
@@ -162,53 +166,101 @@ class TripInfoCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 // User info row
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageTransitions.slideRight(
-                        ProfileScreen(userId: trip.userId),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 12,
-                          backgroundColor: WandererTheme.primaryOrange,
-                          child: Text(
-                            trip.username.isNotEmpty
-                                ? trip.username[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            PageTransitions.slideRight(
+                              ProfileScreen(userId: trip.userId),
                             ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                radius: 12,
+                                backgroundColor: WandererTheme.primaryOrange,
+                                child: Text(
+                                  trip.username.isNotEmpty
+                                      ? trip.username[0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '@${trip.username}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: WandererTheme.primaryOrange,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.chevron_right,
+                                size: 14,
+                                color: WandererTheme.primaryOrange,
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '@${trip.username}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: WandererTheme.primaryOrange,
+                      ),
+                    ),
+                    // Show follow/friend buttons if viewing another user's trip
+                    if (onFollowUser != null || onSendFriendRequest != null) ...[
+                      const SizedBox(width: 8),
+                      if (onFollowUser != null)
+                        Container(
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.person_add,
+                              size: 16,
+                            ),
+                            onPressed: onFollowUser,
+                            tooltip: 'Follow',
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            constraints: const BoxConstraints(),
                           ),
                         ),
+                      if (onSendFriendRequest != null) ...[
                         const SizedBox(width: 4),
-                        Icon(
-                          Icons.chevron_right,
-                          size: 14,
-                          color: WandererTheme.primaryOrange,
+                        Container(
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.person_add_alt,
+                              size: 16,
+                            ),
+                            onPressed: onSendFriendRequest,
+                            tooltip: 'Send Friend Request',
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            constraints: const BoxConstraints(),
+                          ),
                         ),
                       ],
-                    ),
-                  ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 8),
                 // Stats row

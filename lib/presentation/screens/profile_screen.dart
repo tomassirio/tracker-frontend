@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/repositories/profile_repository.dart';
+import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
@@ -28,8 +29,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileRepository _repository = ProfileRepository();
+  final UserService _userService = UserService();
   final TextEditingController _searchController = TextEditingController();
   UserProfile? _profile;
+  UserProfile? _currentUser;
   List<Trip> _userTrips = [];
   bool _isLoadingProfile = false;
   bool _isLoadingTrips = false;
@@ -60,6 +63,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _isLoggedIn = isLoggedIn;
       });
+
+      // Load current user if logged in
+      if (isLoggedIn) {
+        try {
+          final currentUser = await _repository.getMyProfile();
+          setState(() {
+            _currentUser = currentUser;
+          });
+        } catch (e) {
+          // Ignore error loading current user
+        }
+      }
 
       // If viewing another user's profile
       if (widget.userId != null) {
@@ -232,6 +247,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
     avatarUrlController.dispose();
   }
 
+  Future<void> _handleFollowUser() async {
+    if (_profile == null) return;
+
+    try {
+      await _userService.followUser(_profile!.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'You are now following ${_profile!.username}');
+        // Reload profile to get updated isFollowing status
+        await _loadProfile();
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+      }
+    }
+  }
+
+  Future<void> _handleUnfollowUser() async {
+    if (_profile == null) return;
+
+    try {
+      await _userService.unfollowUser(_profile!.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Unfollowed ${_profile!.username}');
+        // Reload profile to get updated isFollowing status
+        await _loadProfile();
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Failed to unfollow user: $e');
+      }
+    }
+  }
+
+  Future<void> _handleSendFriendRequest() async {
+    if (_profile == null) return;
+
+    try {
+      await _userService.sendFriendRequest(_profile!.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Friend request sent to ${_profile!.username}');
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Failed to send friend request: $e');
+      }
+    }
+  }
+
   Future<void> _updateProfile(
     String displayName,
     String bio,
@@ -358,12 +422,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _profile!.displayName ?? _profile!.username,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _profile!.displayName ?? _profile!.username,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          if (_profile!.isFollowing) ...[
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.person_add_alt_1,
+                              size: 20,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        ],
                       ),
                       Text(
                         '@${_profile!.username}',
@@ -377,12 +455,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-                if (widget.userId ==
-                    null) // Only show edit button for own profile
+                if (widget.userId == null)
+                  // Only show edit button for own profile
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: _showEditProfileDialog,
                     tooltip: 'Edit Profile',
+                  )
+                else
+                  // Show follow/friend request buttons for other users
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _profile!.isFollowing
+                              ? Icons.person_remove
+                              : Icons.person_add,
+                        ),
+                        onPressed: _profile!.isFollowing
+                            ? _handleUnfollowUser
+                            : _handleFollowUser,
+                        tooltip: _profile!.isFollowing ? 'Unfollow' : 'Follow',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.person_add_alt),
+                        onPressed: _handleSendFriendRequest,
+                        tooltip: 'Send Friend Request',
+                      ),
+                    ],
                   ),
               ],
             ),
