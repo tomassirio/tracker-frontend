@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
+import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
+import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
@@ -34,8 +37,10 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
+  final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
+  StreamSubscription<WebSocketEvent>? _wsSubscription;
   late Trip _trip;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
@@ -95,6 +100,183 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadUserInfo();
     _loadComments();
     _loadTripUpdates();
+    _initWebSocket();
+  }
+
+  Future<void> _initWebSocket() async {
+    // Connect to WebSocket server first
+    await _webSocketService.connect();
+    // Subscribe to events for this specific trip
+    final tripStream = _webSocketService.subscribeToTrip(_trip.id);
+    _wsSubscription = tripStream.listen(_handleWebSocketEvent);
+  }
+
+  void _handleWebSocketEvent(WebSocketEvent event) {
+    if (!mounted) return;
+
+    switch (event.type) {
+      case WebSocketEventType.tripStatusChanged:
+        _handleTripStatusChanged(event as TripStatusChangedEvent);
+        break;
+      case WebSocketEventType.tripUpdated:
+        _handleTripUpdatedEvent(event as TripUpdatedEvent);
+        break;
+      case WebSocketEventType.commentAdded:
+        _handleCommentAdded(event as CommentAddedEvent);
+        break;
+      case WebSocketEventType.commentReactionAdded:
+      case WebSocketEventType.commentReactionRemoved:
+        _handleCommentReaction(event as CommentReactionEvent);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleTripStatusChanged(TripStatusChangedEvent event) {
+    setState(() {
+      _trip = _trip.copyWith(status: event.newStatus);
+    });
+  }
+
+  void _handleTripUpdatedEvent(TripUpdatedEvent event) {
+    // Add the new update to the timeline
+    if (event.latitude != null && event.longitude != null) {
+      final newUpdate = TripLocation(
+        id: 'ws_${event.timestamp.millisecondsSinceEpoch}',
+        latitude: event.latitude!,
+        longitude: event.longitude!,
+        timestamp: event.timestamp,
+        battery: event.batteryLevel,
+        message: event.message,
+        city: event.city,
+        country: event.country,
+      );
+
+      setState(() {
+        _tripUpdates = [newUpdate, ..._tripUpdates];
+      });
+
+      // Update the map to show the new location
+      _updateMapData();
+    }
+  }
+
+  void _handleCommentAdded(CommentAddedEvent event) {
+    // Create a new comment from the event
+    final newComment = Comment(
+      id: event.commentId,
+      tripId: _trip.id,
+      userId: event.userId,
+      username: event.username,
+      message: event.message,
+      parentCommentId: event.parentCommentId,
+      createdAt: event.timestamp,
+      updatedAt: event.timestamp,
+    );
+
+    setState(() {
+      if (event.parentCommentId != null) {
+        // It's a reply
+        final parentId = event.parentCommentId!;
+        if (_replies.containsKey(parentId)) {
+          _replies[parentId] = [..._replies[parentId]!, newComment];
+        }
+      } else {
+        // It's a top-level comment
+        _comments.insert(0, newComment);
+        _sortComments();
+      }
+    });
+  }
+
+  void _handleCommentReaction(CommentReactionEvent event) {
+    // Update local state directly from WebSocket event instead of making a GET request
+    setState(() {
+      // Find and update the comment in top-level comments
+      final commentIndex = _comments.indexWhere((c) => c.id == event.commentId);
+      if (commentIndex != -1) {
+        final comment = _comments[commentIndex];
+        final updatedReactions = Map<String, int>.from(comment.reactions ?? {});
+
+        if (event.isRemoval) {
+          // Decrement reaction count
+          final currentCount = updatedReactions[event.reactionType] ?? 0;
+          if (currentCount > 1) {
+            updatedReactions[event.reactionType] = currentCount - 1;
+          } else {
+            updatedReactions.remove(event.reactionType);
+          }
+        } else {
+          // Increment reaction count
+          updatedReactions[event.reactionType] =
+              (updatedReactions[event.reactionType] ?? 0) + 1;
+        }
+
+        // Calculate new total reactions count
+        final newReactionsCount =
+            updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+        _comments[commentIndex] = Comment(
+          id: comment.id,
+          tripId: comment.tripId,
+          userId: comment.userId,
+          username: comment.username,
+          userAvatarUrl: comment.userAvatarUrl,
+          message: comment.message,
+          parentCommentId: comment.parentCommentId,
+          reactions: updatedReactions.isEmpty ? null : updatedReactions,
+          replies: comment.replies,
+          reactionsCount: newReactionsCount,
+          responsesCount: comment.responsesCount,
+          createdAt: comment.createdAt,
+          updatedAt: comment.updatedAt,
+        );
+        return;
+      }
+
+      // Check in replies
+      for (final parentId in _replies.keys) {
+        final replies = _replies[parentId]!;
+        final replyIndex = replies.indexWhere((c) => c.id == event.commentId);
+        if (replyIndex != -1) {
+          final reply = replies[replyIndex];
+          final updatedReactions = Map<String, int>.from(reply.reactions ?? {});
+
+          if (event.isRemoval) {
+            final currentCount = updatedReactions[event.reactionType] ?? 0;
+            if (currentCount > 1) {
+              updatedReactions[event.reactionType] = currentCount - 1;
+            } else {
+              updatedReactions.remove(event.reactionType);
+            }
+          } else {
+            updatedReactions[event.reactionType] =
+                (updatedReactions[event.reactionType] ?? 0) + 1;
+          }
+
+          final newReactionsCount =
+              updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+          _replies[parentId]![replyIndex] = Comment(
+            id: reply.id,
+            tripId: reply.tripId,
+            userId: reply.userId,
+            username: reply.username,
+            userAvatarUrl: reply.userAvatarUrl,
+            message: reply.message,
+            parentCommentId: reply.parentCommentId,
+            reactions: updatedReactions.isEmpty ? null : updatedReactions,
+            replies: reply.replies,
+            reactionsCount: newReactionsCount,
+            responsesCount: reply.responsesCount,
+            createdAt: reply.createdAt,
+            updatedAt: reply.updatedAt,
+          );
+          return;
+        }
+      }
+    });
   }
 
   @override
@@ -124,6 +306,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   @override
   void dispose() {
+    _wsSubscription?.cancel();
+    _webSocketService.unsubscribeFromTrip(_trip.id);
     _commentController.dispose();
     _scrollController.dispose();
     _searchController.dispose();
@@ -246,25 +430,22 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
     try {
       if (_replyingToCommentId != null) {
-        final reply = await _repository.addReply(
+        await _repository.addReply(
           _trip.id,
           _replyingToCommentId!,
           message,
         );
 
+        // Clear the reply state - the comment will arrive via WebSocket
         setState(() {
-          _replies[_replyingToCommentId!] = [
-            ...?_replies[_replyingToCommentId!],
-            reply,
-          ];
           _commentController.clear();
           _replyingToCommentId = null;
         });
       } else {
-        final comment = await _repository.addComment(_trip.id, message);
+        await _repository.addComment(_trip.id, message);
 
+        // Clear the input - the comment will arrive via WebSocket
         setState(() {
-          _comments.insert(0, comment);
           _commentController.clear();
         });
       }
@@ -308,16 +489,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isChangingStatus = true);
 
     try {
-      final updatedTrip =
-          await _repository.changeTripStatus(_trip.id, newStatus);
+      await _repository.changeTripStatus(_trip.id, newStatus);
 
+      // Update local state optimistically - WebSocket will confirm the change
       setState(() {
-        // Preserve username if backend didn't return it
-        if (updatedTrip.username.isEmpty && _trip.username.isNotEmpty) {
-          _trip = updatedTrip.copyWith(username: _trip.username);
-        } else {
-          _trip = updatedTrip;
-        }
+        _trip = _trip.copyWith(status: newStatus);
         _isChangingStatus = false;
       });
 

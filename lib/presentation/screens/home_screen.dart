@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
@@ -24,7 +27,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final HomeRepository _repository = HomeRepository();
   final TripService _tripService = TripService();
+  final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
+  StreamSubscription<WebSocketEvent>? _wsSubscription;
   List<Trip> _trips = [];
   List<Trip> _filteredTrips = [];
   bool _isLoading = false;
@@ -40,10 +45,53 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUserInfo();
     _loadTrips();
     _searchController.addListener(_filterTrips);
+    _initWebSocket();
+  }
+
+  Future<void> _initWebSocket() async {
+    await _webSocketService.connect();
+    _wsSubscription = _webSocketService.events.listen(_handleWebSocketEvent);
+  }
+
+  void _handleWebSocketEvent(WebSocketEvent event) {
+    if (!mounted) return;
+
+    switch (event.type) {
+      case WebSocketEventType.tripStatusChanged:
+        _handleTripStatusChanged(event as TripStatusChangedEvent);
+        break;
+      case WebSocketEventType.tripUpdated:
+        _handleTripUpdated(event as TripUpdatedEvent);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleTripStatusChanged(TripStatusChangedEvent event) {
+    final tripIndex = _trips.indexWhere((t) => t.id == event.tripId);
+    if (tripIndex != -1) {
+      setState(() {
+        _trips[tripIndex] = _trips[tripIndex].copyWith(status: event.newStatus);
+        _filterTrips();
+      });
+    }
+  }
+
+  void _handleTripUpdated(TripUpdatedEvent event) {
+    // For home screen, we just need to know the trip was updated
+    // Refresh the trip data to get latest info
+    final tripIndex = _trips.indexWhere((t) => t.id == event.tripId);
+    if (tripIndex != -1) {
+      // Could refresh the specific trip, but for now just trigger a UI update
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _wsSubscription?.cancel();
+    _webSocketService.unsubscribeFromAllTrips();
     _searchController.dispose();
     super.dispose();
   }
@@ -73,6 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _filteredTrips = trips;
         _isLoading = false;
       });
+
+      // Subscribe to WebSocket updates for all loaded trips
+      _webSocketService.unsubscribeFromAllTrips();
+      _webSocketService.subscribeToTrips(trips.map((t) => t.id).toList());
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -142,25 +194,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _navigateToCreateTrip() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateTripScreen()),
     );
 
-    if (result == true) {
-      _loadTrips();
+    // Always refresh trips when returning
+    // CreateTripScreen uses pushReplacement to TripDetailScreen after creation
+    if (mounted) {
+      await _loadTrips();
     }
   }
 
   void _navigateToTripDetail(Trip trip) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       PageTransitions.slideUp(TripDetailScreen(trip: trip)),
     );
 
-    // Refresh if user logged out from trip detail screen
-    if (result == true && mounted) {
-      await _loadUserInfo();
+    // Always refresh trips when returning from trip detail
+    // This ensures newly created trips and any updates are shown
+    if (mounted) {
       await _loadTrips();
     }
   }

@@ -49,7 +49,8 @@ class TripDetailRepository {
   }
 
   /// Adds a new top-level comment
-  Future<Comment> addComment(String tripId, String message) async {
+  /// Returns the comment ID. Full comment data will be delivered via WebSocket.
+  Future<String> addComment(String tripId, String message) async {
     return await _commentService.addComment(
       tripId,
       CreateCommentRequest(message: message),
@@ -58,7 +59,8 @@ class TripDetailRepository {
 
   /// Adds a reply to a comment
   /// Uses parentCommentId in the request body to create a reply
-  Future<Comment> addReply(
+  /// Returns the comment ID. Full comment data will be delivered via WebSocket.
+  Future<String> addReply(
     String tripId,
     String parentCommentId,
     String message,
@@ -81,7 +83,8 @@ class TripDetailRepository {
   }
 
   /// Changes the status of a trip
-  Future<Trip> changeTripStatus(String tripId, TripStatus newStatus) async {
+  /// Returns the trip ID. Full trip data will be delivered via WebSocket.
+  Future<String> changeTripStatus(String tripId, TripStatus newStatus) async {
     final request = ChangeStatusRequest(status: newStatus);
     return await _tripService.changeStatus(tripId, request);
   }

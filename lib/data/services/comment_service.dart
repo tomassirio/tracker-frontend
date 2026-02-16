@@ -34,7 +34,8 @@ class CommentService {
   // ===== Comment Command Operations =====
 
   /// Add a new comment (top-level or reply)
-  Future<Comment> addComment(
+  /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
+  Future<String> addComment(
     String tripId,
     CreateCommentRequest request,
   ) async {
@@ -42,12 +43,15 @@ class CommentService {
   }
 
   /// Add a reaction to a comment
-  Future<void> addReaction(String commentId, AddReactionRequest request) async {
-    await _commentCommandClient.addReaction(commentId, request);
+  /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
+  Future<String> addReaction(
+      String commentId, AddReactionRequest request) async {
+    return await _commentCommandClient.addReaction(commentId, request);
   }
 
   /// Remove a reaction from a comment
-  Future<void> removeReaction(String commentId) async {
-    await _commentCommandClient.removeReaction(commentId);
+  /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
+  Future<String> removeReaction(String commentId) async {
+    return await _commentCommandClient.removeReaction(commentId);
   }
 }

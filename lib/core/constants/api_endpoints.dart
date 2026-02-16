@@ -11,6 +11,9 @@ class ApiEndpoints {
       getConfigValue('queryBaseUrl', '/api/query');
   static String get authBaseUrl => getConfigValue('authBaseUrl', '/api/auth');
 
+  // WebSocket base URL - read from window.appConfig or use default
+  static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');
+
   // Google Maps API key - read from window.appConfig
   static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
 
@@ -74,4 +77,8 @@ class ApiEndpoints {
   static String tripComments(String tripId) => '/trips/$tripId/comments';
   static String commentReactions(String commentId) =>
       '/comments/$commentId/reactions';
+
+  // WebSocket topics
+  static String wsTripTopic(String tripId) => '/topic/trips/$tripId';
+  static String wsUserTopic(String userId) => '/topic/users/$userId';
 }

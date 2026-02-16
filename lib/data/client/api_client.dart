@@ -84,6 +84,42 @@ class ApiClient {
     return response;
   }
 
+  /// POST request with raw body (for sending plain values like enums)
+  Future<http.Response> postRaw(
+    String endpoint, {
+    required dynamic body,
+    bool requireAuth = false,
+    Map<String, String>? headers,
+  }) async {
+    // Proactively refresh token if expired (OAuth2 best practice)
+    if (requireAuth) {
+      await _ensureValidToken();
+    }
+
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final requestHeaders = await _buildHeaders(requireAuth, headers);
+
+    var response = await _httpClient.post(
+      uri,
+      headers: requestHeaders,
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401 && requireAuth) {
+      final refreshed = await _refreshTokenIfNeeded();
+      if (refreshed) {
+        final newHeaders = await _buildHeaders(requireAuth, headers);
+        response = await _httpClient.post(
+          uri,
+          headers: newHeaders,
+          body: jsonEncode(body),
+        );
+      }
+    }
+
+    return response;
+  }
+
   /// PUT request
   Future<http.Response> put(
     String endpoint, {
@@ -261,7 +297,7 @@ class ApiClient {
         body: jsonEncode({'refreshToken': refreshToken}),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
         // Get new tokens from response
@@ -330,6 +366,43 @@ class ApiClient {
       throw _handleError(response);
     }
     // Success - no content to return
+  }
+
+  /// Handle 202 Accepted response from async operations
+  /// Returns the ID from the response body - supports both plain string ID
+  /// and JSON object { "id": "..." } formats
+  String handleAcceptedResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final body = response.body.trim();
+      if (body.isEmpty) {
+        throw Exception('Invalid response: empty body');
+      }
+
+      // Try to decode as JSON first
+      final decoded = jsonDecode(body);
+
+      // If it's a plain string (UUID directly), return it
+      if (decoded is String) {
+        if (decoded.isEmpty) {
+          throw Exception('Invalid response: empty id string');
+        }
+        return decoded;
+      }
+
+      // If it's a Map, extract the id field
+      if (decoded is Map<String, dynamic>) {
+        final id = decoded['id'] as String?;
+        if (id != null && id.isNotEmpty) {
+          return id;
+        }
+        throw Exception('Response does not contain an id field');
+      }
+
+      throw Exception(
+          'Invalid response format: expected string or object with id');
+    } else {
+      throw _handleError(response);
+    }
   }
 
   /// Handle errors from API

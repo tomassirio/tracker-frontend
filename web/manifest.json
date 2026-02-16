@@ -1,11 +1,11 @@
 {
-    "name": "tracker_frontend",
-    "short_name": "tracker_frontend",
+    "name": "Wanderer",
+    "short_name": "Wanderer",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Tracker's Frontend/Mobile",
+    "description": "Track your trips and adventures",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

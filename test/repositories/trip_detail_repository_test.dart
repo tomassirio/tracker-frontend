@@ -132,26 +132,26 @@ void main() {
 
     group('addComment', () {
       test('adds a top-level comment successfully', () async {
-        final newComment = createMockComment('new-comment', null);
-
         when(
-          mockCommentService.addComment('trip-1', any),
-        ).thenAnswer((_) async => newComment);
+          mockCommentService.addComment(captureAny, captureAny),
+        ).thenAnswer((_) async => 'new-comment');
 
         final result = await repository.addComment('trip-1', 'Test message');
 
-        expect(result.id, 'new-comment');
-        verify(mockCommentService.addComment('trip-1', any)).called(1);
+        expect(result, 'new-comment');
+        final captured =
+            verify(mockCommentService.addComment(captureAny, captureAny))
+                .captured;
+        expect(captured[0], 'trip-1');
+        expect(captured[1], isA<CreateCommentRequest>());
       });
     });
 
     group('addReply', () {
       test('adds a reply to a comment successfully', () async {
-        final newReply = createMockComment('new-reply', 'parent-1');
-
         when(
-          mockCommentService.addComment('trip-1', any),
-        ).thenAnswer((_) async => newReply);
+          mockCommentService.addComment(captureAny, captureAny),
+        ).thenAnswer((_) async => 'new-reply');
 
         final result = await repository.addReply(
           'trip-1',
@@ -159,8 +159,7 @@ void main() {
           'Reply message',
         );
 
-        expect(result.id, 'new-reply');
-        expect(result.parentCommentId, 'parent-1');
+        expect(result, 'new-reply');
       });
     });
 
@@ -195,17 +194,21 @@ void main() {
     group('addReaction', () {
       test('adds reaction to a comment successfully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any),
-        ).thenAnswer((_) async => {});
+          mockCommentService.addReaction(captureAny, captureAny),
+        ).thenAnswer((_) async => 'comment-1');
 
         await repository.addReaction('comment-1', ReactionType.heart);
 
-        verify(mockCommentService.addReaction('comment-1', any)).called(1);
+        final captured =
+            verify(mockCommentService.addReaction(captureAny, captureAny))
+                .captured;
+        expect(captured[0], 'comment-1');
+        expect(captured[1], isA<AddReactionRequest>());
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any),
+          mockCommentService.addReaction(captureAny, captureAny),
         ).thenThrow(Exception('API Error'));
 
         expect(
@@ -219,7 +222,7 @@ void main() {
       test('removes reaction from a comment successfully', () async {
         when(
           mockCommentService.removeReaction('comment-1'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'comment-1');
 
         await repository.removeReaction('comment-1');
 
@@ -237,25 +240,26 @@ void main() {
 
     group('changeTripStatus', () {
       test('changes trip status successfully', () async {
-        final updatedTrip = createMockTrip('trip-1', TripStatus.inProgress);
-
         when(
-          mockTripService.changeStatus('trip-1', any),
-        ).thenAnswer((_) async => updatedTrip);
+          mockTripService.changeStatus(captureAny, captureAny),
+        ).thenAnswer((_) async => 'trip-1');
 
         final result = await repository.changeTripStatus(
           'trip-1',
           TripStatus.inProgress,
         );
 
-        expect(result.id, 'trip-1');
-        expect(result.status, TripStatus.inProgress);
-        verify(mockTripService.changeStatus('trip-1', any)).called(1);
+        expect(result, 'trip-1');
+        final captured =
+            verify(mockTripService.changeStatus(captureAny, captureAny))
+                .captured;
+        expect(captured[0], 'trip-1');
+        expect(captured[1], isA<ChangeStatusRequest>());
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockTripService.changeStatus('trip-1', any),
+          mockTripService.changeStatus(captureAny, captureAny),
         ).thenThrow(Exception('API Error'));
 
         expect(

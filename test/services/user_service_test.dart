@@ -284,16 +284,17 @@ void main() {
       test('sends friend request successfully', () async {
         when(
           mockUserCommandClient.sendFriendRequest('user-123'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'request-123');
 
-        await userService.sendFriendRequest('user-123');
+        final result = await userService.sendFriendRequest('user-123');
 
+        expect(result, 'request-123');
         verify(mockUserCommandClient.sendFriendRequest('user-123')).called(1);
       });
 
       test('handles errors when sending friend request', () async {
         when(
-          mockUserCommandClient.sendFriendRequest(any),
+          mockUserCommandClient.sendFriendRequest('user-123'),
         ).thenThrow(Exception('Failed to send request'));
 
         expect(
@@ -305,10 +306,11 @@ void main() {
       test('passes correct user ID to command client', () async {
         when(
           mockUserCommandClient.sendFriendRequest('user-456'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'request-456');
 
-        await userService.sendFriendRequest('user-456');
+        final result = await userService.sendFriendRequest('user-456');
 
+        expect(result, 'request-456');
         verify(mockUserCommandClient.sendFriendRequest('user-456')).called(1);
       });
     });
@@ -317,16 +319,17 @@ void main() {
       test('accepts friend request successfully', () async {
         when(
           mockUserCommandClient.acceptFriendRequest('req-123'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'req-123');
 
-        await userService.acceptFriendRequest('req-123');
+        final result = await userService.acceptFriendRequest('req-123');
 
+        expect(result, 'req-123');
         verify(mockUserCommandClient.acceptFriendRequest('req-123')).called(1);
       });
 
       test('handles errors when accepting friend request', () async {
         when(
-          mockUserCommandClient.acceptFriendRequest(any),
+          mockUserCommandClient.acceptFriendRequest('req-123'),
         ).thenThrow(Exception('Failed to accept request'));
 
         expect(
@@ -338,10 +341,11 @@ void main() {
       test('passes correct request ID to command client', () async {
         when(
           mockUserCommandClient.acceptFriendRequest('req-789'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'req-789');
 
-        await userService.acceptFriendRequest('req-789');
+        final result = await userService.acceptFriendRequest('req-789');
 
+        expect(result, 'req-789');
         verify(mockUserCommandClient.acceptFriendRequest('req-789')).called(1);
       });
     });
@@ -350,16 +354,17 @@ void main() {
       test('declines friend request successfully', () async {
         when(
           mockUserCommandClient.declineFriendRequest('req-123'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'req-123');
 
-        await userService.declineFriendRequest('req-123');
+        final result = await userService.declineFriendRequest('req-123');
 
+        expect(result, 'req-123');
         verify(mockUserCommandClient.declineFriendRequest('req-123')).called(1);
       });
 
       test('handles errors when declining friend request', () async {
         when(
-          mockUserCommandClient.declineFriendRequest(any),
+          mockUserCommandClient.declineFriendRequest('req-123'),
         ).thenThrow(Exception('Failed to decline request'));
 
         expect(
@@ -371,10 +376,11 @@ void main() {
       test('passes correct request ID to command client', () async {
         when(
           mockUserCommandClient.declineFriendRequest('req-456'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'req-456');
 
-        await userService.declineFriendRequest('req-456');
+        final result = await userService.declineFriendRequest('req-456');
 
+        expect(result, 'req-456');
         verify(mockUserCommandClient.declineFriendRequest('req-456')).called(1);
       });
     });
@@ -383,16 +389,17 @@ void main() {
       test('follows user successfully', () async {
         when(
           mockUserCommandClient.followUser('user-123'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'follow-123');
 
-        await userService.followUser('user-123');
+        final result = await userService.followUser('user-123');
 
+        expect(result, 'follow-123');
         verify(mockUserCommandClient.followUser('user-123')).called(1);
       });
 
       test('handles errors when following user', () async {
         when(
-          mockUserCommandClient.followUser(any),
+          mockUserCommandClient.followUser('user-123'),
         ).thenThrow(Exception('Failed to follow user'));
 
         expect(() => userService.followUser('user-123'), throwsException);
@@ -401,10 +408,11 @@ void main() {
       test('passes correct user ID to command client', () async {
         when(
           mockUserCommandClient.followUser('user-789'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'follow-789');
 
-        await userService.followUser('user-789');
+        final result = await userService.followUser('user-789');
 
+        expect(result, 'follow-789');
         verify(mockUserCommandClient.followUser('user-789')).called(1);
       });
     });
@@ -413,16 +421,17 @@ void main() {
       test('unfollows user successfully', () async {
         when(
           mockUserCommandClient.unfollowUser('user-123'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'user-123');
 
-        await userService.unfollowUser('user-123');
+        final result = await userService.unfollowUser('user-123');
 
+        expect(result, 'user-123');
         verify(mockUserCommandClient.unfollowUser('user-123')).called(1);
       });
 
       test('handles errors when unfollowing user', () async {
         when(
-          mockUserCommandClient.unfollowUser(any),
+          mockUserCommandClient.unfollowUser('user-123'),
         ).thenThrow(Exception('Failed to unfollow user'));
 
         expect(() => userService.unfollowUser('user-123'), throwsException);
@@ -431,10 +440,11 @@ void main() {
       test('passes correct user ID to command client', () async {
         when(
           mockUserCommandClient.unfollowUser('user-456'),
-        ).thenAnswer((_) async => {});
+        ).thenAnswer((_) async => 'user-456');
 
-        await userService.unfollowUser('user-456');
+        final result = await userService.unfollowUser('user-456');
 
+        expect(result, 'user-456');
         verify(mockUserCommandClient.unfollowUser('user-456')).called(1);
       });
     });

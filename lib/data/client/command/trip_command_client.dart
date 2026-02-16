@@ -13,29 +13,32 @@ class TripCommandClient {
 
   /// Create new trip
   /// Requires authentication (USER, ADMIN)
-  Future<Trip> createTrip(CreateTripRequest request) async {
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> createTrip(CreateTripRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.tripsCreate,
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, Trip.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Update trip
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<Trip> updateTrip(String tripId, UpdateTripRequest request) async {
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> updateTrip(String tripId, UpdateTripRequest request) async {
     final response = await _apiClient.put(
       ApiEndpoints.tripUpdate(tripId),
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, Trip.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Change trip visibility (PUBLIC/PRIVATE/PROTECTED)
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<Trip> changeVisibility(
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> changeVisibility(
     String tripId,
     ChangeVisibilityRequest request,
   ) async {
@@ -44,39 +47,43 @@ class TripCommandClient {
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, Trip.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Change trip status (CREATED/IN_PROGRESS/PAUSED/FINISHED)
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<Trip> changeStatus(String tripId, ChangeStatusRequest request) async {
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> changeStatus(
+      String tripId, ChangeStatusRequest request) async {
     final response = await _apiClient.patch(
       ApiEndpoints.tripStatus(tripId),
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, Trip.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Delete trip
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<void> deleteTrip(String tripId) async {
+  /// Returns the trip ID immediately. Deletion will be confirmed via WebSocket.
+  Future<String> deleteTrip(String tripId) async {
     final response = await _apiClient.delete(
       ApiEndpoints.tripDelete(tripId),
       requireAuth: true,
     );
-    _apiClient.handleNoContentResponse(response);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Create trip from trip plan
   /// Requires authentication (USER, ADMIN - owner only)
-  Future<Trip> createTripFromPlan(
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> createTripFromPlan(
       String tripPlanId, Visibility visibility) async {
-    final response = await _apiClient.post(
+    final response = await _apiClient.postRaw(
       ApiEndpoints.tripFromPlan(tripPlanId),
-      body: {'visibility': visibility.name.toUpperCase()},
+      body: visibility.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, Trip.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 }
