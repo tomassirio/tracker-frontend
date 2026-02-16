@@ -132,27 +132,27 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   }
 
   Future<void> _handleTripPlanTap(TripPlan plan) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TripPlanDetailScreen(tripPlan: plan),
       ),
     );
 
-    // Reload trip plans if the plan was modified or deleted
-    if (result == true && mounted) {
+    // Always reload trip plans when returning to reflect any modifications or deletions
+    if (mounted) {
       await _loadTripPlans();
     }
   }
 
   Future<void> _handleCreatePlan() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateTripPlanScreen()),
     );
 
-    // Reload trip plans if a new one was created
-    if (result == true && mounted) {
+    // Always reload trip plans when returning to ensure new plans are shown
+    if (mounted) {
       await _loadTripPlans();
     }
   }

@@ -194,25 +194,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _navigateToCreateTrip() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateTripScreen()),
     );
 
-    if (result == true) {
-      _loadTrips();
+    // Always refresh trips when returning
+    // CreateTripScreen uses pushReplacement to TripDetailScreen after creation
+    if (mounted) {
+      await _loadTrips();
     }
   }
 
   void _navigateToTripDetail(Trip trip) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       PageTransitions.slideUp(TripDetailScreen(trip: trip)),
     );
 
-    // Refresh if user logged out from trip detail screen
-    if (result == true && mounted) {
-      await _loadUserInfo();
+    // Always refresh trips when returning from trip detail
+    // This ensures newly created trips and any updates are shown
+    if (mounted) {
       await _loadTrips();
     }
   }
