@@ -32,7 +32,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final UserService _userService = UserService();
   final TextEditingController _searchController = TextEditingController();
   UserProfile? _profile;
-  UserProfile? _currentUser;
   List<Trip> _userTrips = [];
   bool _isLoadingProfile = false;
   bool _isLoadingTrips = false;
@@ -67,10 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Load current user if logged in
       if (isLoggedIn) {
         try {
-          final currentUser = await _repository.getMyProfile();
-          setState(() {
-            _currentUser = currentUser;
-          });
+          await _repository.getMyProfile();
         } catch (e) {
           // Ignore error loading current user
         }
@@ -253,7 +249,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _userService.followUser(_profile!.id);
       if (mounted) {
-        UiHelpers.showSuccessMessage(context, 'You are now following ${_profile!.username}');
+        UiHelpers.showSuccessMessage(
+            context, 'You are now following ${_profile!.username}');
         // Reload profile to get updated isFollowing status
         await _loadProfile();
       }
@@ -270,7 +267,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _userService.unfollowUser(_profile!.id);
       if (mounted) {
-        UiHelpers.showSuccessMessage(context, 'Unfollowed ${_profile!.username}');
+        UiHelpers.showSuccessMessage(
+            context, 'Unfollowed ${_profile!.username}');
         // Reload profile to get updated isFollowing status
         await _loadProfile();
       }
@@ -287,11 +285,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _userService.sendFriendRequest(_profile!.id);
       if (mounted) {
-        UiHelpers.showSuccessMessage(context, 'Friend request sent to ${_profile!.username}');
+        UiHelpers.showSuccessMessage(
+            context, 'Friend request sent to ${_profile!.username}');
       }
     } catch (e) {
       if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to send friend request: $e');
+        UiHelpers.showErrorMessage(
+            context, 'Failed to send friend request: $e');
       }
     }
   }

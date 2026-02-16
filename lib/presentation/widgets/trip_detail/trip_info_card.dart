@@ -219,7 +219,8 @@ class TripInfoCard extends StatelessWidget {
                       ),
                     ),
                     // Show follow/friend buttons if viewing another user's trip
-                    if (onFollowUser != null || onSendFriendRequest != null) ...[
+                    if (onFollowUser != null ||
+                        onSendFriendRequest != null) ...[
                       const SizedBox(width: 8),
                       if (onFollowUser != null)
                         Container(

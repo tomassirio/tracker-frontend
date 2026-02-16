@@ -9,6 +9,7 @@ import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
+import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
@@ -801,9 +802,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner:
           _trip.userId != _userId ? _handleFollowTripOwner : null,
-      onSendFriendRequestToTripOwner: _trip.userId != _userId
-          ? _handleSendFriendRequestToTripOwner
-          : null,
+      onSendFriendRequestToTripOwner:
+          _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
     );
   }
 
