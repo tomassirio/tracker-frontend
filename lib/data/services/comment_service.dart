@@ -44,7 +44,8 @@ class CommentService {
 
   /// Add a reaction to a comment
   /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
-  Future<String> addReaction(String commentId, AddReactionRequest request) async {
+  Future<String> addReaction(
+      String commentId, AddReactionRequest request) async {
     return await _commentCommandClient.addReaction(commentId, request);
   }
 

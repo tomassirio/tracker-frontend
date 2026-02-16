@@ -39,7 +39,8 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        final result = await tripUpdateCommandClient.createTripUpdate('trip-123', request);
+        final result =
+            await tripUpdateCommandClient.createTripUpdate('trip-123', request);
 
         expect(result, 'update-123');
         expect(mockHttpClient.lastMethod, 'POST');

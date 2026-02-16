@@ -142,9 +142,11 @@ void main() {
           final responseBody = {
             'id': 'request-123',
           };
-          mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
+          mockHttpClient.response =
+              http.Response(jsonEncode(responseBody), 202);
 
-          final result = await userCommandClient.acceptFriendRequest('request-123');
+          final result =
+              await userCommandClient.acceptFriendRequest('request-123');
 
           expect(result, 'request-123');
           expect(mockHttpClient.lastMethod, 'POST');
@@ -190,9 +192,11 @@ void main() {
           final responseBody = {
             'id': 'request-123',
           };
-          mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
+          mockHttpClient.response =
+              http.Response(jsonEncode(responseBody), 202);
 
-          final result = await userCommandClient.declineFriendRequest('request-123');
+          final result =
+              await userCommandClient.declineFriendRequest('request-123');
 
           expect(result, 'request-123');
           expect(mockHttpClient.lastMethod, 'POST');

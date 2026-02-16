@@ -78,7 +78,8 @@ class TripService {
 
   /// Change trip status (start/pause/finish)
   /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
-  Future<String> changeStatus(String tripId, ChangeStatusRequest request) async {
+  Future<String> changeStatus(
+      String tripId, ChangeStatusRequest request) async {
     return await _tripCommandClient.changeStatus(tripId, request);
   }
 
@@ -97,7 +98,8 @@ class TripService {
 
   /// Send trip update (location, message)
   /// Returns the trip update ID immediately. Full data will be delivered via WebSocket.
-  Future<String> sendTripUpdate(String tripId, TripUpdateRequest request) async {
+  Future<String> sendTripUpdate(
+      String tripId, TripUpdateRequest request) async {
     return await _tripUpdateCommandClient.createTripUpdate(tripId, request);
   }
 

@@ -225,7 +225,8 @@ class MockCommentCommandClient extends CommentCommandClient {
   }
 
   @override
-  Future<String> addReaction(String commentId, AddReactionRequest request) async {
+  Future<String> addReaction(
+      String commentId, AddReactionRequest request) async {
     addReactionCalled = true;
     lastCommentId = commentId;
     lastReactionRequest = request;

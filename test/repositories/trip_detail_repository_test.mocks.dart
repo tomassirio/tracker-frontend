@@ -6,13 +6,14 @@
 import 'dart:async' as _i6;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:tracker_frontend/core/constants/enums.dart' as _i8;
+import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:tracker_frontend/core/constants/enums.dart' as _i9;
 import 'package:tracker_frontend/data/models/auth_models.dart' as _i4;
 import 'package:tracker_frontend/data/models/comment_models.dart' as _i2;
 import 'package:tracker_frontend/data/models/trip_models.dart' as _i3;
-import 'package:tracker_frontend/data/services/auth_service.dart' as _i9;
+import 'package:tracker_frontend/data/services/auth_service.dart' as _i10;
 import 'package:tracker_frontend/data/services/comment_service.dart' as _i5;
-import 'package:tracker_frontend/data/services/trip_service.dart' as _i7;
+import 'package:tracker_frontend/data/services/trip_service.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -49,18 +50,8 @@ class _FakeTrip_1 extends _i1.SmartFake implements _i3.Trip {
         );
 }
 
-class _FakeTripPlan_2 extends _i1.SmartFake implements _i3.TripPlan {
-  _FakeTripPlan_2(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-class _FakeAuthResponse_3 extends _i1.SmartFake implements _i4.AuthResponse {
-  _FakeAuthResponse_3(
+class _FakeAuthResponse_2 extends _i1.SmartFake implements _i4.AuthResponse {
+  _FakeAuthResponse_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -115,8 +106,8 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
 
   @override
   _i6.Future<String> addComment(
-    String tripId,
-    _i2.CreateCommentRequest request,
+    String? tripId,
+    _i2.CreateCommentRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -126,14 +117,22 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #addComment,
+            [
+              tripId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> addReaction(
-    String commentId,
-    _i2.AddReactionRequest request,
+    String? commentId,
+    _i2.AddReactionRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -143,25 +142,38 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #addReaction,
+            [
+              commentId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
-  _i6.Future<String> removeReaction(String commentId) => (super.noSuchMethod(
+  _i6.Future<String> removeReaction(String? commentId) => (super.noSuchMethod(
         Invocation.method(
           #removeReaction,
           [commentId],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #removeReaction,
+            [commentId],
+          ),
+        )),
       ) as _i6.Future<String>);
 }
 
 /// A class which mocks [TripService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockTripService extends _i1.Mock implements _i7.TripService {
+class MockTripService extends _i1.Mock implements _i8.TripService {
   MockTripService() {
     _i1.throwOnMissingStub(this);
   }
@@ -228,20 +240,25 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
       ) as _i6.Future<List<_i3.Trip>>);
 
   @override
-  _i6.Future<String> createTrip(_i3.CreateTripRequest request) =>
+  _i6.Future<String> createTrip(_i3.CreateTripRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #createTrip,
           [request],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #createTrip,
+            [request],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> updateTrip(
-    String tripId,
-    _i3.UpdateTripRequest request,
+    String? tripId,
+    _i3.UpdateTripRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -251,14 +268,22 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #updateTrip,
+            [
+              tripId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> changeVisibility(
-    String tripId,
-    _i3.ChangeVisibilityRequest request,
+    String? tripId,
+    _i3.ChangeVisibilityRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -268,14 +293,22 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #changeVisibility,
+            [
+              tripId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> changeStatus(
-    String tripId,
-    _i3.ChangeStatusRequest request,
+    String? tripId,
+    _i3.ChangeStatusRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -285,24 +318,37 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #changeStatus,
+            [
+              tripId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
-  _i6.Future<String> deleteTrip(String tripId) => (super.noSuchMethod(
+  _i6.Future<String> deleteTrip(String? tripId) => (super.noSuchMethod(
         Invocation.method(
           #deleteTrip,
           [tripId],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #deleteTrip,
+            [tripId],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> createTripFromPlan(
-    String tripPlanId,
-    _i8.Visibility visibility,
+    String? tripPlanId,
+    _i9.Visibility? visibility,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -312,14 +358,22 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             visibility,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #createTripFromPlan,
+            [
+              tripPlanId,
+              visibility,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> sendTripUpdate(
-    String tripId,
-    _i3.TripUpdateRequest request,
+    String? tripId,
+    _i3.TripUpdateRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -329,25 +383,38 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #sendTripUpdate,
+            [
+              tripId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
-  _i6.Future<String> createTripPlan(_i3.CreateTripPlanRequest request) =>
+  _i6.Future<String> createTripPlan(_i3.CreateTripPlanRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #createTripPlan,
           [request],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #createTripPlan,
+            [request],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
   _i6.Future<String> updateTripPlan(
-    String planId,
-    _i3.UpdateTripPlanRequest request,
+    String? planId,
+    _i3.UpdateTripPlanRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -357,18 +424,31 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #updateTripPlan,
+            [
+              planId,
+              request,
+            ],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
-  _i6.Future<String> deleteTripPlan(String planId) => (super.noSuchMethod(
+  _i6.Future<String> deleteTripPlan(String? planId) => (super.noSuchMethod(
         Invocation.method(
           #deleteTripPlan,
           [planId],
         ),
-        returnValue: _i6.Future<String>.value(''),
-        returnValueForMissingStub: _i6.Future<String>.value(''),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #deleteTripPlan,
+            [planId],
+          ),
+        )),
       ) as _i6.Future<String>);
 
   @override
@@ -386,7 +466,7 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
 /// A class which mocks [AuthService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthService extends _i1.Mock implements _i9.AuthService {
+class MockAuthService extends _i1.Mock implements _i10.AuthService {
   MockAuthService() {
     _i1.throwOnMissingStub(this);
   }
@@ -398,7 +478,7 @@ class MockAuthService extends _i1.Mock implements _i9.AuthService {
           #register,
           [request],
         ),
-        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_3(
+        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_2(
           this,
           Invocation.method(
             #register,
@@ -414,7 +494,7 @@ class MockAuthService extends _i1.Mock implements _i9.AuthService {
           #login,
           [request],
         ),
-        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_3(
+        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_2(
           this,
           Invocation.method(
             #login,

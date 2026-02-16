@@ -294,7 +294,7 @@ void main() {
 
       test('handles errors when sending friend request', () async {
         when(
-          mockUserCommandClient.sendFriendRequest(any),
+          mockUserCommandClient.sendFriendRequest('user-123'),
         ).thenThrow(Exception('Failed to send request'));
 
         expect(
@@ -329,7 +329,7 @@ void main() {
 
       test('handles errors when accepting friend request', () async {
         when(
-          mockUserCommandClient.acceptFriendRequest(any),
+          mockUserCommandClient.acceptFriendRequest('req-123'),
         ).thenThrow(Exception('Failed to accept request'));
 
         expect(
@@ -364,7 +364,7 @@ void main() {
 
       test('handles errors when declining friend request', () async {
         when(
-          mockUserCommandClient.declineFriendRequest(any),
+          mockUserCommandClient.declineFriendRequest('req-123'),
         ).thenThrow(Exception('Failed to decline request'));
 
         expect(
@@ -399,7 +399,7 @@ void main() {
 
       test('handles errors when following user', () async {
         when(
-          mockUserCommandClient.followUser(any),
+          mockUserCommandClient.followUser('user-123'),
         ).thenThrow(Exception('Failed to follow user'));
 
         expect(() => userService.followUser('user-123'), throwsException);
@@ -431,7 +431,7 @@ void main() {
 
       test('handles errors when unfollowing user', () async {
         when(
-          mockUserCommandClient.unfollowUser(any),
+          mockUserCommandClient.unfollowUser('user-123'),
         ).thenThrow(Exception('Failed to unfollow user'));
 
         expect(() => userService.unfollowUser('user-123'), throwsException);

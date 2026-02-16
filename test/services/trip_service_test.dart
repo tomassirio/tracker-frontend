@@ -363,7 +363,8 @@ class MockTripCommandClient extends TripCommandClient {
   }
 
   @override
-  Future<String> changeStatus(String tripId, ChangeStatusRequest request) async {
+  Future<String> changeStatus(
+      String tripId, ChangeStatusRequest request) async {
     changeStatusCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to change status');

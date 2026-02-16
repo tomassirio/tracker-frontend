@@ -133,20 +133,24 @@ void main() {
     group('addComment', () {
       test('adds a top-level comment successfully', () async {
         when(
-          mockCommentService.addComment('trip-1', any<CreateCommentRequest>()),
+          mockCommentService.addComment(captureAny, captureAny),
         ).thenAnswer((_) async => 'new-comment');
 
         final result = await repository.addComment('trip-1', 'Test message');
 
         expect(result, 'new-comment');
-        verify(mockCommentService.addComment('trip-1', any<CreateCommentRequest>())).called(1);
+        final captured =
+            verify(mockCommentService.addComment(captureAny, captureAny))
+                .captured;
+        expect(captured[0], 'trip-1');
+        expect(captured[1], isA<CreateCommentRequest>());
       });
     });
 
     group('addReply', () {
       test('adds a reply to a comment successfully', () async {
         when(
-          mockCommentService.addComment('trip-1', any<CreateCommentRequest>()),
+          mockCommentService.addComment(captureAny, captureAny),
         ).thenAnswer((_) async => 'new-reply');
 
         final result = await repository.addReply(
@@ -190,17 +194,21 @@ void main() {
     group('addReaction', () {
       test('adds reaction to a comment successfully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any<AddReactionRequest>()),
+          mockCommentService.addReaction(captureAny, captureAny),
         ).thenAnswer((_) async => 'comment-1');
 
         await repository.addReaction('comment-1', ReactionType.heart);
 
-        verify(mockCommentService.addReaction('comment-1', any<AddReactionRequest>())).called(1);
+        final captured =
+            verify(mockCommentService.addReaction(captureAny, captureAny))
+                .captured;
+        expect(captured[0], 'comment-1');
+        expect(captured[1], isA<AddReactionRequest>());
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockCommentService.addReaction('comment-1', any<AddReactionRequest>()),
+          mockCommentService.addReaction(captureAny, captureAny),
         ).thenThrow(Exception('API Error'));
 
         expect(
@@ -233,7 +241,7 @@ void main() {
     group('changeTripStatus', () {
       test('changes trip status successfully', () async {
         when(
-          mockTripService.changeStatus('trip-1', any<ChangeStatusRequest>()),
+          mockTripService.changeStatus(captureAny, captureAny),
         ).thenAnswer((_) async => 'trip-1');
 
         final result = await repository.changeTripStatus(
@@ -242,12 +250,16 @@ void main() {
         );
 
         expect(result, 'trip-1');
-        verify(mockTripService.changeStatus('trip-1', any<ChangeStatusRequest>())).called(1);
+        final captured =
+            verify(mockTripService.changeStatus(captureAny, captureAny))
+                .captured;
+        expect(captured[0], 'trip-1');
+        expect(captured[1], isA<ChangeStatusRequest>());
       });
 
       test('handles API errors gracefully', () async {
         when(
-          mockTripService.changeStatus('trip-1', any<ChangeStatusRequest>()),
+          mockTripService.changeStatus(captureAny, captureAny),
         ).thenThrow(Exception('API Error'));
 
         expect(

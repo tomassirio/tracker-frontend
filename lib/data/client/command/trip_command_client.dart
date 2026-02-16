@@ -53,7 +53,8 @@ class TripCommandClient {
   /// Change trip status (CREATED/IN_PROGRESS/PAUSED/FINISHED)
   /// Requires authentication (USER, ADMIN - owner only)
   /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
-  Future<String> changeStatus(String tripId, ChangeStatusRequest request) async {
+  Future<String> changeStatus(
+      String tripId, ChangeStatusRequest request) async {
     final response = await _apiClient.patch(
       ApiEndpoints.tripStatus(tripId),
       body: request.toJson(),

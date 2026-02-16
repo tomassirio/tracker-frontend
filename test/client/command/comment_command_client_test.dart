@@ -118,7 +118,8 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        final result = await commentCommandClient.addReaction('comment-123', request);
+        final result =
+            await commentCommandClient.addReaction('comment-123', request);
 
         expect(result, 'reaction-123');
         expect(mockHttpClient.lastMethod, 'POST');
@@ -143,7 +144,8 @@ void main() {
           final responseBody = {
             'id': 'reaction-123',
           };
-          mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
+          mockHttpClient.response =
+              http.Response(jsonEncode(responseBody), 202);
 
           await commentCommandClient.addReaction('comment-123', request);
 

@@ -230,11 +230,11 @@ class WebSocketService {
         return TripStatusChangedEvent.fromJson(data);
       case WebSocketEventType.tripVisibilityChanged:
         return TripVisibilityChangedEvent.fromJson(data);
-      
+
       // Trip update events
       case WebSocketEventType.tripUpdateCreated:
         return TripUpdateCreatedEvent.fromJson(data);
-      
+
       // Comment events
       case WebSocketEventType.commentAdded:
         return CommentAddedEvent.fromJson(data);
@@ -247,7 +247,7 @@ class WebSocketService {
         return CommentReactionEvent.fromJson(data, isRemoval: false);
       case WebSocketEventType.commentReactionRemoved:
         return CommentReactionEvent.fromJson(data, isRemoval: true);
-      
+
       // Trip plan events
       case WebSocketEventType.tripPlanCreated:
         return TripPlanCreatedEvent.fromJson(data);
@@ -255,13 +255,13 @@ class WebSocketService {
         return TripPlanUpdatedEvent.fromJson(data);
       case WebSocketEventType.tripPlanDeleted:
         return TripPlanDeletedEvent.fromJson(data);
-      
+
       // User relationship events
       case WebSocketEventType.userFollowed:
         return UserFollowedEvent.fromJson(data);
       case WebSocketEventType.friendRequestSent:
         return FriendRequestSentEvent.fromJson(data);
-      
+
       default:
         return WebSocketEvent.fromJson(data);
     }

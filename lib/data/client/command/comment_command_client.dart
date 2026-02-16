@@ -28,7 +28,8 @@ class CommentCommandClient {
   /// Add a reaction to a comment
   /// Requires authentication (USER, ADMIN)
   /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
-  Future<String> addReaction(String commentId, AddReactionRequest request) async {
+  Future<String> addReaction(
+      String commentId, AddReactionRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.commentReactions(commentId),
       body: request.toJson(),

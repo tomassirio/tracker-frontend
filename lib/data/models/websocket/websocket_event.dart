@@ -9,19 +9,19 @@ enum WebSocketEventType {
   tripStatusChanged,
   tripVisibilityChanged,
   tripMetadataUpdated,
-  
+
   // Trip update events
   tripUpdateCreated,
-  
+
   // Comment events
   commentAdded,
   commentReaction,
-  
+
   // Trip plan events
   tripPlanCreated,
   tripPlanUpdated,
   tripPlanDeleted,
-  
+
   // User relationship events
   userFollowed,
   userUnfollowed,
@@ -30,11 +30,11 @@ enum WebSocketEventType {
   friendRequestDeclined,
   friendshipCreated,
   friendshipRemoved,
-  
+
   // Legacy events for backwards compatibility
   commentReactionAdded,
   commentReactionRemoved,
-  
+
   unknown,
 }
 
@@ -68,11 +68,11 @@ class WebSocketEvent {
         return WebSocketEventType.tripVisibilityChanged;
       case 'TRIP_METADATA_UPDATED':
         return WebSocketEventType.tripMetadataUpdated;
-      
+
       // Trip update events
       case 'TRIP_UPDATE_CREATED':
         return WebSocketEventType.tripUpdateCreated;
-      
+
       // Comment events
       case 'COMMENT_ADDED':
         return WebSocketEventType.commentAdded;
@@ -82,7 +82,7 @@ class WebSocketEvent {
         return WebSocketEventType.commentReactionAdded;
       case 'COMMENT_REACTION_REMOVED':
         return WebSocketEventType.commentReactionRemoved;
-      
+
       // Trip plan events
       case 'TRIP_PLAN_CREATED':
         return WebSocketEventType.tripPlanCreated;
@@ -90,7 +90,7 @@ class WebSocketEvent {
         return WebSocketEventType.tripPlanUpdated;
       case 'TRIP_PLAN_DELETED':
         return WebSocketEventType.tripPlanDeleted;
-      
+
       // User relationship events
       case 'USER_FOLLOWED':
         return WebSocketEventType.userFollowed;
@@ -106,7 +106,7 @@ class WebSocketEvent {
         return WebSocketEventType.friendshipCreated;
       case 'FRIENDSHIP_REMOVED':
         return WebSocketEventType.friendshipRemoved;
-      
+
       default:
         return WebSocketEventType.unknown;
     }
@@ -447,7 +447,8 @@ class TripPlanCreatedEvent extends WebSocketEvent {
     final payload = json['payload'] as Map<String, dynamic>? ?? json;
 
     return TripPlanCreatedEvent(
-      tripPlanId: payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
+      tripPlanId:
+          payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
       planName: payload['planName'] as String? ?? '',
       ownerId: payload['ownerId'] as String? ?? '',
       payload: payload,
@@ -474,7 +475,8 @@ class TripPlanUpdatedEvent extends WebSocketEvent {
     final payload = json['payload'] as Map<String, dynamic>? ?? json;
 
     return TripPlanUpdatedEvent(
-      tripPlanId: payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
+      tripPlanId:
+          payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)
@@ -499,7 +501,8 @@ class TripPlanDeletedEvent extends WebSocketEvent {
     final payload = json['payload'] as Map<String, dynamic>? ?? json;
 
     return TripPlanDeletedEvent(
-      tripPlanId: payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
+      tripPlanId:
+          payload['tripPlanId'] as String? ?? payload['id'] as String? ?? '',
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)
@@ -526,7 +529,8 @@ class UserFollowedEvent extends WebSocketEvent {
     final payload = json['payload'] as Map<String, dynamic>? ?? json;
 
     return UserFollowedEvent(
-      followerId: payload['followerId'] as String? ?? payload['id'] as String? ?? '',
+      followerId:
+          payload['followerId'] as String? ?? payload['id'] as String? ?? '',
       followedId: payload['followedId'] as String? ?? '',
       payload: payload,
       timestamp: json['timestamp'] != null
@@ -556,7 +560,8 @@ class FriendRequestSentEvent extends WebSocketEvent {
     final payload = json['payload'] as Map<String, dynamic>? ?? json;
 
     return FriendRequestSentEvent(
-      requestId: payload['requestId'] as String? ?? payload['id'] as String? ?? '',
+      requestId:
+          payload['requestId'] as String? ?? payload['id'] as String? ?? '',
       senderId: payload['senderId'] as String? ?? '',
       receiverId: payload['receiverId'] as String? ?? '',
       payload: payload,

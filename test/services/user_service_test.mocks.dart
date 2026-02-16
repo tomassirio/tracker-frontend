@@ -6,6 +6,7 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:tracker_frontend/data/client/command/user_command_client.dart'
     as _i5;
 import 'package:tracker_frontend/data/client/query/user_query_client.dart'
@@ -166,55 +167,80 @@ class MockUserCommandClient extends _i1.Mock implements _i5.UserCommandClient {
       ) as _i4.Future<_i2.UserProfile>);
 
   @override
-  _i4.Future<String> sendFriendRequest(String userId) => (super.noSuchMethod(
+  _i4.Future<String> sendFriendRequest(String? userId) => (super.noSuchMethod(
         Invocation.method(
           #sendFriendRequest,
           [userId],
         ),
-        returnValue: _i4.Future<String>.value(''),
-        returnValueForMissingStub: _i4.Future<String>.value(''),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #sendFriendRequest,
+            [userId],
+          ),
+        )),
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> acceptFriendRequest(String requestId) =>
+  _i4.Future<String> acceptFriendRequest(String? requestId) =>
       (super.noSuchMethod(
         Invocation.method(
           #acceptFriendRequest,
           [requestId],
         ),
-        returnValue: _i4.Future<String>.value(''),
-        returnValueForMissingStub: _i4.Future<String>.value(''),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #acceptFriendRequest,
+            [requestId],
+          ),
+        )),
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> declineFriendRequest(String requestId) =>
+  _i4.Future<String> declineFriendRequest(String? requestId) =>
       (super.noSuchMethod(
         Invocation.method(
           #declineFriendRequest,
           [requestId],
         ),
-        returnValue: _i4.Future<String>.value(''),
-        returnValueForMissingStub: _i4.Future<String>.value(''),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #declineFriendRequest,
+            [requestId],
+          ),
+        )),
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> followUser(String userId) => (super.noSuchMethod(
+  _i4.Future<String> followUser(String? userId) => (super.noSuchMethod(
         Invocation.method(
           #followUser,
           [userId],
         ),
-        returnValue: _i4.Future<String>.value(''),
-        returnValueForMissingStub: _i4.Future<String>.value(''),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #followUser,
+            [userId],
+          ),
+        )),
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> unfollowUser(String followedId) => (super.noSuchMethod(
+  _i4.Future<String> unfollowUser(String? followedId) => (super.noSuchMethod(
         Invocation.method(
           #unfollowUser,
           [followedId],
         ),
-        returnValue: _i4.Future<String>.value(''),
-        returnValueForMissingStub: _i4.Future<String>.value(''),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #unfollowUser,
+            [followedId],
+          ),
+        )),
       ) as _i4.Future<String>);
 
   @override
