@@ -228,8 +228,7 @@ void main() {
 
         final result = await tripPlanService.createTripPlanBackend(request);
 
-        expect(result.id, 'plan-backend');
-        expect(result.name, 'Road Trip');
+        expect(result, 'plan-backend');
         expect(fakeTripPlanCommandClient.createTripPlanBackendCalled, true);
       });
 
@@ -251,7 +250,7 @@ void main() {
 
         final result = await tripPlanService.createTripPlanBackend(request);
 
-        expect(result.id, 'plan-waypoints');
+        expect(result, 'plan-waypoints');
         expect(fakeTripPlanCommandClient.createTripPlanBackendCalled, true);
       });
 

@@ -184,8 +184,11 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final trip = await _tripService.createTripFromPlan(
+      final tripId = await _tripService.createTripFromPlan(
           _selectedTripPlan!.id, visibility);
+
+      // Fetch the created trip to get full details
+      final trip = await _tripService.getTripById(tripId);
 
       if (mounted) {
         UiHelpers.showSuccessMessage(

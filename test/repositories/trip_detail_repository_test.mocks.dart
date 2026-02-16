@@ -114,9 +114,9 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
       ) as _i6.Future<_i2.Comment>);
 
   @override
-  _i6.Future<_i2.Comment> addComment(
-    String? tripId,
-    _i2.CreateCommentRequest? request,
+  _i6.Future<String> addComment(
+    String tripId,
+    _i2.CreateCommentRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -126,22 +126,14 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
             request,
           ],
         ),
-        returnValue: _i6.Future<_i2.Comment>.value(_FakeComment_0(
-          this,
-          Invocation.method(
-            #addComment,
-            [
-              tripId,
-              request,
-            ],
-          ),
-        )),
-      ) as _i6.Future<_i2.Comment>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<void> addReaction(
-    String? commentId,
-    _i2.AddReactionRequest? request,
+  _i6.Future<String> addReaction(
+    String commentId,
+    _i2.AddReactionRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -151,19 +143,19 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
             request,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<void> removeReaction(String? commentId) => (super.noSuchMethod(
+  _i6.Future<String> removeReaction(String commentId) => (super.noSuchMethod(
         Invocation.method(
           #removeReaction,
           [commentId],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 }
 
 /// A class which mocks [TripService].
@@ -236,25 +228,20 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
       ) as _i6.Future<List<_i3.Trip>>);
 
   @override
-  _i6.Future<_i3.Trip> createTrip(_i3.CreateTripRequest? request) =>
+  _i6.Future<String> createTrip(_i3.CreateTripRequest request) =>
       (super.noSuchMethod(
         Invocation.method(
           #createTrip,
           [request],
         ),
-        returnValue: _i6.Future<_i3.Trip>.value(_FakeTrip_1(
-          this,
-          Invocation.method(
-            #createTrip,
-            [request],
-          ),
-        )),
-      ) as _i6.Future<_i3.Trip>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<_i3.Trip> updateTrip(
-    String? tripId,
-    _i3.UpdateTripRequest? request,
+  _i6.Future<String> updateTrip(
+    String tripId,
+    _i3.UpdateTripRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -264,22 +251,14 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<_i3.Trip>.value(_FakeTrip_1(
-          this,
-          Invocation.method(
-            #updateTrip,
-            [
-              tripId,
-              request,
-            ],
-          ),
-        )),
-      ) as _i6.Future<_i3.Trip>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<_i3.Trip> changeVisibility(
-    String? tripId,
-    _i3.ChangeVisibilityRequest? request,
+  _i6.Future<String> changeVisibility(
+    String tripId,
+    _i3.ChangeVisibilityRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -289,22 +268,14 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<_i3.Trip>.value(_FakeTrip_1(
-          this,
-          Invocation.method(
-            #changeVisibility,
-            [
-              tripId,
-              request,
-            ],
-          ),
-        )),
-      ) as _i6.Future<_i3.Trip>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<_i3.Trip> changeStatus(
-    String? tripId,
-    _i3.ChangeStatusRequest? request,
+  _i6.Future<String> changeStatus(
+    String tripId,
+    _i3.ChangeStatusRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -314,32 +285,24 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<_i3.Trip>.value(_FakeTrip_1(
-          this,
-          Invocation.method(
-            #changeStatus,
-            [
-              tripId,
-              request,
-            ],
-          ),
-        )),
-      ) as _i6.Future<_i3.Trip>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<void> deleteTrip(String? tripId) => (super.noSuchMethod(
+  _i6.Future<String> deleteTrip(String tripId) => (super.noSuchMethod(
         Invocation.method(
           #deleteTrip,
           [tripId],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<_i3.Trip> createTripFromPlan(
-    String? tripPlanId,
-    _i8.Visibility? visibility,
+  _i6.Future<String> createTripFromPlan(
+    String tripPlanId,
+    _i8.Visibility visibility,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -349,22 +312,14 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             visibility,
           ],
         ),
-        returnValue: _i6.Future<_i3.Trip>.value(_FakeTrip_1(
-          this,
-          Invocation.method(
-            #createTripFromPlan,
-            [
-              tripPlanId,
-              visibility,
-            ],
-          ),
-        )),
-      ) as _i6.Future<_i3.Trip>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<void> sendTripUpdate(
-    String? tripId,
-    _i3.TripUpdateRequest? request,
+  _i6.Future<String> sendTripUpdate(
+    String tripId,
+    _i3.TripUpdateRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -374,30 +329,25 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<_i3.TripPlan> createTripPlan(_i3.CreateTripPlanRequest? request) =>
+  _i6.Future<String> createTripPlan(_i3.CreateTripPlanRequest request) =>
       (super.noSuchMethod(
         Invocation.method(
           #createTripPlan,
           [request],
         ),
-        returnValue: _i6.Future<_i3.TripPlan>.value(_FakeTripPlan_2(
-          this,
-          Invocation.method(
-            #createTripPlan,
-            [request],
-          ),
-        )),
-      ) as _i6.Future<_i3.TripPlan>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<_i3.TripPlan> updateTripPlan(
-    String? planId,
-    _i3.UpdateTripPlanRequest? request,
+  _i6.Future<String> updateTripPlan(
+    String planId,
+    _i3.UpdateTripPlanRequest request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -407,27 +357,19 @@ class MockTripService extends _i1.Mock implements _i7.TripService {
             request,
           ],
         ),
-        returnValue: _i6.Future<_i3.TripPlan>.value(_FakeTripPlan_2(
-          this,
-          Invocation.method(
-            #updateTripPlan,
-            [
-              planId,
-              request,
-            ],
-          ),
-        )),
-      ) as _i6.Future<_i3.TripPlan>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
-  _i6.Future<void> deleteTripPlan(String? planId) => (super.noSuchMethod(
+  _i6.Future<String> deleteTripPlan(String planId) => (super.noSuchMethod(
         Invocation.method(
           #deleteTripPlan,
           [planId],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i6.Future<String>.value(''),
+        returnValueForMissingStub: _i6.Future<String>.value(''),
+      ) as _i6.Future<String>);
 
   @override
   _i6.Future<List<_i3.TripLocation>> getTripUpdates(String? tripId) =>
