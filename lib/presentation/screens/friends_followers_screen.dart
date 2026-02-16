@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
+import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
+import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
@@ -17,9 +20,11 @@ class FriendsFollowersScreen extends StatefulWidget {
 class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     with SingleTickerProviderStateMixin {
   final UserService _userService = UserService();
+  final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
 
   late TabController _tabController;
+  StreamSubscription<WebSocketEvent>? _wsSubscription;
 
   // Data
   List<UserFollow> _followers = [];
@@ -42,10 +47,75 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadData();
+    _initWebSocket();
+  }
+
+  Future<void> _initWebSocket() async {
+    await _webSocketService.connect();
+    _wsSubscription = _webSocketService.events.listen(_handleWebSocketEvent);
+  }
+
+  void _handleWebSocketEvent(WebSocketEvent event) {
+    if (!mounted) return;
+
+    switch (event.type) {
+      case WebSocketEventType.userFollowed:
+        _handleUserFollowed(event as UserFollowedEvent);
+        break;
+      case WebSocketEventType.userUnfollowed:
+        _handleUserUnfollowed(event as UserUnfollowedEvent);
+        break;
+      case WebSocketEventType.friendRequestSent:
+        _handleFriendRequestSent(event as FriendRequestSentEvent);
+        break;
+      case WebSocketEventType.friendRequestAccepted:
+        _handleFriendRequestAccepted(event as FriendRequestAcceptedEvent);
+        break;
+      case WebSocketEventType.friendRequestDeclined:
+        _handleFriendRequestDeclined(event as FriendRequestDeclinedEvent);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleUserFollowed(UserFollowedEvent event) {
+    // Reload data to get updated lists
+    _loadData();
+    if (mounted) {
+      UiHelpers.showSuccessMessage(context, 'You have a new follower!');
+    }
+  }
+
+  void _handleUserUnfollowed(UserUnfollowedEvent event) {
+    // Reload data to get updated lists
+    _loadData();
+  }
+
+  void _handleFriendRequestSent(FriendRequestSentEvent event) {
+    // Reload data to get updated lists
+    _loadData();
+    if (mounted) {
+      UiHelpers.showSuccessMessage(context, 'You received a friend request!');
+    }
+  }
+
+  void _handleFriendRequestAccepted(FriendRequestAcceptedEvent event) {
+    // Reload data to get updated lists
+    _loadData();
+    if (mounted) {
+      UiHelpers.showSuccessMessage(context, 'Friend request accepted!');
+    }
+  }
+
+  void _handleFriendRequestDeclined(FriendRequestDeclinedEvent event) {
+    // Reload data to get updated lists
+    _loadData();
   }
 
   @override
   void dispose() {
+    _wsSubscription?.cancel();
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();

@@ -571,3 +571,96 @@ class FriendRequestSentEvent extends WebSocketEvent {
     );
   }
 }
+
+/// Event for user unfollow
+class UserUnfollowedEvent extends WebSocketEvent {
+  final String followerId;
+  final String followedId;
+
+  UserUnfollowedEvent({
+    required this.followerId,
+    required this.followedId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.userUnfollowed,
+        );
+
+  factory UserUnfollowedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return UserUnfollowedEvent(
+      followerId:
+          payload['followerId'] as String? ?? payload['id'] as String? ?? '',
+      followedId: payload['followedId'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for friend request accepted
+class FriendRequestAcceptedEvent extends WebSocketEvent {
+  final String requestId;
+  final String senderId;
+  final String receiverId;
+
+  FriendRequestAcceptedEvent({
+    required this.requestId,
+    required this.senderId,
+    required this.receiverId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.friendRequestAccepted,
+        );
+
+  factory FriendRequestAcceptedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return FriendRequestAcceptedEvent(
+      requestId:
+          payload['requestId'] as String? ?? payload['id'] as String? ?? '',
+      senderId: payload['senderId'] as String? ?? '',
+      receiverId: payload['receiverId'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for friend request declined
+class FriendRequestDeclinedEvent extends WebSocketEvent {
+  final String requestId;
+  final String senderId;
+  final String receiverId;
+
+  FriendRequestDeclinedEvent({
+    required this.requestId,
+    required this.senderId,
+    required this.receiverId,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.friendRequestDeclined,
+        );
+
+  factory FriendRequestDeclinedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return FriendRequestDeclinedEvent(
+      requestId:
+          payload['requestId'] as String? ?? payload['id'] as String? ?? '',
+      senderId: payload['senderId'] as String? ?? '',
+      receiverId: payload['receiverId'] as String? ?? '',
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
