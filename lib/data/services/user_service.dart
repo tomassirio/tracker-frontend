@@ -74,6 +74,12 @@ class UserService {
     return await _userCommandClient.declineFriendRequest(requestId);
   }
 
+  /// Cancel a sent friend request
+  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
+  Future<String> cancelFriendRequest(String requestId) async {
+    return await _userCommandClient.cancelFriendRequest(requestId);
+  }
+
   /// Remove a friend (unfriend)
   /// Returns the ID from the response. Confirmation will be delivered via WebSocket.
   Future<String> removeFriend(String friendId) async {

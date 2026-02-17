@@ -119,6 +119,17 @@ void main() {
         );
       });
 
+      test('usersFriendRequestCancel generates correct path', () {
+        expect(
+          ApiEndpoints.usersFriendRequestCancel('req123'),
+          '/users/friends/requests/req123',
+        );
+        expect(
+          ApiEndpoints.usersFriendRequestCancel('abc-def'),
+          '/users/friends/requests/abc-def',
+        );
+      });
+
       test('usersRemoveFriend generates correct path', () {
         expect(
           ApiEndpoints.usersRemoveFriend('friend123'),

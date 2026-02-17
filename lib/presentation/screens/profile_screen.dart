@@ -40,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _hasSentFriendRequest =
       false; // Track if friend request was sent locally
   bool _isAlreadyFriends = false; // Track if already friends with user
+  String? _sentFriendRequestId; // Store the request ID for cancellation
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -157,15 +158,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Check if already sent a friend request
       final sentRequests = await _userService.getSentFriendRequests();
-      final hasSentRequest = sentRequests.any(
-        (r) =>
-            r.receiverId == userId && r.status == FriendRequestStatus.pending,
-      );
+      final pendingRequest = sentRequests.cast<FriendRequest?>().firstWhere(
+            (r) =>
+                r!.receiverId == userId &&
+                r.status == FriendRequestStatus.pending,
+            orElse: () => null,
+          );
+      final hasSentRequest = pendingRequest != null;
+      final requestId = pendingRequest?.id;
 
       if (mounted) {
         setState(() {
           _isAlreadyFriends = isAlreadyFriends;
           _hasSentFriendRequest = hasSentRequest;
+          _sentFriendRequestId = requestId;
         });
       }
     } catch (e) {
@@ -365,21 +371,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    // If already sent, this acts as a cancel (just toggle state locally)
-    if (_hasSentFriendRequest) {
-      setState(() {
-        _hasSentFriendRequest = false;
-      });
-      if (mounted) {
-        UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+    // Cancel existing friend request
+    if (_hasSentFriendRequest && _sentFriendRequestId != null) {
+      try {
+        await _userService.cancelFriendRequest(_sentFriendRequestId!);
+        setState(() {
+          _hasSentFriendRequest = false;
+          _sentFriendRequestId = null;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+              context, 'Failed to cancel friend request: $e');
+        }
       }
       return;
     }
 
+    // Send new friend request
     try {
-      await _userService.sendFriendRequest(_profile!.id);
+      final requestId = await _userService.sendFriendRequest(_profile!.id);
       setState(() {
         _hasSentFriendRequest = true;
+        _sentFriendRequestId = requestId;
       });
       if (mounted) {
         UiHelpers.showSuccessMessage(

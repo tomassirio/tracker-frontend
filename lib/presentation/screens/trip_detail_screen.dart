@@ -69,6 +69,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isFollowingTripOwner = false;
   bool _hasSentFriendRequest = false;
   bool _isAlreadyFriends = false;
+  String? _sentFriendRequestId; // Store the request ID for cancellation
 
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
@@ -347,11 +348,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
       // Check if already sent a friend request to the trip owner
       final sentRequests = await _userService.getSentFriendRequests();
-      final hasSentRequest = sentRequests.any(
-        (r) =>
-            r.receiverId == _trip.userId &&
-            r.status == FriendRequestStatus.pending,
-      );
+      final pendingRequest = sentRequests.cast<FriendRequest?>().firstWhere(
+            (r) =>
+                r!.receiverId == _trip.userId &&
+                r.status == FriendRequestStatus.pending,
+            orElse: () => null,
+          );
+      final hasSentRequest = pendingRequest != null;
+      final requestId = pendingRequest?.id;
 
       // Check if already friends with the trip owner
       final friends = await _userService.getFriends();
@@ -361,6 +365,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         setState(() {
           _isFollowingTripOwner = isFollowing;
           _hasSentFriendRequest = hasSentRequest;
+          _sentFriendRequestId = requestId;
           _isAlreadyFriends = isAlreadyFriends;
         });
       }
@@ -754,21 +759,32 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       return;
     }
 
-    // Toggle between send and cancel
-    if (_hasSentFriendRequest) {
-      setState(() {
-        _hasSentFriendRequest = false;
-      });
-      if (mounted) {
-        UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+    // Cancel existing friend request
+    if (_hasSentFriendRequest && _sentFriendRequestId != null) {
+      try {
+        await _userService.cancelFriendRequest(_sentFriendRequestId!);
+        setState(() {
+          _hasSentFriendRequest = false;
+          _sentFriendRequestId = null;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+              context, 'Failed to cancel friend request: $e');
+        }
       }
       return;
     }
 
+    // Send new friend request
     try {
-      await _userService.sendFriendRequest(_trip.userId);
+      final requestId = await _userService.sendFriendRequest(_trip.userId);
       setState(() {
         _hasSentFriendRequest = true;
+        _sentFriendRequestId = requestId;
       });
       if (mounted) {
         UiHelpers.showSuccessMessage(
