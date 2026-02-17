@@ -5,9 +5,11 @@ import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
+import 'profile_screen.dart';
 
 /// Screen for managing friends and followers
 class FriendsFollowersScreen extends StatefulWidget {
@@ -270,6 +272,13 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     }
   }
 
+  void _navigateToUserProfile(String userId) {
+    Navigator.push(
+      context,
+      PageTransitions.slideUp(ProfileScreen(userId: userId)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -404,6 +413,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              onTap: () => _navigateToUserProfile(friendship.friendId),
               leading: CircleAvatar(
                 backgroundImage: profile?.avatarUrl != null
                     ? NetworkImage(profile!.avatarUrl!)
@@ -466,6 +476,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              onTap: () => _navigateToUserProfile(follower.followerId),
               leading: CircleAvatar(
                 backgroundImage: profile?.avatarUrl != null
                     ? NetworkImage(profile!.avatarUrl!)
@@ -523,6 +534,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              onTap: () => _navigateToUserProfile(following.followedId),
               leading: CircleAvatar(
                 backgroundImage: profile?.avatarUrl != null
                     ? NetworkImage(profile!.avatarUrl!)
@@ -603,6 +615,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              onTap: () => _navigateToUserProfile(request.senderId),
               leading: CircleAvatar(
                 backgroundImage: profile?.avatarUrl != null
                     ? NetworkImage(profile!.avatarUrl!)
@@ -671,6 +684,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              onTap: () => _navigateToUserProfile(request.receiverId),
               leading: CircleAvatar(
                 backgroundImage: profile?.avatarUrl != null
                     ? NetworkImage(profile!.avatarUrl!)
