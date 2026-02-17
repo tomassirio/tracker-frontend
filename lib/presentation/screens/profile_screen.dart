@@ -41,6 +41,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       false; // Track if friend request was sent locally
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
+  // Actual counts loaded from API (for own profile)
+  int _followersCount = 0;
+  int _followingCount = 0;
+  int _friendsCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +74,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (isLoggedIn) {
         try {
           await _repository.getMyProfile();
+          // Load social counts for own profile
+          await _loadSocialCounts();
         } catch (e) {
           // Ignore error loading current user
         }
@@ -79,6 +86,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final profile = await _repository.getUserProfile(widget.userId!);
         setState(() {
           _profile = profile;
+          _followersCount = profile.followersCount;
+          _followingCount = profile.followingCount;
           _isLoadingProfile = false;
         });
 
@@ -102,13 +111,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoadingProfile = false;
       });
 
-      // Load user's trips
+      // Load user's trips and social counts
       _loadUserTrips(profile.id);
+      await _loadSocialCounts();
     } catch (e) {
       setState(() {
         _error = e.toString();
         _isLoadingProfile = false;
       });
+    }
+  }
+
+  /// Load follower, following, and friends counts from API
+  Future<void> _loadSocialCounts() async {
+    try {
+      final results = await Future.wait([
+        _userService.getFollowers(),
+        _userService.getFollowing(),
+        _userService.getFriends(),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _followersCount = (results[0] as List).length;
+          _followingCount = (results[1] as List).length;
+          _friendsCount = (results[2] as List).length;
+        });
+      }
+    } catch (e) {
+      // Silently fail - use profile counts as fallback
+      debugPrint('Failed to load social counts: $e');
     }
   }
 
@@ -526,10 +558,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatCard('Trips', _userTrips.length.toString(), null),
-        _buildStatCard('Followers', _profile!.followersCount.toString(),
+        _buildStatCard('Followers', _followersCount.toString(),
             _navigateToFriendsFollowers),
-        _buildStatCard('Following', _profile!.followingCount.toString(),
+        _buildStatCard('Following', _followingCount.toString(),
             _navigateToFriendsFollowers),
+        _buildStatCard(
+            'Friends', _friendsCount.toString(), _navigateToFriendsFollowers),
       ],
     );
   }

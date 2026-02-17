@@ -458,6 +458,11 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           final follower = _followers[index];
           final profile = _userProfiles[follower.followerId];
 
+          // Check if we're already following this user
+          final isFollowingBack = _following.any(
+            (f) => f.followedId == follower.followerId,
+          );
+
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
@@ -473,10 +478,15 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
               subtitle: profile?.displayName != null
                   ? Text(profile!.displayName!)
                   : null,
-              trailing: ElevatedButton(
-                onPressed: () => _handleFollowUser(follower.followerId),
-                child: const Text('Follow Back'),
-              ),
+              trailing: isFollowingBack
+                  ? OutlinedButton(
+                      onPressed: () => _handleUnfollowUser(follower.followerId),
+                      child: const Text('Unfollow'),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => _handleFollowUser(follower.followerId),
+                      child: const Text('Follow Back'),
+                    ),
             ),
           );
         },
