@@ -264,27 +264,34 @@ class TripInfoCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: isAlreadyFriends
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.people,
-                                        size: 16,
-                                        color: Colors.white,
+                              ? InkWell(
+                                  onTap: onSendFriendRequest,
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Tooltip(
+                                    message: 'Unfriend',
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.people,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Friends',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Friends',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 )
                               : IconButton(

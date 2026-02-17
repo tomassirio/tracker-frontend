@@ -44,6 +44,8 @@ class ApiEndpoints {
       '/users/friends/requests/$requestId/accept';
   static String usersFriendRequestDecline(String requestId) =>
       '/users/friends/requests/$requestId/decline';
+  static String usersRemoveFriend(String friendId) =>
+      '/users/friends/$friendId';
   static const String usersFollows = '/users/follows';
   static String usersUnfollow(String followedId) =>
       '/users/follows/$followedId';

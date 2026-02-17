@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoggedIn = false;
   bool _hasSentFriendRequest =
       false; // Track if friend request was sent locally
+  bool _isAlreadyFriends = false; // Track if already friends with user
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -91,8 +92,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _isLoadingProfile = false;
         });
 
-        // Load user's trips
+        // Load user's trips and check friendship status
         _loadUserTrips(profile.id);
+        if (isLoggedIn) {
+          await _loadFriendshipStatus(profile.id);
+        }
         return;
       }
 
@@ -141,6 +145,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       // Silently fail - use profile counts as fallback
       debugPrint('Failed to load social counts: $e');
+    }
+  }
+
+  /// Load friendship status when viewing another user's profile
+  Future<void> _loadFriendshipStatus(String userId) async {
+    try {
+      // Check if already friends
+      final friends = await _userService.getFriends();
+      final isAlreadyFriends = friends.any((f) => f.friendId == userId);
+
+      // Check if already sent a friend request
+      final sentRequests = await _userService.getSentFriendRequests();
+      final hasSentRequest = sentRequests.any(
+        (r) =>
+            r.receiverId == userId && r.status == FriendRequestStatus.pending,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isAlreadyFriends = isAlreadyFriends;
+          _hasSentFriendRequest = hasSentRequest;
+        });
+      }
+    } catch (e) {
+      // Silently fail - friendship features are optional
+      debugPrint('Failed to load friendship status: $e');
     }
   }
 
@@ -315,6 +345,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleSendFriendRequest() async {
     if (_profile == null) return;
+
+    // If already friends, allow unfriending
+    if (_isAlreadyFriends) {
+      try {
+        await _userService.removeFriend(_profile!.id);
+        setState(() {
+          _isAlreadyFriends = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are no longer friends with ${_profile!.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to remove friend: $e');
+        }
+      }
+      return;
+    }
 
     // If already sent, this acts as a cancel (just toggle state locally)
     if (_hasSentFriendRequest) {
@@ -529,15 +578,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       IconButton(
                         icon: Icon(
-                          _hasSentFriendRequest
-                              ? Icons.person_add_disabled
-                              : Icons.person_add_alt,
+                          _isAlreadyFriends
+                              ? Icons.people
+                              : _hasSentFriendRequest
+                                  ? Icons.person_add_disabled
+                                  : Icons.person_add_alt,
                         ),
                         onPressed: _handleSendFriendRequest,
-                        tooltip: _hasSentFriendRequest
-                            ? 'Cancel Friend Request'
-                            : 'Send Friend Request',
-                        color: _hasSentFriendRequest ? Colors.orange : null,
+                        tooltip: _isAlreadyFriends
+                            ? 'Unfriend'
+                            : _hasSentFriendRequest
+                                ? 'Cancel Friend Request'
+                                : 'Send Friend Request',
+                        color: _isAlreadyFriends
+                            ? Colors.green
+                            : _hasSentFriendRequest
+                                ? Colors.orange
+                                : null,
                       ),
                     ],
                   ),

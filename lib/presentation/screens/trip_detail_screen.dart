@@ -735,11 +735,21 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _handleSendFriendRequestToTripOwner() async {
     if (!_isLoggedIn || _trip.userId == _userId) return;
 
-    // Don't allow if already friends
+    // If already friends, allow unfriending
     if (_isAlreadyFriends) {
-      if (mounted) {
-        UiHelpers.showInfoMessage(
-            context, 'You are already friends with @${_trip.username}');
+      try {
+        await _userService.removeFriend(_trip.userId);
+        setState(() {
+          _isAlreadyFriends = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are no longer friends with @${_trip.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to remove friend: $e');
+        }
       }
       return;
     }
