@@ -341,9 +341,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   /// Load the current user's social relationship with the trip owner
   Future<void> _loadSocialStatus() async {
     try {
-      // Get the trip owner's profile - this includes isFollowing from the API
-      final tripOwnerProfile = await _userService.getUserById(_trip.userId);
-      final isFollowing = tripOwnerProfile.isFollowing;
+      // Check if following the trip owner by looking at our following list
+      final following = await _userService.getFollowing();
+
+      // Debug: print what we got
+      debugPrint('Trip owner userId: ${_trip.userId}');
+      debugPrint('Following list count: ${following.length}');
+      for (final f in following) {
+        debugPrint(
+            '  Following: followerId=${f.followerId}, followedId=${f.followedId}');
+      }
+
+      final isFollowing = following.any((f) => f.followedId == _trip.userId);
+      debugPrint('Is following trip owner: $isFollowing');
 
       // Check if already sent a friend request to the trip owner
       final sentRequests = await _userService.getSentFriendRequests();
@@ -355,13 +365,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
       // Check if already friends with the trip owner
       final friends = await _userService.getFriends();
+      debugPrint('Friends list count: ${friends.length}');
+      for (final f in friends) {
+        debugPrint('  Friend: userId=${f.userId}, friendId=${f.friendId}');
+      }
       final isAlreadyFriends = friends.any((f) => f.friendId == _trip.userId);
+      debugPrint('Is already friends: $isAlreadyFriends');
 
-      setState(() {
-        _isFollowingTripOwner = isFollowing;
-        _hasSentFriendRequest = hasSentRequest;
-        _isAlreadyFriends = isAlreadyFriends;
-      });
+      if (mounted) {
+        setState(() {
+          _isFollowingTripOwner = isFollowing;
+          _hasSentFriendRequest = hasSentRequest;
+          _isAlreadyFriends = isAlreadyFriends;
+        });
+      }
     } catch (e) {
       // Silently fail - social features are optional
       debugPrint('Failed to load social status: $e');
