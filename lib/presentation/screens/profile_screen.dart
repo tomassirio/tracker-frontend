@@ -42,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isAlreadyFriends = false; // Track if already friends with user
   bool _isFollowingUser = false; // Track if following this user
   String? _sentFriendRequestId; // Store the request ID for cancellation
+  String? _currentUserId; // Track the logged-in user's ID
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -61,6 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  /// Check if viewing own profile (either no userId passed, or userId matches current user)
+  bool get _isViewingOwnProfile =>
+      widget.userId == null ||
+      (widget.userId != null && widget.userId == _currentUserId);
+
   Future<void> _loadProfile() async {
     setState(() {
       _isLoadingProfile = true;
@@ -76,7 +82,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Load current user if logged in
       if (isLoggedIn) {
         try {
-          await _repository.getMyProfile();
+          final currentUser = await _repository.getMyProfile();
+          setState(() {
+            _currentUserId = currentUser.id;
+          });
           // Load social counts for own profile
           await _loadSocialCounts();
         } catch (e) {
@@ -94,9 +103,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _isLoadingProfile = false;
         });
 
-        // Load user's trips and check friendship status
+        // Load user's trips
         _loadUserTrips(profile.id);
-        if (isLoggedIn) {
+
+        // Only load friendship status if viewing someone else's profile
+        if (isLoggedIn && widget.userId != _currentUserId) {
           await _loadFriendshipStatus(profile.id);
         }
         return;
@@ -554,7 +565,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-                          if (_isFollowingUser && widget.userId != null) ...[
+                          if (_isFollowingUser && !_isViewingOwnProfile) ...[
                             const SizedBox(width: 8),
                             const Icon(
                               Icons.person_add_alt_1,
@@ -576,7 +587,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-                if (widget.userId == null)
+                if (_isViewingOwnProfile)
                   // Only show edit button for own profile
                   IconButton(
                     icon: const Icon(Icons.edit),
