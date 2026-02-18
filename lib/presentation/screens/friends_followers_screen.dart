@@ -2,13 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
+import 'package:tracker_frontend/data/services/auth_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
+import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
+import 'home_screen.dart';
 import 'profile_screen.dart';
 
 /// Screen for managing friends and followers
@@ -226,10 +229,17 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
   }
 
   Future<void> _handleLogout() async {
-    // Simple logout - clear token and navigate back
-    // The actual logout logic should be in a repository/service
-    if (mounted) {
-      Navigator.of(context).pop();
+    final confirm = await DialogHelper.showLogoutConfirmation(context);
+
+    if (confirm) {
+      await AuthService().logout();
+      if (mounted) {
+        // Navigate to home screen and clear navigation stack
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+      }
     }
   }
 

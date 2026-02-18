@@ -158,8 +158,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (confirm) {
       await _repository.logout();
       if (mounted) {
-        await _loadUserInfo();
-        await _loadTrips();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     }
   }

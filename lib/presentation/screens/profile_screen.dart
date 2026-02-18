@@ -14,6 +14,7 @@ import '../../data/client/google_maps_api_client.dart';
 import '../../data/client/google_routes_api_client.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
+import 'home_screen.dart';
 import 'trip_detail_screen.dart';
 import 'friends_followers_screen.dart';
 
@@ -224,7 +225,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirm) {
       await _repository.logout();
       if (mounted) {
-        Navigator.of(context).pop(true); // Return to previous screen
+        // Navigate to home screen and clear navigation stack
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     }
   }

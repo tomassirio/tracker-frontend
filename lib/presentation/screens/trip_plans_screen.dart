@@ -11,6 +11,7 @@ import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plans_content.dart';
 import 'auth_screen.dart';
 import 'create_trip_plan_screen.dart';
+import 'home_screen.dart';
 import 'trip_detail_screen.dart';
 import 'trip_plan_detail_screen.dart';
 
@@ -109,8 +110,10 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     if (confirm) {
       await _homeRepository.logout();
       if (mounted) {
-        await _loadUserInfo();
-        await _loadTripPlans();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     }
   }

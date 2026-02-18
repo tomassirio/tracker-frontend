@@ -25,6 +25,7 @@ import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.da
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 import 'auth_screen.dart';
+import 'home_screen.dart';
 import 'profile_screen.dart';
 
 /// Trip detail screen showing trip info, map, and comments
@@ -662,8 +663,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     if (confirm) {
       await _repository.logout();
       if (mounted) {
-        // Pop with result to trigger refresh in home screen
-        Navigator.pop(context, true);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     }
   }
