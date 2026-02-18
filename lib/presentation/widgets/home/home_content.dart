@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/presentation/widgets/home/trip_card.dart';
 import 'package:tracker_frontend/presentation/widgets/home/empty_trips_view.dart';
 import 'package:tracker_frontend/presentation/widgets/home/error_view.dart';
@@ -98,25 +99,50 @@ class HomeContent extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Welcome header for guests
+              if (!isLoggedIn) ...[
+                _buildGuestWelcomeHeader(),
+                const SizedBox(height: 24),
+              ],
               // My Trips Section
               if (myTrips.isNotEmpty) ...[
-                _buildSectionHeader('My Trips', myTrips.length),
+                _buildSectionHeader(
+                  'My Trips',
+                  myTrips.length,
+                  Icons.person_outline,
+                  WandererTheme.primaryOrange,
+                ),
                 const SizedBox(height: 12),
                 _buildTripGrid(myTrips, crossAxisCount),
                 const SizedBox(height: 32),
               ],
               // Friends Trips Section
               if (friendsTrips.isNotEmpty) ...[
-                _buildSectionHeader('Friends Trips', friendsTrips.length),
+                _buildSectionHeader(
+                  'Friends Trips',
+                  friendsTrips.length,
+                  Icons.people_outline,
+                  Colors.blue,
+                ),
                 const SizedBox(height: 12),
                 _buildTripGrid(friendsTrips, crossAxisCount),
                 const SizedBox(height: 32),
               ],
-              // Public Trips Section
+              // Public/Discover Trips Section
               if (publicTrips.isNotEmpty) ...[
                 _buildSectionHeader(
-                  isLoggedIn ? 'Public Trips' : 'All Trips',
+                  isLoggedIn ? 'Discover' : 'Discover',
                   publicTrips.length,
+                  Icons.explore,
+                  Colors.green,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Explore public trips from the community',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: WandererTheme.textTertiary,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _buildTripGrid(publicTrips, crossAxisCount),
@@ -128,23 +154,147 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title, int count) {
+  /// Build a welcoming header for guest users
+  Widget _buildGuestWelcomeHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            WandererTheme.primaryOrange.withOpacity(0.05),
+            WandererTheme.primaryOrangeLight.withOpacity(0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: WandererTheme.primaryOrange.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Welcome icon
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: WandererTheme.primaryOrange.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.login,
+              size: 32,
+              color: WandererTheme.textTertiary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Welcome text
+          const Text(
+            'Welcome to Tracker',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: WandererTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please log in to see personalized content',
+            style: TextStyle(
+              fontSize: 14,
+              color: WandererTheme.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          // Login button
+          if (onLoginPressed != null)
+            ElevatedButton(
+              onPressed: onLoginPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: WandererTheme.primaryOrange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Log In',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Text(
+            'Or explore public trips:',
+            style: TextStyle(
+              fontSize: 13,
+              color: WandererTheme.textTertiary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(
+    String title,
+    int count,
+    IconData icon,
+    Color accentColor,
+  ) {
     return Row(
       children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: accentColor,
+          ),
+        ),
+        const SizedBox(width: 12),
         Text(
           title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: WandererTheme.textPrimary,
+          ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: accentColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             '$count',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: accentColor,
+            ),
           ),
         ),
       ],
