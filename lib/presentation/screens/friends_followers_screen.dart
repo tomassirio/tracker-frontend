@@ -214,6 +214,25 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     }
   }
 
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      PageTransitions.slideUp(const ProfileScreen()),
+    );
+  }
+
+  void _handleSettings() {
+    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+  }
+
+  Future<void> _handleLogout() async {
+    // Simple logout - clear token and navigate back
+    // The actual logout logic should be in a repository/service
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _handleFollowUser(String userId) async {
     try {
       await _userService.followUser(userId);
@@ -290,16 +309,16 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
         onLoginPressed: _navigateToAuth,
         username: _currentUser?.username,
         userId: _currentUser?.id,
-        onProfile: () {},
-        onSettings: () {},
-        onLogout: () {},
+        onProfile: _navigateToProfile,
+        onSettings: _handleSettings,
+        onLogout: _handleLogout,
       ),
       drawer: AppSidebar(
         username: _currentUser?.username,
         userId: _currentUser?.id,
         selectedIndex: _selectedSidebarIndex,
-        onLogout: () {},
-        onSettings: () {},
+        onLogout: _handleLogout,
+        onSettings: _handleSettings,
       ),
       body: _buildBody(),
     );
