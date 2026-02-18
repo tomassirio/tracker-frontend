@@ -40,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _hasSentFriendRequest =
       false; // Track if friend request was sent locally
   bool _isAlreadyFriends = false; // Track if already friends with user
+  bool _isFollowingUser = false; // Track if following this user
   String? _sentFriendRequestId; // Store the request ID for cancellation
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
@@ -149,9 +150,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// Load friendship status when viewing another user's profile
+  /// Load friendship and follow status when viewing another user's profile
   Future<void> _loadFriendshipStatus(String userId) async {
     try {
+      // Check if already following this user
+      final following = await _userService.getFollowing();
+      final isFollowing = following.any((f) => f.followedId == userId);
+
       // Check if already friends
       final friends = await _userService.getFriends();
       final isAlreadyFriends = friends.any((f) => f.friendId == userId);
@@ -169,13 +174,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (mounted) {
         setState(() {
+          _isFollowingUser = isFollowing;
           _isAlreadyFriends = isAlreadyFriends;
           _hasSentFriendRequest = hasSentRequest;
           _sentFriendRequestId = requestId;
         });
       }
     } catch (e) {
-      // Silently fail - friendship features are optional
+      // Silently fail - social features are optional
       debugPrint('Failed to load friendship status: $e');
     }
   }
@@ -316,35 +322,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleFollowUser() async {
     if (_profile == null) return;
 
-    try {
-      await _userService.followUser(_profile!.id);
-      if (mounted) {
-        UiHelpers.showSuccessMessage(
-            context, 'You are now following ${_profile!.username}');
-        // Reload profile to get updated isFollowing status
-        await _loadProfile();
+    // Toggle between follow and unfollow
+    if (_isFollowingUser) {
+      try {
+        await _userService.unfollowUser(_profile!.id);
+        setState(() {
+          _isFollowingUser = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'Unfollowed ${_profile!.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to unfollow user: $e');
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
-      }
-    }
-  }
-
-  Future<void> _handleUnfollowUser() async {
-    if (_profile == null) return;
-
-    try {
-      await _userService.unfollowUser(_profile!.id);
-      if (mounted) {
-        UiHelpers.showSuccessMessage(
-            context, 'Unfollowed ${_profile!.username}');
-        // Reload profile to get updated isFollowing status
-        await _loadProfile();
-      }
-    } catch (e) {
-      if (mounted) {
-        UiHelpers.showErrorMessage(context, 'Failed to unfollow user: $e');
+    } else {
+      try {
+        await _userService.followUser(_profile!.id);
+        setState(() {
+          _isFollowingUser = true;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are now following ${_profile!.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+        }
       }
     }
   }
@@ -547,7 +554,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-                          if (_profile!.isFollowing) ...[
+                          if (_isFollowingUser && widget.userId != null) ...[
                             const SizedBox(width: 8),
                             const Icon(
                               Icons.person_add_alt_1,
@@ -583,15 +590,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       IconButton(
                         icon: Icon(
-                          _profile!.isFollowing
+                          _isFollowingUser
                               ? Icons.person_remove
                               : Icons.person_add,
                         ),
-                        onPressed: _profile!.isFollowing
-                            ? _handleUnfollowUser
-                            : _handleFollowUser,
-                        tooltip: _profile!.isFollowing ? 'Unfollow' : 'Follow',
-                        color: _profile!.isFollowing ? Colors.blue : null,
+                        onPressed: _handleFollowUser,
+                        tooltip: _isFollowingUser ? 'Unfollow' : 'Follow',
+                        color: _isFollowingUser ? Colors.blue : null,
                       ),
                       IconButton(
                         icon: Icon(
