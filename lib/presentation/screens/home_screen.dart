@@ -812,45 +812,146 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 )
               : !_isLoggedIn
-                  ? Center(
+                  ? SingleChildScrollView(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.login, size: 64, color: Colors.grey[400]),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Welcome to Tracker',
-                            style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[700]),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Please log in to see personalized content',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.grey[500]),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: _navigateToAuth,
-                            icon: const Icon(Icons.login),
-                            label: const Text('Log In'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 32, vertical: 16),
+                          // Hero section with better visuals
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 48, horizontal: 24),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.1),
+                                  Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.05),
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.explore,
+                                    size: 64,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                const Text(
+                                  'Welcome to Tracker',
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -1,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Track your adventures, share your journeys',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 32),
+                                ElevatedButton.icon(
+                                  onPressed: _navigateToAuth,
+                                  icon: const Icon(Icons.login, size: 20),
+                                  label: const Text(
+                                    'Log In to Get Started',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 32,
+                                      vertical: 16,
+                                    ),
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 32),
-                          Text(
-                            'Or explore public trips:',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.grey[600]),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 400,
-                            child: _buildDiscoverTab(),
+                          // Discover section with better header
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(
+                                        Icons.public,
+                                        color: Theme.of(context).primaryColor,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Explore Public Trips',
+                                            style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: -0.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Discover adventures from the community',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                _buildDiscoverTab(),
+                              ],
+                            ),
                           ),
                         ],
                       ),

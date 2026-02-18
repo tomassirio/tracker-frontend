@@ -16,28 +16,35 @@ class VisibilityBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: compact
-          ? const EdgeInsets.symmetric(horizontal: 6, vertical: 2)
-          : const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+          : const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: _getBackgroundColor(),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getBorderColor(), width: 1),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _getBorderColor(), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: _getIconColor().withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             _getIcon(),
-            size: compact ? 12 : 14,
+            size: compact ? 14 : 16,
             color: _getIconColor(),
           ),
           if (!compact) ...[
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               _getLabel(),
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
                 color: _getIconColor(),
               ),
             ),

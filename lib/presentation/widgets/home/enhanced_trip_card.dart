@@ -207,13 +207,17 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
+      elevation: 3,
+      shadowColor: Colors.black.withOpacity(0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: InkWell(
         onTap: widget.onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Static map preview
+            // Static map preview with gradient overlay
             AspectRatio(
               aspectRatio: 16 / 9,
               child: Stack(
@@ -225,7 +229,16 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return Container(
-                          color: Colors.grey[300],
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.grey[200]!,
+                                Colors.grey[300]!,
+                              ],
+                            ),
+                          ),
                           child: Center(
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
@@ -238,12 +251,21 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       },
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: Colors.grey[300],
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.grey[200]!,
+                                Colors.grey[300]!,
+                              ],
+                            ),
+                          ),
                           child: Center(
                             child: Icon(
                               Icons.map,
                               size: 48,
-                              color: Colors.grey[500],
+                              color: Colors.grey[400],
                             ),
                           ),
                         );
@@ -251,31 +273,56 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                     )
                   else
                     Container(
-                      color: Colors.grey[300],
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.grey[200]!,
+                            Colors.grey[300]!,
+                          ],
+                        ),
+                      ),
                       child: Center(
                         child: Icon(
                           Icons.map_outlined,
                           size: 48,
-                          color: Colors.grey[500],
+                          color: Colors.grey[400],
                         ),
                       ),
                     ),
 
-                  // Top badges overlay
+                  // Subtle gradient overlay for better badge visibility
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.3),
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                        ],
+                        stops: const [0.0, 0.25, 0.75, 1.0],
+                      ),
+                    ),
+                  ),
+
+                  // Top badges overlay with shadow for visibility
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: 10,
+                    left: 10,
                     child: Wrap(
                       spacing: 6,
                       runSpacing: 6,
                       children: [
                         if (widget.showAllBadges)
-                          StatusBadge(
-                              status: widget.trip.status, compact: true),
+                          StatusBadge(status: widget.trip.status, compact: false),
                         if (widget.relationship != null)
                           RelationshipBadge(
                             type: widget.relationship!,
-                            compact: true,
+                            compact: false,
                           ),
                       ],
                     ),
@@ -284,31 +331,43 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                   // Visibility badge overlay
                   if (widget.showAllBadges)
                     Positioned(
-                      bottom: 8,
-                      left: 8,
+                      bottom: 10,
+                      left: 10,
                       child: VisibilityBadge(
                         visibility: widget.trip.visibility,
-                        compact: true,
+                        compact: false,
                       ),
                     ),
 
-                  // Delete button overlay
+                  // Delete button overlay with better contrast
                   if (widget.onDelete != null)
                     Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Material(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: widget.onDelete,
-                          child: const Padding(
-                            padding: EdgeInsets.all(6),
-                            child: Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                              size: 20,
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade600,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(24),
+                            onTap: widget.onDelete,
+                            child: const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.delete_outline,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
@@ -317,24 +376,35 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                 ],
               ),
             ),
-            // Trip info section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+            // Trip info section with better spacing and hierarchy
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey[200]!,
+                    width: 1,
+                  ),
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Trip title
+                  // Trip title with better typography
                   Text(
                     widget.trip.name,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                      letterSpacing: -0.5,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
-                  // Username and date
+                  const SizedBox(height: 10),
+                  // Username with avatar-style icon
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -344,55 +414,93 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                         ),
                       );
                     },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.person, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          '@${widget.trip.username}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 4, horizontal: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.person,
+                              size: 14,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Text(
+                            '@${widget.trip.username}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  // Metadata row
+                  const SizedBox(height: 8),
+                  // Metadata row with icons
                   Row(
                     children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
                       Text(
                         _formatDate(widget.trip.createdAt),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 3,
-                        height: 3,
-                        decoration: BoxDecoration(
+                        style: TextStyle(
+                          fontSize: 13,
                           color: Colors.grey[600],
-                          shape: BoxShape.circle,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Icon(Icons.comment, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 12),
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${widget.trip.commentsCount}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
                   if (widget.trip.description != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.trip.description!,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        widget.trip.description!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[700],
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ],

@@ -54,12 +54,19 @@ class _StatusBadgeState extends State<StatusBadge>
   Widget build(BuildContext context) {
     return Container(
       padding: widget.compact
-          ? const EdgeInsets.symmetric(horizontal: 6, vertical: 2)
-          : const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+          : const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: _getBackgroundColor(),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getBorderColor(), width: 1),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _getBorderColor(), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: _getIconColor().withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -69,8 +76,8 @@ class _StatusBadgeState extends State<StatusBadge>
               animation: _pulseController,
               builder: (context, child) {
                 return Container(
-                  width: widget.compact ? 6 : 8,
-                  height: widget.compact ? 6 : 8,
+                  width: widget.compact ? 8 : 10,
+                  height: widget.compact ? 8 : 10,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _getIconColor(),
@@ -78,8 +85,8 @@ class _StatusBadgeState extends State<StatusBadge>
                       BoxShadow(
                         color:
                             _getIconColor().withOpacity(_pulseController.value),
-                        blurRadius: 4,
-                        spreadRadius: 2,
+                        blurRadius: 6,
+                        spreadRadius: 3,
                       ),
                     ],
                   ),
@@ -89,16 +96,16 @@ class _StatusBadgeState extends State<StatusBadge>
           else
             Icon(
               _getIcon(),
-              size: widget.compact ? 12 : 14,
+              size: widget.compact ? 14 : 16,
               color: _getIconColor(),
             ),
           if (!widget.compact) ...[
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               _getLabel(),
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
                 color: _getIconColor(),
               ),
             ),
