@@ -206,22 +206,12 @@ void main() {
       test('successful retrieval returns list of friends', () async {
         final responseBody = [
           {
-            'id': 'user-1',
-            'username': 'friend1',
-            'email': 'friend1@example.com',
-            'followersCount': 10,
-            'followingCount': 15,
-            'tripsCount': 5,
-            'createdAt': DateTime.now().toIso8601String(),
+            'userId': 'current-user',
+            'friendId': 'friend-1',
           },
           {
-            'id': 'user-2',
-            'username': 'friend2',
-            'email': 'friend2@example.com',
-            'followersCount': 20,
-            'followingCount': 25,
-            'tripsCount': 8,
-            'createdAt': DateTime.now().toIso8601String(),
+            'userId': 'current-user',
+            'friendId': 'friend-2',
           },
         ];
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
@@ -229,8 +219,8 @@ void main() {
         final result = await userQueryClient.getFriends();
 
         expect(result.length, 2);
-        expect(result[0].username, 'friend1');
-        expect(result[1].username, 'friend2');
+        expect(result[0].friendId, 'friend-1');
+        expect(result[1].friendId, 'friend-2');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
@@ -264,10 +254,11 @@ void main() {
         final responseBody = [
           {
             'id': 'request-1',
-            'fromUserId': 'user-1',
-            'toUserId': 'user-current',
+            'senderId': 'user-1',
+            'receiverId': 'user-current',
             'status': 'PENDING',
             'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
           },
         ];
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
@@ -275,7 +266,7 @@ void main() {
         final result = await userQueryClient.getReceivedFriendRequests();
 
         expect(result.length, 1);
-        expect(result[0]['id'], 'request-1');
+        expect(result[0].id, 'request-1');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
@@ -312,10 +303,11 @@ void main() {
         final responseBody = [
           {
             'id': 'request-2',
-            'fromUserId': 'user-current',
-            'toUserId': 'user-2',
+            'senderId': 'user-current',
+            'receiverId': 'user-2',
             'status': 'PENDING',
             'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
           },
         ];
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
@@ -323,7 +315,7 @@ void main() {
         final result = await userQueryClient.getSentFriendRequests();
 
         expect(result.length, 1);
-        expect(result[0]['id'], 'request-2');
+        expect(result[0].id, 'request-2');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
@@ -359,23 +351,15 @@ void main() {
       test('successful retrieval returns list of followed users', () async {
         final responseBody = [
           {
-            'id': 'user-1',
-            'username': 'following1',
-            'email': 'following1@example.com',
-            'followersCount': 50,
-            'followingCount': 40,
-            'tripsCount': 12,
-            'isFollowing': true,
+            'id': 'follow-1',
+            'followerId': 'current-user',
+            'followedId': 'user-1',
             'createdAt': DateTime.now().toIso8601String(),
           },
           {
-            'id': 'user-2',
-            'username': 'following2',
-            'email': 'following2@example.com',
-            'followersCount': 30,
-            'followingCount': 35,
-            'tripsCount': 8,
-            'isFollowing': true,
+            'id': 'follow-2',
+            'followerId': 'current-user',
+            'followedId': 'user-2',
             'createdAt': DateTime.now().toIso8601String(),
           },
         ];
@@ -384,8 +368,8 @@ void main() {
         final result = await userQueryClient.getFollowing();
 
         expect(result.length, 2);
-        expect(result[0].username, 'following1');
-        expect(result[1].username, 'following2');
+        expect(result[0].followedId, 'user-1');
+        expect(result[1].followedId, 'user-2');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
@@ -421,23 +405,15 @@ void main() {
       test('successful retrieval returns list of followers', () async {
         final responseBody = [
           {
-            'id': 'user-1',
-            'username': 'follower1',
-            'email': 'follower1@example.com',
-            'followersCount': 15,
-            'followingCount': 20,
-            'tripsCount': 6,
-            'isFollowing': false,
+            'id': 'follow-1',
+            'followerId': 'user-1',
+            'followedId': 'current-user',
             'createdAt': DateTime.now().toIso8601String(),
           },
           {
-            'id': 'user-2',
-            'username': 'follower2',
-            'email': 'follower2@example.com',
-            'followersCount': 25,
-            'followingCount': 30,
-            'tripsCount': 10,
-            'isFollowing': true,
+            'id': 'follow-2',
+            'followerId': 'user-2',
+            'followedId': 'current-user',
             'createdAt': DateTime.now().toIso8601String(),
           },
         ];
@@ -446,8 +422,8 @@ void main() {
         final result = await userQueryClient.getFollowers();
 
         expect(result.length, 2);
-        expect(result[0].username, 'follower1');
-        expect(result[1].username, 'follower2');
+        expect(result[0].followerId, 'user-1');
+        expect(result[1].followerId, 'user-2');
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,

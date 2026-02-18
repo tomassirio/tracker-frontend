@@ -33,8 +33,8 @@ class ApiEndpoints {
   static const String usersFriendRequestsReceived =
       '/users/friends/requests/received';
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
-  static const String usersFollowsFollowing = '/users/follows/following';
-  static const String usersFollowsFollowers = '/users/follows/followers';
+  static const String usersFollowsFollowing = '/users/following';
+  static const String usersFollowsFollowers = '/users/followers';
 
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';
@@ -42,8 +42,12 @@ class ApiEndpoints {
   static const String usersFriendRequests = '/users/friends/requests';
   static String usersFriendRequestAccept(String requestId) =>
       '/users/friends/requests/$requestId/accept';
-  static String usersFriendRequestDecline(String requestId) =>
-      '/users/friends/requests/$requestId/decline';
+
+  /// Delete a friend request (works for both sender cancelling and receiver declining)
+  static String usersFriendRequestDelete(String requestId) =>
+      '/users/friends/requests/$requestId';
+  static String usersRemoveFriend(String friendId) =>
+      '/users/friends/$friendId';
   static const String usersFollows = '/users/follows';
   static String usersUnfollow(String followedId) =>
       '/users/follows/$followedId';

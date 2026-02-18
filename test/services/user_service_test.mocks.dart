@@ -94,52 +94,53 @@ class MockUserQueryClient extends _i1.Mock implements _i3.UserQueryClient {
       ) as _i4.Future<_i2.UserProfile>);
 
   @override
-  _i4.Future<List<_i2.UserProfile>> getFriends() => (super.noSuchMethod(
+  _i4.Future<List<_i2.Friendship>> getFriends() => (super.noSuchMethod(
         Invocation.method(
           #getFriends,
           [],
         ),
-        returnValue:
-            _i4.Future<List<_i2.UserProfile>>.value(<_i2.UserProfile>[]),
-      ) as _i4.Future<List<_i2.UserProfile>>);
+        returnValue: _i4.Future<List<_i2.Friendship>>.value(<_i2.Friendship>[]),
+      ) as _i4.Future<List<_i2.Friendship>>);
 
   @override
-  _i4.Future<List<dynamic>> getReceivedFriendRequests() => (super.noSuchMethod(
+  _i4.Future<List<_i2.FriendRequest>> getReceivedFriendRequests() =>
+      (super.noSuchMethod(
         Invocation.method(
           #getReceivedFriendRequests,
           [],
         ),
-        returnValue: _i4.Future<List<dynamic>>.value(<dynamic>[]),
-      ) as _i4.Future<List<dynamic>>);
+        returnValue:
+            _i4.Future<List<_i2.FriendRequest>>.value(<_i2.FriendRequest>[]),
+      ) as _i4.Future<List<_i2.FriendRequest>>);
 
   @override
-  _i4.Future<List<dynamic>> getSentFriendRequests() => (super.noSuchMethod(
+  _i4.Future<List<_i2.FriendRequest>> getSentFriendRequests() =>
+      (super.noSuchMethod(
         Invocation.method(
           #getSentFriendRequests,
           [],
         ),
-        returnValue: _i4.Future<List<dynamic>>.value(<dynamic>[]),
-      ) as _i4.Future<List<dynamic>>);
+        returnValue:
+            _i4.Future<List<_i2.FriendRequest>>.value(<_i2.FriendRequest>[]),
+      ) as _i4.Future<List<_i2.FriendRequest>>);
 
   @override
-  _i4.Future<List<_i2.UserProfile>> getFollowing() => (super.noSuchMethod(
+  _i4.Future<List<_i2.UserFollow>> getFollowing() => (super.noSuchMethod(
         Invocation.method(
           #getFollowing,
           [],
         ),
-        returnValue:
-            _i4.Future<List<_i2.UserProfile>>.value(<_i2.UserProfile>[]),
-      ) as _i4.Future<List<_i2.UserProfile>>);
+        returnValue: _i4.Future<List<_i2.UserFollow>>.value(<_i2.UserFollow>[]),
+      ) as _i4.Future<List<_i2.UserFollow>>);
 
   @override
-  _i4.Future<List<_i2.UserProfile>> getFollowers() => (super.noSuchMethod(
+  _i4.Future<List<_i2.UserFollow>> getFollowers() => (super.noSuchMethod(
         Invocation.method(
           #getFollowers,
           [],
         ),
-        returnValue:
-            _i4.Future<List<_i2.UserProfile>>.value(<_i2.UserProfile>[]),
-      ) as _i4.Future<List<_i2.UserProfile>>);
+        returnValue: _i4.Future<List<_i2.UserFollow>>.value(<_i2.UserFollow>[]),
+      ) as _i4.Future<List<_i2.UserFollow>>);
 }
 
 /// A class which mocks [UserCommandClient].
@@ -198,17 +199,32 @@ class MockUserCommandClient extends _i1.Mock implements _i5.UserCommandClient {
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> declineFriendRequest(String? requestId) =>
+  _i4.Future<String> deleteFriendRequest(String? requestId) =>
       (super.noSuchMethod(
         Invocation.method(
-          #declineFriendRequest,
+          #deleteFriendRequest,
           [requestId],
         ),
         returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
           this,
           Invocation.method(
-            #declineFriendRequest,
+            #deleteFriendRequest,
             [requestId],
+          ),
+        )),
+      ) as _i4.Future<String>);
+
+  @override
+  _i4.Future<String> removeFriend(String? friendId) => (super.noSuchMethod(
+        Invocation.method(
+          #removeFriend,
+          [friendId],
+        ),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #removeFriend,
+            [friendId],
           ),
         )),
       ) as _i4.Future<String>);

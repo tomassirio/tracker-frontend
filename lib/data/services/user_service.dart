@@ -29,27 +29,30 @@ class UserService {
   }
 
   /// Get user's friends list
-  Future<List<UserProfile>> getFriends() async {
+  /// Returns a list of friendships (userId and friendId pairs)
+  Future<List<Friendship>> getFriends() async {
     return await _userQueryClient.getFriends();
   }
 
   /// Get pending received friend requests
-  Future<List<dynamic>> getReceivedFriendRequests() async {
+  Future<List<FriendRequest>> getReceivedFriendRequests() async {
     return await _userQueryClient.getReceivedFriendRequests();
   }
 
   /// Get pending sent friend requests
-  Future<List<dynamic>> getSentFriendRequests() async {
+  Future<List<FriendRequest>> getSentFriendRequests() async {
     return await _userQueryClient.getSentFriendRequests();
   }
 
   /// Get users that current user follows
-  Future<List<UserProfile>> getFollowing() async {
+  /// Returns a list of follow relationships
+  Future<List<UserFollow>> getFollowing() async {
     return await _userQueryClient.getFollowing();
   }
 
   /// Get users that follow current user
-  Future<List<UserProfile>> getFollowers() async {
+  /// Returns a list of follow relationships
+  Future<List<UserFollow>> getFollowers() async {
     return await _userQueryClient.getFollowers();
   }
 
@@ -65,10 +68,18 @@ class UserService {
     return await _userCommandClient.acceptFriendRequest(requestId);
   }
 
-  /// Decline a friend request
+  /// Delete a friend request (decline if receiver, cancel if sender)
   /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
-  Future<String> declineFriendRequest(String requestId) async {
-    return await _userCommandClient.declineFriendRequest(requestId);
+  /// - If you sent the request → cancels it (FRIEND_REQUEST_CANCELLED event)
+  /// - If you received the request → declines it (FRIEND_REQUEST_DECLINED event)
+  Future<String> deleteFriendRequest(String requestId) async {
+    return await _userCommandClient.deleteFriendRequest(requestId);
+  }
+
+  /// Remove a friend (unfriend)
+  /// Returns the ID from the response. Confirmation will be delivered via WebSocket.
+  Future<String> removeFriend(String friendId) async {
+    return await _userCommandClient.removeFriend(friendId);
   }
 
   /// Follow a user

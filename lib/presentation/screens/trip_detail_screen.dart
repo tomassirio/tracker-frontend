@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
+import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
@@ -23,6 +25,7 @@ import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.da
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 import 'auth_screen.dart';
+import 'home_screen.dart';
 import 'profile_screen.dart';
 
 /// Trip detail screen showing trip info, map, and comments
@@ -37,6 +40,7 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
+  final UserService _userService = UserService();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
@@ -61,6 +65,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
   String? _username;
   String? _userId;
+
+  // Track social interactions
+  bool _isFollowingTripOwner = false;
+  bool _hasSentFriendRequest = false;
+  bool _isAlreadyFriends = false;
+  String? _sentFriendRequestId; // Store the request ID for cancellation
 
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
@@ -323,6 +333,47 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _username = username;
       _userId = userId;
     });
+
+    // If logged in and viewing another user's trip, check social status
+    if (userId != null && _trip.userId != userId) {
+      await _loadSocialStatus();
+    }
+  }
+
+  /// Load the current user's social relationship with the trip owner
+  Future<void> _loadSocialStatus() async {
+    try {
+      // Check if following the trip owner by looking at our following list
+      final following = await _userService.getFollowing();
+      final isFollowing = following.any((f) => f.followedId == _trip.userId);
+
+      // Check if already sent a friend request to the trip owner
+      final sentRequests = await _userService.getSentFriendRequests();
+      final pendingRequest = sentRequests.cast<FriendRequest?>().firstWhere(
+            (r) =>
+                r!.receiverId == _trip.userId &&
+                r.status == FriendRequestStatus.pending,
+            orElse: () => null,
+          );
+      final hasSentRequest = pendingRequest != null;
+      final requestId = pendingRequest?.id;
+
+      // Check if already friends with the trip owner
+      final friends = await _userService.getFriends();
+      final isAlreadyFriends = friends.any((f) => f.friendId == _trip.userId);
+
+      if (mounted) {
+        setState(() {
+          _isFollowingTripOwner = isFollowing;
+          _hasSentFriendRequest = hasSentRequest;
+          _sentFriendRequestId = requestId;
+          _isAlreadyFriends = isAlreadyFriends;
+        });
+      }
+    } catch (e) {
+      // Silently fail - social features are optional
+      debugPrint('Failed to load social status: $e');
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -612,8 +663,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     if (confirm) {
       await _repository.logout();
       if (mounted) {
-        // Pop with result to trigger refresh in home screen
-        Navigator.pop(context, true);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     }
   }
@@ -647,6 +700,104 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       await _loadComments(); // Reload comments in case user can now see more
       await _loadTripUpdates(); // Reload timeline
       setState(() {}); // Force rebuild to update UI
+    }
+  }
+
+  Future<void> _handleFollowTripOwner() async {
+    if (!_isLoggedIn || _trip.userId == _userId) return;
+
+    // Toggle between follow and unfollow
+    if (_isFollowingTripOwner) {
+      try {
+        await _userService.unfollowUser(_trip.userId);
+        setState(() {
+          _isFollowingTripOwner = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'Unfollowed @${_trip.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to unfollow user: $e');
+        }
+      }
+    } else {
+      try {
+        await _userService.followUser(_trip.userId);
+        setState(() {
+          _isFollowingTripOwner = true;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are now following @${_trip.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _handleSendFriendRequestToTripOwner() async {
+    if (!_isLoggedIn || _trip.userId == _userId) return;
+
+    // If already friends, allow unfriending
+    if (_isAlreadyFriends) {
+      try {
+        await _userService.removeFriend(_trip.userId);
+        setState(() {
+          _isAlreadyFriends = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are no longer friends with @${_trip.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to remove friend: $e');
+        }
+      }
+      return;
+    }
+
+    // Cancel existing friend request
+    if (_hasSentFriendRequest && _sentFriendRequestId != null) {
+      try {
+        await _userService.deleteFriendRequest(_sentFriendRequestId!);
+        setState(() {
+          _hasSentFriendRequest = false;
+          _sentFriendRequestId = null;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+              context, 'Failed to cancel friend request: $e');
+        }
+      }
+      return;
+    }
+
+    // Send new friend request
+    try {
+      final requestId = await _userService.sendFriendRequest(_trip.userId);
+      setState(() {
+        _hasSentFriendRequest = true;
+        _sentFriendRequestId = requestId;
+      });
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+            context, 'Friend request sent to @${_trip.username}');
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Failed to send friend request: $e');
+      }
     }
   }
 
@@ -751,6 +902,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       currentUserId: _userId,
       isChangingStatus: _isChangingStatus,
       showTripUpdatePanel: _showTripUpdatePanel,
+      isFollowingTripOwner: _isFollowingTripOwner,
+      hasSentFriendRequest: _hasSentFriendRequest,
+      isAlreadyFriends: _isAlreadyFriends,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
@@ -765,6 +919,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
       onSendTripUpdate: _sendManualUpdate,
+      onFollowTripOwner:
+          _trip.userId != _userId ? _handleFollowTripOwner : null,
+      onSendFriendRequestToTripOwner:
+          _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
     );
   }
 

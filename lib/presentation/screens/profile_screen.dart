@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/repositories/profile_repository.dart';
+import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
@@ -13,7 +14,9 @@ import '../../data/client/google_maps_api_client.dart';
 import '../../data/client/google_routes_api_client.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
+import 'home_screen.dart';
 import 'trip_detail_screen.dart';
+import 'friends_followers_screen.dart';
 
 /// User profile screen showing user information, statistics, and trips
 class ProfileScreen extends StatefulWidget {
@@ -27,6 +30,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileRepository _repository = ProfileRepository();
+  final UserService _userService = UserService();
   final TextEditingController _searchController = TextEditingController();
   UserProfile? _profile;
   List<Trip> _userTrips = [];
@@ -34,7 +38,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingTrips = false;
   String? _error;
   bool _isLoggedIn = false;
-  final int _selectedSidebarIndex = 3; // Profile is index 3
+  bool _hasSentFriendRequest =
+      false; // Track if friend request was sent locally
+  bool _isAlreadyFriends = false; // Track if already friends with user
+  bool _isFollowingUser = false; // Track if following this user
+  String? _sentFriendRequestId; // Store the request ID for cancellation
+  String? _currentUserId; // Track the logged-in user's ID
+  final int _selectedSidebarIndex = 4; // Profile is index 4
+
+  // Actual counts loaded from API (for own profile)
+  int _followersCount = 0;
+  int _followingCount = 0;
+  int _friendsCount = 0;
 
   @override
   void initState() {
@@ -48,6 +63,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  /// Check if viewing own profile (either no userId passed, or userId matches current user)
+  bool get _isViewingOwnProfile =>
+      widget.userId == null ||
+      (widget.userId != null && widget.userId == _currentUserId);
+
   Future<void> _loadProfile() async {
     setState(() {
       _isLoadingProfile = true;
@@ -60,16 +80,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoggedIn = isLoggedIn;
       });
 
+      // Load current user if logged in
+      if (isLoggedIn) {
+        try {
+          final currentUser = await _repository.getMyProfile();
+          setState(() {
+            _currentUserId = currentUser.id;
+          });
+          // Load social counts for own profile
+          await _loadSocialCounts();
+        } catch (e) {
+          // Ignore error loading current user
+        }
+      }
+
       // If viewing another user's profile
       if (widget.userId != null) {
         final profile = await _repository.getUserProfile(widget.userId!);
         setState(() {
           _profile = profile;
+          _followersCount = profile.followersCount;
+          _followingCount = profile.followingCount;
           _isLoadingProfile = false;
         });
 
         // Load user's trips
         _loadUserTrips(profile.id);
+
+        // Only load friendship status if viewing someone else's profile
+        if (isLoggedIn && widget.userId != _currentUserId) {
+          await _loadFriendshipStatus(profile.id);
+        }
         return;
       }
 
@@ -88,13 +129,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoadingProfile = false;
       });
 
-      // Load user's trips
+      // Load user's trips and social counts
       _loadUserTrips(profile.id);
+      await _loadSocialCounts();
     } catch (e) {
       setState(() {
         _error = e.toString();
         _isLoadingProfile = false;
       });
+    }
+  }
+
+  /// Load follower, following, and friends counts from API
+  Future<void> _loadSocialCounts() async {
+    try {
+      final results = await Future.wait([
+        _userService.getFollowers(),
+        _userService.getFollowing(),
+        _userService.getFriends(),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _followersCount = (results[0] as List).length;
+          _followingCount = (results[1] as List).length;
+          _friendsCount = (results[2] as List).length;
+        });
+      }
+    } catch (e) {
+      // Silently fail - use profile counts as fallback
+      debugPrint('Failed to load social counts: $e');
+    }
+  }
+
+  /// Load friendship and follow status when viewing another user's profile
+  Future<void> _loadFriendshipStatus(String userId) async {
+    try {
+      // Check if already following this user
+      final following = await _userService.getFollowing();
+      final isFollowing = following.any((f) => f.followedId == userId);
+
+      // Check if already friends
+      final friends = await _userService.getFriends();
+      final isAlreadyFriends = friends.any((f) => f.friendId == userId);
+
+      // Check if already sent a friend request
+      final sentRequests = await _userService.getSentFriendRequests();
+      final pendingRequest = sentRequests.cast<FriendRequest?>().firstWhere(
+            (r) =>
+                r!.receiverId == userId &&
+                r.status == FriendRequestStatus.pending,
+            orElse: () => null,
+          );
+      final hasSentRequest = pendingRequest != null;
+      final requestId = pendingRequest?.id;
+
+      if (mounted) {
+        setState(() {
+          _isFollowingUser = isFollowing;
+          _isAlreadyFriends = isAlreadyFriends;
+          _hasSentFriendRequest = hasSentRequest;
+          _sentFriendRequestId = requestId;
+        });
+      }
+    } catch (e) {
+      // Silently fail - social features are optional
+      debugPrint('Failed to load friendship status: $e');
     }
   }
 
@@ -125,7 +225,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirm) {
       await _repository.logout();
       if (mounted) {
-        Navigator.of(context).pop(true); // Return to previous screen
+        // Navigate to home screen and clear navigation stack
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     }
   }
@@ -149,6 +253,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(
       context,
       PageTransitions.slideUp(TripDetailScreen(trip: trip)),
+    );
+  }
+
+  void _navigateToFriendsFollowers() {
+    Navigator.push(
+      context,
+      PageTransitions.slideUp(const FriendsFollowersScreen()),
     );
   }
 
@@ -222,6 +333,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
     displayNameController.dispose();
     bioController.dispose();
     avatarUrlController.dispose();
+  }
+
+  Future<void> _handleFollowUser() async {
+    if (_profile == null) return;
+
+    // Toggle between follow and unfollow
+    if (_isFollowingUser) {
+      try {
+        await _userService.unfollowUser(_profile!.id);
+        setState(() {
+          _isFollowingUser = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'Unfollowed ${_profile!.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to unfollow user: $e');
+        }
+      }
+    } else {
+      try {
+        await _userService.followUser(_profile!.id);
+        setState(() {
+          _isFollowingUser = true;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are now following ${_profile!.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to follow user: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _handleSendFriendRequest() async {
+    if (_profile == null) return;
+
+    // If already friends, allow unfriending
+    if (_isAlreadyFriends) {
+      try {
+        await _userService.removeFriend(_profile!.id);
+        setState(() {
+          _isAlreadyFriends = false;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, 'You are no longer friends with ${_profile!.username}');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to remove friend: $e');
+        }
+      }
+      return;
+    }
+
+    // Cancel existing friend request
+    if (_hasSentFriendRequest && _sentFriendRequestId != null) {
+      try {
+        await _userService.deleteFriendRequest(_sentFriendRequestId!);
+        setState(() {
+          _hasSentFriendRequest = false;
+          _sentFriendRequestId = null;
+        });
+        if (mounted) {
+          UiHelpers.showSuccessMessage(context, 'Friend request cancelled');
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+              context, 'Failed to cancel friend request: $e');
+        }
+      }
+      return;
+    }
+
+    // Send new friend request
+    try {
+      final requestId = await _userService.sendFriendRequest(_profile!.id);
+      setState(() {
+        _hasSentFriendRequest = true;
+        _sentFriendRequestId = requestId;
+      });
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+            context, 'Friend request sent to ${_profile!.username}');
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Failed to send friend request: $e');
+      }
+    }
   }
 
   Future<void> _updateProfile(
@@ -350,12 +559,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _profile!.displayName ?? _profile!.username,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _profile!.displayName ?? _profile!.username,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          if (_isFollowingUser && !_isViewingOwnProfile) ...[
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.person_add_alt_1,
+                              size: 20,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        ],
                       ),
                       Text(
                         '@${_profile!.username}',
@@ -369,12 +592,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-                if (widget.userId ==
-                    null) // Only show edit button for own profile
+                if (_isViewingOwnProfile)
+                  // Only show edit button for own profile
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: _showEditProfileDialog,
                     tooltip: 'Edit Profile',
+                  )
+                else
+                  // Show follow/friend request buttons for other users
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _isFollowingUser
+                              ? Icons.person_remove
+                              : Icons.person_add,
+                        ),
+                        onPressed: _handleFollowUser,
+                        tooltip: _isFollowingUser ? 'Unfollow' : 'Follow',
+                        color: _isFollowingUser ? Colors.blue : null,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _isAlreadyFriends
+                              ? Icons.people
+                              : _hasSentFriendRequest
+                                  ? Icons.person_add_disabled
+                                  : Icons.person_add_alt,
+                        ),
+                        onPressed: _handleSendFriendRequest,
+                        tooltip: _isAlreadyFriends
+                            ? 'Unfriend'
+                            : _hasSentFriendRequest
+                                ? 'Cancel Friend Request'
+                                : 'Send Friend Request',
+                        color: _isAlreadyFriends
+                            ? Colors.green
+                            : _hasSentFriendRequest
+                                ? Colors.orange
+                                : null,
+                      ),
+                    ],
                   ),
               ],
             ),
@@ -392,36 +652,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatCard('Trips', _userTrips.length.toString()),
-        _buildStatCard('Followers', _profile!.followersCount.toString()),
-        _buildStatCard('Following', _profile!.followingCount.toString()),
+        _buildStatCard('Trips', _userTrips.length.toString(), null),
+        _buildStatCard('Followers', _followersCount.toString(),
+            _navigateToFriendsFollowers),
+        _buildStatCard('Following', _followingCount.toString(),
+            _navigateToFriendsFollowers),
+        _buildStatCard(
+            'Friends', _friendsCount.toString(), _navigateToFriendsFollowers),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+  Widget _buildStatCard(String label, String value, VoidCallback? onTap) {
+    final card = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ],
         ),
       ),
+    );
+
+    return Expanded(
+      child: onTap != null
+          ? InkWell(
+              onTap: onTap,
+              child: card,
+            )
+          : card,
     );
   }
 

@@ -27,7 +27,7 @@ class UserCommandClient {
   Future<String> sendFriendRequest(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFriendRequests,
-      body: {'userId': userId},
+      body: {'receiverId': userId},
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);
@@ -45,13 +45,25 @@ class UserCommandClient {
     return _apiClient.handleAcceptedResponse(response);
   }
 
-  /// Decline a friend request
+  /// Delete a friend request (decline if receiver, cancel if sender)
   /// Requires authentication (USER, ADMIN)
   /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
-  Future<String> declineFriendRequest(String requestId) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.usersFriendRequestDecline(requestId),
-      body: {},
+  /// - If you sent the request → cancels it (FRIEND_REQUEST_CANCELLED event)
+  /// - If you received the request → declines it (FRIEND_REQUEST_DECLINED event)
+  Future<String> deleteFriendRequest(String requestId) async {
+    final response = await _apiClient.delete(
+      ApiEndpoints.usersFriendRequestDelete(requestId),
+      requireAuth: true,
+    );
+    return _apiClient.handleAcceptedResponse(response);
+  }
+
+  /// Remove a friend (unfriend)
+  /// Requires authentication (USER, ADMIN)
+  /// Returns the ID from the response. Confirmation will be delivered via WebSocket.
+  Future<String> removeFriend(String friendId) async {
+    final response = await _apiClient.delete(
+      ApiEndpoints.usersRemoveFriend(friendId),
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);
@@ -63,7 +75,7 @@ class UserCommandClient {
   Future<String> followUser(String userId) async {
     final response = await _apiClient.post(
       ApiEndpoints.usersFollows,
-      body: {'userId': userId},
+      body: {'followedId': userId},
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);

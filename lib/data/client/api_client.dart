@@ -371,11 +371,14 @@ class ApiClient {
   /// Handle 202 Accepted response from async operations
   /// Returns the ID from the response body - supports both plain string ID
   /// and JSON object { "id": "..." } formats
+  /// Also handles empty responses (common for DELETE operations) by returning empty string
   String handleAcceptedResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final body = response.body.trim();
+
+      // Handle empty body (common for DELETE operations like unfollow)
       if (body.isEmpty) {
-        throw Exception('Invalid response: empty body');
+        return '';
       }
 
       // Try to decode as JSON first
@@ -383,9 +386,6 @@ class ApiClient {
 
       // If it's a plain string (UUID directly), return it
       if (decoded is String) {
-        if (decoded.isEmpty) {
-          throw Exception('Invalid response: empty id string');
-        }
         return decoded;
       }
 
@@ -395,11 +395,12 @@ class ApiClient {
         if (id != null && id.isNotEmpty) {
           return id;
         }
-        throw Exception('Response does not contain an id field');
+        // Return empty string if no id field but response was successful
+        return '';
       }
 
-      throw Exception(
-          'Invalid response format: expected string or object with id');
+      // For any other valid JSON, return empty string
+      return '';
     } else {
       throw _handleError(response);
     }

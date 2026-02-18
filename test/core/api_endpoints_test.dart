@@ -80,11 +80,11 @@ void main() {
       });
 
       test('usersFollowsFollowing path is correct', () {
-        expect(ApiEndpoints.usersFollowsFollowing, '/users/follows/following');
+        expect(ApiEndpoints.usersFollowsFollowing, '/users/following');
       });
 
       test('usersFollowsFollowers path is correct', () {
-        expect(ApiEndpoints.usersFollowsFollowers, '/users/follows/followers');
+        expect(ApiEndpoints.usersFollowsFollowers, '/users/followers');
       });
     });
 
@@ -108,14 +108,25 @@ void main() {
         );
       });
 
-      test('usersFriendRequestDecline generates correct path', () {
+      test('usersFriendRequestDelete generates correct path', () {
         expect(
-          ApiEndpoints.usersFriendRequestDecline('req123'),
-          '/users/friends/requests/req123/decline',
+          ApiEndpoints.usersFriendRequestDelete('req123'),
+          '/users/friends/requests/req123',
         );
         expect(
-          ApiEndpoints.usersFriendRequestDecline('xyz-789'),
-          '/users/friends/requests/xyz-789/decline',
+          ApiEndpoints.usersFriendRequestDelete('abc-def'),
+          '/users/friends/requests/abc-def',
+        );
+      });
+
+      test('usersRemoveFriend generates correct path', () {
+        expect(
+          ApiEndpoints.usersRemoveFriend('friend123'),
+          '/users/friends/friend123',
+        );
+        expect(
+          ApiEndpoints.usersRemoveFriend('abc-def-ghi'),
+          '/users/friends/abc-def-ghi',
         );
       });
 

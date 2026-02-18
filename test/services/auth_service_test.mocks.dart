@@ -204,52 +204,53 @@ class MockUserQueryClient extends _i1.Mock implements _i6.UserQueryClient {
       ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i5.Future<List<_i3.UserProfile>> getFriends() => (super.noSuchMethod(
+  _i5.Future<List<_i3.Friendship>> getFriends() => (super.noSuchMethod(
         Invocation.method(
           #getFriends,
           [],
         ),
-        returnValue:
-            _i5.Future<List<_i3.UserProfile>>.value(<_i3.UserProfile>[]),
-      ) as _i5.Future<List<_i3.UserProfile>>);
+        returnValue: _i5.Future<List<_i3.Friendship>>.value(<_i3.Friendship>[]),
+      ) as _i5.Future<List<_i3.Friendship>>);
 
   @override
-  _i5.Future<List<dynamic>> getReceivedFriendRequests() => (super.noSuchMethod(
+  _i5.Future<List<_i3.FriendRequest>> getReceivedFriendRequests() =>
+      (super.noSuchMethod(
         Invocation.method(
           #getReceivedFriendRequests,
           [],
         ),
-        returnValue: _i5.Future<List<dynamic>>.value(<dynamic>[]),
-      ) as _i5.Future<List<dynamic>>);
+        returnValue:
+            _i5.Future<List<_i3.FriendRequest>>.value(<_i3.FriendRequest>[]),
+      ) as _i5.Future<List<_i3.FriendRequest>>);
 
   @override
-  _i5.Future<List<dynamic>> getSentFriendRequests() => (super.noSuchMethod(
+  _i5.Future<List<_i3.FriendRequest>> getSentFriendRequests() =>
+      (super.noSuchMethod(
         Invocation.method(
           #getSentFriendRequests,
           [],
         ),
-        returnValue: _i5.Future<List<dynamic>>.value(<dynamic>[]),
-      ) as _i5.Future<List<dynamic>>);
+        returnValue:
+            _i5.Future<List<_i3.FriendRequest>>.value(<_i3.FriendRequest>[]),
+      ) as _i5.Future<List<_i3.FriendRequest>>);
 
   @override
-  _i5.Future<List<_i3.UserProfile>> getFollowing() => (super.noSuchMethod(
+  _i5.Future<List<_i3.UserFollow>> getFollowing() => (super.noSuchMethod(
         Invocation.method(
           #getFollowing,
           [],
         ),
-        returnValue:
-            _i5.Future<List<_i3.UserProfile>>.value(<_i3.UserProfile>[]),
-      ) as _i5.Future<List<_i3.UserProfile>>);
+        returnValue: _i5.Future<List<_i3.UserFollow>>.value(<_i3.UserFollow>[]),
+      ) as _i5.Future<List<_i3.UserFollow>>);
 
   @override
-  _i5.Future<List<_i3.UserProfile>> getFollowers() => (super.noSuchMethod(
+  _i5.Future<List<_i3.UserFollow>> getFollowers() => (super.noSuchMethod(
         Invocation.method(
           #getFollowers,
           [],
         ),
-        returnValue:
-            _i5.Future<List<_i3.UserProfile>>.value(<_i3.UserProfile>[]),
-      ) as _i5.Future<List<_i3.UserProfile>>);
+        returnValue: _i5.Future<List<_i3.UserFollow>>.value(<_i3.UserFollow>[]),
+      ) as _i5.Future<List<_i3.UserFollow>>);
 }
 
 /// A class which mocks [TokenStorage].
