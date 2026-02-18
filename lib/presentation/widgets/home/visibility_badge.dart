@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:flutter/material.dart' hide Visibility;
+import 'package:tracker_frontend/core/constants/enums.dart' show Visibility;
 
 /// Badge widget that displays trip visibility status
 class VisibilityBadge extends StatelessWidget {
@@ -49,55 +49,55 @@ class VisibilityBadge extends StatelessWidget {
 
   IconData _getIcon() {
     switch (visibility) {
-      case Visibility.PUBLIC:
+      case Visibility.public:
         return Icons.public;
-      case Visibility.PROTECTED:
+      case Visibility.protected:
         return Icons.lock_outline;
-      case Visibility.PRIVATE:
+      case Visibility.private:
         return Icons.lock;
     }
   }
 
   String _getLabel() {
     switch (visibility) {
-      case Visibility.PUBLIC:
+      case Visibility.public:
         return 'Public';
-      case Visibility.PROTECTED:
+      case Visibility.protected:
         return 'Protected';
-      case Visibility.PRIVATE:
+      case Visibility.private:
         return 'Private';
     }
   }
 
   Color _getBackgroundColor() {
     switch (visibility) {
-      case Visibility.PUBLIC:
+      case Visibility.public:
         return Colors.green.withOpacity(0.1);
-      case Visibility.PROTECTED:
+      case Visibility.protected:
         return Colors.orange.withOpacity(0.1);
-      case Visibility.PRIVATE:
+      case Visibility.private:
         return Colors.red.withOpacity(0.1);
     }
   }
 
   Color _getBorderColor() {
     switch (visibility) {
-      case Visibility.PUBLIC:
+      case Visibility.public:
         return Colors.green.withOpacity(0.3);
-      case Visibility.PROTECTED:
+      case Visibility.protected:
         return Colors.orange.withOpacity(0.3);
-      case Visibility.PRIVATE:
+      case Visibility.private:
         return Colors.red.withOpacity(0.3);
     }
   }
 
   Color _getIconColor() {
     switch (visibility) {
-      case Visibility.PUBLIC:
+      case Visibility.public:
         return Colors.green.shade700;
-      case Visibility.PROTECTED:
+      case Visibility.protected:
         return Colors.orange.shade700;
-      case Visibility.PRIVATE:
+      case Visibility.private:
         return Colors.red.shade700;
     }
   }

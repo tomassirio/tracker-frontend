@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/core/constants/enums.dart' show TripStatus;
 
 /// Badge widget that displays trip status with live indicator
 class StatusBadge extends StatefulWidget {
@@ -27,7 +27,7 @@ class _StatusBadgeState extends State<StatusBadge>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    if (widget.status == TripStatus.IN_PROGRESS) {
+    if (widget.status == TripStatus.inProgress) {
       _pulseController.repeat(reverse: true);
     }
   }
@@ -35,11 +35,11 @@ class _StatusBadgeState extends State<StatusBadge>
   @override
   void didUpdateWidget(StatusBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.status == TripStatus.IN_PROGRESS &&
-        oldWidget.status != TripStatus.IN_PROGRESS) {
+    if (widget.status == TripStatus.inProgress &&
+        oldWidget.status != TripStatus.inProgress) {
       _pulseController.repeat(reverse: true);
-    } else if (widget.status != TripStatus.IN_PROGRESS &&
-        oldWidget.status == TripStatus.IN_PROGRESS) {
+    } else if (widget.status != TripStatus.inProgress &&
+        oldWidget.status == TripStatus.inProgress) {
       _pulseController.stop();
     }
   }
@@ -64,7 +64,7 @@ class _StatusBadgeState extends State<StatusBadge>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.status == TripStatus.IN_PROGRESS)
+          if (widget.status == TripStatus.inProgress)
             AnimatedBuilder(
               animation: _pulseController,
               builder: (context, child) {
@@ -76,7 +76,8 @@ class _StatusBadgeState extends State<StatusBadge>
                     color: _getIconColor(),
                     boxShadow: [
                       BoxShadow(
-                        color: _getIconColor().withOpacity(_pulseController.value),
+                        color:
+                            _getIconColor().withOpacity(_pulseController.value),
                         blurRadius: 4,
                         spreadRadius: 2,
                       ),
@@ -109,65 +110,65 @@ class _StatusBadgeState extends State<StatusBadge>
 
   IconData _getIcon() {
     switch (widget.status) {
-      case TripStatus.CREATED:
+      case TripStatus.created:
         return Icons.edit_outlined;
-      case TripStatus.IN_PROGRESS:
+      case TripStatus.inProgress:
         return Icons.circle;
-      case TripStatus.PAUSED:
+      case TripStatus.paused:
         return Icons.pause;
-      case TripStatus.FINISHED:
+      case TripStatus.finished:
         return Icons.check_circle_outline;
     }
   }
 
   String _getLabel() {
     switch (widget.status) {
-      case TripStatus.CREATED:
+      case TripStatus.created:
         return 'Draft';
-      case TripStatus.IN_PROGRESS:
+      case TripStatus.inProgress:
         return 'Live';
-      case TripStatus.PAUSED:
+      case TripStatus.paused:
         return 'Paused';
-      case TripStatus.FINISHED:
+      case TripStatus.finished:
         return 'Completed';
     }
   }
 
   Color _getBackgroundColor() {
     switch (widget.status) {
-      case TripStatus.CREATED:
+      case TripStatus.created:
         return Colors.grey.withOpacity(0.1);
-      case TripStatus.IN_PROGRESS:
+      case TripStatus.inProgress:
         return Colors.green.withOpacity(0.1);
-      case TripStatus.PAUSED:
+      case TripStatus.paused:
         return Colors.orange.withOpacity(0.1);
-      case TripStatus.FINISHED:
+      case TripStatus.finished:
         return Colors.blue.withOpacity(0.1);
     }
   }
 
   Color _getBorderColor() {
     switch (widget.status) {
-      case TripStatus.CREATED:
+      case TripStatus.created:
         return Colors.grey.withOpacity(0.3);
-      case TripStatus.IN_PROGRESS:
+      case TripStatus.inProgress:
         return Colors.green.withOpacity(0.3);
-      case TripStatus.PAUSED:
+      case TripStatus.paused:
         return Colors.orange.withOpacity(0.3);
-      case TripStatus.FINISHED:
+      case TripStatus.finished:
         return Colors.blue.withOpacity(0.3);
     }
   }
 
   Color _getIconColor() {
     switch (widget.status) {
-      case TripStatus.CREATED:
+      case TripStatus.created:
         return Colors.grey.shade700;
-      case TripStatus.IN_PROGRESS:
+      case TripStatus.inProgress:
         return Colors.green.shade700;
-      case TripStatus.PAUSED:
+      case TripStatus.paused:
         return Colors.orange.shade700;
-      case TripStatus.FINISHED:
+      case TripStatus.finished:
         return Colors.blue.shade700;
     }
   }

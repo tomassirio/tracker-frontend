@@ -270,7 +270,8 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       runSpacing: 6,
                       children: [
                         if (widget.showAllBadges)
-                          StatusBadge(status: widget.trip.status, compact: true),
+                          StatusBadge(
+                              status: widget.trip.status, compact: true),
                         if (widget.relationship != null)
                           RelationshipBadge(
                             type: widget.relationship!,

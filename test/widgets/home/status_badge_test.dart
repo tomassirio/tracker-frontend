@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/home/status_badge.dart';
 
 void main() {
@@ -11,7 +11,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: StatusBadge(
-              status: TripStatus.CREATED,
+              status: TripStatus.created,
             ),
           ),
         ),
@@ -27,7 +27,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: StatusBadge(
-              status: TripStatus.IN_PROGRESS,
+              status: TripStatus.inProgress,
             ),
           ),
         ),
@@ -41,13 +41,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
     });
 
-    testWidgets('displays PAUSED badge correctly',
-        (WidgetTester tester) async {
+    testWidgets('displays PAUSED badge correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: StatusBadge(
-              status: TripStatus.PAUSED,
+              status: TripStatus.paused,
             ),
           ),
         ),
@@ -63,7 +62,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: StatusBadge(
-              status: TripStatus.FINISHED,
+              status: TripStatus.finished,
             ),
           ),
         ),
@@ -79,7 +78,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: StatusBadge(
-              status: TripStatus.CREATED,
+              status: TripStatus.created,
               compact: true,
             ),
           ),
@@ -105,7 +104,8 @@ void main() {
 
       // Change to IN_PROGRESS
       await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
+      // Use pump instead of pumpAndSettle because inProgress has infinite animation
+      await tester.pump();
 
       expect(find.text('Live'), findsOneWidget);
     });
@@ -119,7 +119,7 @@ class _TestStatusBadgeWrapper extends StatefulWidget {
 }
 
 class _TestStatusBadgeWrapperState extends State<_TestStatusBadgeWrapper> {
-  TripStatus _status = TripStatus.CREATED;
+  TripStatus _status = TripStatus.created;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +129,7 @@ class _TestStatusBadgeWrapperState extends State<_TestStatusBadgeWrapper> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              _status = TripStatus.IN_PROGRESS;
+              _status = TripStatus.inProgress;
             });
           },
           child: const Text('Change Status'),

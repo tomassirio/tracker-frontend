@@ -4,8 +4,7 @@ import 'package:tracker_frontend/presentation/widgets/home/relationship_badge.da
 
 void main() {
   group('RelationshipBadge Widget', () {
-    testWidgets('displays friend badge correctly',
-        (WidgetTester tester) async {
+    testWidgets('displays friend badge correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(

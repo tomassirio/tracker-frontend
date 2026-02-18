@@ -1,5 +1,7 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Visibility;
+import 'package:tracker_frontend/core/constants/enums.dart'
+    show TripStatus, Visibility;
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
@@ -184,12 +186,12 @@ class _HomeScreenState extends State<HomeScreen>
 
       final isFriend = _friendIds.contains(trip.userId);
       final isFollowing = _followingIds.contains(trip.userId);
-      final isPublic = trip.visibility == Visibility.PUBLIC;
+      final isPublic = trip.visibility == Visibility.public;
 
       // Add to feed if from friend or following
       if (isFriend || isFollowing) {
         // Friends can see PUBLIC and PROTECTED
-        if (isFriend && (isPublic || trip.visibility == Visibility.PROTECTED)) {
+        if (isFriend && (isPublic || trip.visibility == Visibility.protected)) {
           feedTrips.add(trip);
         }
         // Following can only see PUBLIC
@@ -221,8 +223,8 @@ class _HomeScreenState extends State<HomeScreen>
   /// Compare trips by priority for feed sorting
   int _compareTripsByPriority(Trip a, Trip b) {
     // Priority 1: Live trips (IN_PROGRESS)
-    final aIsLive = a.status == TripStatus.IN_PROGRESS;
-    final bIsLive = b.status == TripStatus.IN_PROGRESS;
+    final aIsLive = a.status == TripStatus.inProgress;
+    final bIsLive = b.status == TripStatus.inProgress;
     if (aIsLive != bIsLive) return aIsLive ? -1 : 1;
 
     // Priority 2: Friends over following
@@ -390,35 +392,35 @@ class _HomeScreenState extends State<HomeScreen>
             label: 'Live',
             icon: Icons.circle,
             iconColor: Colors.green,
-            selected: _statusFilter == TripStatus.IN_PROGRESS,
+            selected: _statusFilter == TripStatus.inProgress,
             onSelected: () =>
-                setState(() => _statusFilter = TripStatus.IN_PROGRESS),
+                setState(() => _statusFilter = TripStatus.inProgress),
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
             label: 'Paused',
             icon: Icons.pause,
             iconColor: Colors.orange,
-            selected: _statusFilter == TripStatus.PAUSED,
-            onSelected: () => setState(() => _statusFilter = TripStatus.PAUSED),
+            selected: _statusFilter == TripStatus.paused,
+            onSelected: () => setState(() => _statusFilter = TripStatus.paused),
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
             label: 'Completed',
             icon: Icons.check_circle_outline,
             iconColor: Colors.blue,
-            selected: _statusFilter == TripStatus.FINISHED,
+            selected: _statusFilter == TripStatus.finished,
             onSelected: () =>
-                setState(() => _statusFilter = TripStatus.FINISHED),
+                setState(() => _statusFilter = TripStatus.finished),
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
             label: 'Draft',
             icon: Icons.edit_outlined,
             iconColor: Colors.grey,
-            selected: _statusFilter == TripStatus.CREATED,
+            selected: _statusFilter == TripStatus.created,
             onSelected: () =>
-                setState(() => _statusFilter = TripStatus.CREATED),
+                setState(() => _statusFilter = TripStatus.created),
           ),
           if (_tabController.index == 0) ...[
             const SizedBox(width: 16),
@@ -433,27 +435,27 @@ class _HomeScreenState extends State<HomeScreen>
               label: 'Public',
               icon: Icons.public,
               iconColor: Colors.green,
-              selected: _visibilityFilter == Visibility.PUBLIC,
+              selected: _visibilityFilter == Visibility.public,
               onSelected: () =>
-                  setState(() => _visibilityFilter = Visibility.PUBLIC),
+                  setState(() => _visibilityFilter = Visibility.public),
             ),
             const SizedBox(width: 8),
             _buildFilterChip(
               label: 'Protected',
               icon: Icons.lock_outline,
               iconColor: Colors.orange,
-              selected: _visibilityFilter == Visibility.PROTECTED,
+              selected: _visibilityFilter == Visibility.protected,
               onSelected: () =>
-                  setState(() => _visibilityFilter = Visibility.PROTECTED),
+                  setState(() => _visibilityFilter = Visibility.protected),
             ),
             const SizedBox(width: 8),
             _buildFilterChip(
               label: 'Private',
               icon: Icons.lock,
               iconColor: Colors.red,
-              selected: _visibilityFilter == Visibility.PRIVATE,
+              selected: _visibilityFilter == Visibility.private,
               onSelected: () =>
-                  setState(() => _visibilityFilter = Visibility.PRIVATE),
+                  setState(() => _visibilityFilter = Visibility.private),
             ),
           ],
         ],
@@ -494,13 +496,13 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Group trips by status
     final activeTrips =
-        filteredTrips.where((t) => t.status == TripStatus.IN_PROGRESS).toList();
+        filteredTrips.where((t) => t.status == TripStatus.inProgress).toList();
     final pausedTrips =
-        filteredTrips.where((t) => t.status == TripStatus.PAUSED).toList();
+        filteredTrips.where((t) => t.status == TripStatus.paused).toList();
     final draftTrips =
-        filteredTrips.where((t) => t.status == TripStatus.CREATED).toList();
+        filteredTrips.where((t) => t.status == TripStatus.created).toList();
     final completedTrips =
-        filteredTrips.where((t) => t.status == TripStatus.FINISHED).toList();
+        filteredTrips.where((t) => t.status == TripStatus.finished).toList();
 
     if (filteredTrips.isEmpty) {
       return Center(
@@ -581,16 +583,16 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Group by live and other
     final liveTrips =
-        filteredTrips.where((t) => t.status == TripStatus.IN_PROGRESS).toList();
+        filteredTrips.where((t) => t.status == TripStatus.inProgress).toList();
     final friendsTrips = filteredTrips
         .where((t) =>
-            _friendIds.contains(t.userId) && t.status != TripStatus.IN_PROGRESS)
+            _friendIds.contains(t.userId) && t.status != TripStatus.inProgress)
         .toList();
     final followingTrips = filteredTrips
         .where((t) =>
             _followingIds.contains(t.userId) &&
             !_friendIds.contains(t.userId) &&
-            t.status != TripStatus.IN_PROGRESS)
+            t.status != TripStatus.inProgress)
         .toList();
 
     if (filteredTrips.isEmpty) {
@@ -814,8 +816,7 @@ class _HomeScreenState extends State<HomeScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.login,
-                              size: 64, color: Colors.grey[400]),
+                          Icon(Icons.login, size: 64, color: Colors.grey[400]),
                           const SizedBox(height: 16),
                           Text(
                             'Welcome to Tracker',

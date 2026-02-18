@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/models/domain/user_profile.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/services/auth_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Visibility;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/core/constants/enums.dart' show Visibility;
 import 'package:tracker_frontend/presentation/widgets/home/visibility_badge.dart';
 
 void main() {
@@ -10,7 +10,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: VisibilityBadge(
-              visibility: Visibility.PUBLIC,
+              visibility: Visibility.public,
             ),
           ),
         ),
@@ -27,7 +27,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: VisibilityBadge(
-              visibility: Visibility.PROTECTED,
+              visibility: Visibility.protected,
             ),
           ),
         ),
@@ -44,7 +44,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: VisibilityBadge(
-              visibility: Visibility.PRIVATE,
+              visibility: Visibility.private,
             ),
           ),
         ),
@@ -61,7 +61,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: VisibilityBadge(
-              visibility: Visibility.PUBLIC,
+              visibility: Visibility.public,
               compact: true,
             ),
           ),
