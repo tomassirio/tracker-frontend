@@ -45,24 +45,14 @@ class UserCommandClient {
     return _apiClient.handleAcceptedResponse(response);
   }
 
-  /// Decline a friend request
+  /// Delete a friend request (decline if receiver, cancel if sender)
   /// Requires authentication (USER, ADMIN)
   /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
-  Future<String> declineFriendRequest(String requestId) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.usersFriendRequestDecline(requestId),
-      body: {},
-      requireAuth: true,
-    );
-    return _apiClient.handleAcceptedResponse(response);
-  }
-
-  /// Cancel a sent friend request
-  /// Requires authentication (USER, ADMIN)
-  /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
-  Future<String> cancelFriendRequest(String requestId) async {
+  /// - If you sent the request → cancels it (FRIEND_REQUEST_CANCELLED event)
+  /// - If you received the request → declines it (FRIEND_REQUEST_DECLINED event)
+  Future<String> deleteFriendRequest(String requestId) async {
     final response = await _apiClient.delete(
-      ApiEndpoints.usersFriendRequestCancel(requestId),
+      ApiEndpoints.usersFriendRequestDelete(requestId),
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);

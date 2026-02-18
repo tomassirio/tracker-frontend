@@ -762,7 +762,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     // Cancel existing friend request
     if (_hasSentFriendRequest && _sentFriendRequestId != null) {
       try {
-        await _userService.cancelFriendRequest(_sentFriendRequestId!);
+        await _userService.deleteFriendRequest(_sentFriendRequestId!);
         setState(() {
           _hasSentFriendRequest = false;
           _sentFriendRequestId = null;

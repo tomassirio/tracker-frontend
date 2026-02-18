@@ -42,9 +42,9 @@ class ApiEndpoints {
   static const String usersFriendRequests = '/users/friends/requests';
   static String usersFriendRequestAccept(String requestId) =>
       '/users/friends/requests/$requestId/accept';
-  static String usersFriendRequestDecline(String requestId) =>
-      '/users/friends/requests/$requestId/decline';
-  static String usersFriendRequestCancel(String requestId) =>
+
+  /// Delete a friend request (works for both sender cancelling and receiver declining)
+  static String usersFriendRequestDelete(String requestId) =>
       '/users/friends/requests/$requestId';
   static String usersRemoveFriend(String friendId) =>
       '/users/friends/$friendId';

@@ -259,7 +259,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
 
   Future<void> _handleDeclineFriendRequest(String requestId) async {
     try {
-      await _userService.declineFriendRequest(requestId);
+      await _userService.deleteFriendRequest(requestId);
       if (mounted) {
         UiHelpers.showSuccessMessage(context, 'Friend request declined');
         await _loadData();

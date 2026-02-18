@@ -398,38 +398,38 @@ void main() {
       });
     });
 
-    group('declineFriendRequest', () {
-      test('declines friend request successfully', () async {
+    group('deleteFriendRequest', () {
+      test('deletes friend request successfully', () async {
         when(
-          mockUserCommandClient.declineFriendRequest('req-123'),
+          mockUserCommandClient.deleteFriendRequest('req-123'),
         ).thenAnswer((_) async => 'req-123');
 
-        final result = await userService.declineFriendRequest('req-123');
+        final result = await userService.deleteFriendRequest('req-123');
 
         expect(result, 'req-123');
-        verify(mockUserCommandClient.declineFriendRequest('req-123')).called(1);
+        verify(mockUserCommandClient.deleteFriendRequest('req-123')).called(1);
       });
 
-      test('handles errors when declining friend request', () async {
+      test('handles errors when deleting friend request', () async {
         when(
-          mockUserCommandClient.declineFriendRequest('req-123'),
-        ).thenThrow(Exception('Failed to decline request'));
+          mockUserCommandClient.deleteFriendRequest('req-123'),
+        ).thenThrow(Exception('Failed to delete request'));
 
         expect(
-          () => userService.declineFriendRequest('req-123'),
+          () => userService.deleteFriendRequest('req-123'),
           throwsException,
         );
       });
 
       test('passes correct request ID to command client', () async {
         when(
-          mockUserCommandClient.declineFriendRequest('req-456'),
+          mockUserCommandClient.deleteFriendRequest('req-456'),
         ).thenAnswer((_) async => 'req-456');
 
-        final result = await userService.declineFriendRequest('req-456');
+        final result = await userService.deleteFriendRequest('req-456');
 
         expect(result, 'req-456');
-        verify(mockUserCommandClient.declineFriendRequest('req-456')).called(1);
+        verify(mockUserCommandClient.deleteFriendRequest('req-456')).called(1);
       });
     });
 

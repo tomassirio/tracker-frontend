@@ -185,9 +185,9 @@ void main() {
       });
     });
 
-    group('declineFriendRequest', () {
+    group('deleteFriendRequest', () {
       test(
-        'successful friend request decline returns request ID',
+        'successful friend request delete returns request ID',
         () async {
           final responseBody = {
             'id': 'request-123',
@@ -196,13 +196,13 @@ void main() {
               http.Response(jsonEncode(responseBody), 202);
 
           final result =
-              await userCommandClient.declineFriendRequest('request-123');
+              await userCommandClient.deleteFriendRequest('request-123');
 
           expect(result, 'request-123');
-          expect(mockHttpClient.lastMethod, 'POST');
+          expect(mockHttpClient.lastMethod, 'DELETE');
           expect(
             mockHttpClient.lastUri?.path,
-            endsWith(ApiEndpoints.usersFriendRequestDecline('request-123')),
+            endsWith(ApiEndpoints.usersFriendRequestDelete('request-123')),
           );
           expect(
             mockHttpClient.lastHeaders?['Authorization'],
@@ -211,25 +211,25 @@ void main() {
         },
       );
 
-      test('declineFriendRequest requires authentication', () async {
+      test('deleteFriendRequest requires authentication', () async {
         final responseBody = {
           'id': 'request-123',
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await userCommandClient.declineFriendRequest('request-123');
+        await userCommandClient.deleteFriendRequest('request-123');
 
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
 
-      test('declineFriendRequest throws exception on not found', () async {
+      test('deleteFriendRequest throws exception on not found', () async {
         mockHttpClient.response = http.Response(
           '{"message":"Friend request not found"}',
           404,
         );
 
         expect(
-          () => userCommandClient.declineFriendRequest('request-123'),
+          () => userCommandClient.deleteFriendRequest('request-123'),
           throwsException,
         );
       });

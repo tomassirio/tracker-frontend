@@ -108,24 +108,13 @@ void main() {
         );
       });
 
-      test('usersFriendRequestDecline generates correct path', () {
+      test('usersFriendRequestDelete generates correct path', () {
         expect(
-          ApiEndpoints.usersFriendRequestDecline('req123'),
-          '/users/friends/requests/req123/decline',
-        );
-        expect(
-          ApiEndpoints.usersFriendRequestDecline('xyz-789'),
-          '/users/friends/requests/xyz-789/decline',
-        );
-      });
-
-      test('usersFriendRequestCancel generates correct path', () {
-        expect(
-          ApiEndpoints.usersFriendRequestCancel('req123'),
+          ApiEndpoints.usersFriendRequestDelete('req123'),
           '/users/friends/requests/req123',
         );
         expect(
-          ApiEndpoints.usersFriendRequestCancel('abc-def'),
+          ApiEndpoints.usersFriendRequestDelete('abc-def'),
           '/users/friends/requests/abc-def',
         );
       });

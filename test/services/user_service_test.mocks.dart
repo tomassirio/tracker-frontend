@@ -199,17 +199,32 @@ class MockUserCommandClient extends _i1.Mock implements _i5.UserCommandClient {
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> declineFriendRequest(String? requestId) =>
+  _i4.Future<String> deleteFriendRequest(String? requestId) =>
       (super.noSuchMethod(
         Invocation.method(
-          #declineFriendRequest,
+          #deleteFriendRequest,
           [requestId],
         ),
         returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
           this,
           Invocation.method(
-            #declineFriendRequest,
+            #deleteFriendRequest,
             [requestId],
+          ),
+        )),
+      ) as _i4.Future<String>);
+
+  @override
+  _i4.Future<String> removeFriend(String? friendId) => (super.noSuchMethod(
+        Invocation.method(
+          #removeFriend,
+          [friendId],
+        ),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #removeFriend,
+            [friendId],
           ),
         )),
       ) as _i4.Future<String>);
