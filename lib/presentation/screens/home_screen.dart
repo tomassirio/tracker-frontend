@@ -376,86 +376,183 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildFilterChips() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+        ),
+      ),
       child: Row(
         children: [
-          // Status filters
-          _buildFilterChip(
-            label: 'All',
-            selected: _statusFilter == null,
-            onSelected: () => setState(() => _statusFilter = null),
+          // Status filter dropdown
+          Expanded(
+            child: PopupMenuButton<TripStatus?>(
+              initialValue: _statusFilter,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          _getStatusIcon(_statusFilter),
+                          size: 18,
+                          color: _getStatusColor(_statusFilter),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _statusFilter == null ? 'All Status' : _getStatusLabel(_statusFilter!),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.arrow_drop_down, size: 20),
+                  ],
+                ),
+              ),
+              onSelected: (value) {
+                setState(() => _statusFilter = value);
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: null,
+                  child: Row(
+                    children: [
+                      Icon(Icons.all_inclusive, size: 18),
+                      SizedBox(width: 8),
+                      Text('All Status'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: TripStatus.inProgress,
+                  child: Row(
+                    children: [
+                      Icon(Icons.circle, size: 18, color: Colors.green),
+                      const SizedBox(width: 8),
+                      const Text('Live'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: TripStatus.paused,
+                  child: Row(
+                    children: [
+                      Icon(Icons.pause, size: 18, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      const Text('Paused'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: TripStatus.finished,
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle_outline, size: 18, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      const Text('Completed'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: TripStatus.created,
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      const Text('Draft'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            label: 'Live',
-            icon: Icons.circle,
-            iconColor: Colors.green,
-            selected: _statusFilter == TripStatus.inProgress,
-            onSelected: () =>
-                setState(() => _statusFilter = TripStatus.inProgress),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            label: 'Paused',
-            icon: Icons.pause,
-            iconColor: Colors.orange,
-            selected: _statusFilter == TripStatus.paused,
-            onSelected: () => setState(() => _statusFilter = TripStatus.paused),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            label: 'Completed',
-            icon: Icons.check_circle_outline,
-            iconColor: Colors.blue,
-            selected: _statusFilter == TripStatus.finished,
-            onSelected: () =>
-                setState(() => _statusFilter = TripStatus.finished),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            label: 'Draft',
-            icon: Icons.edit_outlined,
-            iconColor: Colors.grey,
-            selected: _statusFilter == TripStatus.created,
-            onSelected: () =>
-                setState(() => _statusFilter = TripStatus.created),
-          ),
+          // Only show visibility filter on My Trips tab
           if (_tabController.index == 0) ...[
-            const SizedBox(width: 16),
-            Container(
-              width: 1,
-              height: 24,
-              color: Colors.grey[300],
-            ),
-            const SizedBox(width: 16),
-            // Visibility filters (only for My Trips tab)
-            _buildFilterChip(
-              label: 'Public',
-              icon: Icons.public,
-              iconColor: Colors.green,
-              selected: _visibilityFilter == Visibility.public,
-              onSelected: () =>
-                  setState(() => _visibilityFilter = Visibility.public),
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Protected',
-              icon: Icons.lock_outline,
-              iconColor: Colors.orange,
-              selected: _visibilityFilter == Visibility.protected,
-              onSelected: () =>
-                  setState(() => _visibilityFilter = Visibility.protected),
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Private',
-              icon: Icons.lock,
-              iconColor: Colors.red,
-              selected: _visibilityFilter == Visibility.private,
-              onSelected: () =>
-                  setState(() => _visibilityFilter = Visibility.private),
+            const SizedBox(width: 12),
+            Expanded(
+              child: PopupMenuButton<Visibility?>(
+                initialValue: _visibilityFilter,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            _getVisibilityIcon(_visibilityFilter),
+                            size: 18,
+                            color: _getVisibilityColor(_visibilityFilter),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _visibilityFilter == null ? 'All Visibility' : _getVisibilityLabel(_visibilityFilter!),
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      const Icon(Icons.arrow_drop_down, size: 20),
+                    ],
+                  ),
+                ),
+                onSelected: (value) {
+                  setState(() => _visibilityFilter = value);
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: null,
+                    child: Row(
+                      children: [
+                        Icon(Icons.all_inclusive, size: 18),
+                        SizedBox(width: 8),
+                        Text('All Visibility'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: Visibility.public,
+                    child: Row(
+                      children: [
+                        Icon(Icons.public, size: 18, color: Colors.green),
+                        const SizedBox(width: 8),
+                        const Text('Public'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: Visibility.protected,
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock_outline, size: 18, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        const Text('Protected'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: Visibility.private,
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock, size: 18, color: Colors.red),
+                        const SizedBox(width: 8),
+                        const Text('Private'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -463,32 +560,80 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildFilterChip({
-    required String label,
-    required bool selected,
-    required VoidCallback onSelected,
-    IconData? icon,
-    Color? iconColor,
-  }) {
-    return FilterChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16, color: selected ? Colors.white : iconColor),
-            const SizedBox(width: 4),
-          ],
-          Text(label),
-        ],
-      ),
-      selected: selected,
-      onSelected: (_) => onSelected(),
-      selectedColor: Theme.of(context).primaryColor,
-      labelStyle: TextStyle(
-        color: selected ? Colors.white : null,
-        fontWeight: selected ? FontWeight.bold : null,
-      ),
-    );
+  IconData _getStatusIcon(TripStatus? status) {
+    if (status == null) return Icons.all_inclusive;
+    switch (status) {
+      case TripStatus.inProgress:
+        return Icons.circle;
+      case TripStatus.paused:
+        return Icons.pause;
+      case TripStatus.finished:
+        return Icons.check_circle_outline;
+      case TripStatus.created:
+        return Icons.edit_outlined;
+    }
+  }
+
+  Color _getStatusColor(TripStatus? status) {
+    if (status == null) return Colors.grey;
+    switch (status) {
+      case TripStatus.inProgress:
+        return Colors.green;
+      case TripStatus.paused:
+        return Colors.orange;
+      case TripStatus.finished:
+        return Colors.blue;
+      case TripStatus.created:
+        return Colors.grey;
+    }
+  }
+
+  String _getStatusLabel(TripStatus status) {
+    switch (status) {
+      case TripStatus.inProgress:
+        return 'Live';
+      case TripStatus.paused:
+        return 'Paused';
+      case TripStatus.finished:
+        return 'Completed';
+      case TripStatus.created:
+        return 'Draft';
+    }
+  }
+
+  IconData _getVisibilityIcon(Visibility? visibility) {
+    if (visibility == null) return Icons.all_inclusive;
+    switch (visibility) {
+      case Visibility.public:
+        return Icons.public;
+      case Visibility.protected:
+        return Icons.lock_outline;
+      case Visibility.private:
+        return Icons.lock;
+    }
+  }
+
+  Color _getVisibilityColor(Visibility? visibility) {
+    if (visibility == null) return Colors.grey;
+    switch (visibility) {
+      case Visibility.public:
+        return Colors.green;
+      case Visibility.protected:
+        return Colors.orange;
+      case Visibility.private:
+        return Colors.red;
+    }
+  }
+
+  String _getVisibilityLabel(Visibility visibility) {
+    switch (visibility) {
+      case Visibility.public:
+        return 'Public';
+      case Visibility.protected:
+        return 'Protected';
+      case Visibility.private:
+        return 'Private';
+    }
   }
 
   Widget _buildMyTripsTab() {
@@ -849,10 +994,17 @@ class _HomeScreenState extends State<HomeScreen>
                                       ),
                                     ],
                                   ),
-                                  child: Icon(
-                                    Icons.explore,
-                                    size: 64,
-                                    color: Theme.of(context).primaryColor,
+                                  child: Image.network(
+                                    'icons/Icon-192.png',
+                                    width: 64,
+                                    height: 64,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.explore,
+                                        size: 64,
+                                        color: Theme.of(context).primaryColor,
+                                      );
+                                    },
                                   ),
                                 ),
                                 const SizedBox(height: 24),
@@ -879,7 +1031,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   onPressed: _navigateToAuth,
                                   icon: const Icon(Icons.login, size: 20),
                                   label: const Text(
-                                    'Log In to Get Started',
+                                    'Log In',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
