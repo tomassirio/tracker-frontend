@@ -305,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen>
       MaterialPageRoute(builder: (context) => const AuthScreen()),
     );
 
-    if (result == true || mounted) {
+    if (result == true && mounted) {
       await _loadUserInfo();
       await _loadTrips();
     }
