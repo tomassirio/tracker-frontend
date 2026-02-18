@@ -391,27 +391,24 @@ class _HomeScreenState extends State<HomeScreen>
             child: PopupMenuButton<TripStatus?>(
               initialValue: _statusFilter,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _getStatusIcon(_statusFilter),
-                          size: 18,
-                          color: _getStatusColor(_statusFilter),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _statusFilter == null ? 'All Status' : _getStatusLabel(_statusFilter!),
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
+                    Icon(
+                      _getStatusIcon(_statusFilter),
+                      size: 18,
+                      color: _getStatusColor(_statusFilter),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _statusFilter == null ? 'All Status' : _getStatusLabel(_statusFilter!),
+                        style: const TextStyle(fontSize: 14),
+                      ),
                     ),
                     const Icon(Icons.arrow_drop_down, size: 20),
                   ],
@@ -481,27 +478,24 @@ class _HomeScreenState extends State<HomeScreen>
               child: PopupMenuButton<Visibility?>(
                 initialValue: _visibilityFilter,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            _getVisibilityIcon(_visibilityFilter),
-                            size: 18,
-                            color: _getVisibilityColor(_visibilityFilter),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _visibilityFilter == null ? 'All Visibility' : _getVisibilityLabel(_visibilityFilter!),
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ],
+                      Icon(
+                        _getVisibilityIcon(_visibilityFilter),
+                        size: 18,
+                        color: _getVisibilityColor(_visibilityFilter),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _visibilityFilter == null ? 'All Visibility' : _getVisibilityLabel(_visibilityFilter!),
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
                       const Icon(Icons.arrow_drop_down, size: 20),
                     ],
