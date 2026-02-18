@@ -141,19 +141,6 @@ class _StatusBadgeState extends State<StatusBadge>
     }
   }
 
-  Color _getBackgroundColor() {
-    switch (widget.status) {
-      case TripStatus.created:
-        return Colors.grey.withOpacity(0.1);
-      case TripStatus.inProgress:
-        return Colors.green.withOpacity(0.1);
-      case TripStatus.paused:
-        return Colors.orange.withOpacity(0.1);
-      case TripStatus.finished:
-        return Colors.blue.withOpacity(0.1);
-    }
-  }
-
   Color _getBorderColor() {
     switch (widget.status) {
       case TripStatus.created:

@@ -76,17 +76,6 @@ class VisibilityBadge extends StatelessWidget {
     }
   }
 
-  Color _getBackgroundColor() {
-    switch (visibility) {
-      case Visibility.public:
-        return Colors.green.withOpacity(0.1);
-      case Visibility.protected:
-        return Colors.orange.withOpacity(0.1);
-      case Visibility.private:
-        return Colors.red.withOpacity(0.1);
-    }
-  }
-
   Color _getBorderColor() {
     switch (visibility) {
       case Visibility.public:

@@ -71,15 +71,6 @@ class RelationshipBadge extends StatelessWidget {
     }
   }
 
-  Color _getBackgroundColor() {
-    switch (type) {
-      case RelationshipType.friend:
-        return Colors.blue.withOpacity(0.1);
-      case RelationshipType.following:
-        return Colors.purple.withOpacity(0.1);
-    }
-  }
-
   Color _getBorderColor() {
     switch (type) {
       case RelationshipType.friend:
