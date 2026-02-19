@@ -35,6 +35,9 @@ class ApiEndpoints {
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
   static const String usersFollowsFollowing = '/users/following';
   static const String usersFollowsFollowers = '/users/followers';
+  static String userFollowing(String userId) => '/users/$userId/following';
+  static String userFollowers(String userId) => '/users/$userId/followers';
+  static String userFriends(String userId) => '/users/$userId/friends';
 
   // User Command endpoints (use commandBaseUrl)
   static const String usersCreate = '/users';

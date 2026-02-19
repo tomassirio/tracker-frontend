@@ -56,6 +56,21 @@ class UserService {
     return await _userQueryClient.getFollowers();
   }
 
+  /// Get users that a specific user follows
+  Future<List<UserFollow>> getUserFollowing(String userId) async {
+    return await _userQueryClient.getUserFollowing(userId);
+  }
+
+  /// Get users that follow a specific user
+  Future<List<UserFollow>> getUserFollowers(String userId) async {
+    return await _userQueryClient.getUserFollowers(userId);
+  }
+
+  /// Get friends of a specific user
+  Future<List<Friendship>> getUserFriends(String userId) async {
+    return await _userQueryClient.getUserFriends(userId);
+  }
+
   /// Send a friend request
   /// Returns the request ID immediately. Confirmation will be delivered via WebSocket.
   Future<String> sendFriendRequest(String userId) async {

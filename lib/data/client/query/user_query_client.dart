@@ -91,4 +91,34 @@ class UserQueryClient {
     );
     return _apiClient.handleListResponse(response, UserFollow.fromJson);
   }
+
+  /// Get users that a specific user follows
+  /// Requires authentication (USER, ADMIN)
+  Future<List<UserFollow>> getUserFollowing(String userId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.userFollowing(userId),
+      requireAuth: true,
+    );
+    return _apiClient.handleListResponse(response, UserFollow.fromJson);
+  }
+
+  /// Get users that follow a specific user
+  /// Requires authentication (USER, ADMIN)
+  Future<List<UserFollow>> getUserFollowers(String userId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.userFollowers(userId),
+      requireAuth: true,
+    );
+    return _apiClient.handleListResponse(response, UserFollow.fromJson);
+  }
+
+  /// Get friends of a specific user
+  /// Requires authentication (USER, ADMIN)
+  Future<List<Friendship>> getUserFriends(String userId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.userFriends(userId),
+      requireAuth: true,
+    );
+    return _apiClient.handleListResponse(response, Friendship.fromJson);
+  }
 }

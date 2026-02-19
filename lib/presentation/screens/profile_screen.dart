@@ -126,6 +126,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Load user's trips
         _loadUserTrips(profile.id);
 
+        // Load the viewed user's actual social counts
+        if (isLoggedIn) {
+          await _loadUserSocialCounts(profile.id);
+        }
+
         // Only load friendship status if viewing someone else's profile
         if (isLoggedIn && widget.userId != _currentUserId) {
           await _loadFriendshipStatus(profile.id);
@@ -166,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// Load follower, following, and friends counts from API
+  /// Load follower, following, and friends counts from API (for own profile)
   Future<void> _loadSocialCounts() async {
     try {
       final results = await Future.wait([
@@ -185,6 +190,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       // Silently fail - use profile counts as fallback
       debugPrint('Failed to load social counts: $e');
+    }
+  }
+
+  /// Load follower, following, and friends counts for another user
+  Future<void> _loadUserSocialCounts(String userId) async {
+    try {
+      final results = await Future.wait([
+        _userService.getUserFollowers(userId),
+        _userService.getUserFollowing(userId),
+        _userService.getUserFriends(userId),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _followersCount = (results[0] as List).length;
+          _followingCount = (results[1] as List).length;
+          _friendsCount = (results[2] as List).length;
+        });
+      }
+    } catch (e) {
+      // Silently fail - keep counts from profile response as fallback
+      debugPrint('Failed to load user social counts: $e');
     }
   }
 
