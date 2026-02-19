@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../data/client/google_maps_api_client.dart';
 import '../../../data/client/google_routes_api_client.dart';
-import '../../screens/profile_screen.dart';
-import '../../helpers/page_transitions.dart';
+import '../../helpers/auth_navigation_helper.dart';
 
 class TripCard extends StatefulWidget {
   final Trip trip;
@@ -215,207 +216,479 @@ class _TripCardState extends State<TripCard> {
         (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) ||
             _hasPlannedRoute;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: widget.onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Static map preview (16:9 aspect ratio)
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                children: [
-                  // Static map image - shows actual locations or planned route
-                  if (hasMapData)
-                    Image.network(
-                      _generateStaticMapUrl(),
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(
-                              Icons.map,
-                              size: 48,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  else
-                    Container(
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: Icon(
-                          Icons.map_outlined,
-                          size: 48,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ),
-
-                  // Status badge overlay
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        widget.trip.status.toJson().toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Delete button overlay
-                  if (widget.onDelete != null)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Material(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: widget.onDelete,
-                          child: const Padding(
-                            padding: EdgeInsets.all(6),
-                            child: Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            // Trip info section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Trip title
-                  Text(
-                    widget.trip.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  // Username and date
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        PageTransitions.slideRight(
-                          ProfileScreen(userId: widget.trip.userId),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.person, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          '@${widget.trip.username}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Metadata row
-                  Row(
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.white,
+          child: InkWell(
+            onTap: widget.onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Map preview section with overlays
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Stack(
                     children: [
-                      Text(
-                        _formatDate(widget.trip.createdAt),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 3,
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[600],
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(Icons.comment, size: 14, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.trip.commentsCount}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      if (widget.trip.visibility.toJson() == 'PUBLIC') ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 3,
-                          height: 3,
+                      // Map or placeholder
+                      if (hasMapData)
+                        Image.network(
+                          _generateStaticMapUrl(),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return _buildLoadingPlaceholder();
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildNoMapPlaceholder();
+                          },
+                        )
+                      else
+                        _buildNoMapPlaceholder(),
+
+                      // Gradient overlay at bottom for better text readability
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 60,
+                        child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey[600],
-                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.4),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Icon(Icons.public, size: 14, color: Colors.grey[600]),
-                      ],
+                      ),
+
+                      // Status badge overlay (bottom left)
+                      Positioned(
+                        bottom: 8,
+                        left: 8,
+                        child: _buildStatusBadge(),
+                      ),
+
+                      // Visibility badge overlay (bottom right)
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: _buildVisibilityBadge(),
+                      ),
+
+                      // Delete button overlay (top right)
+                      if (widget.onDelete != null)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: _buildDeleteButton(),
+                        ),
+
+                      // Edit indicator for own trips (top left)
+                      if (widget.onDelete != null)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: _buildEditIndicator(),
+                        ),
                     ],
                   ),
-                  if (widget.trip.description != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.trip.description!,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                ),
+                // Trip info section
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Trip title
+                        Text(
+                          widget.trip.name,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: WandererTheme.textPrimary,
+                            letterSpacing: -0.3,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        // Username row with avatar
+                        InkWell(
+                          onTap: () {
+                            AuthNavigationHelper.navigateToUserProfile(
+                              context,
+                              widget.trip.userId,
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(4),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: WandererTheme.primaryOrange
+                                      .withOpacity(0.15),
+                                  child: Text(
+                                    widget.trip.username.isNotEmpty
+                                        ? widget.trip.username[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      color: WandererTheme.primaryOrange,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    '@${widget.trip.username}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: WandererTheme.textSecondary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        // Metadata row
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 12,
+                              color: WandererTheme.textTertiary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _formatDate(widget.trip.createdAt),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: WandererTheme.textTertiary,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 12,
+                              color: WandererTheme.textTertiary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${widget.trip.commentsCount}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: WandererTheme.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+  /// Build a loading placeholder with shimmer effect
+  Widget _buildLoadingPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey[200]!,
+            Colors.grey[300]!,
+            Colors.grey[200]!,
+          ],
+        ),
+      ),
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            WandererTheme.primaryOrange.withOpacity(0.5),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build a stylish placeholder for trips without map data
+  Widget _buildNoMapPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey[100]!,
+            Colors.grey[200]!,
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Pattern background
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _MapPatternPainter(),
+            ),
+          ),
+          // Center icon
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.map_outlined,
+                size: 32,
+                color: WandererTheme.primaryOrange.withOpacity(0.6),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build colored status badge
+  Widget _buildStatusBadge() {
+    final statusText = widget.trip.status.toJson();
+    final statusColor = _getStatusColor(widget.trip.status);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: statusColor.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getStatusIcon(widget.trip.status),
+            size: 10,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            _formatStatus(statusText),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build visibility badge
+  Widget _buildVisibilityBadge() {
+    final visibility = widget.trip.visibility.toJson();
+    IconData icon;
+    Color color;
+
+    switch (visibility) {
+      case 'PUBLIC':
+        icon = Icons.public;
+        color = Colors.green;
+        break;
+      case 'FRIENDS':
+        icon = Icons.people;
+        color = Colors.blue;
+        break;
+      default:
+        icon = Icons.lock;
+        color = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        size: 14,
+        color: color,
+      ),
+    );
+  }
+
+  /// Build delete button
+  Widget _buildDeleteButton() {
+    return Material(
+      color: Colors.red.withOpacity(0.9),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: widget.onDelete,
+        child: const Padding(
+          padding: EdgeInsets.all(6),
+          child: Icon(
+            Icons.delete_outline,
+            color: Colors.white,
+            size: 18,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build edit indicator for own trips
+  Widget _buildEditIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: WandererTheme.primaryOrange.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: WandererTheme.primaryOrange.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.edit,
+        size: 14,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  /// Get status color based on trip status
+  Color _getStatusColor(TripStatus status) {
+    switch (status) {
+      case TripStatus.created:
+        return const Color(0xFF6C757D); // Gray
+      case TripStatus.inProgress:
+        return const Color(0xFF28A745); // Green
+      case TripStatus.paused:
+        return const Color(0xFFFFC107); // Yellow/Amber
+      case TripStatus.finished:
+        return const Color(0xFF007BFF); // Blue
+    }
+  }
+
+  /// Get status icon
+  IconData _getStatusIcon(TripStatus status) {
+    switch (status) {
+      case TripStatus.created:
+        return Icons.pending_outlined;
+      case TripStatus.inProgress:
+        return Icons.play_arrow;
+      case TripStatus.paused:
+        return Icons.pause;
+      case TripStatus.finished:
+        return Icons.check_circle_outline;
+    }
+  }
+
+  /// Format status text for display
+  String _formatStatus(String status) {
+    switch (status.toUpperCase()) {
+      case 'CREATED':
+        return 'DRAFT';
+      case 'IN_PROGRESS':
+        return 'LIVE';
+      case 'PAUSED':
+        return 'PAUSED';
+      case 'FINISHED':
+        return 'DONE';
+      default:
+        return status.toUpperCase();
+    }
+  }
+}
+
+/// Custom painter for map pattern background
+class _MapPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey[300]!.withOpacity(0.5)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    // Draw grid pattern
+    const spacing = 20.0;
+    for (double x = 0; x < size.width; x += spacing) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+    }
+    for (double y = 0; y < size.height; y += spacing) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

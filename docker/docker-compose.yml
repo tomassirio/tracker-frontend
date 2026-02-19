@@ -13,7 +13,7 @@ services:
       # Backend service URLs - customize these for your environment
       - COMMAND_BASE_URL=${COMMAND_BASE_URL:-http://localhost:8081/api/1}
       - QUERY_BASE_URL=${QUERY_BASE_URL:-http://localhost:8082/api/1}
-      - AUTH_BASE_URL=${AUTH_BASE_URL:-http://localhost:8083/api/1}
+      - AUTH_BASE_URL=${AUTH_BASE_URL:-http://localhost:8083/api/1/auth}
     networks:
       - tracker-network
 

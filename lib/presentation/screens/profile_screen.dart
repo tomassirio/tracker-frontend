@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/data/client/api_client.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/repositories/profile_repository.dart';
@@ -44,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isFollowingUser = false; // Track if following this user
   String? _sentFriendRequestId; // Store the request ID for cancellation
   String? _currentUserId; // Track the logged-in user's ID
+  String? _currentUsername; // Track the logged-in user's username
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -80,15 +82,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoggedIn = isLoggedIn;
       });
 
-      // Load current user if logged in
+      // If viewing another user's profile and not logged in, redirect to auth
+      if (widget.userId != null && !isLoggedIn) {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+        // Navigate to auth screen - use push so user can go back
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AuthScreen()),
+          ).then((_) {
+            // Reload profile after returning from auth
+            if (mounted) {
+              _loadProfile();
+            }
+          });
+        }
+        return;
+      }
+
+      // Load current user ID and username if logged in (needed to determine if viewing own profile and for AppBar/Sidebar)
       if (isLoggedIn) {
         try {
           final currentUser = await _repository.getMyProfile();
           setState(() {
             _currentUserId = currentUser.id;
+            _currentUsername = currentUser.username;
           });
-          // Load social counts for own profile
-          await _loadSocialCounts();
         } catch (e) {
           // Ignore error loading current user
         }
@@ -106,6 +127,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         // Load user's trips
         _loadUserTrips(profile.id);
+
+        // Load the viewed user's actual social counts
+        if (isLoggedIn) {
+          await _loadUserSocialCounts(profile.id);
+        }
 
         // Only load friendship status if viewing someone else's profile
         if (isLoggedIn && widget.userId != _currentUserId) {
@@ -132,6 +158,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Load user's trips and social counts
       _loadUserTrips(profile.id);
       await _loadSocialCounts();
+    } on AuthenticationRedirectException {
+      // User is being redirected to login - don't show error
+      if (mounted) {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -140,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// Load follower, following, and friends counts from API
+  /// Load follower, following, and friends counts from API (for own profile)
   Future<void> _loadSocialCounts() async {
     try {
       final results = await Future.wait([
@@ -159,6 +192,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       // Silently fail - use profile counts as fallback
       debugPrint('Failed to load social counts: $e');
+    }
+  }
+
+  /// Load follower, following, and friends counts for another user
+  Future<void> _loadUserSocialCounts(String userId) async {
+    try {
+      final results = await Future.wait([
+        _userService.getUserFollowers(userId),
+        _userService.getUserFollowing(userId),
+        _userService.getUserFriends(userId),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _followersCount = (results[0] as List).length;
+          _followingCount = (results[1] as List).length;
+          _friendsCount = (results[2] as List).length;
+        });
+      }
+    } catch (e) {
+      // Silently fail - keep counts from profile response as fallback
+      debugPrint('Failed to load user social counts: $e');
     }
   }
 
@@ -209,6 +264,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _userTrips = trips;
         _isLoadingTrips = false;
       });
+    } on AuthenticationRedirectException {
+      // User is being redirected to login - don't show error
+      if (mounted) {
+        setState(() {
+          _isLoadingTrips = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _isLoadingTrips = false;
@@ -469,15 +531,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onClear: () {},
         isLoggedIn: _isLoggedIn,
         onLoginPressed: _navigateToAuth,
-        username: _profile?.username,
-        userId: _profile?.id,
+        username: _currentUsername,
+        userId: _currentUserId,
         onProfile: () {},
         onSettings: _handleSettings,
         onLogout: _logout,
       ),
       drawer: AppSidebar(
-        username: _profile?.username,
-        userId: _profile?.id,
+        username: _currentUsername,
+        userId: _currentUserId,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
@@ -654,11 +716,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         _buildStatCard('Trips', _userTrips.length.toString(), null),
         _buildStatCard('Followers', _followersCount.toString(),
-            _navigateToFriendsFollowers),
+            _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
         _buildStatCard('Following', _followingCount.toString(),
-            _navigateToFriendsFollowers),
-        _buildStatCard(
-            'Friends', _friendsCount.toString(), _navigateToFriendsFollowers),
+            _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
+        _buildStatCard('Friends', _friendsCount.toString(),
+            _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
       ],
     );
   }

@@ -17,7 +17,7 @@ import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
@@ -26,7 +26,6 @@ import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
-import 'profile_screen.dart';
 
 /// Trip detail screen showing trip info, map, and comments
 class TripDetailScreen extends StatefulWidget {
@@ -676,15 +675,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleProfile() {
-    Navigator.push(
-      context,
-      PageTransitions.slideRight(const ProfileScreen()),
-    ).then((result) {
-      if (result == true && mounted) {
-        // User logged out from profile screen
-        Navigator.pop(context, true); // Go back to home with logout signal
-      }
-    });
+    AuthNavigationHelper.navigateToOwnProfile(context);
   }
 
   Future<void> _navigateToAuth() async {

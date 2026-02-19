@@ -7,6 +7,8 @@ import 'package:tracker_frontend/data/client/query/trip_plan_query_client.dart';
 import 'package:tracker_frontend/data/storage/token_storage.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('TripPlanQueryClient', () {
     late MockHttpClient mockHttpClient;
     late MockTokenStorage mockTokenStorage;

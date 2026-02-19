@@ -5,15 +5,15 @@ void main() {
   group('ApiEndpoints', () {
     group('Base URLs', () {
       test('commandBaseUrl is correct', () {
-        expect(ApiEndpoints.commandBaseUrl, '/api/command');
+        expect(ApiEndpoints.commandBaseUrl, 'http://localhost:8081/api/1');
       });
 
       test('queryBaseUrl is correct', () {
-        expect(ApiEndpoints.queryBaseUrl, '/api/query');
+        expect(ApiEndpoints.queryBaseUrl, 'http://localhost:8082/api/1');
       });
 
       test('authBaseUrl is correct', () {
-        expect(ApiEndpoints.authBaseUrl, '/api/auth');
+        expect(ApiEndpoints.authBaseUrl, 'http://localhost:8083/api/1/auth');
       });
     });
 
@@ -61,8 +61,16 @@ void main() {
         );
       });
 
-      test('usersFriends path is correct', () {
-        expect(ApiEndpoints.usersFriends, '/users/friends');
+      test('usersMeFriends path is correct', () {
+        expect(ApiEndpoints.usersMeFriends, '/users/me/friends');
+      });
+
+      test('usersMeFollowing path is correct', () {
+        expect(ApiEndpoints.usersMeFollowing, '/users/me/following');
+      });
+
+      test('usersMeFollowers path is correct', () {
+        expect(ApiEndpoints.usersMeFollowers, '/users/me/followers');
       });
 
       test('usersFriendRequestsReceived path is correct', () {
@@ -79,12 +87,19 @@ void main() {
         );
       });
 
-      test('usersFollowsFollowing path is correct', () {
-        expect(ApiEndpoints.usersFollowsFollowing, '/users/following');
+      test('userFriends generates correct path', () {
+        expect(ApiEndpoints.userFriends('user123'), '/users/user123/friends');
+        expect(ApiEndpoints.userFriends('abc-def'), '/users/abc-def/friends');
       });
 
-      test('usersFollowsFollowers path is correct', () {
-        expect(ApiEndpoints.usersFollowsFollowers, '/users/followers');
+      test('userFollowing generates correct path', () {
+        expect(ApiEndpoints.userFollowing('user123'), '/users/user123/following');
+        expect(ApiEndpoints.userFollowing('abc-def'), '/users/abc-def/following');
+      });
+
+      test('userFollowers generates correct path', () {
+        expect(ApiEndpoints.userFollowers('user123'), '/users/user123/followers');
+        expect(ApiEndpoints.userFollowers('abc-def'), '/users/abc-def/followers');
       });
     });
 

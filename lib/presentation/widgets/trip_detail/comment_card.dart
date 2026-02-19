@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reply_card.dart';
-import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget displaying a comment card with glassmorphism styling
@@ -27,10 +26,7 @@ class CommentCard extends StatelessWidget {
   });
 
   void _navigateToProfile(BuildContext context) {
-    Navigator.push(
-      context,
-      PageTransitions.slideRight(ProfileScreen(userId: comment.userId)),
-    );
+    AuthNavigationHelper.navigateToUserProfile(context, comment.userId);
   }
 
   @override

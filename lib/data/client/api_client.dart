@@ -3,6 +3,16 @@ import 'package:http/http.dart' as http;
 import '../../core/constants/api_endpoints.dart';
 import '../storage/token_storage.dart';
 
+/// Exception thrown when user needs to authenticate
+/// This is not an error - it's a signal to redirect to login without showing error messages
+class AuthenticationRedirectException implements Exception {
+  final String message;
+  AuthenticationRedirectException([this.message = 'Authentication required']);
+
+  @override
+  String toString() => message;
+}
+
 /// Base API client with authentication support
 class ApiClient {
   final http.Client _httpClient;
@@ -42,6 +52,9 @@ class ApiClient {
         // Retry the request with new token
         final newHeaders = await _buildHeaders(requireAuth, headers);
         response = await _httpClient.get(uri, headers: newHeaders);
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -78,6 +91,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -114,6 +130,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -150,6 +169,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -186,6 +208,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -213,6 +238,9 @@ class ApiClient {
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
         response = await _httpClient.delete(uri, headers: newHeaders);
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -332,6 +360,14 @@ class ApiClient {
       await _tokenStorage.clearTokens();
       return false;
     }
+  }
+
+  /// Handle unauthorized access
+  /// Throws AuthenticationRedirectException to signal that
+  /// the user needs to authenticate. The UI layer is responsible
+  /// for handling navigation to the auth screen.
+  void _handleUnauthorized() {
+    throw AuthenticationRedirectException();
   }
 
   /// Handle API response with type conversion
