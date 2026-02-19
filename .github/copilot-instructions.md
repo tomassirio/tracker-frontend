@@ -133,7 +133,7 @@ GOOGLE_MAPS_API_KEY=your_key
 # Optional with defaults:
 COMMAND_BASE_URL=http://localhost:8081/api/1
 QUERY_BASE_URL=http://localhost:8082/api/1
-AUTH_BASE_URL=http://localhost:8083/api/1
+AUTH_BASE_URL=http://localhost:8083/api/1/auth
 ```
 
 Script creates `web/index.html.template`, injects variables, runs on port 51538, restores on exit.

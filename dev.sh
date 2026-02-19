@@ -33,7 +33,7 @@ sed -i.bak "s|{{GOOGLE_MAPS_API_KEY}}|${GOOGLE_MAPS_API_KEY}|g" web/index.html
 # Replace backend URLs (or use defaults if not set)
 COMMAND_URL="${COMMAND_BASE_URL:-http://localhost:8081/api/1}"
 QUERY_URL="${QUERY_BASE_URL:-http://localhost:8082/api/1}"
-AUTH_URL="${AUTH_BASE_URL:-http://localhost:8083/api/1}"
+AUTH_URL="${AUTH_BASE_URL:-http://localhost:8083/api/1/auth}"
 WS_URL="${WS_BASE_URL:-ws://localhost:8080}"
 
 sed -i.bak "s|{{COMMAND_BASE_URL}}|${COMMAND_URL}|g" web/index.html
