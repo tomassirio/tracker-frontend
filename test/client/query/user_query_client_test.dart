@@ -226,7 +226,7 @@ void main() {
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
-          endsWith(ApiEndpoints.usersFriends),
+          endsWith(ApiEndpoints.usersMeFriends),
         );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
@@ -375,7 +375,7 @@ void main() {
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
-          endsWith(ApiEndpoints.usersFollowsFollowing),
+          endsWith(ApiEndpoints.usersMeFollowing),
         );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
@@ -429,7 +429,7 @@ void main() {
         expect(mockHttpClient.lastMethod, 'GET');
         expect(
           mockHttpClient.lastUri?.path,
-          endsWith(ApiEndpoints.usersFollowsFollowers),
+          endsWith(ApiEndpoints.usersMeFollowers),
         );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],

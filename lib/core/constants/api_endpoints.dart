@@ -29,13 +29,15 @@ class ApiEndpoints {
   static const String usersMe = '/users/me';
   static String userById(String userId) => '/users/$userId';
   static String userByUsername(String username) => '/users/username/$username';
-  static const String usersFriends = '/users/friends';
+  
+  // Current user's friends, following, and followers (use /me/ endpoints)
+  static const String usersMeFriends = '/users/me/friends';
+  static const String usersMeFollowing = '/users/me/following';
+  static const String usersMeFollowers = '/users/me/followers';
+  
   static const String usersFriendRequestsReceived =
       '/users/friends/requests/received';
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
-  // Current user's following and followers
-  static const String usersFollowsFollowing = '/users/following';
-  static const String usersFollowsFollowers = '/users/followers';
   
   // Specific user's following, followers, and friends (for viewing other users' profiles)
   static String userFollowing(String userId) => '/users/$userId/following';
