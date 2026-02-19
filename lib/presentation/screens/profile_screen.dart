@@ -101,15 +101,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-      // Load current user if logged in
+      // Load current user ID if logged in (needed to determine if viewing own profile)
       if (isLoggedIn) {
         try {
           final currentUser = await _repository.getMyProfile();
           setState(() {
             _currentUserId = currentUser.id;
           });
-          // Load social counts for own profile
-          await _loadSocialCounts();
         } catch (e) {
           // Ignore error loading current user
         }
@@ -122,6 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profile = profile;
           _followersCount = profile.followersCount;
           _followingCount = profile.followingCount;
+          _friendsCount = 0; // Friends count not available from profile API
           _isLoadingProfile = false;
         });
 
@@ -689,11 +688,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         _buildStatCard('Trips', _userTrips.length.toString(), null),
         _buildStatCard('Followers', _followersCount.toString(),
-            _navigateToFriendsFollowers),
+            _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
         _buildStatCard('Following', _followingCount.toString(),
-            _navigateToFriendsFollowers),
-        _buildStatCard(
-            'Friends', _friendsCount.toString(), _navigateToFriendsFollowers),
+            _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
+        if (_isViewingOwnProfile)
+          _buildStatCard(
+              'Friends', _friendsCount.toString(), _navigateToFriendsFollowers),
       ],
     );
   }
