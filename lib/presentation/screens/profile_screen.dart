@@ -45,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isFollowingUser = false; // Track if following this user
   String? _sentFriendRequestId; // Store the request ID for cancellation
   String? _currentUserId; // Track the logged-in user's ID
+  String? _currentUsername; // Track the logged-in user's username
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -101,12 +102,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-      // Load current user ID if logged in (needed to determine if viewing own profile)
+      // Load current user ID and username if logged in (needed to determine if viewing own profile and for AppBar/Sidebar)
       if (isLoggedIn) {
         try {
           final currentUser = await _repository.getMyProfile();
           setState(() {
             _currentUserId = currentUser.id;
+            _currentUsername = currentUser.username;
           });
         } catch (e) {
           // Ignore error loading current user
@@ -529,15 +531,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onClear: () {},
         isLoggedIn: _isLoggedIn,
         onLoginPressed: _navigateToAuth,
-        username: _profile?.username,
-        userId: _profile?.id,
+        username: _currentUsername,
+        userId: _currentUserId,
         onProfile: () {},
         onSettings: _handleSettings,
         onLogout: _logout,
       ),
       drawer: AppSidebar(
-        username: _profile?.username,
-        userId: _profile?.id,
+        username: _currentUsername,
+        userId: _currentUserId,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
