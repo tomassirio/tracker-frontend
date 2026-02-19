@@ -81,6 +81,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoggedIn = isLoggedIn;
       });
 
+      // If viewing another user's profile and not logged in, redirect to auth
+      if (widget.userId != null && !isLoggedIn) {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+        // Navigate to auth screen - use push so user can go back
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AuthScreen()),
+          ).then((_) {
+            // Reload profile after returning from auth
+            if (mounted) {
+              _loadProfile();
+            }
+          });
+        }
+        return;
+      }
+
       // Load current user if logged in
       if (isLoggedIn) {
         try {
