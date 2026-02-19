@@ -4,6 +4,16 @@ import '../../core/constants/api_endpoints.dart';
 import '../../core/services/navigation_service.dart';
 import '../storage/token_storage.dart';
 
+/// Exception thrown when user needs to authenticate
+/// This is not an error - it's a signal to redirect to login without showing error messages
+class AuthenticationRedirectException implements Exception {
+  final String message;
+  AuthenticationRedirectException([this.message = 'Authentication required']);
+
+  @override
+  String toString() => message;
+}
+
 /// Base API client with authentication support
 class ApiClient {
   final http.Client _httpClient;
@@ -354,9 +364,12 @@ class ApiClient {
   }
 
   /// Handle unauthorized access by redirecting to login
+  /// Throws AuthenticationRedirectException to stop further processing
   void _handleUnauthorized() {
     // Navigate to auth screen without showing error
     NavigationService().navigateToAuth();
+    // Throw a special exception that signals redirect, not an error
+    throw AuthenticationRedirectException();
   }
 
   /// Handle API response with type conversion

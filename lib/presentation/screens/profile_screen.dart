@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/data/client/api_client.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/repositories/profile_repository.dart';
@@ -132,6 +133,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Load user's trips and social counts
       _loadUserTrips(profile.id);
       await _loadSocialCounts();
+    } on AuthenticationRedirectException {
+      // User is being redirected to login - don't show error
+      if (mounted) {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -209,6 +217,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _userTrips = trips;
         _isLoadingTrips = false;
       });
+    } on AuthenticationRedirectException {
+      // User is being redirected to login - don't show error
+      if (mounted) {
+        setState(() {
+          _isLoadingTrips = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _isLoadingTrips = false;

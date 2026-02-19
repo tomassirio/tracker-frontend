@@ -11,10 +11,18 @@ class NavigationService {
 
   /// Navigate to the authentication screen
   /// Called when user receives 401 Unauthorized response
+  /// Uses push so user can go back to previous screen after login
   void navigateToAuth() {
     final context = navigatorKey.currentContext;
     if (context != null) {
-      // Import auth screen lazily to avoid circular dependencies
+      Navigator.of(context).pushNamed('/auth');
+    }
+  }
+
+  /// Navigate to auth and clear all routes (for explicit logout)
+  void navigateToAuthAndClearStack() {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/auth',
         (route) => false,
