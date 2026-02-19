@@ -17,6 +17,7 @@ import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/home/enhanced_trip_card.dart';
 import 'package:tracker_frontend/presentation/widgets/home/feed_section_header.dart';
 import 'package:tracker_frontend/presentation/widgets/home/relationship_badge.dart';
+import 'package:tracker_frontend/main.dart' show routeObserver;
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
 import 'auth_screen.dart';
@@ -30,7 +31,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, RouteAware {
   final HomeRepository _repository = HomeRepository();
   final TripService _tripService = TripService();
   final WebSocketService _webSocketService = WebSocketService();
@@ -65,6 +66,19 @@ class _HomeScreenState extends State<HomeScreen>
     _initializeData();
     _searchController.addListener(_applyFilters);
     _initWebSocket();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    // Called when a route that was pushed on top of this one is popped.
+    // Reload data in case the user logged in or out while on another screen.
+    _initializeData();
   }
 
   Future<void> _initializeData() async {
@@ -120,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _wsSubscription?.cancel();
     _webSocketService.unsubscribeFromAllTrips();
     _searchController.dispose();
