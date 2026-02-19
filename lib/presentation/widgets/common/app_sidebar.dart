@@ -157,7 +157,6 @@ class AppSidebar extends StatelessWidget {
               selected: selectedIndex == 4,
               onTap: () => _handleNavigation(context, 4),
             ),
-            const Divider(),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
