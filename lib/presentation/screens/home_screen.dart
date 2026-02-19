@@ -1073,7 +1073,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                                 const SizedBox(height: 24),
                                 const Text(
-                                  'Welcome to Tracker',
+                                  'Welcome to Wanderer',
                                   style: TextStyle(
                                     fontSize: 32,
                                     fontWeight: FontWeight.bold,

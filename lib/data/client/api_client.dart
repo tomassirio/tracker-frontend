@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_endpoints.dart';
+import '../../core/services/navigation_service.dart';
 import '../storage/token_storage.dart';
 
 /// Base API client with authentication support
@@ -42,6 +43,9 @@ class ApiClient {
         // Retry the request with new token
         final newHeaders = await _buildHeaders(requireAuth, headers);
         response = await _httpClient.get(uri, headers: newHeaders);
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -78,6 +82,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -114,6 +121,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -150,6 +160,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -186,6 +199,9 @@ class ApiClient {
           headers: newHeaders,
           body: jsonEncode(body),
         );
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -213,6 +229,9 @@ class ApiClient {
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
         response = await _httpClient.delete(uri, headers: newHeaders);
+      } else {
+        // Refresh failed, redirect to login
+        _handleUnauthorized();
       }
     }
 
@@ -332,6 +351,12 @@ class ApiClient {
       await _tokenStorage.clearTokens();
       return false;
     }
+  }
+
+  /// Handle unauthorized access by redirecting to login
+  void _handleUnauthorized() {
+    // Navigate to auth screen without showing error
+    NavigationService().navigateToAuth();
   }
 
   /// Handle API response with type conversion
