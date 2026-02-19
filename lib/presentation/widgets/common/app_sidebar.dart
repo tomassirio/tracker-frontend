@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
 import 'package:tracker_frontend/presentation/screens/trip_plans_screen.dart';
 import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
@@ -118,36 +119,32 @@ class AppSidebar extends StatelessWidget {
             selected: selectedIndex == 0,
             onTap: () => _handleNavigation(context, 0),
           ),
-          ListTile(
-            leading: const Icon(Icons.calendar_today),
-            title: const Text('Trip Plans'),
-            selected: selectedIndex == 1,
-            enabled: isLoggedIn,
-            onTap: isLoggedIn ? () => _handleNavigation(context, 1) : null,
-          ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Friends'),
-            selected: selectedIndex == 2,
-            enabled: isLoggedIn,
-            onTap: isLoggedIn ? () => _handleNavigation(context, 2) : null,
-          ),
-          ListTile(
-            leading: const Icon(Icons.emoji_events),
-            title: const Text('Achievements'),
-            selected: selectedIndex == 3,
-            enabled: isLoggedIn,
-            onTap: isLoggedIn ? () => _handleNavigation(context, 3) : null,
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('My Profile'),
-            selected: selectedIndex == 4,
-            enabled: isLoggedIn,
-            onTap: isLoggedIn ? () => _handleNavigation(context, 4) : null,
-          ),
-          const Divider(),
           if (isLoggedIn) ...[
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Trip Plans'),
+              selected: selectedIndex == 1,
+              onTap: () => _handleNavigation(context, 1),
+            ),
+            ListTile(
+              leading: const Icon(Icons.people),
+              title: const Text('Friends'),
+              selected: selectedIndex == 2,
+              onTap: () => _handleNavigation(context, 2),
+            ),
+            ListTile(
+              leading: const Icon(Icons.emoji_events),
+              title: const Text('Achievements'),
+              selected: selectedIndex == 3,
+              onTap: () => _handleNavigation(context, 3),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('My Profile'),
+              selected: selectedIndex == 4,
+              onTap: () => _handleNavigation(context, 4),
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
@@ -162,6 +159,23 @@ class AppSidebar extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 onLogout?.call();
+              },
+            ),
+          ],
+          if (!isLoggedIn) ...[
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Log In'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to auth screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AuthScreen(),
+                  ),
+                );
               },
             ),
           ],
