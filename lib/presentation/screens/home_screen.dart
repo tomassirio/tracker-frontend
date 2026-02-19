@@ -386,48 +386,48 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       child: Row(
         children: [
+          const Spacer(), // Push dropdowns to the right
           // Status filter dropdown
-          Expanded(
-            child: PopupMenuButton<TripStatus?>(
-              initialValue: _statusFilter,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          PopupMenuButton<TripStatus?>(
+            initialValue: _statusFilter,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _getStatusIcon(_statusFilter),
+                    size: 18,
+                    color: _getStatusColor(_statusFilter),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _statusFilter == null ? 'All Status' : _getStatusLabel(_statusFilter!),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_drop_down, size: 20),
+                ],
+              ),
+            ),
+            onSelected: (value) {
+              setState(() => _statusFilter = value);
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: null,
                 child: Row(
                   children: [
-                    Icon(
-                      _getStatusIcon(_statusFilter),
-                      size: 18,
-                      color: _getStatusColor(_statusFilter),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _statusFilter == null ? 'All Status' : _getStatusLabel(_statusFilter!),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    const Icon(Icons.arrow_drop_down, size: 20),
+                    Icon(Icons.all_inclusive, size: 18),
+                    SizedBox(width: 8),
+                    Text('All Status'),
                   ],
                 ),
               ),
-              onSelected: (value) {
-                setState(() => _statusFilter = value);
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: null,
-                  child: Row(
-                    children: [
-                      Icon(Icons.all_inclusive, size: 18),
-                      SizedBox(width: 8),
-                      Text('All Status'),
-                    ],
-                  ),
-                ),
                 PopupMenuItem(
                   value: TripStatus.inProgress,
                   child: Row(
@@ -474,47 +474,46 @@ class _HomeScreenState extends State<HomeScreen>
           // Only show visibility filter on My Trips tab
           if (_tabController.index == 0) ...[
             const SizedBox(width: 12),
-            Expanded(
-              child: PopupMenuButton<Visibility?>(
-                initialValue: _visibilityFilter,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            PopupMenuButton<Visibility?>(
+              initialValue: _visibilityFilter,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getVisibilityIcon(_visibilityFilter),
+                      size: 18,
+                      color: _getVisibilityColor(_visibilityFilter),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _visibilityFilter == null ? 'All Visibility' : _getVisibilityLabel(_visibilityFilter!),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_drop_down, size: 20),
+                  ],
+                ),
+              ),
+              onSelected: (value) {
+                setState(() => _visibilityFilter = value);
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: null,
                   child: Row(
                     children: [
-                      Icon(
-                        _getVisibilityIcon(_visibilityFilter),
-                        size: 18,
-                        color: _getVisibilityColor(_visibilityFilter),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _visibilityFilter == null ? 'All Visibility' : _getVisibilityLabel(_visibilityFilter!),
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                      const Icon(Icons.arrow_drop_down, size: 20),
+                      Icon(Icons.all_inclusive, size: 18),
+                      SizedBox(width: 8),
+                      Text('All Visibility'),
                     ],
                   ),
                 ),
-                onSelected: (value) {
-                  setState(() => _visibilityFilter = value);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: null,
-                    child: Row(
-                      children: [
-                        Icon(Icons.all_inclusive, size: 18),
-                        SizedBox(width: 8),
-                        Text('All Visibility'),
-                      ],
-                    ),
-                  ),
                   PopupMenuItem(
                     value: Visibility.public,
                     child: Row(
