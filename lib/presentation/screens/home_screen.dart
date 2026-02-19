@@ -406,7 +406,9 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    _statusFilter == null ? 'All Status' : _getStatusLabel(_statusFilter!),
+                    _statusFilter == null
+                        ? 'All Status'
+                        : _getStatusLabel(_statusFilter!),
                     style: const TextStyle(fontSize: 14),
                   ),
                   const SizedBox(width: 4),
@@ -428,48 +430,48 @@ class _HomeScreenState extends State<HomeScreen>
                   ],
                 ),
               ),
-                PopupMenuItem(
-                  value: TripStatus.inProgress,
-                  child: Row(
-                    children: [
-                      Icon(Icons.circle, size: 18, color: Colors.green),
-                      const SizedBox(width: 8),
-                      const Text('Live'),
-                    ],
-                  ),
+              PopupMenuItem(
+                value: TripStatus.inProgress,
+                child: Row(
+                  children: [
+                    Icon(Icons.circle, size: 18, color: Colors.green),
+                    const SizedBox(width: 8),
+                    const Text('Live'),
+                  ],
                 ),
-                PopupMenuItem(
-                  value: TripStatus.paused,
-                  child: Row(
-                    children: [
-                      Icon(Icons.pause, size: 18, color: Colors.orange),
-                      const SizedBox(width: 8),
-                      const Text('Paused'),
-                    ],
-                  ),
+              ),
+              PopupMenuItem(
+                value: TripStatus.paused,
+                child: Row(
+                  children: [
+                    Icon(Icons.pause, size: 18, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    const Text('Paused'),
+                  ],
                 ),
-                PopupMenuItem(
-                  value: TripStatus.finished,
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle_outline, size: 18, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      const Text('Completed'),
-                    ],
-                  ),
+              ),
+              PopupMenuItem(
+                value: TripStatus.finished,
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline,
+                        size: 18, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    const Text('Completed'),
+                  ],
                 ),
-                PopupMenuItem(
-                  value: TripStatus.created,
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      const Text('Draft'),
-                    ],
-                  ),
+              ),
+              PopupMenuItem(
+                value: TripStatus.created,
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    const Text('Draft'),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           // Only show visibility filter on My Trips tab
           if (_tabController.index == 0) ...[
@@ -477,7 +479,8 @@ class _HomeScreenState extends State<HomeScreen>
             PopupMenuButton<Visibility?>(
               initialValue: _visibilityFilter,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(8),
@@ -492,7 +495,9 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _visibilityFilter == null ? 'All Visibility' : _getVisibilityLabel(_visibilityFilter!),
+                      _visibilityFilter == null
+                          ? 'All Visibility'
+                          : _getVisibilityLabel(_visibilityFilter!),
                       style: const TextStyle(fontSize: 14),
                     ),
                     const SizedBox(width: 4),
@@ -514,38 +519,37 @@ class _HomeScreenState extends State<HomeScreen>
                     ],
                   ),
                 ),
-                  PopupMenuItem(
-                    value: Visibility.public,
-                    child: Row(
-                      children: [
-                        Icon(Icons.public, size: 18, color: Colors.green),
-                        const SizedBox(width: 8),
-                        const Text('Public'),
-                      ],
-                    ),
+                PopupMenuItem(
+                  value: Visibility.public,
+                  child: Row(
+                    children: [
+                      Icon(Icons.public, size: 18, color: Colors.green),
+                      const SizedBox(width: 8),
+                      const Text('Public'),
+                    ],
                   ),
-                  PopupMenuItem(
-                    value: Visibility.protected,
-                    child: Row(
-                      children: [
-                        Icon(Icons.lock_outline, size: 18, color: Colors.orange),
-                        const SizedBox(width: 8),
-                        const Text('Protected'),
-                      ],
-                    ),
+                ),
+                PopupMenuItem(
+                  value: Visibility.protected,
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock_outline, size: 18, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      const Text('Protected'),
+                    ],
                   ),
-                  PopupMenuItem(
-                    value: Visibility.private,
-                    child: Row(
-                      children: [
-                        Icon(Icons.lock, size: 18, color: Colors.red),
-                        const SizedBox(width: 8),
-                        const Text('Private'),
-                      ],
-                    ),
+                ),
+                PopupMenuItem(
+                  value: Visibility.private,
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock, size: 18, color: Colors.red),
+                      const SizedBox(width: 8),
+                      const Text('Private'),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ],
@@ -1025,11 +1029,13 @@ class _HomeScreenState extends State<HomeScreen>
                                       child: Image.network(
                                         'icons/Icon-192.png',
                                         fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) {
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
                                           return Icon(
                                             Icons.explore,
                                             size: 64,
-                                            color: Theme.of(context).primaryColor,
+                                            color:
+                                                Theme.of(context).primaryColor,
                                           );
                                         },
                                       ),
