@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
-import 'package:tracker_frontend/presentation/screens/trip_plans_screen.dart';
-import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
-import 'package:tracker_frontend/presentation/screens/friends_followers_screen.dart';
 
 /// Sidebar navigation for the app
 class AppSidebar extends StatelessWidget {
@@ -60,29 +58,20 @@ class AppSidebar extends StatelessWidget {
         }
         break;
       case 1:
-        // Navigate to Trip Plans (left of home)
-        Navigator.push(
-          context,
-          PageTransitions.slideLeft(const TripPlansScreen()),
-        );
+        // Navigate to Trip Plans (left of home) - requires auth
+        AuthNavigationHelper.navigateToTripPlans(context);
         break;
       case 2:
-        // Navigate to Friends & Followers
-        Navigator.push(
-          context,
-          PageTransitions.slideUp(const FriendsFollowersScreen()),
-        );
+        // Navigate to Friends & Followers - requires auth
+        AuthNavigationHelper.navigateToFriendsFollowers(context);
         break;
       case 3:
         // Achievements coming soon
         UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
         break;
       case 4:
-        // Navigate to Profile (right of home)
-        Navigator.push(
-          context,
-          PageTransitions.slideRight(const ProfileScreen()),
-        );
+        // Navigate to Profile (right of home) - requires auth
+        AuthNavigationHelper.navigateToOwnProfile(context);
         break;
     }
   }

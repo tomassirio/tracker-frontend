@@ -7,12 +7,11 @@ import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
-import 'profile_screen.dart';
 
 /// Screen for managing friends and followers
 class FriendsFollowersScreen extends StatefulWidget {
@@ -218,10 +217,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
   }
 
   void _navigateToProfile() {
-    Navigator.push(
-      context,
-      PageTransitions.slideUp(const ProfileScreen()),
-    );
+    AuthNavigationHelper.navigateToOwnProfile(context);
   }
 
   void _handleSettings() {
@@ -302,10 +298,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
   }
 
   void _navigateToUserProfile(String userId) {
-    Navigator.push(
-      context,
-      PageTransitions.slideUp(ProfileScreen(userId: userId)),
-    );
+    AuthNavigationHelper.navigateToUserProfile(context, userId);
   }
 
   @override

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 
 /// Widget displaying a reply card
 class ReplyCard extends StatelessWidget {
@@ -10,10 +9,7 @@ class ReplyCard extends StatelessWidget {
   const ReplyCard({super.key, required this.reply});
 
   void _navigateToProfile(BuildContext context) {
-    Navigator.push(
-      context,
-      PageTransitions.slideRight(ProfileScreen(userId: reply.userId)),
-    );
+    AuthNavigationHelper.navigateToUserProfile(context, reply.userId);
   }
 
   @override

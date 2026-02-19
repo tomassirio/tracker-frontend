@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
@@ -177,11 +176,9 @@ class TripInfoCard extends StatelessWidget {
                     Expanded(
                       child: InkWell(
                         onTap: () {
-                          Navigator.push(
+                          AuthNavigationHelper.navigateToUserProfile(
                             context,
-                            PageTransitions.slideRight(
-                              ProfileScreen(userId: trip.userId),
-                            ),
+                            trip.userId,
                           );
                         },
                         borderRadius: BorderRadius.circular(20),

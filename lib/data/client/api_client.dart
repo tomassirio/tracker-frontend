@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_endpoints.dart';
-import '../../core/services/navigation_service.dart';
 import '../storage/token_storage.dart';
 
 /// Exception thrown when user needs to authenticate
@@ -363,12 +362,11 @@ class ApiClient {
     }
   }
 
-  /// Handle unauthorized access by redirecting to login
-  /// Throws AuthenticationRedirectException to stop further processing
+  /// Handle unauthorized access
+  /// Throws AuthenticationRedirectException to signal that
+  /// the user needs to authenticate. The UI layer is responsible
+  /// for handling navigation to the auth screen.
   void _handleUnauthorized() {
-    // Navigate to auth screen without showing error
-    NavigationService().navigateToAuth();
-    // Throw a special exception that signals redirect, not an error
     throw AuthenticationRedirectException();
   }
 

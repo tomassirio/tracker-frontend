@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart'
     show TripStatus, Visibility;
+import 'package:tracker_frontend/data/client/api_client.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
@@ -10,6 +11,7 @@ import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/home/enhanced_trip_card.dart';
@@ -17,7 +19,6 @@ import 'package:tracker_frontend/presentation/widgets/home/feed_section_header.d
 import 'package:tracker_frontend/presentation/widgets/home/relationship_badge.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
-import 'profile_screen.dart';
 import 'auth_screen.dart';
 
 /// Redesigned Home screen with personalized feed, visibility badges, and prioritization
@@ -179,6 +180,15 @@ class _HomeScreenState extends State<HomeScreen>
       // Subscribe to WebSocket updates
       _webSocketService.unsubscribeFromAllTrips();
       _webSocketService.subscribeToTrips(_allTrips.map((t) => t.id).toList());
+    } on AuthenticationRedirectException {
+      // Token expired or user not authenticated - treat as guest
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = false;
+          _isLoading = false;
+        });
+        _loadTrips(); // Reload as guest
+      }
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -305,15 +315,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _handleProfile() {
-    Navigator.push(
-      context,
-      PageTransitions.slideRight(const ProfileScreen()),
-    ).then((result) {
-      if (result == true && mounted) {
-        _loadUserInfo();
-        _loadTrips();
-      }
-    });
+    AuthNavigationHelper.navigateToOwnProfile(context);
   }
 
   void _handleSettings() {

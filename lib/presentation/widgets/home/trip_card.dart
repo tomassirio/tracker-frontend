@@ -8,8 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../data/client/google_maps_api_client.dart';
 import '../../../data/client/google_routes_api_client.dart';
-import '../../screens/profile_screen.dart';
-import '../../helpers/page_transitions.dart';
+import '../../helpers/auth_navigation_helper.dart';
 
 class TripCard extends StatefulWidget {
   final Trip trip;
@@ -340,11 +339,9 @@ class _TripCardState extends State<TripCard> {
                         // Username row with avatar
                         InkWell(
                           onTap: () {
-                            Navigator.push(
+                            AuthNavigationHelper.navigateToUserProfile(
                               context,
-                              PageTransitions.slideRight(
-                                ProfileScreen(userId: widget.trip.userId),
-                              ),
+                              widget.trip.userId,
                             );
                           },
                           borderRadius: BorderRadius.circular(4),
