@@ -120,7 +120,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profile = profile;
           _followersCount = profile.followersCount;
           _followingCount = profile.followingCount;
-          _friendsCount = 0; // Friends count not available from profile API
           _isLoadingProfile = false;
         });
 
@@ -691,9 +690,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
         _buildStatCard('Following', _followingCount.toString(),
             _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
-        if (_isViewingOwnProfile)
-          _buildStatCard(
-              'Friends', _friendsCount.toString(), _navigateToFriendsFollowers),
+        _buildStatCard('Friends', _friendsCount.toString(),
+            _isViewingOwnProfile ? _navigateToFriendsFollowers : null),
       ],
     );
   }
