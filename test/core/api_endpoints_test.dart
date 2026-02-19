@@ -5,15 +5,15 @@ void main() {
   group('ApiEndpoints', () {
     group('Base URLs', () {
       test('commandBaseUrl is correct', () {
-        expect(ApiEndpoints.commandBaseUrl, '/api/command');
+        expect(ApiEndpoints.commandBaseUrl, 'http://localhost:8081/api/1');
       });
 
       test('queryBaseUrl is correct', () {
-        expect(ApiEndpoints.queryBaseUrl, '/api/query');
+        expect(ApiEndpoints.queryBaseUrl, 'http://localhost:8082/api/1');
       });
 
       test('authBaseUrl is correct', () {
-        expect(ApiEndpoints.authBaseUrl, '/api/auth');
+        expect(ApiEndpoints.authBaseUrl, 'http://localhost:8083/api/1/auth');
       });
     });
 
