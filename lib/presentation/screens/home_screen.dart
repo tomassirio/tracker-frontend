@@ -844,6 +844,37 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  // Build discover section for guest users without ListView wrapper
+  Widget _buildGuestDiscoverSection() {
+    final filteredTrips = _getFilteredTrips(_discoverTrips);
+
+    if (filteredTrips.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.explore_outlined, size: 64, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'No public trips found',
+                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Check back later for new adventures!',
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _buildTripGrid(filteredTrips, showRelationship: false);
+  }
+
   Widget _buildTripGrid(
     List<Trip> trips, {
     bool showDelete = false,
@@ -1099,7 +1130,8 @@ class _HomeScreenState extends State<HomeScreen>
                                   ],
                                 ),
                                 const SizedBox(height: 24),
-                                _buildDiscoverTab(),
+                                // Build trip grid directly for guest users (no ListView wrapper)
+                                _buildGuestDiscoverSection(),
                               ],
                             ),
                           ),
