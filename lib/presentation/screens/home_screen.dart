@@ -60,10 +60,28 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadUserInfo();
-    _loadTrips();
+    _tabController.addListener(_onTabChanged);
+    _initializeData();
     _searchController.addListener(_applyFilters);
     _initWebSocket();
+  }
+
+  Future<void> _initializeData() async {
+    await _loadUserInfo();
+    await _loadTrips();
+  }
+
+  void _onTabChanged() {
+    // Rebuild to update the filter chips visibility based on selected tab
+    if (mounted) {
+      setState(() {
+        // Reset visibility filter when switching away from My Trips tab
+        // since visibility filter only applies to My Trips
+        if (_tabController.index != 0) {
+          _visibilityFilter = null;
+        }
+      });
+    }
   }
 
   Future<void> _initWebSocket() async {
@@ -104,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen>
     _wsSubscription?.cancel();
     _webSocketService.unsubscribeFromAllTrips();
     _searchController.dispose();
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -389,7 +408,68 @@ class _HomeScreenState extends State<HomeScreen>
           const Spacer(), // Push dropdowns to the right
           // Status filter dropdown
           PopupMenuButton<TripStatus?>(
-            initialValue: _statusFilter,
+            onSelected: (value) {
+              setState(() => _statusFilter = value);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<TripStatus?>(
+                value: null,
+                onTap: () {
+                  // Handle null selection explicitly
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    setState(() => _statusFilter = null);
+                  });
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.all_inclusive, size: 18),
+                    SizedBox(width: 8),
+                    Text('All Status'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<TripStatus?>(
+                value: TripStatus.inProgress,
+                child: Row(
+                  children: [
+                    Icon(Icons.circle, size: 18, color: Colors.green),
+                    const SizedBox(width: 8),
+                    const Text('Live'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<TripStatus?>(
+                value: TripStatus.paused,
+                child: Row(
+                  children: [
+                    Icon(Icons.pause, size: 18, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    const Text('Paused'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<TripStatus?>(
+                value: TripStatus.finished,
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline,
+                        size: 18, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    const Text('Completed'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<TripStatus?>(
+                value: TripStatus.created,
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    const Text('Draft'),
+                  ],
+                ),
+              ),
+            ],
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
@@ -416,68 +496,62 @@ class _HomeScreenState extends State<HomeScreen>
                 ],
               ),
             ),
-            onSelected: (value) {
-              setState(() => _statusFilter = value);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: null,
-                child: Row(
-                  children: [
-                    Icon(Icons.all_inclusive, size: 18),
-                    SizedBox(width: 8),
-                    Text('All Status'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: TripStatus.inProgress,
-                child: Row(
-                  children: [
-                    Icon(Icons.circle, size: 18, color: Colors.green),
-                    const SizedBox(width: 8),
-                    const Text('Live'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: TripStatus.paused,
-                child: Row(
-                  children: [
-                    Icon(Icons.pause, size: 18, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    const Text('Paused'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: TripStatus.finished,
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle_outline,
-                        size: 18, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    const Text('Completed'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: TripStatus.created,
-                child: Row(
-                  children: [
-                    Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    const Text('Draft'),
-                  ],
-                ),
-              ),
-            ],
           ),
           // Only show visibility filter on My Trips tab
           if (_tabController.index == 0) ...[
             const SizedBox(width: 12),
             PopupMenuButton<Visibility?>(
-              initialValue: _visibilityFilter,
+              onSelected: (value) {
+                setState(() => _visibilityFilter = value);
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<Visibility?>(
+                  value: null,
+                  onTap: () {
+                    // Handle null selection explicitly
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      setState(() => _visibilityFilter = null);
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.all_inclusive, size: 18),
+                      SizedBox(width: 8),
+                      Text('All Visibility'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<Visibility?>(
+                  value: Visibility.public,
+                  child: Row(
+                    children: [
+                      Icon(Icons.public, size: 18, color: Colors.green),
+                      const SizedBox(width: 8),
+                      const Text('Public'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<Visibility?>(
+                  value: Visibility.protected,
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock_outline, size: 18, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      const Text('Protected'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<Visibility?>(
+                  value: Visibility.private,
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock, size: 18, color: Colors.red),
+                      const SizedBox(width: 8),
+                      const Text('Private'),
+                    ],
+                  ),
+                ),
+              ],
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -505,51 +579,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ],
                 ),
               ),
-              onSelected: (value) {
-                setState(() => _visibilityFilter = value);
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: null,
-                  child: Row(
-                    children: [
-                      Icon(Icons.all_inclusive, size: 18),
-                      SizedBox(width: 8),
-                      Text('All Visibility'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: Visibility.public,
-                  child: Row(
-                    children: [
-                      Icon(Icons.public, size: 18, color: Colors.green),
-                      const SizedBox(width: 8),
-                      const Text('Public'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: Visibility.protected,
-                  child: Row(
-                    children: [
-                      Icon(Icons.lock_outline, size: 18, color: Colors.orange),
-                      const SizedBox(width: 8),
-                      const Text('Protected'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: Visibility.private,
-                  child: Row(
-                    children: [
-                      Icon(Icons.lock, size: 18, color: Colors.red),
-                      const SizedBox(width: 8),
-                      const Text('Private'),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ],
         ],
