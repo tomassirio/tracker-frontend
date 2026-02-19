@@ -4,12 +4,12 @@ import '../config/api_endpoints_stub.dart'
 /// API endpoint constants
 class ApiEndpoints {
   // Base URLs - read from window.appConfig (injected by Docker) or use defaults
-  // Defaults use relative paths for Kubernetes deployments, falls back to localhost for local dev
+  // Defaults use /api/1 for all services (query, command, auth)
   static String get commandBaseUrl =>
-      getConfigValue('commandBaseUrl', '/api/command');
+      getConfigValue('commandBaseUrl', 'http://localhost:8081/api/1');
   static String get queryBaseUrl =>
-      getConfigValue('queryBaseUrl', '/api/query');
-  static String get authBaseUrl => getConfigValue('authBaseUrl', '/api/auth');
+      getConfigValue('queryBaseUrl', 'http://localhost:8082/api/1');
+  static String get authBaseUrl => getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
 
   // WebSocket base URL - read from window.appConfig or use default
   static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');
@@ -33,8 +33,11 @@ class ApiEndpoints {
   static const String usersFriendRequestsReceived =
       '/users/friends/requests/received';
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
+  // Current user's following and followers
   static const String usersFollowsFollowing = '/users/following';
   static const String usersFollowsFollowers = '/users/followers';
+  
+  // Specific user's following, followers, and friends (for viewing other users' profiles)
   static String userFollowing(String userId) => '/users/$userId/following';
   static String userFollowers(String userId) => '/users/$userId/followers';
   static String userFriends(String userId) => '/users/$userId/friends';
