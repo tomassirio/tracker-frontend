@@ -976,7 +976,8 @@ class _HomeScreenState extends State<HomeScreen>
                             child: Column(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(20),
+                                  width: 120,
+                                  height: 120,
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     shape: BoxShape.circle,
@@ -988,17 +989,21 @@ class _HomeScreenState extends State<HomeScreen>
                                       ),
                                     ],
                                   ),
-                                  child: Image.network(
-                                    'icons/Icon-192.png',
-                                    width: 64,
-                                    height: 64,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.explore,
-                                        size: 64,
-                                        color: Theme.of(context).primaryColor,
-                                      );
-                                    },
+                                  child: ClipOval(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Image.network(
+                                        'icons/Icon-192.png',
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Icon(
+                                            Icons.explore,
+                                            size: 64,
+                                            color: Theme.of(context).primaryColor,
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 24),
@@ -1021,24 +1026,23 @@ class _HomeScreenState extends State<HomeScreen>
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 32),
-                                ElevatedButton.icon(
+                                ElevatedButton(
                                   onPressed: _navigateToAuth,
-                                  icon: const Icon(Icons.login, size: 20),
-                                  label: const Text(
-                                    'Log In',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 32,
+                                      horizontal: 40,
                                       vertical: 16,
                                     ),
                                     elevation: 2,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Log In',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
