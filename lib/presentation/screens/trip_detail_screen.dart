@@ -610,8 +610,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  void _handleToggleTripUpdate() {
-    setState(() => _isTripUpdateCollapsed = !_isTripUpdateCollapsed);
+  /// Handle trip update panel toggle with mobile-specific behavior
+  void _handleToggleTripUpdate(bool isMobile) {
+    setState(() {
+      if (_isTripUpdateCollapsed) {
+        // Opening
+        _isTripUpdateCollapsed = false;
+        if (isMobile) {
+          // Close other panels on mobile
+          _isTripInfoCollapsed = true;
+          _isCommentsCollapsed = true;
+          _isTimelineCollapsed = true;
+        }
+      } else {
+        // Closing
+        _isTripUpdateCollapsed = true;
+      }
+    });
   }
 
   Future<void> _sendManualUpdate(String? message) async {
@@ -899,7 +914,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
-      onToggleTripUpdate: _handleToggleTripUpdate,
+      onToggleTripUpdate: () => _handleToggleTripUpdate(isMobile),
       onRefreshTimeline: _loadTripUpdates,
       onTimelineUpdateTap: _handleTimelineUpdateTap,
       onSortChanged: _changeSortOption,
@@ -927,6 +942,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Close other panels on mobile
           _isCommentsCollapsed = true;
           _isTimelineCollapsed = true;
+          _isTripUpdateCollapsed = true;
         }
       } else {
         // Closing
@@ -945,6 +961,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Close other panels on mobile
           _isTripInfoCollapsed = true;
           _isTimelineCollapsed = true;
+          _isTripUpdateCollapsed = true;
         }
       } else {
         // Closing
@@ -963,6 +980,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Close other panels on mobile
           _isTripInfoCollapsed = true;
           _isCommentsCollapsed = true;
+          _isTripUpdateCollapsed = true;
         }
       } else {
         // Closing

@@ -242,9 +242,9 @@ class _TripCardState extends State<TripCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Map preview section with overlays
-                AspectRatio(
-                  aspectRatio: 16 / 9,
+                Expanded(
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
                       // Map or placeholder
                       if (hasMapData)
@@ -317,8 +317,7 @@ class _TripCardState extends State<TripCard> {
                   ),
                 ),
                 // Trip info section
-                Expanded(
-                  child: Padding(
+                Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +417,6 @@ class _TripCardState extends State<TripCard> {
                         ),
                       ],
                     ),
-                  ),
                 ),
               ],
             ),

@@ -217,9 +217,9 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Static map preview with gradient overlay
-            AspectRatio(
-              aspectRatio: 16 / 9,
+            Expanded(
               child: Stack(
+                fit: StackFit.expand,
                 children: [
                   if (hasMapData)
                     Image.network(
@@ -377,113 +377,111 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
               ),
             ),
             // Trip info section - compact layout
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(
-                      color: Colors.grey[200]!,
-                      width: 1,
-                    ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey[200]!,
+                    width: 1,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Trip title
-                    Text(
-                      widget.trip.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        height: 1.2,
-                        letterSpacing: -0.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Trip title
+                  Text(
+                    widget.trip.name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                      letterSpacing: -0.3,
                     ),
-                    const SizedBox(height: 4),
-                    // Username + metadata in a single compact row
-                    Row(
-                      children: [
-                        // Username
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              AuthNavigationHelper.navigateToUserProfile(
-                                context,
-                                widget.trip.userId,
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(4),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 10,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Username + metadata in a single compact row
+                  Row(
+                    children: [
+                      // Username
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            AuthNavigationHelper.navigateToUserProfile(
+                              context,
+                              widget.trip.userId,
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.person,
+                                  size: 10,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  '@${widget.trip.username}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
                                     color: Theme.of(context).primaryColor,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    '@${widget.trip.username}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        // Metadata
-                        Icon(
-                          Icons.access_time,
-                          size: 11,
+                      ),
+                      // Metadata
+                      Icon(
+                        Icons.access_time,
+                        size: 11,
+                        color: Colors.grey[500],
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        _formatDate(widget.trip.createdAt),
+                        style: TextStyle(
+                          fontSize: 11,
                           color: Colors.grey[500],
                         ),
-                        const SizedBox(width: 3),
-                        Text(
-                          _formatDate(widget.trip.createdAt),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.comment_outlined,
-                          size: 11,
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 11,
+                        color: Colors.grey[500],
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${widget.trip.commentsCount}',
+                        style: TextStyle(
+                          fontSize: 11,
                           color: Colors.grey[500],
                         ),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${widget.trip.commentsCount}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
