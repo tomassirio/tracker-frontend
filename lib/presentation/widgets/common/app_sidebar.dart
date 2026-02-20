@@ -4,6 +4,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Sidebar navigation for the app
 class AppSidebar extends StatelessWidget {
@@ -76,6 +77,29 @@ class AppSidebar extends StatelessWidget {
     }
   }
 
+  Future<void> _launchBuyMeACoffee(BuildContext context) async {
+    final url = Uri.parse('https://buymeacoffee.com/tomassirio');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          UiHelpers.showErrorMessage(
+            context,
+            'Could not open Buy Me a Coffee link',
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        UiHelpers.showErrorMessage(
+          context,
+          'Error opening link: $e',
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = username != null;
@@ -133,13 +157,21 @@ class AppSidebar extends StatelessWidget {
               selected: selectedIndex == 4,
               onTap: () => _handleNavigation(context, 4),
             ),
-            const Divider(),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
                 onSettings?.call();
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.coffee),
+              title: const Text('Buy Me a Coffee'),
+              onTap: () {
+                Navigator.pop(context);
+                _launchBuyMeACoffee(context);
               },
             ),
             ListTile(
@@ -153,6 +185,14 @@ class AppSidebar extends StatelessWidget {
           ],
           if (!isLoggedIn) ...[
             const Divider(),
+            ListTile(
+              leading: const Icon(Icons.coffee),
+              title: const Text('Buy Me a Coffee'),
+              onTap: () {
+                Navigator.pop(context);
+                _launchBuyMeACoffee(context);
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.login),
               title: const Text('Log In'),
