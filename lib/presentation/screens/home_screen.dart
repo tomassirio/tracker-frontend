@@ -94,6 +94,13 @@ class _HomeScreenState extends State<HomeScreen>
         // since visibility filter only applies to My Trips
         if (_tabController.index != 0) {
           _visibilityFilter = null;
+          // Reset status filter if current filter is not valid for Feed/Discover
+          // (only inProgress and paused are shown in those tabs)
+          if (_statusFilter != null &&
+              _statusFilter != TripStatus.inProgress &&
+              _statusFilter != TripStatus.paused) {
+            _statusFilter = null;
+          }
         }
       });
     }
@@ -214,7 +221,12 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _categorizeTrips() {
     if (!_isLoggedIn) {
-      _discoverTrips = List.from(_allTrips);
+      // Guest users only see in-progress and paused trips
+      _discoverTrips = _allTrips
+          .where((t) =>
+              t.status == TripStatus.inProgress ||
+              t.status == TripStatus.paused)
+          .toList();
       _feedTrips = [];
       _applyFilters();
       return;
@@ -227,6 +239,11 @@ class _HomeScreenState extends State<HomeScreen>
     for (final trip in _allTrips) {
       // Skip user's own trips from feed/discover
       if (trip.userId == _userId) continue;
+
+      // Only show in-progress and paused trips in feed/discover
+      final isActiveOrPaused = trip.status == TripStatus.inProgress ||
+          trip.status == TripStatus.paused;
+      if (!isActiveOrPaused) continue;
 
       final isFriend = _friendIds.contains(trip.userId);
       final isFollowing = _followingIds.contains(trip.userId);
@@ -412,6 +429,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildFilterChips() {
+    final bool isMyTripsTab = _tabController.index == 0;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -465,27 +484,30 @@ class _HomeScreenState extends State<HomeScreen>
                   ],
                 ),
               ),
-              PopupMenuItem<TripStatus?>(
-                value: TripStatus.finished,
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle_outline,
-                        size: 18, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    const Text('Completed'),
-                  ],
+              // Only show Completed and Draft options on My Trips tab
+              if (isMyTripsTab) ...[
+                PopupMenuItem<TripStatus?>(
+                  value: TripStatus.finished,
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          size: 18, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      const Text('Completed'),
+                    ],
+                  ),
                 ),
-              ),
-              PopupMenuItem<TripStatus?>(
-                value: TripStatus.created,
-                child: Row(
-                  children: [
-                    Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    const Text('Draft'),
-                  ],
+                PopupMenuItem<TripStatus?>(
+                  value: TripStatus.created,
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      const Text('Draft'),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
