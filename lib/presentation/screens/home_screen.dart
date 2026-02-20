@@ -221,12 +221,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _categorizeTrips() {
     if (!_isLoggedIn) {
-      // Guest users only see in-progress and paused trips
-      _discoverTrips = _allTrips
-          .where((t) =>
-              t.status == TripStatus.inProgress ||
-              t.status == TripStatus.paused)
-          .toList();
+      // Guest users see all public trips
+      _discoverTrips = List.from(_allTrips);
       _feedTrips = [];
       _applyFilters();
       return;
