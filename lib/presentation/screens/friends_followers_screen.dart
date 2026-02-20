@@ -416,7 +416,8 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
               ),
               child: Text(
                 '$count',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ),
           ],

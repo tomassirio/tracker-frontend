@@ -318,111 +318,177 @@ class _TripCardState extends State<TripCard> {
                 ),
                 // Trip info section
                 Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Trip title
-                        Text(
-                          widget.trip.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: WandererTheme.textPrimary,
-                            letterSpacing: -0.3,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        // Username + metadata in a single compact row
-                        Row(
-                          children: [
-                            // Username
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  AuthNavigationHelper.navigateToUserProfile(
-                                    context,
-                                    widget.trip.userId,
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(4),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 9,
-                                      backgroundColor: WandererTheme
-                                          .primaryOrange
-                                          .withOpacity(0.15),
-                                      child: Text(
-                                        widget.trip.username.isNotEmpty
-                                            ? widget.trip.username[0]
-                                                .toUpperCase()
-                                            : '?',
-                                        style: const TextStyle(
-                                          color: WandererTheme.primaryOrange,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Flexible(
-                                      child: Text(
-                                        '@${widget.trip.username}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: WandererTheme.textSecondary,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Metadata
-                            Icon(
-                              Icons.access_time,
-                              size: 11,
-                              color: WandererTheme.textTertiary,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              _formatDate(widget.trip.createdAt),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: WandererTheme.textTertiary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              size: 11,
-                              color: WandererTheme.textTertiary,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '${widget.trip.commentsCount}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: WandererTheme.textTertiary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  padding: const EdgeInsets.all(12),
+                  child: _buildInfoContent(context),
                 ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoContent(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
+    if (isMobile) {
+      // Mobile: compact 2-row layout
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            widget.trip.name,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: WandererTheme.textPrimary,
+              letterSpacing: -0.3,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => AuthNavigationHelper.navigateToUserProfile(
+                      context, widget.trip.userId),
+                  borderRadius: BorderRadius.circular(4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        radius: 8,
+                        backgroundColor:
+                            WandererTheme.primaryOrange.withOpacity(0.15),
+                        child: Text(
+                          widget.trip.username.isNotEmpty
+                              ? widget.trip.username[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: WandererTheme.primaryOrange,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          '@${widget.trip.username}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: WandererTheme.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.access_time,
+                  size: 11, color: WandererTheme.textTertiary),
+              const SizedBox(width: 3),
+              Text(_formatDate(widget.trip.createdAt),
+                  style: TextStyle(
+                      fontSize: 11, color: WandererTheme.textTertiary)),
+              const SizedBox(width: 8),
+              Icon(Icons.chat_bubble_outline,
+                  size: 11, color: WandererTheme.textTertiary),
+              const SizedBox(width: 3),
+              Text('${widget.trip.commentsCount}',
+                  style: TextStyle(
+                      fontSize: 11, color: WandererTheme.textTertiary)),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // Web/desktop: original 3-row layout
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.trip.name,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: WandererTheme.textPrimary,
+            letterSpacing: -0.3,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: () => AuthNavigationHelper.navigateToUserProfile(
+              context, widget.trip.userId),
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 10,
+                  backgroundColor:
+                      WandererTheme.primaryOrange.withOpacity(0.15),
+                  child: Text(
+                    widget.trip.username.isNotEmpty
+                        ? widget.trip.username[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                      color: WandererTheme.primaryOrange,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    '@${widget.trip.username}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: WandererTheme.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(Icons.access_time,
+                size: 12, color: WandererTheme.textTertiary),
+            const SizedBox(width: 4),
+            Text(
+              _formatDate(widget.trip.createdAt),
+              style: TextStyle(fontSize: 11, color: WandererTheme.textTertiary),
+            ),
+            const SizedBox(width: 12),
+            Icon(Icons.chat_bubble_outline,
+                size: 12, color: WandererTheme.textTertiary),
+            const SizedBox(width: 4),
+            Text(
+              '${widget.trip.commentsCount}',
+              style: TextStyle(fontSize: 11, color: WandererTheme.textTertiary),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

@@ -80,7 +80,8 @@ class AppSidebar extends StatelessWidget {
   Future<void> _launchBuyMeACoffee(BuildContext context) async {
     final url = Uri.parse('https://buymeacoffee.com/tomassirio');
     try {
-      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched =
+          await launchUrl(url, mode: LaunchMode.externalApplication);
       if (!launched && context.mounted) {
         UiHelpers.showErrorMessage(
           context,

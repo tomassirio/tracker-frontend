@@ -946,9 +946,9 @@ class _HomeScreenState extends State<HomeScreen>
         if (crossAxisCount == 1) {
           childAspectRatio = 1.3; // Wider cards on mobile to avoid stretching
         } else if (crossAxisCount == 2) {
-          childAspectRatio = 0.85;
+          childAspectRatio = 1.2;
         } else {
-          childAspectRatio = 0.9;
+          childAspectRatio = 1.15;
         }
 
         return GridView.builder(
