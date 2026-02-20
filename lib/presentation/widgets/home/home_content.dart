@@ -307,9 +307,9 @@ class HomeContent extends StatelessWidget {
     if (crossAxisCount == 1) {
       childAspectRatio = 1.3; // Wider cards on mobile to avoid stretching
     } else if (crossAxisCount == 2) {
-      childAspectRatio = 1.1;
+      childAspectRatio = 0.85;
     } else {
-      childAspectRatio = 1.15;
+      childAspectRatio = 0.9;
     }
 
     return GridView.builder(
