@@ -360,29 +360,27 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
       children: [
         Container(
           color: Theme.of(context).primaryColor,
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: Colors.white,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            tabs: [
-              Tab(
-                text: 'Friends (${_friends.length})',
-                icon: const Icon(Icons.people),
-              ),
-              Tab(
-                text: 'Followers (${_followers.length})',
-                icon: const Icon(Icons.person_add),
-              ),
-              Tab(
-                text: 'Following (${_following.length})',
-                icon: const Icon(Icons.person_outline),
-              ),
-              Tab(
-                text: 'Requests (${_receivedRequests.length})',
-                icon: const Icon(Icons.notifications),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 500;
+              return TabBar(
+                controller: _tabController,
+                indicatorColor: Colors.white,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                isScrollable: false,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 2),
+                tabs: [
+                  _buildTab(Icons.people, 'Friends', _friends.length, isNarrow),
+                  _buildTab(Icons.person_add, 'Followers', _followers.length,
+                      isNarrow),
+                  _buildTab(Icons.person_outline, 'Following',
+                      _following.length, isNarrow),
+                  _buildTab(Icons.notifications, 'Requests',
+                      _receivedRequests.length, isNarrow),
+                ],
+              );
+            },
           ),
         ),
         Expanded(
@@ -397,6 +395,39 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTab(IconData icon, String label, int count, bool isNarrow) {
+    if (isNarrow) {
+      // Mobile: icon + count badge, no text label to save space
+      return Tab(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style:
+                    const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    // Wide screen: icon + full label with count
+    return Tab(
+      text: '$label ($count)',
+      icon: Icon(icon),
     );
   }
 

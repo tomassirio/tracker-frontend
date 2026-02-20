@@ -49,5 +49,10 @@
 	<string>This app needs access to your location to track your trips and add location updates.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to your location to track your trips and add location updates.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
 </dict>
 </plist>

@@ -728,20 +728,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatCard(String label, String value, VoidCallback? onTap) {
     final card = Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         child: Column(
           children: [
             Text(
               value,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                maxLines: 1,
+              ),
             ),
           ],
         ),
