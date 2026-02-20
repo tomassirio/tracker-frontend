@@ -376,112 +376,114 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                 ],
               ),
             ),
-            // Trip info section with better spacing and hierarchy
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey[200]!,
-                    width: 1,
+            // Trip info section - compact layout
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.grey[200]!,
+                      width: 1,
+                    ),
                   ),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Trip title with better typography
-                  Text(
-                    widget.trip.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      height: 1.3,
-                      letterSpacing: -0.5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Trip title
+                    Text(
+                      widget.trip.name,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                        letterSpacing: -0.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  // Username with avatar-style icon
-                  InkWell(
-                    onTap: () {
-                      AuthNavigationHelper.navigateToUserProfile(
-                        context,
-                        widget.trip.userId,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.person,
-                              size: 14,
-                              color: Theme.of(context).primaryColor,
+                    const SizedBox(height: 4),
+                    // Username + metadata in a single compact row
+                    Row(
+                      children: [
+                        // Username
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              AuthNavigationHelper.navigateToUserProfile(
+                                context,
+                                widget.trip.userId,
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 10,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    '@${widget.trip.username}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '@${widget.trip.username}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).primaryColor,
-                            ),
+                        ),
+                        // Metadata
+                        Icon(
+                          Icons.access_time,
+                          size: 11,
+                          color: Colors.grey[500],
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          _formatDate(widget.trip.createdAt),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.comment_outlined,
+                          size: 11,
+                          color: Colors.grey[500],
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${widget.trip.commentsCount}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Metadata row with icons
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDate(widget.trip.createdAt),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        Icons.comment_outlined,
-                        size: 14,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.trip.commentsCount}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

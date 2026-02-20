@@ -9,7 +9,8 @@ class ApiEndpoints {
       getConfigValue('commandBaseUrl', 'http://localhost:8081/api/1');
   static String get queryBaseUrl =>
       getConfigValue('queryBaseUrl', 'http://localhost:8082/api/1');
-  static String get authBaseUrl => getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
+  static String get authBaseUrl =>
+      getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
 
   // WebSocket base URL - read from window.appConfig or use default
   static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');
@@ -29,16 +30,16 @@ class ApiEndpoints {
   static const String usersMe = '/users/me';
   static String userById(String userId) => '/users/$userId';
   static String userByUsername(String username) => '/users/username/$username';
-  
+
   // Current user's friends, following, and followers (use /me/ endpoints)
   static const String usersMeFriends = '/users/me/friends';
   static const String usersMeFollowing = '/users/me/following';
   static const String usersMeFollowers = '/users/me/followers';
-  
+
   static const String usersFriendRequestsReceived =
       '/users/friends/requests/received';
   static const String usersFriendRequestsSent = '/users/friends/requests/sent';
-  
+
   // Specific user's following, followers, and friends (for viewing other users' profiles)
   static String userFollowing(String userId) => '/users/$userId/following';
   static String userFollowers(String userId) => '/users/$userId/followers';

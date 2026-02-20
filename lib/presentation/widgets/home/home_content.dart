@@ -302,12 +302,22 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildTripGrid(List<Trip> trips, int crossAxisCount) {
+    // Adjust aspect ratio based on column count for better responsiveness
+    final double childAspectRatio;
+    if (crossAxisCount == 1) {
+      childAspectRatio = 1.3; // Wider cards on mobile to avoid stretching
+    } else if (crossAxisCount == 2) {
+      childAspectRatio = 0.95;
+    } else {
+      childAspectRatio = 1.0;
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: 1.1, // Adjusted to prevent overflow
+        childAspectRatio: childAspectRatio,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),

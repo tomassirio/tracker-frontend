@@ -941,12 +941,22 @@ class _HomeScreenState extends State<HomeScreen>
           crossAxisCount = 2;
         }
 
+        // Adjust aspect ratio based on column count for better responsiveness
+        final double childAspectRatio;
+        if (crossAxisCount == 1) {
+          childAspectRatio = 1.3; // Wider cards on mobile to avoid stretching
+        } else if (crossAxisCount == 2) {
+          childAspectRatio = 0.95;
+        } else {
+          childAspectRatio = 1.0;
+        }
+
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: 1.2,
+            childAspectRatio: childAspectRatio,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
           ),

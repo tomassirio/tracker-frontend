@@ -319,9 +319,10 @@ class _TripCardState extends State<TripCard> {
                 // Trip info section
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Trip title
                         Text(
@@ -335,62 +336,63 @@ class _TripCardState extends State<TripCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
-                        // Username row with avatar
-                        InkWell(
-                          onTap: () {
-                            AuthNavigationHelper.navigateToUserProfile(
-                              context,
-                              widget.trip.userId,
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(4),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CircleAvatar(
-                                  radius: 10,
-                                  backgroundColor: WandererTheme.primaryOrange
-                                      .withOpacity(0.15),
-                                  child: Text(
-                                    widget.trip.username.isNotEmpty
-                                        ? widget.trip.username[0].toUpperCase()
-                                        : '?',
-                                    style: const TextStyle(
-                                      color: WandererTheme.primaryOrange,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    '@${widget.trip.username}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: WandererTheme.textSecondary,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        // Metadata row
+                        const SizedBox(height: 4),
+                        // Username + metadata in a single compact row
                         Row(
                           children: [
+                            // Username
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  AuthNavigationHelper.navigateToUserProfile(
+                                    context,
+                                    widget.trip.userId,
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(4),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 9,
+                                      backgroundColor: WandererTheme
+                                          .primaryOrange
+                                          .withOpacity(0.15),
+                                      child: Text(
+                                        widget.trip.username.isNotEmpty
+                                            ? widget.trip.username[0]
+                                                .toUpperCase()
+                                            : '?',
+                                        style: const TextStyle(
+                                          color: WandererTheme.primaryOrange,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        '@${widget.trip.username}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: WandererTheme.textSecondary,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Metadata
                             Icon(
                               Icons.access_time,
-                              size: 12,
+                              size: 11,
                               color: WandererTheme.textTertiary,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 3),
                             Text(
                               _formatDate(widget.trip.createdAt),
                               style: TextStyle(
@@ -398,13 +400,13 @@ class _TripCardState extends State<TripCard> {
                                 color: WandererTheme.textTertiary,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 8),
                             Icon(
                               Icons.chat_bubble_outline,
-                              size: 12,
+                              size: 11,
                               color: WandererTheme.textTertiary,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 3),
                             Text(
                               '${widget.trip.commentsCount}',
                               style: TextStyle(

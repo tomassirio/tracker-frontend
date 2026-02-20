@@ -93,13 +93,17 @@ void main() {
       });
 
       test('userFollowing generates correct path', () {
-        expect(ApiEndpoints.userFollowing('user123'), '/users/user123/following');
-        expect(ApiEndpoints.userFollowing('abc-def'), '/users/abc-def/following');
+        expect(
+            ApiEndpoints.userFollowing('user123'), '/users/user123/following');
+        expect(
+            ApiEndpoints.userFollowing('abc-def'), '/users/abc-def/following');
       });
 
       test('userFollowers generates correct path', () {
-        expect(ApiEndpoints.userFollowers('user123'), '/users/user123/followers');
-        expect(ApiEndpoints.userFollowers('abc-def'), '/users/abc-def/followers');
+        expect(
+            ApiEndpoints.userFollowers('user123'), '/users/user123/followers');
+        expect(
+            ApiEndpoints.userFollowers('abc-def'), '/users/abc-def/followers');
       });
     });
 
