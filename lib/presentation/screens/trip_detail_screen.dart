@@ -297,6 +297,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final screenWidth = MediaQuery.of(context).size.width;
       final isMobile = screenWidth < 600;
 
+      debugPrint('[Init] didChangeDependencies - screenWidth=$screenWidth, isMobile=$isMobile');
+
       if (isMobile) {
         // On mobile, collapse all panels by default so map is visible
         // Use post-frame callback to ensure setState works properly
@@ -306,6 +308,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               _isTimelineCollapsed = true;
               _isCommentsCollapsed = true;
               _isTripInfoCollapsed = true;
+              debugPrint('[Init] Post-frame callback - collapsed all panels on mobile');
+              debugPrint('[Init] isCommentsCollapsed=$_isCommentsCollapsed, isTripInfoCollapsed=$_isTripInfoCollapsed, isTimelineCollapsed=$_isTimelineCollapsed, isTripUpdateCollapsed=$_isTripUpdateCollapsed');
             });
           }
         });
@@ -621,10 +625,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isCommentsCollapsed = true;
           _isTimelineCollapsed = true;
+          debugPrint('[TripUpdate] Opening on mobile - collapsed all other panels');
+          debugPrint('[TripUpdate] isCommentsCollapsed=$_isCommentsCollapsed, isTripInfoCollapsed=$_isTripInfoCollapsed, isTimelineCollapsed=$_isTimelineCollapsed');
+        } else {
+          debugPrint('[TripUpdate] Opening on desktop - keeping other panels as is');
         }
       } else {
         // Closing
         _isTripUpdateCollapsed = true;
+        debugPrint('[TripUpdate] Closing');
       }
     });
   }
@@ -837,6 +846,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           final strategy =
               TripDetailLayoutStrategyFactory.getStrategy(constraints.maxWidth);
 
+          debugPrint('[Build] LayoutBuilder - constraints.maxWidth=${constraints.maxWidth}, isMobile=$isMobile');
+
           // Create layout data with all state and callbacks
           final layoutData = _createLayoutData(isMobile);
 
@@ -962,10 +973,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isTimelineCollapsed = true;
           _isTripUpdateCollapsed = true;
+          debugPrint('[Comments] Opening on mobile - collapsed all other panels');
+          debugPrint('[Comments] isTripUpdateCollapsed=$_isTripUpdateCollapsed, isTripInfoCollapsed=$_isTripInfoCollapsed, isTimelineCollapsed=$_isTimelineCollapsed');
+        } else {
+          debugPrint('[Comments] Opening on desktop - keeping other panels as is');
         }
       } else {
         // Closing
         _isCommentsCollapsed = true;
+        debugPrint('[Comments] Closing');
       }
     });
   }
