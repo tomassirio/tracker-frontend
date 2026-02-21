@@ -13,3 +13,6 @@ export 'domain/planned_location.dart';
 export 'requests/create_trip_plan_request.dart';
 export 'requests/create_trip_plan_backend_request.dart';
 export 'requests/update_trip_plan_request.dart';
+export 'domain/trip_promotion.dart';
+export 'requests/promote_trip_request.dart';
+export 'requests/update_promotion_request.dart';

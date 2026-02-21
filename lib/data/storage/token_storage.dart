@@ -8,6 +8,7 @@ class TokenStorage {
   static const String _expiresAtKey = 'expires_at';
   static const String _userIdKey = 'userId';
   static const String _usernameKey = 'username';
+  static const String _isAdminKey = 'isAdmin';
 
   /// Save authentication tokens
   Future<void> saveTokens({
@@ -17,6 +18,7 @@ class TokenStorage {
     required int expiresIn,
     String? userId,
     String? username,
+    bool isAdmin = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final expiresAt =
@@ -34,6 +36,7 @@ class TokenStorage {
     if (username != null) {
       await prefs.setString(_usernameKey, username);
     }
+    await prefs.setBool(_isAdminKey, isAdmin);
   }
 
   /// Get access token
@@ -66,6 +69,12 @@ class TokenStorage {
     return prefs.getString(_usernameKey);
   }
 
+  /// Get admin status
+  Future<bool> isAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isAdminKey) ?? false;
+  }
+
   /// Check if access token is expired
   Future<bool> isAccessTokenExpired() async {
     final prefs = await SharedPreferences.getInstance();
@@ -92,5 +101,6 @@ class TokenStorage {
     await prefs.remove(_expiresAtKey);
     await prefs.remove(_userIdKey);
     await prefs.remove(_usernameKey);
+    await prefs.remove(_isAdminKey);
   }
 }
