@@ -24,6 +24,7 @@ class FriendsFollowersScreen extends StatefulWidget {
 class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     with SingleTickerProviderStateMixin {
   final UserService _userService = UserService();
+  final AuthService _authService = AuthService();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
 
@@ -45,6 +46,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
   String? _error;
   UserProfile? _currentUser;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   final int _selectedSidebarIndex = 2; // Friends is index 2
 
   @override
@@ -135,9 +137,11 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
     try {
       // Check if logged in
       final profile = await _userService.getMyProfile();
+      final isAdmin = await _authService.isAdmin();
       setState(() {
         _currentUser = profile;
         _isLoggedIn = true;
+        _isAdmin = isAdmin;
       });
 
       // Load all data in parallel
@@ -322,6 +326,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
         selectedIndex: _selectedSidebarIndex,
         onLogout: _handleLogout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: _buildBody(),
     );

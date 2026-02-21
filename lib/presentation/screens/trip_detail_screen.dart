@@ -58,6 +58,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoadingComments = false;
   bool _isAddingComment = false;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   bool _isChangingStatus = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
@@ -327,10 +328,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _loadUserInfo() async {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
+    final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
+      _isAdmin = isAdmin;
     });
 
     // If logged in and viewing another user's trip, check social status
@@ -828,6 +831,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
