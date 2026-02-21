@@ -104,6 +104,11 @@ class TripDetailRepository {
     return await _authService.getCurrentUserId();
   }
 
+  /// Checks if current user is admin
+  Future<bool> isAdmin() async {
+    return await _authService.isAdmin();
+  }
+
   /// Logs out the current user
   Future<void> logout() async {
     await _authService.logout();

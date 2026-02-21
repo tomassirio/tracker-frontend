@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   final int _selectedSidebarIndex = 0;
 
   // Filter states
@@ -154,11 +155,13 @@ class _HomeScreenState extends State<HomeScreen>
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
     final isLoggedIn = await _repository.isLoggedIn();
+    final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
       _isLoggedIn = isLoggedIn;
+      _isAdmin = isAdmin;
     });
   }
 
@@ -1033,6 +1036,7 @@ class _HomeScreenState extends State<HomeScreen>
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

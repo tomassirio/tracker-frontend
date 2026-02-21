@@ -91,6 +91,13 @@ class ApiEndpoints {
   static String commentReactions(String commentId) =>
       '/comments/$commentId/reactions';
 
+  // Trip Promotion Command endpoints (use commandBaseUrl, ADMIN only)
+  static String tripPromote(String tripId) => '/trips/$tripId/promote';
+
+  // Trip Promotion Query endpoints (use queryBaseUrl, PUBLIC)
+  static const String promotedTrips = '/promoted-trips';
+  static String tripPromotion(String tripId) => '/trips/$tripId/promotion';
+
   // WebSocket topics
   static String wsTripTopic(String tripId) => '/topic/trips/$tripId';
   static String wsUserTopic(String userId) => '/topic/users/$userId';

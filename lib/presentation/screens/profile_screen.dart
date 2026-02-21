@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingTrips = false;
   String? _error;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   bool _hasSentFriendRequest =
       false; // Track if friend request was sent locally
   bool _isAlreadyFriends = false; // Track if already friends with user
@@ -78,8 +79,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final isLoggedIn = await _repository.isLoggedIn();
+      final isAdmin = await _repository.isAdmin();
       setState(() {
         _isLoggedIn = isLoggedIn;
+        _isAdmin = isAdmin;
       });
 
       // If viewing another user's profile and not logged in, redirect to auth
@@ -543,6 +546,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: _buildBody(),
     );

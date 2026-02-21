@@ -27,6 +27,7 @@ class AuthService {
       refreshToken: authResponse.refreshToken,
       tokenType: authResponse.tokenType,
       expiresIn: authResponse.expiresIn,
+      isAdmin: authResponse.isAdmin,
     );
 
     // Fetch user profile to get userId and username
@@ -41,6 +42,7 @@ class AuthService {
         expiresIn: authResponse.expiresIn,
         userId: profile.id,
         username: profile.username,
+        isAdmin: authResponse.isAdmin,
       );
     } catch (e) {
       // If profile fetch fails, continue with just tokens
@@ -60,6 +62,7 @@ class AuthService {
       refreshToken: authResponse.refreshToken,
       tokenType: authResponse.tokenType,
       expiresIn: authResponse.expiresIn,
+      isAdmin: authResponse.isAdmin,
     );
 
     // Fetch user profile to get userId and username
@@ -74,6 +77,7 @@ class AuthService {
         expiresIn: authResponse.expiresIn,
         userId: profile.id,
         username: profile.username,
+        isAdmin: authResponse.isAdmin,
       );
     } catch (e) {
       // If profile fetch fails, continue with just tokens
@@ -120,6 +124,11 @@ class AuthService {
   /// Get current username
   Future<String?> getCurrentUsername() async {
     return await _tokenStorage.getUsername();
+  }
+
+  /// Check if current user is admin
+  Future<bool> isAdmin() async {
+    return await _tokenStorage.isAdmin();
   }
 
   /// Refresh access token using refresh token

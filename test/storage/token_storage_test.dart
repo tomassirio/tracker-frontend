@@ -23,6 +23,7 @@ void main() {
           expiresIn: 3600,
           userId: 'user-123',
           username: 'testuser',
+          isAdmin: true,
         );
 
         final accessToken = await tokenStorage.getAccessToken();
@@ -30,12 +31,14 @@ void main() {
         final tokenType = await tokenStorage.getTokenType();
         final userId = await tokenStorage.getUserId();
         final username = await tokenStorage.getUsername();
+        final isAdmin = await tokenStorage.isAdmin();
 
         expect(accessToken, 'access-token-123');
         expect(refreshToken, 'refresh-token-456');
         expect(tokenType, 'Bearer');
         expect(userId, 'user-123');
         expect(username, 'testuser');
+        expect(isAdmin, true);
       });
 
       test('saves tokens without optional user info', () async {
@@ -49,10 +52,12 @@ void main() {
         final accessToken = await tokenStorage.getAccessToken();
         final userId = await tokenStorage.getUserId();
         final username = await tokenStorage.getUsername();
+        final isAdmin = await tokenStorage.isAdmin();
 
         expect(accessToken, 'access-token');
         expect(userId, null);
         expect(username, null);
+        expect(isAdmin, false);
       });
 
       test('overwrites existing tokens', () async {
@@ -209,6 +214,42 @@ void main() {
       });
     });
 
+    group('isAdmin', () {
+      test('returns true when user is admin', () async {
+        await tokenStorage.saveTokens(
+          accessToken: 'access',
+          refreshToken: 'refresh',
+          tokenType: 'Bearer',
+          expiresIn: 3600,
+          isAdmin: true,
+        );
+
+        final result = await tokenStorage.isAdmin();
+
+        expect(result, true);
+      });
+
+      test('returns false when user is not admin', () async {
+        await tokenStorage.saveTokens(
+          accessToken: 'access',
+          refreshToken: 'refresh',
+          tokenType: 'Bearer',
+          expiresIn: 3600,
+          isAdmin: false,
+        );
+
+        final result = await tokenStorage.isAdmin();
+
+        expect(result, false);
+      });
+
+      test('returns false when no admin status saved', () async {
+        final result = await tokenStorage.isAdmin();
+
+        expect(result, false);
+      });
+    });
+
     group('isAccessTokenExpired', () {
       test('returns false when token is not expired', () async {
         await tokenStorage.saveTokens(
@@ -310,6 +351,7 @@ void main() {
           expiresIn: 3600,
           userId: 'user-123',
           username: 'testuser',
+          isAdmin: true,
         );
 
         await tokenStorage.clearTokens();
@@ -319,12 +361,14 @@ void main() {
         final tokenType = await tokenStorage.getTokenType();
         final userId = await tokenStorage.getUserId();
         final username = await tokenStorage.getUsername();
+        final isAdmin = await tokenStorage.isAdmin();
 
         expect(accessToken, null);
         expect(refreshToken, null);
         expect(tokenType, null);
         expect(userId, null);
         expect(username, null);
+        expect(isAdmin, false);
       });
 
       test('can be called multiple times safely', () async {
