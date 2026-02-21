@@ -616,26 +616,31 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// Handle trip update panel toggle with mobile-specific behavior
   void _handleToggleTripUpdate(bool isMobile) {
-    setState(() {
-      if (_isTripUpdateCollapsed) {
-        // Opening
-        _isTripUpdateCollapsed = false;
-        if (isMobile) {
-          // Close other panels on mobile
-          _isTripInfoCollapsed = true;
-          _isCommentsCollapsed = true;
-          _isTimelineCollapsed = true;
-          debugPrint('[TripUpdate] Opening on mobile - collapsed all other panels');
-          debugPrint('[TripUpdate] isCommentsCollapsed=$_isCommentsCollapsed, isTripInfoCollapsed=$_isTripInfoCollapsed, isTimelineCollapsed=$_isTimelineCollapsed');
+    try {
+      setState(() {
+        if (_isTripUpdateCollapsed) {
+          // Opening
+          _isTripUpdateCollapsed = false;
+          if (isMobile) {
+            // Close other panels on mobile
+            _isTripInfoCollapsed = true;
+            _isCommentsCollapsed = true;
+            _isTimelineCollapsed = true;
+            debugPrint('[TripUpdate] Opening on mobile - collapsed all other panels');
+            debugPrint('[TripUpdate] isCommentsCollapsed=$_isCommentsCollapsed, isTripInfoCollapsed=$_isTripInfoCollapsed, isTimelineCollapsed=$_isTimelineCollapsed');
+          } else {
+            debugPrint('[TripUpdate] Opening on desktop - keeping other panels as is');
+          }
         } else {
-          debugPrint('[TripUpdate] Opening on desktop - keeping other panels as is');
+          // Closing
+          _isTripUpdateCollapsed = true;
+          debugPrint('[TripUpdate] Closing');
         }
-      } else {
-        // Closing
-        _isTripUpdateCollapsed = true;
-        debugPrint('[TripUpdate] Closing');
-      }
-    });
+      });
+    } catch (e, stack) {
+      debugPrint('[TripUpdate] ERROR in setState: $e');
+      debugPrint('[TripUpdate] Stack trace: $stack');
+    }
   }
 
   Future<void> _sendManualUpdate(String? message) async {
@@ -897,6 +902,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// Creates the layout data object with all state and callbacks
   TripDetailLayoutData _createLayoutData(bool isMobile) {
+    debugPrint('[CreateLayoutData] isMobile=$isMobile, isCommentsCollapsed=$_isCommentsCollapsed, isTripUpdateCollapsed=$_isTripUpdateCollapsed, isTripInfoCollapsed=$_isTripInfoCollapsed, isTimelineCollapsed=$_isTimelineCollapsed');
+    
     return TripDetailLayoutData(
       trip: _trip,
       comments: _comments,
