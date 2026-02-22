@@ -243,9 +243,12 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WandererAppBar(
-        title: 'Trip Promotion Management',
-        showBackButton: true,
-        onBackPressed: () => Navigator.pop(context),
+        searchController: _searchController,
+        isLoggedIn: _isLoggedIn,
+        username: _username,
+        userId: _userId,
+        onLogout: _handleLogout,
+        onSettings: _handleSettings,
       ),
       drawer: AppSidebar(
         username: _username,

@@ -6,7 +6,6 @@ class AuthResponse {
   final int expiresIn; // seconds until token expires
   final String? userId;
   final String? username;
-  final bool isAdmin;
 
   AuthResponse({
     required this.accessToken,
@@ -15,7 +14,6 @@ class AuthResponse {
     required this.expiresIn,
     this.userId,
     this.username,
-    this.isAdmin = false,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
@@ -31,7 +29,6 @@ class AuthResponse {
               3600,
       userId: json['userId'] ?? json['user_id'],
       username: json['username'],
-      isAdmin: json['isAdmin'] ?? json['is_admin'] ?? false,
     );
   }
 
@@ -42,6 +39,5 @@ class AuthResponse {
         'expires_in': expiresIn,
         if (userId != null) 'user_id': userId,
         if (username != null) 'username': username,
-        'is_admin': isAdmin,
       };
 }

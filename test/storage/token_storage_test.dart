@@ -1,6 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tracker_frontend/data/storage/token_storage.dart';
+
+/// Creates a fake JWT token with the given roles in its payload.
+String _createFakeJwt({List<String> roles = const []}) {
+  final header = base64Url.encode(utf8.encode('{"alg":"HS256","typ":"JWT"}'));
+  final payload = base64Url.encode(utf8.encode(jsonEncode({'roles': roles})));
+  final signature = base64Url.encode(utf8.encode('fake-signature'));
+  return '$header.$payload.$signature';
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -16,14 +26,14 @@ void main() {
 
     group('saveTokens', () {
       test('saves all token data correctly', () async {
+        final adminJwt = _createFakeJwt(roles: ['ADMIN']);
         await tokenStorage.saveTokens(
-          accessToken: 'access-token-123',
+          accessToken: adminJwt,
           refreshToken: 'refresh-token-456',
           tokenType: 'Bearer',
           expiresIn: 3600,
           userId: 'user-123',
           username: 'testuser',
-          isAdmin: true,
         );
 
         final accessToken = await tokenStorage.getAccessToken();
@@ -33,7 +43,7 @@ void main() {
         final username = await tokenStorage.getUsername();
         final isAdmin = await tokenStorage.isAdmin();
 
-        expect(accessToken, 'access-token-123');
+        expect(accessToken, adminJwt);
         expect(refreshToken, 'refresh-token-456');
         expect(tokenType, 'Bearer');
         expect(userId, 'user-123');
@@ -42,8 +52,9 @@ void main() {
       });
 
       test('saves tokens without optional user info', () async {
+        final userJwt = _createFakeJwt(roles: ['USER']);
         await tokenStorage.saveTokens(
-          accessToken: 'access-token',
+          accessToken: userJwt,
           refreshToken: 'refresh-token',
           tokenType: 'Bearer',
           expiresIn: 3600,
@@ -54,7 +65,7 @@ void main() {
         final username = await tokenStorage.getUsername();
         final isAdmin = await tokenStorage.isAdmin();
 
-        expect(accessToken, 'access-token');
+        expect(accessToken, userJwt);
         expect(userId, null);
         expect(username, null);
         expect(isAdmin, false);
@@ -215,13 +226,13 @@ void main() {
     });
 
     group('isAdmin', () {
-      test('returns true when user is admin', () async {
+      test('returns true when JWT contains ADMIN role', () async {
+        final adminJwt = _createFakeJwt(roles: ['USER', 'ADMIN']);
         await tokenStorage.saveTokens(
-          accessToken: 'access',
+          accessToken: adminJwt,
           refreshToken: 'refresh',
           tokenType: 'Bearer',
           expiresIn: 3600,
-          isAdmin: true,
         );
 
         final result = await tokenStorage.isAdmin();
@@ -229,13 +240,13 @@ void main() {
         expect(result, true);
       });
 
-      test('returns false when user is not admin', () async {
+      test('returns false when JWT does not contain ADMIN role', () async {
+        final userJwt = _createFakeJwt(roles: ['USER']);
         await tokenStorage.saveTokens(
-          accessToken: 'access',
+          accessToken: userJwt,
           refreshToken: 'refresh',
           tokenType: 'Bearer',
           expiresIn: 3600,
-          isAdmin: false,
         );
 
         final result = await tokenStorage.isAdmin();
@@ -243,7 +254,20 @@ void main() {
         expect(result, false);
       });
 
-      test('returns false when no admin status saved', () async {
+      test('returns false when no token saved', () async {
+        final result = await tokenStorage.isAdmin();
+
+        expect(result, false);
+      });
+
+      test('returns false when token is not a valid JWT', () async {
+        await tokenStorage.saveTokens(
+          accessToken: 'not-a-jwt',
+          refreshToken: 'refresh',
+          tokenType: 'Bearer',
+          expiresIn: 3600,
+        );
+
         final result = await tokenStorage.isAdmin();
 
         expect(result, false);
@@ -344,14 +368,14 @@ void main() {
 
     group('clearTokens', () {
       test('clears all token data', () async {
+        final adminJwt = _createFakeJwt(roles: ['ADMIN']);
         await tokenStorage.saveTokens(
-          accessToken: 'access',
+          accessToken: adminJwt,
           refreshToken: 'refresh',
           tokenType: 'Bearer',
           expiresIn: 3600,
           userId: 'user-123',
           username: 'testuser',
-          isAdmin: true,
         );
 
         await tokenStorage.clearTokens();

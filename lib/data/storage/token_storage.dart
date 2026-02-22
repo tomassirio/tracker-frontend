@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for storing and retrieving authentication tokens securely
@@ -8,7 +10,6 @@ class TokenStorage {
   static const String _expiresAtKey = 'expires_at';
   static const String _userIdKey = 'userId';
   static const String _usernameKey = 'username';
-  static const String _isAdminKey = 'isAdmin';
 
   /// Save authentication tokens
   Future<void> saveTokens({
@@ -18,7 +19,6 @@ class TokenStorage {
     required int expiresIn,
     String? userId,
     String? username,
-    bool isAdmin = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final expiresAt =
@@ -36,7 +36,6 @@ class TokenStorage {
     if (username != null) {
       await prefs.setString(_usernameKey, username);
     }
-    await prefs.setBool(_isAdminKey, isAdmin);
   }
 
   /// Get access token
@@ -69,10 +68,41 @@ class TokenStorage {
     return prefs.getString(_usernameKey);
   }
 
-  /// Get admin status
+  /// Get admin status by decoding the JWT access token
   Future<bool> isAdmin() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_isAdminKey) ?? false;
+    final token = await getAccessToken();
+    if (token == null || token.isEmpty) return false;
+
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return false;
+
+      // Decode the payload (second part of the JWT)
+      String payload = parts[1];
+      // Add padding if needed for base64 decoding
+      switch (payload.length % 4) {
+        case 2:
+          payload += '==';
+          break;
+        case 3:
+          payload += '=';
+          break;
+      }
+      final decoded = utf8.decode(base64Url.decode(payload));
+      final claims = jsonDecode(decoded) as Map<String, dynamic>;
+
+      // Check for ADMIN role in common JWT claim fields
+      final roles = claims['roles'] ?? claims['role'] ?? [];
+      if (roles is List) {
+        return roles.contains('ADMIN');
+      }
+      if (roles is String) {
+        return roles == 'ADMIN';
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Check if access token is expired
@@ -101,6 +131,5 @@ class TokenStorage {
     await prefs.remove(_expiresAtKey);
     await prefs.remove(_userIdKey);
     await prefs.remove(_usernameKey);
-    await prefs.remove(_isAdminKey);
   }
 }

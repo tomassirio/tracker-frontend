@@ -43,6 +43,11 @@ class ProfileRepository {
     return await _authService.isLoggedIn();
   }
 
+  /// Checks if user is admin
+  Future<bool> isAdmin() async {
+    return await _authService.isAdmin();
+  }
+
   /// Gets the current user's username
   Future<String?> getCurrentUsername() async {
     return await _authService.getCurrentUsername();
