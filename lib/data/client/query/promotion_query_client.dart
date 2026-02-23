@@ -10,12 +10,11 @@ class PromotionQueryClient {
       : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
 
   /// Get all promoted trips
-  /// Public endpoint - no authentication required
   /// Returns 200 OK with array of promoted trips
   Future<List<PromotedTrip>> getPromotedTrips() async {
     final response = await _apiClient.get(
       ApiEndpoints.promotedTrips,
-      requireAuth: false,
+      requireAuth: true,
     );
     return _apiClient.handleListResponse(response, PromotedTrip.fromJson);
   }

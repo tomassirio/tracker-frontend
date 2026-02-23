@@ -107,6 +107,9 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
       setState(() {
         _isLoadingPromoted = false;
       });
+      if (mounted) {
+        debugPrint('Failed to load promoted trips: $e');
+      }
     }
   }
 
@@ -173,7 +176,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
 
         if (mounted) {
           UiHelpers.showSuccessMessage(context, 'Trip promoted successfully!');
-          _loadPromotedTrips();
+          await _loadPromotedTrips();
         }
       } catch (e) {
         if (mounted) {
@@ -214,7 +217,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
             context,
             'Trip unpromoted successfully!',
           );
-          _loadPromotedTrips();
+          await _loadPromotedTrips();
         }
       } catch (e) {
         if (mounted) {
@@ -441,16 +444,28 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                         ),
                       ],
                     ),
-                    trailing: isPromoted
-                        ? const Chip(
-                            label: Text('Promoted'),
-                            backgroundColor: Colors.amber,
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () => _promoteTrip(trip),
-                            icon: const Icon(Icons.star, size: 16),
-                            label: const Text('Promote'),
-                          ),
+                    trailing: SizedBox(
+                      width: 140,
+                      child: isPromoted
+                          ? ElevatedButton.icon(
+                              onPressed: () => _unpromoteTrip(trip.id),
+                              icon: const Icon(Icons.star, size: 16),
+                              label: const Text('Unpromote'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade400,
+                                foregroundColor: Colors.white,
+                                alignment: Alignment.center,
+                              ),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: () => _promoteTrip(trip),
+                              icon: const Icon(Icons.star, size: 16),
+                              label: const Text('Promote'),
+                              style: ElevatedButton.styleFrom(
+                                alignment: Alignment.center,
+                              ),
+                            ),
+                    ),
                   );
                 },
               ),
