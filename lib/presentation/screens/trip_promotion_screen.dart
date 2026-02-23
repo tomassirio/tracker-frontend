@@ -137,38 +137,56 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Promote Trip'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Trip: ${trip.name}'),
-            const SizedBox(height: 8),
-            Text('By: ${trip.username}'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: donationLinkController,
-              decoration: const InputDecoration(
-                labelText: 'Donation Link (optional)',
-                hintText: 'https://...',
-                border: OutlineInputBorder(),
-              ),
-              maxLength: 500,
+      builder: (context) {
+        final isMobile = MediaQuery.of(context).size.width < 600;
+
+        return AlertDialog(
+          title: const Text('Promote Trip'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Trip: ${trip.name}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'By: ${trip.username}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: donationLinkController,
+                  decoration: const InputDecoration(
+                    labelText: 'Donation Link (optional)',
+                    hintText: 'https://...',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  maxLength: 500,
+                  maxLines: isMobile ? 2 : 1,
+                  keyboardType: TextInputType.url,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Promote'),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Promote'),
-          ),
-        ],
-      ),
+        );
+      },
     );
 
     if (result == true && mounted) {
@@ -299,7 +317,13 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Error: $_error'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Error: $_error',
+                textAlign: TextAlign.center,
+              ),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadTrips,
@@ -310,40 +334,55 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await _loadTrips();
-        await _loadPromotedTrips();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        final horizontalPadding = isMobile ? 8.0 : 16.0;
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            await _loadTrips();
+            await _loadPromotedTrips();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(horizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPromotedTripsSection(isMobile),
+                const SizedBox(height: 24),
+                _buildPromotableTripsSection(isMobile),
+              ],
+            ),
+          ),
+        );
       },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPromotedTripsSection(),
-            const SizedBox(height: 24),
-            _buildPromotableTripsSection(),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _buildPromotedTripsSection() {
+  Widget _buildPromotedTripsSection(bool isMobile) {
+    final cardPadding = isMobile ? 12.0 : 16.0;
+    final titleFontSize = isMobile ? 18.0 : 20.0;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.star, color: Colors.amber),
-                SizedBox(width: 8),
-                Text(
-                  'Currently Promoted Trips',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                const Icon(Icons.star, color: Colors.amber),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Currently Promoted Trips',
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -368,31 +407,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                 separatorBuilder: (context, index) => const Divider(),
                 itemBuilder: (context, index) {
                   final promoted = _promotedTrips[index];
-                  return ListTile(
-                    leading: const Icon(Icons.star, color: Colors.amber),
-                    title: Text(promoted.tripName),
-                    onTap: () => _navigateToTrip(promoted.tripId),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Owner: ${promoted.tripOwnerUsername}'),
-                        Text(
-                          'Promoted by: ${promoted.promotedByUsername}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        if (promoted.donationLink != null)
-                          Text(
-                            'Donation: ${promoted.donationLink}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                      ],
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.remove_circle, color: Colors.red),
-                      onPressed: () => _unpromoteTrip(promoted.tripId),
-                      tooltip: 'Unpromote',
-                    ),
-                  );
+                  return _buildPromotedTripItem(promoted, isMobile);
                 },
               ),
           ],
@@ -401,27 +416,100 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
     );
   }
 
-  Widget _buildPromotableTripsSection() {
+  Widget _buildPromotedTripItem(PromotedTrip promoted, bool isMobile) {
+    return InkWell(
+      onTap: () => _navigateToTrip(promoted.tripId),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.star, color: Colors.amber, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    promoted.tripName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Owner: ${promoted.tripOwnerUsername}',
+                    style: const TextStyle(fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Promoted by: ${promoted.promotedByUsername}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (promoted.donationLink != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Donation: ${promoted.donationLink}',
+                      style: const TextStyle(fontSize: 12, color: Colors.blue),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.remove_circle, color: Colors.red),
+              onPressed: () => _unpromoteTrip(promoted.tripId),
+              tooltip: 'Unpromote',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPromotableTripsSection(bool isMobile) {
+    final cardPadding = isMobile ? 12.0 : 16.0;
+    final titleFontSize = isMobile ? 18.0 : 20.0;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.public),
-                SizedBox(width: 8),
-                Text(
-                  'Promotable Trips',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                const Icon(Icons.public),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Promotable Trips',
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Public trips that are created, in progress, or paused',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: isMobile ? 12 : 14,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -431,6 +519,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                 hintText: 'Search by trip name or username',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
+                isDense: true,
               ),
             ),
             const SizedBox(height: 16),
@@ -454,52 +543,151 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                   final trip = _filteredTrips[index];
                   final isPromoted = _promotedTrips
                       .any((promoted) => promoted.tripId == trip.id);
-
-                  return ListTile(
-                    leading: Icon(
-                      _getStatusIcon(trip.status),
-                      color: _getStatusColor(trip.status),
-                    ),
-                    title: Text(trip.name),
-                    onTap: () => _navigateToTrip(trip.id),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('By: ${trip.username}'),
-                        Text(
-                          'Status: ${_getStatusLabel(trip.status)}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    trailing: SizedBox(
-                      width: 120,
-                      child: isPromoted
-                          ? ElevatedButton(
-                              onPressed: () => _unpromoteTrip(trip.id),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red.shade400,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text(
-                                'Unpromote',
-                                textAlign: TextAlign.center,
-                              ),
-                            )
-                          : ElevatedButton(
-                              onPressed: () => _promoteTrip(trip),
-                              child: const Text(
-                                'Promote',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                    ),
-                  );
+                  return _buildPromotableTripItem(trip, isPromoted, isMobile);
                 },
               ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPromotableTripItem(Trip trip, bool isPromoted, bool isMobile) {
+    return InkWell(
+      onTap: () => _navigateToTrip(trip.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: isMobile
+            ? _buildMobileTripItem(trip, isPromoted)
+            : _buildDesktopTripItem(trip, isPromoted),
+      ),
+    );
+  }
+
+  Widget _buildMobileTripItem(Trip trip, bool isPromoted) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              _getStatusIcon(trip.status),
+              color: _getStatusColor(trip.status),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    trip.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'By: ${trip.username}',
+                    style: const TextStyle(fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Status: ${_getStatusLabel(trip.status)}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: isPromoted
+              ? ElevatedButton(
+                  onPressed: () => _unpromoteTrip(trip.id),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Unpromote'),
+                )
+              : ElevatedButton(
+                  onPressed: () => _promoteTrip(trip),
+                  child: const Text('Promote'),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopTripItem(Trip trip, bool isPromoted) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          _getStatusIcon(trip.status),
+          color: _getStatusColor(trip.status),
+          size: 24,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                trip.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'By: ${trip.username}',
+                style: const TextStyle(fontSize: 14),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                'Status: ${_getStatusLabel(trip.status)}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 120,
+          child: isPromoted
+              ? ElevatedButton(
+                  onPressed: () => _unpromoteTrip(trip.id),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text(
+                    'Unpromote',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : ElevatedButton(
+                  onPressed: () => _promoteTrip(trip),
+                  child: const Text(
+                    'Promote',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+        ),
+      ],
     );
   }
 
