@@ -454,6 +454,148 @@ void main() {
       });
     });
 
+    group('getAllUsers', () {
+      test('successful retrieval returns paginated users', () async {
+        final responseBody = {
+          'content': [
+            {
+              'id': 'user-1',
+              'username': 'alice',
+              'email': 'alice@example.com',
+              'followersCount': 10,
+              'followingCount': 5,
+              'tripsCount': 3,
+              'createdAt': '2024-01-15T10:30:00Z',
+            },
+            {
+              'id': 'user-2',
+              'username': 'bob',
+              'email': 'bob@example.com',
+              'followersCount': 20,
+              'followingCount': 15,
+              'tripsCount': 7,
+              'createdAt': '2024-02-20T14:00:00Z',
+            },
+          ],
+          'totalElements': 50,
+          'totalPages': 3,
+          'number': 0,
+          'size': 20,
+          'first': true,
+          'last': false,
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+
+        final result = await userQueryClient.getAllUsers();
+
+        expect(result.content.length, 2);
+        expect(result.content[0].username, 'alice');
+        expect(result.content[1].username, 'bob');
+        expect(result.totalElements, 50);
+        expect(result.totalPages, 3);
+        expect(result.number, 0);
+        expect(result.first, true);
+        expect(result.last, false);
+        expect(mockHttpClient.lastMethod, 'GET');
+        expect(
+          mockHttpClient.lastUri.toString(),
+          contains('/users?page=0&size=20&sort=username,asc'),
+        );
+      });
+
+      test('getAllUsers requires authentication', () async {
+        final responseBody = {
+          'content': [],
+          'totalElements': 0,
+          'totalPages': 0,
+          'number': 0,
+          'size': 20,
+          'first': true,
+          'last': true,
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+
+        await userQueryClient.getAllUsers();
+
+        expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
+      });
+
+      test('getAllUsers passes custom pagination parameters', () async {
+        final responseBody = {
+          'content': [],
+          'totalElements': 0,
+          'totalPages': 0,
+          'number': 2,
+          'size': 10,
+          'first': false,
+          'last': true,
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+
+        await userQueryClient.getAllUsers(
+          page: 2,
+          size: 10,
+          sort: 'email',
+          direction: 'desc',
+        );
+
+        expect(
+          mockHttpClient.lastUri.toString(),
+          contains('page=2'),
+        );
+        expect(
+          mockHttpClient.lastUri.toString(),
+          contains('size=10'),
+        );
+        expect(
+          mockHttpClient.lastUri.toString(),
+          contains('sort=email,desc'),
+        );
+      });
+
+      test('getAllUsers handles empty page', () async {
+        final responseBody = {
+          'content': [],
+          'totalElements': 0,
+          'totalPages': 0,
+          'number': 0,
+          'size': 20,
+          'first': true,
+          'last': true,
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+
+        final result = await userQueryClient.getAllUsers();
+
+        expect(result.content, isEmpty);
+        expect(result.totalElements, 0);
+      });
+
+      test('getAllUsers throws on 403 forbidden', () async {
+        mockHttpClient.response = http.Response(
+          '{"message":"Forbidden - ADMIN role required"}',
+          403,
+        );
+
+        expect(
+          () => userQueryClient.getAllUsers(),
+          throwsException,
+        );
+      });
+
+      test('getAllUsers throws on 401 unauthorized', () async {
+        mockHttpClient.response = http.Response(
+          '{"message":"Unauthorized"}',
+          401,
+        );
+
+        expect(
+          () => userQueryClient.getAllUsers(),
+          throwsA(isA<AuthenticationRedirectException>()),
+        );
+      });
+    });
+
     group('UserQueryClient initialization', () {
       test('uses provided ApiClient', () {
         final customApiClient = ApiClient(

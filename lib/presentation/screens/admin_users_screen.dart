@@ -41,6 +41,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String _sortField = 'username';
   String _sortDirection = 'asc';
 
+  // Tracks which users have ADMIN role (userId -> isAdmin)
+  final Map<String, bool> _userAdminStatus = {};
+
   @override
   void initState() {
     super.initState();
@@ -93,6 +96,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         _isLoading = false;
       });
 
+      // Load admin status for each user
+      await _loadUserRoles(pageResponse.content);
+
       // Re-apply search filter if active
       if (_searchController.text.isNotEmpty) {
         _filterUsers();
@@ -142,6 +148,149 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   void _navigateToUserProfile(String userId) {
     AuthNavigationHelper.navigateToUserProfile(context, userId);
+  }
+
+  Future<void> _loadUserRoles(List<UserProfile> users) async {
+    for (final user in users) {
+      try {
+        final roles = await _adminService.getUserRoles(user.id);
+        if (mounted) {
+          setState(() {
+            _userAdminStatus[user.id] =
+                roles.any((r) => r.toUpperCase() == 'ADMIN');
+          });
+        }
+      } catch (e) {
+        // Silently fail for individual role checks
+        debugPrint('Failed to load roles for ${user.username}: $e');
+      }
+    }
+  }
+
+  Future<void> _promoteUser(UserProfile user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Promote to Admin'),
+        content: Text(
+            'Are you sure you want to promote "${user.username}" to admin?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Promote'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await _adminService.promoteUserToAdmin(user.id);
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, '${user.username} promoted to admin!');
+          await _loadUsers(page: _currentPage);
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to promote user: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _demoteUser(UserProfile user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Demote from Admin'),
+        content: Text(
+            'Are you sure you want to remove admin role from "${user.username}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+            ),
+            child: const Text('Demote'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await _adminService.demoteUserFromAdmin(user.id);
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, '${user.username} demoted from admin!');
+          await _loadUsers(page: _currentPage);
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to demote user: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _deleteUser(UserProfile user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                'Are you sure you want to permanently delete "${user.username}"?'),
+            const SizedBox(height: 8),
+            const Text(
+              'This action cannot be undone. All user data will be removed.',
+              style: TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await _adminService.deleteUser(user.id);
+        if (mounted) {
+          UiHelpers.showSuccessMessage(
+              context, '${user.username} deleted successfully!');
+          await _loadUsers(page: _currentPage);
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Failed to delete user: $e');
+        }
+      }
+    }
   }
 
   Future<void> _handleLogout() async {
@@ -356,6 +505,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   Widget _buildUserTile(UserProfile user) {
+    final isUserAdmin = _userAdminStatus[user.id] ?? false;
+    final isSelf = user.id == _userId;
+
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -373,15 +525,39 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       ),
       title: Row(
         children: [
-          Text(
-            user.displayName ?? user.username,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          Flexible(
+            child: Text(
+              user.displayName ?? user.username,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           if (user.displayName != null) ...[
             const SizedBox(width: 8),
-            Text(
-              '@${user.username}',
-              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            Flexible(
+              child: Text(
+                '@${user.username}',
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+          if (isUserAdmin) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade100,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.amber.shade400),
+              ),
+              child: const Text(
+                'ADMIN',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange),
+              ),
             ),
           ],
         ],
@@ -407,10 +583,53 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           ),
         ],
       ),
-      trailing: IconButton(
-        icon: const Icon(Icons.open_in_new),
-        onPressed: () => _navigateToUserProfile(user.id),
-        tooltip: 'View Profile',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Promote/Unpromote button
+          if (!isSelf)
+            isUserAdmin
+                ? SizedBox(
+                    width: 110,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _demoteUser(user),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade400,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      icon: const Icon(Icons.arrow_downward, size: 16),
+                      label: const Text('Unpromote',
+                          style: TextStyle(fontSize: 12)),
+                    ),
+                  )
+                : SizedBox(
+                    width: 110,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _promoteUser(user),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      icon: const Icon(Icons.arrow_upward, size: 16),
+                      label:
+                          const Text('Promote', style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+          const SizedBox(width: 8),
+          // Delete button (cannot delete self)
+          if (!isSelf)
+            IconButton(
+              icon: const Icon(Icons.delete_forever, color: Colors.red),
+              onPressed: () => _deleteUser(user),
+              tooltip: 'Delete User',
+            ),
+          // View profile button
+          IconButton(
+            icon: const Icon(Icons.open_in_new),
+            onPressed: () => _navigateToUserProfile(user.id),
+            tooltip: 'View Profile',
+          ),
+        ],
       ),
       onTap: () => _navigateToUserProfile(user.id),
     );

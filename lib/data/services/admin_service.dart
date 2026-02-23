@@ -10,6 +10,7 @@ class AdminService {
   final PromotionQueryClient _promotionQueryClient;
   final TripQueryClient _tripQueryClient;
   final UserQueryClient _userQueryClient;
+  final AdminCommandClient _adminCommandClient;
 
   AdminService({
     TripCommandClient? tripCommandClient,
@@ -17,12 +18,14 @@ class AdminService {
     PromotionQueryClient? promotionQueryClient,
     TripQueryClient? tripQueryClient,
     UserQueryClient? userQueryClient,
+    AdminCommandClient? adminCommandClient,
   })  : _tripCommandClient = tripCommandClient ?? TripCommandClient(),
         _promotionCommandClient =
             promotionCommandClient ?? PromotionCommandClient(),
         _promotionQueryClient = promotionQueryClient ?? PromotionQueryClient(),
         _tripQueryClient = tripQueryClient ?? TripQueryClient(),
-        _userQueryClient = userQueryClient ?? UserQueryClient();
+        _userQueryClient = userQueryClient ?? UserQueryClient(),
+        _adminCommandClient = adminCommandClient ?? AdminCommandClient();
 
   /// Delete a trip (admin only)
   Future<void> deleteTrip(String tripId) async {
@@ -78,5 +81,25 @@ class AdminService {
       sort: sort,
       direction: direction,
     );
+  }
+
+  /// Promote a user to admin role
+  Future<void> promoteUserToAdmin(String userId) async {
+    await _adminCommandClient.promoteToAdmin(userId);
+  }
+
+  /// Demote a user from admin role
+  Future<void> demoteUserFromAdmin(String userId) async {
+    await _adminCommandClient.demoteFromAdmin(userId);
+  }
+
+  /// Get roles assigned to a user
+  Future<List<String>> getUserRoles(String userId) async {
+    return await _adminCommandClient.getUserRoles(userId);
+  }
+
+  /// Delete a user permanently
+  Future<void> deleteUser(String userId) async {
+    await _adminCommandClient.deleteUser(userId);
   }
 }

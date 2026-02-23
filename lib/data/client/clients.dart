@@ -5,6 +5,7 @@ export 'api_client.dart';
 export 'auth/auth_client.dart';
 
 // Export Command Clients
+export 'command/admin_command_client.dart';
 export 'command/trip_command_client.dart';
 export 'command/trip_plan_command_client.dart';
 export 'command/trip_update_command_client.dart';

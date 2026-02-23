@@ -12,6 +12,10 @@ class ApiEndpoints {
   static String get authBaseUrl =>
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
 
+  // Admin base URL - derived from auth base URL (same service, different path)
+  static String get adminBaseUrl =>
+      authBaseUrl.replaceAll(RegExp(r'/auth$'), '/admin');
+
   // WebSocket base URL - read from window.appConfig or use default
   static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');
 
@@ -98,6 +102,11 @@ class ApiEndpoints {
   // Trip Promotion Query endpoints (use queryBaseUrl, PUBLIC)
   static const String promotedTrips = '/promoted-trips';
   static String tripPromotion(String tripId) => '/trips/$tripId/promotion';
+
+  // Admin User Management endpoints (use adminBaseUrl, ADMIN only)
+  static String adminPromoteUser(String userId) => '/users/$userId/promote';
+  static String adminDeleteUser(String userId) => '/users/$userId';
+  static String adminUserRoles(String userId) => '/users/$userId/roles';
 
   // WebSocket topics
   static String wsTripTopic(String tripId) => '/topic/trips/$tripId';
