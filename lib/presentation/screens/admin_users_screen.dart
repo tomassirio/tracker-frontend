@@ -3,8 +3,9 @@ import 'package:tracker_frontend/data/models/responses/page_response.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/services/admin_service.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/screens/home_screen.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 
@@ -298,7 +299,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const AdminUsersScreen()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
       );
     }
@@ -318,6 +319,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         userId: _userId,
         onLogout: _handleLogout,
         onSettings: _handleSettings,
+        onProfile: () => AuthNavigationHelper.navigateToOwnProfile(context),
       ),
       drawer: AppSidebar(
         username: _username,
