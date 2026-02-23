@@ -72,7 +72,7 @@ class ApiEndpoints {
   static const String tripsMe = '/trips/me';
   static const String tripsPublic = '/trips/public';
   static const String tripsAvailable = '/trips/me/available';
-  static String tripsByUser(String userId) => '/trips/user/$userId';
+  static String tripsByUser(String userId) => '/trips/users/$userId';
 
   // Trip Command endpoints (use commandBaseUrl)
   static const String tripsCreate = '/trips';

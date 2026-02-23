@@ -185,8 +185,8 @@ void main() {
       });
 
       test('tripsByUser generates correct path', () {
-        expect(ApiEndpoints.tripsByUser('user123'), '/trips/user/user123');
-        expect(ApiEndpoints.tripsByUser('test-user'), '/trips/user/test-user');
+        expect(ApiEndpoints.tripsByUser('user123'), '/trips/users/user123');
+        expect(ApiEndpoints.tripsByUser('test-user'), '/trips/users/test-user');
       });
     });
 
