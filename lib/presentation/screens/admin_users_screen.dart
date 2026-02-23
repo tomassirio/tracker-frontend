@@ -541,24 +541,36 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   Widget _buildUsersTable(bool isMobile) {
     if (_filteredUsers.isEmpty) {
-      return const Card(
+      return Card(
         child: Center(
           child: Padding(
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Text(
               'No users found',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey[600]),
             ),
           ),
         ),
       );
     }
 
-    final cardPadding = isMobile ? 8.0 : 16.0;
+    // On mobile, each user is its own card, so no wrapper needed
+    if (isMobile) {
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _filteredUsers.length,
+        itemBuilder: (context, index) {
+          final user = _filteredUsers[index];
+          return _buildUserTile(user, isMobile);
+        },
+      );
+    }
 
+    // Desktop keeps the card wrapper
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(cardPadding),
+        padding: const EdgeInsets.all(16),
         child: ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -585,152 +597,267 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   Widget _buildMobileUserTile(
       UserProfile user, bool isUserAdmin, bool isSelf) {
-    return InkWell(
-      onTap: () => _navigateToUserProfile(user.id),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // User info row
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  backgroundImage: user.avatarUrl != null
-                      ? NetworkImage(user.avatarUrl!)
-                      : null,
-                  child: user.avatarUrl == null
-                      ? Text(
-                          user.username.isNotEmpty
-                              ? user.username[0].toUpperCase()
-                              : '?',
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              user.displayName ?? user.username,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      child: InkWell(
+        onTap: () => _navigateToUserProfile(user.id),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with avatar and primary info
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    backgroundImage: user.avatarUrl != null
+                        ? NetworkImage(user.avatarUrl!)
+                        : null,
+                    child: user.avatarUrl == null
+                        ? Text(
+                            user.username.isNotEmpty
+                                ? user.username[0].toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
-                          ),
-                          if (isUserAdmin) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.amber.shade400),
-                              ),
-                              child: const Text(
-                                'ADMIN',
-                                style: TextStyle(
-                                  fontSize: 10,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Username with admin badge
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                user.displayName ?? user.username,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.orange,
+                                  fontSize: 16,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isUserAdmin) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade100,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border:
+                                      Border.all(color: Colors.amber.shade700),
+                                ),
+                                child: const Text(
+                                  'ADMIN',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange,
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
-                      ),
-                      if (user.displayName != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          '@${user.username}',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        style: const TextStyle(fontSize: 13),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      // Stats row
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 4,
-                        children: [
-                          _buildStatBadge(Icons.map, '${user.tripsCount}'),
-                          _buildStatBadge(Icons.people, '${user.followersCount}'),
-                          _buildStatBadge(Icons.handshake, '${user.friendsCount}'),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Joined ${_formatDate(user.createdAt)}',
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Action buttons row
-            Row(
-              children: [
-                if (!isSelf)
-                  Expanded(
-                    child: isUserAdmin
-                        ? ElevatedButton.icon(
-                            onPressed: () => _demoteUser(user),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange.shade400,
-                              foregroundColor: Colors.white,
+                        if (user.displayName != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '@${user.username}',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 13,
                             ),
-                            icon: const Icon(Icons.arrow_downward, size: 16),
-                            label: const Text('Unpromote',
-                                style: TextStyle(fontSize: 12)),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () => _promoteUser(user),
-                            icon: const Icon(Icons.arrow_upward, size: 16),
-                            label: const Text('Promote',
-                                style: TextStyle(fontSize: 12)),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ],
+                      ],
+                    ),
                   ),
-                const SizedBox(width: 8),
-                if (!isSelf)
-                  IconButton(
-                    icon: const Icon(Icons.delete_forever, color: Colors.red),
-                    onPressed: () => _deleteUser(user),
-                    tooltip: 'Delete User',
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // Email
+              Row(
+                children: [
+                  Icon(Icons.email_outlined, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      user.email,
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                IconButton(
-                  icon: const Icon(Icons.open_in_new),
-                  onPressed: () => _navigateToUserProfile(user.id),
-                  tooltip: 'View Profile',
+                ],
+              ),
+              const SizedBox(height: 8),
+              
+              // Stats row in a subtle container
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildCompactStat(Icons.map, '${user.tripsCount}', 'Trips'),
+                    Container(width: 1, height: 24, color: Colors.grey[300]),
+                    _buildCompactStat(
+                        Icons.people, '${user.followersCount}', 'Followers'),
+                    Container(width: 1, height: 24, color: Colors.grey[300]),
+                    _buildCompactStat(
+                        Icons.handshake, '${user.friendsCount}', 'Friends'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              // Join date
+              Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 12, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Joined ${_formatDate(user.createdAt)}',
+                    style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+              
+              // Action buttons
+              if (!isSelf) ...[
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: isUserAdmin
+                          ? OutlinedButton.icon(
+                              onPressed: () => _demoteUser(user),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.orange.shade700,
+                                side: BorderSide(color: Colors.orange.shade400),
+                              ),
+                              icon: const Icon(Icons.arrow_downward, size: 16),
+                              label: const Text(
+                                'Unpromote',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: () => _promoteUser(user),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                              icon: const Icon(Icons.arrow_upward, size: 16),
+                              label: const Text(
+                                'Promote',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _deleteUser(user),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red.shade700,
+                          side: BorderSide(color: Colors.red.shade400),
+                        ),
+                        icon: const Icon(Icons.delete_outline, size: 16),
+                        label: const Text(
+                          'Delete',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.open_in_new, size: 20),
+                      onPressed: () => _navigateToUserProfile(user.id),
+                      tooltip: 'View Profile',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => _navigateToUserProfile(user.id),
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text(
+                        'View Profile',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactStat(IconData icon, String value, String label) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: Colors.grey[700]),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 
