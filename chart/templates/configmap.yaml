@@ -55,6 +55,18 @@ data:
             proxy_read_timeout 60s;
         }
 
+        # Admin Service - proxy /api/admin/* to tracker-auth service /api/1/admin/*
+        location /api/admin/ {
+            proxy_pass http://tracker-auth{{ .Values.nameSuffix }}:{{ .Values.backend.authPort }}/api/1/admin/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+
         # Command Service - proxy /api/command/* to tracker-command service /api/1/*
         location /api/command/ {
             proxy_pass http://tracker-command{{ .Values.nameSuffix }}:{{ .Values.backend.commandPort }}/api/1/;

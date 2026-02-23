@@ -12,9 +12,9 @@ class ApiEndpoints {
   static String get authBaseUrl =>
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
 
-  // Admin base URL - derived from auth base URL (same service, different path)
+  // Admin base URL - same service as auth, different path prefix
   static String get adminBaseUrl =>
-      authBaseUrl.replaceAll(RegExp(r'/auth$'), '/admin');
+      getConfigValue('adminBaseUrl', 'http://localhost:8083/api/1/admin');
 
   // WebSocket base URL - read from window.appConfig or use default
   static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');

@@ -49,6 +49,7 @@ application:
   commandBaseUrl: "/api/command"
   queryBaseUrl: "/api/query"
   authBaseUrl: "/api/auth"
+  adminBaseUrl: "/api/admin"
 
 # Backend service configuration (internal Kubernetes services)
 backend:

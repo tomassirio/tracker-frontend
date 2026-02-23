@@ -423,8 +423,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             const SizedBox(width: 8),
             _buildSortChip('Username', 'username'),
             const SizedBox(width: 8),
-            _buildSortChip('Email', 'email'),
-            const SizedBox(width: 8),
             _buildSortChip('Created', 'createdAt'),
             const Spacer(),
             // Local search filter
