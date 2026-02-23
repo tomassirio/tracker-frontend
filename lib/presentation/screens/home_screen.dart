@@ -7,6 +7,7 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/services/admin_service.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, RouteAware {
   final HomeRepository _repository = HomeRepository();
   final TripService _tripService = TripService();
+  final AdminService _adminService = AdminService();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   StreamSubscription<WebSocketEvent>? _wsSubscription;
@@ -44,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen>
   List<Trip> _myTrips = [];
   List<Trip> _feedTrips = [];
   List<Trip> _discoverTrips = [];
+  Set<String> _promotedTripIds = {};
   Set<String> _friendIds = {};
   Set<String> _followingIds = {};
 
@@ -52,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   final int _selectedSidebarIndex = 0;
 
   // Filter states
@@ -84,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _initializeData() async {
     await _loadUserInfo();
     await _loadTrips();
+    await _loadPromotedTrips();
   }
 
   void _onTabChanged() {
@@ -154,11 +159,13 @@ class _HomeScreenState extends State<HomeScreen>
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
     final isLoggedIn = await _repository.isLoggedIn();
+    final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
       _isLoggedIn = isLoggedIn;
+      _isAdmin = isAdmin;
     });
   }
 
@@ -216,6 +223,20 @@ class _HomeScreenState extends State<HomeScreen>
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadPromotedTrips() async {
+    try {
+      final promoted = await _adminService.getPromotedTrips();
+      if (mounted) {
+        setState(() {
+          _promotedTripIds = promoted.map((p) => p.tripId).toSet();
+        });
+      }
+    } catch (e) {
+      // Silently fail — user may not have admin access
+      debugPrint('Failed to load promoted trips: $e');
     }
   }
 
@@ -875,8 +896,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDiscoverTab() {
     final filteredTrips = _getFilteredTrips(_discoverTrips);
+    final promotedTripsList =
+        _allTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
 
-    if (filteredTrips.isEmpty) {
+    if (filteredTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -898,10 +921,23 @@ class _HomeScreenState extends State<HomeScreen>
     }
 
     return RefreshIndicator(
-      onRefresh: _loadTrips,
+      onRefresh: () async {
+        await _loadTrips();
+        await _loadPromotedTrips();
+      },
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (promotedTripsList.isNotEmpty) ...[
+            const FeedSectionHeader(
+              title: 'Featured Trips',
+              icon: Icons.star,
+              subtitle: 'Highlighted adventures from the community',
+            ),
+            const SizedBox(height: 12),
+            _buildTripGrid(promotedTripsList, showRelationship: true),
+            const SizedBox(height: 24),
+          ],
           FeedSectionHeader(
             title: 'Discover',
             icon: Icons.public,
@@ -1005,6 +1041,7 @@ class _HomeScreenState extends State<HomeScreen>
                   : null,
               relationship: relationship,
               showAllBadges: true,
+              isPromoted: _promotedTripIds.contains(trip.id),
             );
           },
         );
@@ -1033,6 +1070,7 @@ class _HomeScreenState extends State<HomeScreen>
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

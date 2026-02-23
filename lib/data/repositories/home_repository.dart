@@ -33,6 +33,11 @@ class HomeRepository {
     return await _authService.isLoggedIn();
   }
 
+  /// Checks if user is admin
+  Future<bool> isAdmin() async {
+    return await _authService.isAdmin();
+  }
+
   /// Loads trips based on authentication status
   Future<List<Trip>> loadTrips() async {
     final isLoggedIn = await _authService.isLoggedIn();

@@ -17,6 +17,7 @@ class EnhancedTripCard extends StatefulWidget {
   final VoidCallback? onDelete;
   final RelationshipType? relationship;
   final bool showAllBadges;
+  final bool isPromoted;
 
   const EnhancedTripCard({
     super.key,
@@ -25,6 +26,7 @@ class EnhancedTripCard extends StatefulWidget {
     this.onDelete,
     this.relationship,
     this.showAllBadges = true,
+    this.isPromoted = false,
   });
 
   @override
@@ -484,6 +486,49 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       ],
                     ),
                   ),
+
+                  // Promoted badge overlay (bottom right corner)
+                  if (widget.isPromoted)
+                    Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Promoted',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                   // Visibility badge overlay
                   if (widget.showAllBadges)

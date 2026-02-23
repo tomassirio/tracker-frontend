@@ -35,6 +35,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   String? _userId;
   String? _username;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   final int _selectedSidebarIndex = 1; // Trip Plans is index 1
 
   @override
@@ -56,11 +57,13 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
     final username = await _homeRepository.getCurrentUsername();
     final userId = await _homeRepository.getCurrentUserId();
     final isLoggedIn = await _homeRepository.isLoggedIn();
+    final isAdmin = await _homeRepository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
       _isLoggedIn = isLoggedIn;
+      _isAdmin = isAdmin;
     });
   }
 
@@ -304,6 +307,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: TripPlansContent(
         isLoading: _isLoading,

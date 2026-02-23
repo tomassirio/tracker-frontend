@@ -351,6 +351,15 @@ class MockTokenStorage extends _i1.Mock implements _i7.TokenStorage {
       ) as _i5.Future<bool>);
 
   @override
+  _i5.Future<bool> isAdmin() => (super.noSuchMethod(
+        Invocation.method(
+          #isAdmin,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
   _i5.Future<void> clearTokens() => (super.noSuchMethod(
         Invocation.method(
           #clearTokens,

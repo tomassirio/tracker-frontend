@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingTrips = false;
   String? _error;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   bool _hasSentFriendRequest =
       false; // Track if friend request was sent locally
   bool _isAlreadyFriends = false; // Track if already friends with user
@@ -78,8 +79,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final isLoggedIn = await _repository.isLoggedIn();
+      final isAdmin = await _repository.isAdmin();
       setState(() {
         _isLoggedIn = isLoggedIn;
+        _isAdmin = isAdmin;
       });
 
       // If viewing another user's profile and not logged in, redirect to auth
@@ -259,7 +262,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      final trips = await _repository.getUserTrips(userId);
+      final trips = _isViewingOwnProfile
+          ? await _repository.getMyTrips()
+          : await _repository.getUserTrips(userId);
       setState(() {
         _userTrips = trips;
         _isLoadingTrips = false;
@@ -543,6 +548,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: _buildBody(),
     );
@@ -769,9 +775,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'My Trips',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              _isViewingOwnProfile ? 'My Trips' : 'Trips',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             if (_userTrips.isNotEmpty)
               Text(

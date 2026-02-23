@@ -36,6 +36,8 @@ class TripDetailLayoutData {
   final bool isFollowingTripOwner; // Track if following trip owner
   final bool hasSentFriendRequest; // Track if friend request sent
   final bool isAlreadyFriends; // Track if already friends with trip owner
+  final bool isPromoted; // Track if trip is promoted
+  final String? donationLink; // Donation link for promoted trips
 
   // Callbacks
   final VoidCallback onToggleTripInfo;
@@ -80,6 +82,8 @@ class TripDetailLayoutData {
     this.isFollowingTripOwner = false,
     this.hasSentFriendRequest = false,
     this.isAlreadyFriends = false,
+    this.isPromoted = false,
+    this.donationLink,
     required this.onToggleTripInfo,
     required this.onToggleComments,
     required this.onToggleTimeline,
@@ -134,6 +138,7 @@ abstract class TripDetailLayoutStrategy {
       isFollowing: data.isFollowingTripOwner,
       hasSentFriendRequest: data.hasSentFriendRequest,
       isAlreadyFriends: data.isAlreadyFriends,
+      isPromoted: data.isPromoted,
     );
   }
 

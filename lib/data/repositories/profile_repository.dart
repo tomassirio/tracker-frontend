@@ -33,14 +33,24 @@ class ProfileRepository {
     return await _userService.updateProfile(request);
   }
 
-  /// Gets trips for a specific user
-  Future<List<Trip>> getUserTrips(String userId) async {
+  /// Gets trips for the current logged-in user (all trips regardless of visibility)
+  Future<List<Trip>> getMyTrips() async {
     return await _tripService.getMyTrips();
+  }
+
+  /// Gets trips for another user (respects visibility rules)
+  Future<List<Trip>> getUserTrips(String userId) async {
+    return await _tripService.getUserTrips(userId);
   }
 
   /// Checks if user is logged in
   Future<bool> isLoggedIn() async {
     return await _authService.isLoggedIn();
+  }
+
+  /// Checks if user is admin
+  Future<bool> isAdmin() async {
+    return await _authService.isAdmin();
   }
 
   /// Gets the current user's username

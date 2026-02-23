@@ -12,6 +12,11 @@ class ApiEndpoints {
   static String get authBaseUrl =>
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
 
+  // Admin base URL - same service as auth, different path prefix
+  // Derived from authBaseUrl by replacing /auth with /admin
+  static String get adminBaseUrl =>
+      authBaseUrl.replaceAll(RegExp(r'/auth$'), '/admin');
+
   // WebSocket base URL - read from window.appConfig or use default
   static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');
 
@@ -28,6 +33,7 @@ class ApiEndpoints {
 
   // User Query endpoints (use queryBaseUrl)
   static const String usersMe = '/users/me';
+  static const String usersAll = '/users';
   static String userById(String userId) => '/users/$userId';
   static String userByUsername(String username) => '/users/username/$username';
 
@@ -67,7 +73,7 @@ class ApiEndpoints {
   static const String tripsMe = '/trips/me';
   static const String tripsPublic = '/trips/public';
   static const String tripsAvailable = '/trips/me/available';
-  static String tripsByUser(String userId) => '/trips/user/$userId';
+  static String tripsByUser(String userId) => '/trips/users/$userId';
 
   // Trip Command endpoints (use commandBaseUrl)
   static const String tripsCreate = '/trips';
@@ -90,6 +96,18 @@ class ApiEndpoints {
   static String tripComments(String tripId) => '/trips/$tripId/comments';
   static String commentReactions(String commentId) =>
       '/comments/$commentId/reactions';
+
+  // Trip Promotion Command endpoints (use commandBaseUrl, ADMIN only)
+  static String tripPromote(String tripId) => '/trips/$tripId/promote';
+
+  // Trip Promotion Query endpoints (use queryBaseUrl, PUBLIC)
+  static const String promotedTrips = '/promoted-trips';
+  static String tripPromotion(String tripId) => '/trips/$tripId/promotion';
+
+  // Admin User Management endpoints (use adminBaseUrl, ADMIN only)
+  static String adminPromoteUser(String userId) => '/users/$userId/promote';
+  static String adminDeleteUser(String userId) => '/users/$userId';
+  static String adminUserRoles(String userId) => '/users/$userId/roles';
 
   // WebSocket topics
   static String wsTripTopic(String tripId) => '/topic/trips/$tripId';

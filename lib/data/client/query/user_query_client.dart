@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import '../../../core/constants/api_endpoints.dart';
+import '../../models/responses/page_response.dart';
 import '../../models/user_models.dart';
 import '../api_client.dart';
 
@@ -8,6 +11,29 @@ class UserQueryClient {
 
   UserQueryClient({ApiClient? apiClient})
       : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
+
+  /// Get all users with pagination and sorting (Admin only)
+  Future<PageResponse<UserProfile>> getAllUsers({
+    int page = 0,
+    int size = 20,
+    String sort = 'username',
+    String direction = 'asc',
+  }) async {
+    final endpoint =
+        '${ApiEndpoints.usersAll}?page=$page&size=$size&sort=$sort,$direction';
+    final response = await _apiClient.get(
+      endpoint,
+      requireAuth: true,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return PageResponse.fromJson(data, UserProfile.fromJson);
+    } else {
+      throw Exception(
+          'API Error (${response.statusCode}): Failed to fetch users');
+    }
+  }
 
   /// Get user by ID
   /// Requires authentication (ADMIN, USER)

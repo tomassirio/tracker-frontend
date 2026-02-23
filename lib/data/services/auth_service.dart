@@ -1,4 +1,3 @@
-import '../client/query/user_query_client.dart';
 import '../models/auth_models.dart';
 import '../client/clients.dart';
 import '../storage/token_storage.dart';
@@ -120,6 +119,11 @@ class AuthService {
   /// Get current username
   Future<String?> getCurrentUsername() async {
     return await _tokenStorage.getUsername();
+  }
+
+  /// Check if current user is admin
+  Future<bool> isAdmin() async {
+    return await _tokenStorage.isAdmin();
   }
 
   /// Refresh access token using refresh token

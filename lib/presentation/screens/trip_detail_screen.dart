@@ -8,6 +8,7 @@ import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
+import 'package:tracker_frontend/data/client/query/promotion_query_client.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
@@ -18,6 +19,7 @@ import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
@@ -40,6 +42,7 @@ class TripDetailScreen extends StatefulWidget {
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
   final UserService _userService = UserService();
+  final PromotionQueryClient _promotionQueryClient = PromotionQueryClient();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
@@ -58,6 +61,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoadingComments = false;
   bool _isAddingComment = false;
   bool _isLoggedIn = false;
+  bool _isAdmin = false;
   bool _isChangingStatus = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
@@ -70,6 +74,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _hasSentFriendRequest = false;
   bool _isAlreadyFriends = false;
   String? _sentFriendRequestId; // Store the request ID for cancellation
+
+  // Promotion state
+  bool _isPromoted = false;
+  String? _donationLink;
 
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
@@ -109,6 +117,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadUserInfo();
     _loadComments();
     _loadTripUpdates();
+    _loadPromotionInfo();
     _initWebSocket();
   }
 
@@ -327,10 +336,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _loadUserInfo() async {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
+    final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
+      _isAdmin = isAdmin;
     });
 
     // If logged in and viewing another user's trip, check social status
@@ -395,6 +406,26 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       setState(() => _isLoadingUpdates = false);
       if (mounted) {
         UiHelpers.showErrorMessage(context, 'Error loading updates: $e');
+      }
+    }
+  }
+
+  Future<void> _loadPromotionInfo() async {
+    try {
+      final promotion = await _promotionQueryClient.getTripPromotion(_trip.id);
+      if (mounted) {
+        setState(() {
+          _isPromoted = true;
+          _donationLink = promotion.donationLink;
+        });
+      }
+    } catch (e) {
+      // Trip is not promoted — this is expected for most trips
+      if (mounted) {
+        setState(() {
+          _isPromoted = false;
+          _donationLink = null;
+        });
       }
     }
   }
@@ -693,6 +724,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     AuthNavigationHelper.navigateToOwnProfile(context);
   }
 
+  Future<void> _launchDonationLink() async {
+    if (_donationLink == null) return;
+    final uri = Uri.parse(_donationLink!);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (mounted) {
+      UiHelpers.showErrorMessage(context, 'Could not open donation link');
+    }
+  }
+
   Future<void> _navigateToAuth() async {
     final result = await Navigator.push(
       context,
@@ -828,6 +869,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
+        isAdmin: _isAdmin,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -877,9 +919,88 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     : null,
                 child: strategy.buildTimelinePanel(constraints, layoutData),
               ),
+
+              // Floating donation button for promoted trips
+              if (_isPromoted && _donationLink != null)
+                Positioned(
+                  left: 16,
+                  bottom: 16,
+                  child: _buildDonationButton(),
+                ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  /// Builds a donation button styled based on the donation link provider
+  Widget _buildDonationButton() {
+    final isBuyMeACoffee =
+        _donationLink != null && _donationLink!.contains('buymeacoffee.com');
+
+    if (isBuyMeACoffee) {
+      return Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFFFDD00), // Buy me a Coffee yellow
+        child: InkWell(
+          onTap: _launchDonationLink,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.network(
+                  'https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg',
+                  height: 24,
+                  width: 24,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Text('☕', style: TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Buy me a Coffee',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Generic donation button for other providers
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(12),
+      color: Colors.amber.shade700,
+      child: InkWell(
+        onTap: _launchDonationLink,
+        borderRadius: BorderRadius.circular(12),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.favorite, color: Colors.white, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Support this trip',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -911,6 +1032,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
       isAlreadyFriends: _isAlreadyFriends,
+      isPromoted: _isPromoted,
+      donationLink: _donationLink,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),

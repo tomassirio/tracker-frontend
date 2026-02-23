@@ -20,6 +20,7 @@ class TripInfoCard extends StatelessWidget {
   final bool isFollowing;
   final bool hasSentFriendRequest;
   final bool isAlreadyFriends;
+  final bool isPromoted;
 
   const TripInfoCard({
     super.key,
@@ -34,6 +35,7 @@ class TripInfoCard extends StatelessWidget {
     this.isFollowing = false,
     this.hasSentFriendRequest = false,
     this.isAlreadyFriends = false,
+    this.isPromoted = false,
   });
 
   @override
@@ -329,6 +331,38 @@ class TripInfoCard extends StatelessWidget {
                       trip.visibility.toJson(),
                       '',
                     ),
+                    if (isPromoted) ...[
+                      const SizedBox(width: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 13,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Promoted',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 // Description if present
