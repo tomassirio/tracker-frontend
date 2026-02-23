@@ -775,9 +775,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'My Trips',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              _isViewingOwnProfile ? 'My Trips' : 'Trips',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             if (_userTrips.isNotEmpty)
               Text(

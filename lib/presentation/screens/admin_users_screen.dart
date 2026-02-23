@@ -573,8 +573,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               const SizedBox(width: 12),
               _buildStatBadge(Icons.people, '${user.followersCount}'),
               const SizedBox(width: 12),
-              _buildStatBadge(Icons.person_add_alt_1, '${user.followingCount}'),
-              const SizedBox(width: 12),
               _buildStatBadge(Icons.handshake, '${user.friendsCount}'),
               const SizedBox(width: 12),
               Text(
