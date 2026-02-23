@@ -715,4 +715,3 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
-
