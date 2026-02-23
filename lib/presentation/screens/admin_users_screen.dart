@@ -345,7 +345,13 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Error: $_error'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Error: $_error',
+                textAlign: TextAlign.center,
+              ),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _loadUsers(),
@@ -356,47 +362,63 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () => _loadUsers(page: _currentPage),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
-            _buildSortBar(),
-            const SizedBox(height: 16),
-            _buildUsersTable(),
-            const SizedBox(height: 16),
-            _buildPaginationControls(),
-          ],
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        final horizontalPadding = isMobile ? 8.0 : 16.0;
+
+        return RefreshIndicator(
+          onRefresh: () => _loadUsers(page: _currentPage),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(horizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(isMobile),
+                const SizedBox(height: 16),
+                _buildSortBar(isMobile),
+                const SizedBox(height: 16),
+                _buildUsersTable(isMobile),
+                const SizedBox(height: 16),
+                _buildPaginationControls(),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isMobile) {
+    final cardPadding = isMobile ? 12.0 : 16.0;
+    final titleFontSize = isMobile ? 18.0 : 20.0;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(cardPadding),
         child: Row(
           children: [
-            const Icon(Icons.people, size: 28),
+            Icon(Icons.people, size: isMobile ? 24 : 28),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'User Management',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '$_totalElements total users',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: isMobile ? 12 : 14,
+                    ),
                   ),
                 ],
               ),
@@ -405,6 +427,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               icon: const Icon(Icons.refresh),
               onPressed: () => _loadUsers(page: _currentPage),
               tooltip: 'Refresh',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ],
         ),
@@ -412,10 +436,53 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildSortBar() {
+  Widget _buildSortBar(bool isMobile) {
+    final cardPadding = isMobile ? 12.0 : 16.0;
+
+    if (isMobile) {
+      // Mobile layout: Stack vertically
+      return Card(
+        child: Padding(
+          padding: EdgeInsets.all(cardPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Sort chips
+              Row(
+                children: [
+                  const Text(
+                    'Sort by: ',
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildSortChip('Username', 'username'),
+                  const SizedBox(width: 8),
+                  _buildSortChip('Created', 'createdAt'),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Search filter
+              TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Filter results...',
+                  prefixIcon: Icon(Icons.filter_list, size: 20),
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Desktop layout: Horizontal row
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: cardPadding, vertical: 8),
         child: Row(
           children: [
             const Text(
@@ -472,7 +539,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildUsersTable() {
+  Widget _buildUsersTable(bool isMobile) {
     if (_filteredUsers.isEmpty) {
       return const Card(
         child: Center(
@@ -487,9 +554,11 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       );
     }
 
+    final cardPadding = isMobile ? 8.0 : 16.0;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(cardPadding),
         child: ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -497,17 +566,176 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           separatorBuilder: (context, index) => const Divider(),
           itemBuilder: (context, index) {
             final user = _filteredUsers[index];
-            return _buildUserTile(user);
+            return _buildUserTile(user, isMobile);
           },
         ),
       ),
     );
   }
 
-  Widget _buildUserTile(UserProfile user) {
+  Widget _buildUserTile(UserProfile user, bool isMobile) {
     final isUserAdmin = _userAdminStatus[user.id] ?? false;
     final isSelf = user.id == _userId;
 
+    if (isMobile) {
+      return _buildMobileUserTile(user, isUserAdmin, isSelf);
+    }
+    return _buildDesktopUserTile(user, isUserAdmin, isSelf);
+  }
+
+  Widget _buildMobileUserTile(
+      UserProfile user, bool isUserAdmin, bool isSelf) {
+    return InkWell(
+      onTap: () => _navigateToUserProfile(user.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // User info row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  backgroundImage: user.avatarUrl != null
+                      ? NetworkImage(user.avatarUrl!)
+                      : null,
+                  child: user.avatarUrl == null
+                      ? Text(
+                          user.username.isNotEmpty
+                              ? user.username[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              user.displayName ?? user.username,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isUserAdmin) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.amber.shade400),
+                              ),
+                              child: const Text(
+                                'ADMIN',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (user.displayName != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          '@${user.username}',
+                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: 4),
+                      Text(
+                        user.email,
+                        style: const TextStyle(fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      // Stats row
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 4,
+                        children: [
+                          _buildStatBadge(Icons.map, '${user.tripsCount}'),
+                          _buildStatBadge(Icons.people, '${user.followersCount}'),
+                          _buildStatBadge(Icons.handshake, '${user.friendsCount}'),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Joined ${_formatDate(user.createdAt)}',
+                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Action buttons row
+            Row(
+              children: [
+                if (!isSelf)
+                  Expanded(
+                    child: isUserAdmin
+                        ? ElevatedButton.icon(
+                            onPressed: () => _demoteUser(user),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange.shade400,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: const Icon(Icons.arrow_downward, size: 16),
+                            label: const Text('Unpromote',
+                                style: TextStyle(fontSize: 12)),
+                          )
+                        : ElevatedButton.icon(
+                            onPressed: () => _promoteUser(user),
+                            icon: const Icon(Icons.arrow_upward, size: 16),
+                            label: const Text('Promote',
+                                style: TextStyle(fontSize: 12)),
+                          ),
+                  ),
+                const SizedBox(width: 8),
+                if (!isSelf)
+                  IconButton(
+                    icon: const Icon(Icons.delete_forever, color: Colors.red),
+                    onPressed: () => _deleteUser(user),
+                    tooltip: 'Delete User',
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.open_in_new),
+                  onPressed: () => _navigateToUserProfile(user.id),
+                  tooltip: 'View Profile',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopUserTile(
+      UserProfile user, bool isUserAdmin, bool isSelf) {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
