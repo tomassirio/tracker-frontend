@@ -352,7 +352,11 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('By: ${promoted.username}'),
+                        Text('Owner: ${promoted.tripOwnerUsername}'),
+                        Text(
+                          'Promoted by: ${promoted.promotedByUsername}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
                         if (promoted.donationLink != null)
                           Text(
                             'Donation: ${promoted.donationLink}',

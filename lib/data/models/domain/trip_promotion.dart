@@ -33,50 +33,52 @@ class TripPromotion {
 
 /// Promoted trip model (combines trip and promotion data)
 class PromotedTrip {
+  final String id;
   final String tripId;
   final String tripName;
-  final String userId;
-  final String username;
   final String? donationLink;
+  final String promotedBy;
+  final String promotedByUsername;
+  final String tripOwnerId;
+  final String tripOwnerUsername;
   final DateTime promotedAt;
 
   PromotedTrip({
+    required this.id,
     required this.tripId,
     required this.tripName,
-    required this.userId,
-    required this.username,
     this.donationLink,
+    required this.promotedBy,
+    required this.promotedByUsername,
+    required this.tripOwnerId,
+    required this.tripOwnerUsername,
     required this.promotedAt,
   });
 
   factory PromotedTrip.fromJson(Map<String, dynamic> json) {
     return PromotedTrip(
-      tripId: json['tripId'] as String? ?? json['id'] as String? ?? '',
-      tripName: json['tripName'] as String? ??
-          json['name'] as String? ??
-          'Untitled Trip',
-      userId: json['userId'] as String? ??
-          json['ownerId'] as String? ??
-          '',
-      username: json['username'] as String? ??
-          json['ownerUsername'] as String? ??
-          json['userName'] as String? ??
-          '',
+      id: json['id'] as String? ?? '',
+      tripId: json['tripId'] as String? ?? '',
+      tripName: json['tripName'] as String? ?? 'Untitled Trip',
       donationLink: json['donationLink'] as String?,
-      promotedAt: DateTime.tryParse(
-              json['promotedAt'] as String? ??
-                  json['createdAt'] as String? ??
-                  '') ??
+      promotedBy: json['promotedBy'] as String? ?? '',
+      promotedByUsername: json['promotedByUsername'] as String? ?? '',
+      tripOwnerId: json['tripOwnerId'] as String? ?? '',
+      tripOwnerUsername: json['tripOwnerUsername'] as String? ?? '',
+      promotedAt: DateTime.tryParse(json['promotedAt'] as String? ?? '') ??
           DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'tripId': tripId,
         'tripName': tripName,
-        'userId': userId,
-        'username': username,
         if (donationLink != null) 'donationLink': donationLink,
+        'promotedBy': promotedBy,
+        'promotedByUsername': promotedByUsername,
+        'tripOwnerId': tripOwnerId,
+        'tripOwnerUsername': tripOwnerUsername,
         'promotedAt': promotedAt.toIso8601String(),
       };
 }
