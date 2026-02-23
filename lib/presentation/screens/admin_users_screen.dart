@@ -753,7 +753,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 Row(
                   children: [
                     Expanded(
-                      flex: 2,
+                      flex: 3,
                       child: isUserAdmin
                           ? OutlinedButton.icon(
                               onPressed: () => _demoteUser(user),
@@ -782,6 +782,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
+                      flex: 2,
                       child: OutlinedButton.icon(
                         onPressed: () => _deleteUser(user),
                         style: OutlinedButton.styleFrom(
