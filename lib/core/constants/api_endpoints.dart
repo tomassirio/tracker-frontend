@@ -28,6 +28,7 @@ class ApiEndpoints {
 
   // User Query endpoints (use queryBaseUrl)
   static const String usersMe = '/users/me';
+  static const String usersAll = '/users';
   static String userById(String userId) => '/users/$userId';
   static String userByUsername(String username) => '/users/username/$username';
 

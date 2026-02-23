@@ -1,5 +1,7 @@
 import '../client/clients.dart';
+import '../models/responses/page_response.dart';
 import '../models/trip_models.dart';
+import '../models/user_models.dart';
 
 /// Service for admin operations
 class AdminService {
@@ -7,17 +9,20 @@ class AdminService {
   final PromotionCommandClient _promotionCommandClient;
   final PromotionQueryClient _promotionQueryClient;
   final TripQueryClient _tripQueryClient;
+  final UserQueryClient _userQueryClient;
 
   AdminService({
     TripCommandClient? tripCommandClient,
     PromotionCommandClient? promotionCommandClient,
     PromotionQueryClient? promotionQueryClient,
     TripQueryClient? tripQueryClient,
+    UserQueryClient? userQueryClient,
   })  : _tripCommandClient = tripCommandClient ?? TripCommandClient(),
         _promotionCommandClient =
             promotionCommandClient ?? PromotionCommandClient(),
         _promotionQueryClient = promotionQueryClient ?? PromotionQueryClient(),
-        _tripQueryClient = tripQueryClient ?? TripQueryClient();
+        _tripQueryClient = tripQueryClient ?? TripQueryClient(),
+        _userQueryClient = userQueryClient ?? UserQueryClient();
 
   /// Delete a trip (admin only)
   Future<void> deleteTrip(String tripId) async {
@@ -58,6 +63,20 @@ class AdminService {
     return await _promotionQueryClient.getTripPromotion(tripId);
   }
 
-  // Note: User deletion and comment deletion would need to be added to backend API
-  // and corresponding clients before they can be implemented here
+  // User management operations
+
+  /// Get all users with pagination and sorting (admin only)
+  Future<PageResponse<UserProfile>> getAllUsers({
+    int page = 0,
+    int size = 20,
+    String sort = 'username',
+    String direction = 'asc',
+  }) async {
+    return await _userQueryClient.getAllUsers(
+      page: page,
+      size: size,
+      sort: sort,
+      direction: direction,
+    );
+  }
 }

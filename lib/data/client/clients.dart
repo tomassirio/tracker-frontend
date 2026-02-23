@@ -15,6 +15,7 @@ export 'command/promotion_command_client.dart';
 export 'query/trip_query_client.dart';
 export 'query/comment_query_client.dart';
 export 'query/promotion_query_client.dart';
+export 'query/user_query_client.dart';
 
 // Export Google API Clients
 export 'google_geocoding_api_client.dart';

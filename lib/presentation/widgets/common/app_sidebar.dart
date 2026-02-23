@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:tracker_frontend/presentation/screens/admin_users_screen.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
 import 'package:tracker_frontend/presentation/screens/trip_promotion_screen.dart';
@@ -83,6 +84,15 @@ class AppSidebar extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => const TripPromotionScreen(),
+          ),
+        );
+        break;
+      case 6:
+        // Navigate to User Management (admin only)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AdminUsersScreen(),
           ),
         );
         break;
@@ -182,6 +192,12 @@ class AppSidebar extends StatelessWidget {
                 title: const Text('Trip Promotion'),
                 selected: selectedIndex == 5,
                 onTap: () => _handleNavigation(context, 5),
+              ),
+              ListTile(
+                leading: const Icon(Icons.people_outline),
+                title: const Text('User Management'),
+                selected: selectedIndex == 6,
+                onTap: () => _handleNavigation(context, 6),
               ),
             ],
             const Divider(),
