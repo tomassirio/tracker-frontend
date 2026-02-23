@@ -20,12 +20,12 @@ class PromotionQueryClient {
   }
 
   /// Get promotion details for a specific trip
-  /// Public endpoint - no authentication required
+  /// Requires authentication (ADMIN only)
   /// Returns 200 OK with promotion object
   Future<TripPromotion> getTripPromotion(String tripId) async {
     final response = await _apiClient.get(
       ApiEndpoints.tripPromotion(tripId),
-      requireAuth: false,
+      requireAuth: true,
     );
     return _apiClient.handleResponse(response, TripPromotion.fromJson);
   }
