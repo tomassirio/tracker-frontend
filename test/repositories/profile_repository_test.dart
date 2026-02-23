@@ -66,6 +66,40 @@ void main() {
       });
     });
 
+    group('getMyTrips', () {
+      test('returns all trips for the current user', () async {
+        mockTripService.mockTrips = [
+          createMockTrip('trip-1', 'Trip 1'),
+          createMockTrip('trip-2', 'Trip 2'),
+        ];
+
+        final result = await profileRepository.getMyTrips();
+
+        expect(result.length, 2);
+        expect(result[0].id, 'trip-1');
+        expect(result[1].id, 'trip-2');
+        expect(mockTripService.getMyTripsCalled, true);
+        expect(mockTripService.getUserTripsCalled, false);
+      });
+
+      test('returns empty list when no trips', () async {
+        mockTripService.mockTrips = [];
+
+        final result = await profileRepository.getMyTrips();
+
+        expect(result, isEmpty);
+      });
+
+      test('passes through service errors', () async {
+        mockTripService.shouldThrowError = true;
+
+        expect(
+          () => profileRepository.getMyTrips(),
+          throwsException,
+        );
+      });
+    });
+
     group('getUserTrips', () {
       test('returns trips for the specified user', () async {
         mockTripService.mockTrips = [

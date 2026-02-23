@@ -262,7 +262,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      final trips = await _repository.getUserTrips(userId);
+      final trips = _isViewingOwnProfile
+          ? await _repository.getMyTrips()
+          : await _repository.getUserTrips(userId);
       setState(() {
         _userTrips = trips;
         _isLoadingTrips = false;
