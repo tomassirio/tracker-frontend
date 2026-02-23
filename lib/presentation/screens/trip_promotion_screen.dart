@@ -2,8 +2,10 @@ import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/admin_service.dart';
+import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 
@@ -18,6 +20,7 @@ class TripPromotionScreen extends StatefulWidget {
 class _TripPromotionScreenState extends State<TripPromotionScreen> {
   final AdminService _adminService = AdminService();
   final HomeRepository _homeRepository = HomeRepository();
+  final TripService _tripService = TripService();
   final TextEditingController _searchController = TextEditingController();
 
   List<Trip> _allTrips = [];
@@ -227,6 +230,22 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
     }
   }
 
+  Future<void> _navigateToTrip(String tripId) async {
+    try {
+      final trip = await _tripService.getTripById(tripId);
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TripDetailScreen(trip: trip)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Failed to load trip: $e');
+      }
+    }
+  }
+
   Future<void> _handleLogout() async {
     await _homeRepository.logout();
     if (mounted) {
@@ -349,6 +368,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                   return ListTile(
                     leading: const Icon(Icons.star, color: Colors.amber),
                     title: Text(promoted.tripName),
+                    onTap: () => _navigateToTrip(promoted.tripId),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -438,6 +458,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                       color: _getStatusColor(trip.status),
                     ),
                     title: Text(trip.name),
+                    onTap: () => _navigateToTrip(trip.id),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
