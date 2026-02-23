@@ -46,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen>
   List<Trip> _myTrips = [];
   List<Trip> _feedTrips = [];
   List<Trip> _discoverTrips = [];
-  List<PromotedTrip> _promotedTrips = [];
   Set<String> _promotedTripIds = {};
   Set<String> _friendIds = {};
   Set<String> _followingIds = {};
@@ -232,7 +231,6 @@ class _HomeScreenState extends State<HomeScreen>
       final promoted = await _adminService.getPromotedTrips();
       if (mounted) {
         setState(() {
-          _promotedTrips = promoted;
           _promotedTripIds = promoted.map((p) => p.tripId).toSet();
         });
       }
@@ -898,9 +896,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDiscoverTab() {
     final filteredTrips = _getFilteredTrips(_discoverTrips);
-    final promotedTripsList = _allTrips
-        .where((t) => _promotedTripIds.contains(t.id))
-        .toList();
+    final promotedTripsList =
+        _allTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
 
     if (filteredTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(

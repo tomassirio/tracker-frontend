@@ -65,20 +65,26 @@ void main() {
     group('PromotedTrip', () {
       test('fromJson creates PromotedTrip from JSON', () {
         final json = {
+          'id': 'promo-1',
           'tripId': 'trip123',
           'tripName': 'Amazing Journey',
-          'userId': 'user456',
-          'username': 'johndoe',
           'donationLink': 'https://buymeacoffee.com/johndoe',
+          'promotedBy': 'admin-1',
+          'promotedByUsername': 'admin_user',
+          'tripOwnerId': 'user456',
+          'tripOwnerUsername': 'johndoe',
           'promotedAt': '2024-01-01T00:00:00.000Z',
         };
 
         final promotedTrip = PromotedTrip.fromJson(json);
 
+        expect(promotedTrip.id, 'promo-1');
         expect(promotedTrip.tripId, 'trip123');
         expect(promotedTrip.tripName, 'Amazing Journey');
-        expect(promotedTrip.userId, 'user456');
-        expect(promotedTrip.username, 'johndoe');
+        expect(promotedTrip.promotedBy, 'admin-1');
+        expect(promotedTrip.promotedByUsername, 'admin_user');
+        expect(promotedTrip.tripOwnerId, 'user456');
+        expect(promotedTrip.tripOwnerUsername, 'johndoe');
         expect(promotedTrip.donationLink, 'https://buymeacoffee.com/johndoe');
         expect(promotedTrip.promotedAt,
             DateTime.parse('2024-01-01T00:00:00.000Z'));
@@ -86,10 +92,13 @@ void main() {
 
       test('fromJson handles null donation link', () {
         final json = {
+          'id': 'promo-1',
           'tripId': 'trip123',
           'tripName': 'Amazing Journey',
-          'userId': 'user456',
-          'username': 'johndoe',
+          'promotedBy': 'admin-1',
+          'promotedByUsername': 'admin_user',
+          'tripOwnerId': 'user456',
+          'tripOwnerUsername': 'johndoe',
           'promotedAt': '2024-01-01T00:00:00.000Z',
         };
 
@@ -100,30 +109,39 @@ void main() {
 
       test('toJson converts PromotedTrip correctly', () {
         final promotedTrip = PromotedTrip(
+          id: 'promo-1',
           tripId: 'trip123',
           tripName: 'Amazing Journey',
-          userId: 'user456',
-          username: 'johndoe',
           donationLink: 'https://buymeacoffee.com/johndoe',
+          promotedBy: 'admin-1',
+          promotedByUsername: 'admin_user',
+          tripOwnerId: 'user456',
+          tripOwnerUsername: 'johndoe',
           promotedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
         );
 
         final json = promotedTrip.toJson();
 
+        expect(json['id'], 'promo-1');
         expect(json['tripId'], 'trip123');
         expect(json['tripName'], 'Amazing Journey');
-        expect(json['userId'], 'user456');
-        expect(json['username'], 'johndoe');
+        expect(json['promotedBy'], 'admin-1');
+        expect(json['promotedByUsername'], 'admin_user');
+        expect(json['tripOwnerId'], 'user456');
+        expect(json['tripOwnerUsername'], 'johndoe');
         expect(json['donationLink'], 'https://buymeacoffee.com/johndoe');
         expect(json['promotedAt'], '2024-01-01T00:00:00.000Z');
       });
 
       test('toJson excludes null donation link', () {
         final promotedTrip = PromotedTrip(
+          id: 'promo-1',
           tripId: 'trip123',
           tripName: 'Amazing Journey',
-          userId: 'user456',
-          username: 'johndoe',
+          promotedBy: 'admin-1',
+          promotedByUsername: 'admin_user',
+          tripOwnerId: 'user456',
+          tripOwnerUsername: 'johndoe',
           promotedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
         );
 
