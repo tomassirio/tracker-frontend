@@ -7,6 +7,7 @@ import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/home_repository.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:tracker_frontend/data/services/admin_service.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/presentation/helpers/dialog_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, RouteAware {
   final HomeRepository _repository = HomeRepository();
   final TripService _tripService = TripService();
+  final AdminService _adminService = AdminService();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   StreamSubscription<WebSocketEvent>? _wsSubscription;
@@ -44,6 +46,8 @@ class _HomeScreenState extends State<HomeScreen>
   List<Trip> _myTrips = [];
   List<Trip> _feedTrips = [];
   List<Trip> _discoverTrips = [];
+  List<PromotedTrip> _promotedTrips = [];
+  Set<String> _promotedTripIds = {};
   Set<String> _friendIds = {};
   Set<String> _followingIds = {};
 
@@ -85,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _initializeData() async {
     await _loadUserInfo();
     await _loadTrips();
+    await _loadPromotedTrips();
   }
 
   void _onTabChanged() {
@@ -219,6 +224,21 @@ class _HomeScreenState extends State<HomeScreen>
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadPromotedTrips() async {
+    try {
+      final promoted = await _adminService.getPromotedTrips();
+      if (mounted) {
+        setState(() {
+          _promotedTrips = promoted;
+          _promotedTripIds = promoted.map((p) => p.tripId).toSet();
+        });
+      }
+    } catch (e) {
+      // Silently fail — user may not have admin access
+      debugPrint('Failed to load promoted trips: $e');
     }
   }
 
@@ -878,8 +898,11 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDiscoverTab() {
     final filteredTrips = _getFilteredTrips(_discoverTrips);
+    final promotedTripsList = _allTrips
+        .where((t) => _promotedTripIds.contains(t.id))
+        .toList();
 
-    if (filteredTrips.isEmpty) {
+    if (filteredTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -901,10 +924,23 @@ class _HomeScreenState extends State<HomeScreen>
     }
 
     return RefreshIndicator(
-      onRefresh: _loadTrips,
+      onRefresh: () async {
+        await _loadTrips();
+        await _loadPromotedTrips();
+      },
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (promotedTripsList.isNotEmpty) ...[
+            const FeedSectionHeader(
+              title: 'Featured Trips',
+              icon: Icons.star,
+              subtitle: 'Highlighted adventures from the community',
+            ),
+            const SizedBox(height: 12),
+            _buildTripGrid(promotedTripsList, showRelationship: true),
+            const SizedBox(height: 24),
+          ],
           FeedSectionHeader(
             title: 'Discover',
             icon: Icons.public,
@@ -1008,6 +1044,7 @@ class _HomeScreenState extends State<HomeScreen>
                   : null,
               relationship: relationship,
               showAllBadges: true,
+              isPromoted: _promotedTripIds.contains(trip.id),
             );
           },
         );

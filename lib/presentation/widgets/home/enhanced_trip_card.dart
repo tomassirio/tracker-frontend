@@ -17,6 +17,7 @@ class EnhancedTripCard extends StatefulWidget {
   final VoidCallback? onDelete;
   final RelationshipType? relationship;
   final bool showAllBadges;
+  final bool isPromoted;
 
   const EnhancedTripCard({
     super.key,
@@ -25,6 +26,7 @@ class EnhancedTripCard extends StatefulWidget {
     this.onDelete,
     this.relationship,
     this.showAllBadges = true,
+    this.isPromoted = false,
   });
 
   @override
@@ -473,6 +475,36 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       spacing: 6,
                       runSpacing: 6,
                       children: [
+                        if (widget.isPromoted)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade700,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Promoted',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         if (widget.showAllBadges)
                           StatusBadge(
                               status: widget.trip.status, compact: false),
