@@ -445,24 +445,24 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                       ],
                     ),
                     trailing: SizedBox(
-                      width: 140,
+                      width: 120,
                       child: isPromoted
-                          ? ElevatedButton.icon(
+                          ? ElevatedButton(
                               onPressed: () => _unpromoteTrip(trip.id),
-                              icon: const Icon(Icons.star, size: 16),
-                              label: const Text('Unpromote'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red.shade400,
                                 foregroundColor: Colors.white,
-                                alignment: Alignment.center,
+                              ),
+                              child: const Text(
+                                'Unpromote',
+                                textAlign: TextAlign.center,
                               ),
                             )
-                          : ElevatedButton.icon(
+                          : ElevatedButton(
                               onPressed: () => _promoteTrip(trip),
-                              icon: const Icon(Icons.star, size: 16),
-                              label: const Text('Promote'),
-                              style: ElevatedButton.styleFrom(
-                                alignment: Alignment.center,
+                              child: const Text(
+                                'Promote',
+                                textAlign: TextAlign.center,
                               ),
                             ),
                     ),

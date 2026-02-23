@@ -51,12 +51,22 @@ class PromotedTrip {
 
   factory PromotedTrip.fromJson(Map<String, dynamic> json) {
     return PromotedTrip(
-      tripId: json['tripId'] as String? ?? '',
-      tripName: json['tripName'] as String? ?? 'Untitled Trip',
-      userId: json['userId'] as String? ?? '',
-      username: json['username'] as String? ?? '',
+      tripId: json['tripId'] as String? ?? json['id'] as String? ?? '',
+      tripName: json['tripName'] as String? ??
+          json['name'] as String? ??
+          'Untitled Trip',
+      userId: json['userId'] as String? ??
+          json['ownerId'] as String? ??
+          '',
+      username: json['username'] as String? ??
+          json['ownerUsername'] as String? ??
+          json['userName'] as String? ??
+          '',
       donationLink: json['donationLink'] as String?,
-      promotedAt: DateTime.tryParse(json['promotedAt'] as String? ?? '') ??
+      promotedAt: DateTime.tryParse(
+              json['promotedAt'] as String? ??
+                  json['createdAt'] as String? ??
+                  '') ??
           DateTime.now(),
     );
   }
