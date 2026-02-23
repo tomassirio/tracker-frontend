@@ -34,13 +34,11 @@ sed -i.bak "s|{{GOOGLE_MAPS_API_KEY}}|${GOOGLE_MAPS_API_KEY}|g" web/index.html
 COMMAND_URL="${COMMAND_BASE_URL:-http://localhost:8081/api/1}"
 QUERY_URL="${QUERY_BASE_URL:-http://localhost:8082/api/1}"
 AUTH_URL="${AUTH_BASE_URL:-http://localhost:8083/api/1/auth}"
-ADMIN_URL="${ADMIN_BASE_URL:-http://localhost:8083/api/1/admin}"
 WS_URL="${WS_BASE_URL:-ws://localhost:8080}"
 
 sed -i.bak "s|{{COMMAND_BASE_URL}}|${COMMAND_URL}|g" web/index.html
 sed -i.bak "s|{{QUERY_BASE_URL}}|${QUERY_URL}|g" web/index.html
 sed -i.bak "s|{{AUTH_BASE_URL}}|${AUTH_URL}|g" web/index.html
-sed -i.bak "s|{{ADMIN_BASE_URL}}|${ADMIN_URL}|g" web/index.html
 sed -i.bak "s|{{WS_BASE_URL}}|${WS_URL}|g" web/index.html
 
 # Remove backup file
@@ -51,7 +49,6 @@ echo "  Google Maps API Key: ${GOOGLE_MAPS_API_KEY:0:20}..."
 echo "  Command URL: ${COMMAND_URL}"
 echo "  Query URL: ${QUERY_URL}"
 echo "  Auth URL: ${AUTH_URL}"
-echo "  Admin URL: ${ADMIN_URL}"
 echo "  WebSocket URL: ${WS_URL}"
 echo ""
 

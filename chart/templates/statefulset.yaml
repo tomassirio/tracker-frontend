@@ -39,8 +39,6 @@ spec:
           value: "{{ .Values.application.queryBaseUrl }}"
         - name: AUTH_BASE_URL
           value: "{{ .Values.application.authBaseUrl }}"
-        - name: ADMIN_BASE_URL
-          value: "{{ .Values.application.adminBaseUrl }}"
       volumes:
       - name: config
         configMap:
