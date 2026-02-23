@@ -8,6 +8,7 @@ class UserProfile {
   final String? avatarUrl;
   final int followersCount;
   final int followingCount;
+  final int friendsCount;
   final int tripsCount;
   final bool isFollowing;
   final DateTime createdAt;
@@ -21,6 +22,7 @@ class UserProfile {
     this.avatarUrl,
     required this.followersCount,
     required this.followingCount,
+    this.friendsCount = 0,
     required this.tripsCount,
     this.isFollowing = false,
     required this.createdAt,
@@ -36,6 +38,7 @@ class UserProfile {
       avatarUrl: json['avatarUrl'] as String?,
       followersCount: json['followersCount'] as int? ?? 0,
       followingCount: json['followingCount'] as int? ?? 0,
+      friendsCount: json['friendsCount'] as int? ?? 0,
       tripsCount: json['tripsCount'] as int? ?? 0,
       isFollowing: json['isFollowing'] as bool? ?? false,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
@@ -52,6 +55,7 @@ class UserProfile {
         if (avatarUrl != null) 'avatarUrl': avatarUrl,
         'followersCount': followersCount,
         'followingCount': followingCount,
+        'friendsCount': friendsCount,
         'tripsCount': tripsCount,
         'isFollowing': isFollowing,
         'createdAt': createdAt.toIso8601String(),

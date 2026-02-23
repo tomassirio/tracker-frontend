@@ -67,7 +67,7 @@ void main() {
     });
 
     group('getUserTrips', () {
-      test('returns trips for current user', () async {
+      test('returns trips for the specified user', () async {
         mockTripService.mockTrips = [
           createMockTrip('trip-1', 'Trip 1'),
           createMockTrip('trip-2', 'Trip 2'),
@@ -78,8 +78,9 @@ void main() {
         expect(result.length, 2);
         expect(result[0].id, 'trip-1');
         expect(result[1].id, 'trip-2');
-        // Verify it called getMyTrips, not getUserTrips(userId)
-        expect(mockTripService.getMyTripsCalled, true);
+        // Verify it called getUserTrips(userId), not getMyTrips
+        expect(mockTripService.getUserTripsCalled, true);
+        expect(mockTripService.getMyTripsCalled, false);
       });
 
       test('returns empty list when no trips', () async {

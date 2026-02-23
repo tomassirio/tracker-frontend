@@ -575,6 +575,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               const SizedBox(width: 12),
               _buildStatBadge(Icons.person_add_alt_1, '${user.followingCount}'),
               const SizedBox(width: 12),
+              _buildStatBadge(Icons.handshake, '${user.friendsCount}'),
+              const SizedBox(width: 12),
               Text(
                 'Joined ${_formatDate(user.createdAt)}',
                 style: TextStyle(fontSize: 12, color: Colors.grey[500]),
@@ -713,3 +715,4 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
+
