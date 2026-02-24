@@ -10,12 +10,12 @@ class AchievementQueryClient {
       : _apiClient = apiClient ?? ApiClient(baseUrl: ApiEndpoints.queryBaseUrl);
 
   /// Get all available achievements
-  /// No authentication required
+  /// Requires authentication
   /// Returns 200 OK with array of achievements
   Future<List<Achievement>> getAllAchievements() async {
     final response = await _apiClient.get(
       ApiEndpoints.achievements,
-      requireAuth: false,
+      requireAuth: true,
     );
     return _apiClient.handleListResponse(response, Achievement.fromJson);
   }
