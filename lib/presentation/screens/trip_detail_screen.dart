@@ -6,12 +6,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
+import 'package:tracker_frontend/data/models/achievement_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/query/promotion_query_client.dart';
 import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
+import 'package:tracker_frontend/data/services/achievement_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
@@ -43,6 +45,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   late final TripDetailRepository _repository;
   final UserService _userService = UserService();
   final PromotionQueryClient _promotionQueryClient = PromotionQueryClient();
+  final AchievementService _achievementService = AchievementService();
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
@@ -78,6 +81,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   // Promotion state
   bool _isPromoted = false;
   String? _donationLink;
+
+  // Trip achievements
+  List<UserAchievement> _tripAchievements = [];
 
   // Collapsible panel states
   bool _isTimelineCollapsed = false;
@@ -118,6 +124,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadComments();
     _loadTripUpdates();
     _loadPromotionInfo();
+    _loadTripAchievements();
     _initWebSocket();
   }
 
@@ -427,6 +434,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _donationLink = null;
         });
       }
+    }
+  }
+
+  Future<void> _loadTripAchievements() async {
+    try {
+      final achievements =
+          await _achievementService.getTripAchievements(_trip.id);
+      if (mounted) {
+        setState(() {
+          _tripAchievements = achievements;
+        });
+      }
+    } catch (e) {
+      // Silently fail — achievements are optional
     }
   }
 
@@ -1034,6 +1055,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isAlreadyFriends: _isAlreadyFriends,
       isPromoted: _isPromoted,
       donationLink: _donationLink,
+      tripAchievements: _tripAchievements,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
