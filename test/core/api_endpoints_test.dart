@@ -270,22 +270,33 @@ void main() {
       test('userAchievements generates correct path', () {
         expect(
           ApiEndpoints.userAchievements('user123'),
-          '/achievements/users/user123/achievements',
+          '/users/user123/achievements',
         );
         expect(
           ApiEndpoints.userAchievements('abc-def'),
-          '/achievements/users/abc-def/achievements',
+          '/users/abc-def/achievements',
         );
       });
 
       test('userTripAchievements generates correct path', () {
         expect(
           ApiEndpoints.userTripAchievements('user123', 'trip456'),
-          '/achievements/users/user123/trips/trip456/achievements',
+          '/users/user123/trips/trip456/achievements',
         );
         expect(
           ApiEndpoints.userTripAchievements('abc-def', 'ghi-jkl'),
-          '/achievements/users/abc-def/trips/ghi-jkl/achievements',
+          '/users/abc-def/trips/ghi-jkl/achievements',
+        );
+      });
+
+      test('tripAchievements generates correct path', () {
+        expect(
+          ApiEndpoints.tripAchievements('trip123'),
+          '/trips/trip123/achievements',
+        );
+        expect(
+          ApiEndpoints.tripAchievements('abc-def'),
+          '/trips/abc-def/achievements',
         );
       });
     });

@@ -33,4 +33,9 @@ class AchievementService {
     return await _achievementQueryClient.getUserTripAchievements(
         userId, tripId);
   }
+
+  /// Get all achievements for a specific trip (across all users)
+  Future<List<UserAchievement>> getTripAchievements(String tripId) async {
+    return await _achievementQueryClient.getTripAchievements(tripId);
+  }
 }

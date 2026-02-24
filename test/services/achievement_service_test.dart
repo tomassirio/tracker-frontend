@@ -174,6 +174,68 @@ void main() {
       });
     });
 
+    group('getTripAchievements', () {
+      test('returns all achievements for a trip', () async {
+        mockQueryClient.mockUserAchievements = [
+          UserAchievement(
+            id: 'ua-4',
+            userId: 'user-1',
+            achievement: Achievement(
+              id: 'ach-1',
+              type: AchievementType.distanceOneHundredKm,
+              name: 'First Century',
+              description: 'Walk 100km in a single trip',
+              thresholdValue: 100,
+            ),
+            tripId: 'trip-1',
+            unlockedAt: DateTime.parse('2025-01-15T10:30:00.000Z'),
+            valueAchieved: 105.5,
+          ),
+          UserAchievement(
+            id: 'ua-5',
+            userId: 'user-2',
+            achievement: Achievement(
+              id: 'ach-2',
+              type: AchievementType.updatesTen,
+              name: 'Getting Started',
+              description: 'Post 10 updates on a single trip',
+              thresholdValue: 10,
+            ),
+            tripId: 'trip-1',
+            unlockedAt: DateTime.parse('2025-01-20T08:00:00.000Z'),
+            valueAchieved: 15.0,
+          ),
+        ];
+
+        final result =
+            await achievementService.getTripAchievements('trip-1');
+
+        expect(result.length, 2);
+        expect(result[0].tripId, 'trip-1');
+        expect(result[1].tripId, 'trip-1');
+        expect(mockQueryClient.lastTripId, 'trip-1');
+        expect(mockQueryClient.getTripAchievementsCalled, true);
+      });
+
+      test('returns empty list when no trip achievements', () async {
+        mockQueryClient.mockUserAchievements = [];
+
+        final result =
+            await achievementService.getTripAchievements('trip-1');
+
+        expect(result, isEmpty);
+      });
+
+      test('passes through errors', () async {
+        mockQueryClient.shouldThrowError = true;
+
+        expect(
+          () => achievementService.getTripAchievements('trip-1'),
+          throwsException,
+        );
+      });
+    });
+
     group('AchievementService initialization', () {
       test('creates with provided client', () {
         final client = MockAchievementQueryClient();
@@ -197,6 +259,7 @@ class MockAchievementQueryClient extends AchievementQueryClient {
   List<UserAchievement> mockUserAchievements = [];
   bool getAllAchievementsCalled = false;
   bool getMyAchievementsCalled = false;
+  bool getTripAchievementsCalled = false;
   String? lastUserId;
   String? lastTripId;
   bool shouldThrowError = false;
@@ -228,6 +291,16 @@ class MockAchievementQueryClient extends AchievementQueryClient {
     String tripId,
   ) async {
     lastUserId = userId;
+    lastTripId = tripId;
+    if (shouldThrowError) {
+      throw Exception('Failed to get user trip achievements');
+    }
+    return mockUserAchievements;
+  }
+
+  @override
+  Future<List<UserAchievement>> getTripAchievements(String tripId) async {
+    getTripAchievementsCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) {
       throw Exception('Failed to get trip achievements');
