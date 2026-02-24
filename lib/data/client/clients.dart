@@ -13,6 +13,7 @@ export 'command/comment_command_client.dart';
 export 'command/promotion_command_client.dart';
 
 // Export Query Clients
+export 'query/admin_query_client.dart';
 export 'query/trip_query_client.dart';
 export 'query/comment_query_client.dart';
 export 'query/promotion_query_client.dart';

@@ -49,13 +49,16 @@ void main() {
 
     group('User management', () {
       late MockAdminCommandClient mockAdminCommandClient;
+      late MockAdminQueryClient mockAdminQueryClient;
       late AdminService serviceWithAdmin;
 
       setUp(() {
         mockAdminCommandClient = MockAdminCommandClient();
+        mockAdminQueryClient = MockAdminQueryClient();
         serviceWithAdmin = AdminService(
           tripCommandClient: mockTripCommandClient,
           adminCommandClient: mockAdminCommandClient,
+          adminQueryClient: mockAdminQueryClient,
         );
       });
 
@@ -99,17 +102,17 @@ void main() {
 
       group('getUserRoles', () {
         test('returns list of roles', () async {
-          mockAdminCommandClient.rolesResponse = ['USER', 'ADMIN'];
+          mockAdminQueryClient.rolesResponse = ['USER', 'ADMIN'];
 
           final roles = await serviceWithAdmin.getUserRoles('user-123');
 
           expect(roles, ['USER', 'ADMIN']);
-          expect(mockAdminCommandClient.getUserRolesCalled, true);
-          expect(mockAdminCommandClient.lastUserId, 'user-123');
+          expect(mockAdminQueryClient.getUserRolesCalled, true);
+          expect(mockAdminQueryClient.lastUserId, 'user-123');
         });
 
         test('returns single role', () async {
-          mockAdminCommandClient.rolesResponse = ['USER'];
+          mockAdminQueryClient.rolesResponse = ['USER'];
 
           final roles = await serviceWithAdmin.getUserRoles('user-456');
 
@@ -118,7 +121,7 @@ void main() {
         });
 
         test('passes through errors when getting roles', () async {
-          mockAdminCommandClient.shouldThrowError = true;
+          mockAdminQueryClient.shouldThrowError = true;
 
           expect(
             () => serviceWithAdmin.getUserRoles('user-123'),
@@ -178,6 +181,13 @@ void main() {
 
         expect(service, isNotNull);
       });
+
+      test('creates with admin query client', () {
+        final adminQueryClient = MockAdminQueryClient();
+        final service = AdminService(adminQueryClient: adminQueryClient);
+
+        expect(service, isNotNull);
+      });
     });
   });
 }
@@ -204,12 +214,10 @@ class MockTripCommandClient extends TripCommandClient {
 class MockAdminCommandClient extends AdminCommandClient {
   bool promoteToAdminCalled = false;
   bool demoteFromAdminCalled = false;
-  bool getUserRolesCalled = false;
   bool deleteUserCalled = false;
   String? lastUserId;
   bool shouldThrowError = false;
   String errorMessage = 'Admin command failed';
-  List<String> rolesResponse = ['USER'];
 
   @override
   Future<void> promoteToAdmin(String userId) async {
@@ -230,6 +238,24 @@ class MockAdminCommandClient extends AdminCommandClient {
   }
 
   @override
+  Future<void> deleteUser(String userId) async {
+    deleteUserCalled = true;
+    lastUserId = userId;
+    if (shouldThrowError) {
+      throw Exception(errorMessage);
+    }
+  }
+}
+
+// Mock AdminQueryClient
+class MockAdminQueryClient extends AdminQueryClient {
+  bool getUserRolesCalled = false;
+  String? lastUserId;
+  bool shouldThrowError = false;
+  String errorMessage = 'Admin query failed';
+  List<String> rolesResponse = ['USER'];
+
+  @override
   Future<List<String>> getUserRoles(String userId) async {
     getUserRolesCalled = true;
     lastUserId = userId;
@@ -237,15 +263,6 @@ class MockAdminCommandClient extends AdminCommandClient {
       throw Exception(errorMessage);
     }
     return rolesResponse;
-  }
-
-  @override
-  Future<void> deleteUser(String userId) async {
-    deleteUserCalled = true;
-    lastUserId = userId;
-    if (shouldThrowError) {
-      throw Exception(errorMessage);
-    }
   }
 }
 

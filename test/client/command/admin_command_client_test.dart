@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
@@ -21,7 +20,7 @@ void main() {
       mockTokenStorage.accessToken = 'test-token';
       mockTokenStorage.tokenType = 'Bearer';
       apiClient = ApiClient(
-        baseUrl: ApiEndpoints.adminBaseUrl,
+        baseUrl: ApiEndpoints.commandBaseUrl,
         httpClient: mockHttpClient,
         tokenStorage: mockTokenStorage,
       );
@@ -37,11 +36,22 @@ void main() {
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri.toString(),
-          contains('/users/user-123/promote'),
+          contains('/admin/users/user-123/promote'),
         );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
           'Bearer test-token',
+        );
+      });
+
+      test('promoteToAdmin uses command service base URL', () async {
+        mockHttpClient.response = http.Response('', 204);
+
+        await adminCommandClient.promoteToAdmin('user-123');
+
+        expect(
+          mockHttpClient.lastUri.toString(),
+          startsWith(ApiEndpoints.commandBaseUrl),
         );
       });
 
@@ -87,11 +97,22 @@ void main() {
         expect(mockHttpClient.lastMethod, 'DELETE');
         expect(
           mockHttpClient.lastUri.toString(),
-          contains('/users/user-123/promote'),
+          contains('/admin/users/user-123/promote'),
         );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
           'Bearer test-token',
+        );
+      });
+
+      test('demoteFromAdmin uses command service base URL', () async {
+        mockHttpClient.response = http.Response('', 204);
+
+        await adminCommandClient.demoteFromAdmin('user-123');
+
+        expect(
+          mockHttpClient.lastUri.toString(),
+          startsWith(ApiEndpoints.commandBaseUrl),
         );
       });
 
@@ -128,63 +149,6 @@ void main() {
       });
     });
 
-    group('getUserRoles', () {
-      test('successful retrieval returns list of roles', () async {
-        final responseBody = ['USER', 'ADMIN'];
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
-
-        final result = await adminCommandClient.getUserRoles('user-123');
-
-        expect(result, ['USER', 'ADMIN']);
-        expect(mockHttpClient.lastMethod, 'GET');
-        expect(
-          mockHttpClient.lastUri.toString(),
-          contains('/users/user-123/roles'),
-        );
-      });
-
-      test('getUserRoles requires authentication', () async {
-        mockHttpClient.response = http.Response(jsonEncode(['USER']), 200);
-
-        await adminCommandClient.getUserRoles('user-123');
-
-        expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
-      });
-
-      test('getUserRoles returns single role', () async {
-        mockHttpClient.response = http.Response(jsonEncode(['USER']), 200);
-
-        final result = await adminCommandClient.getUserRoles('user-123');
-
-        expect(result, ['USER']);
-        expect(result.length, 1);
-      });
-
-      test('getUserRoles throws on 400 not found', () async {
-        mockHttpClient.response = http.Response(
-          '{"message":"User not found"}',
-          400,
-        );
-
-        expect(
-          () => adminCommandClient.getUserRoles('nonexistent'),
-          throwsException,
-        );
-      });
-
-      test('getUserRoles throws on 403 forbidden', () async {
-        mockHttpClient.response = http.Response(
-          '{"message":"Forbidden"}',
-          403,
-        );
-
-        expect(
-          () => adminCommandClient.getUserRoles('user-123'),
-          throwsException,
-        );
-      });
-    });
-
     group('deleteUser', () {
       test('successful deletion completes without error', () async {
         mockHttpClient.response = http.Response('', 204);
@@ -194,11 +158,22 @@ void main() {
         expect(mockHttpClient.lastMethod, 'DELETE');
         expect(
           mockHttpClient.lastUri.toString(),
-          contains('/users/user-123'),
+          contains('/admin/users/user-123'),
         );
         expect(
           mockHttpClient.lastHeaders?['Authorization'],
           'Bearer test-token',
+        );
+      });
+
+      test('deleteUser uses command service base URL', () async {
+        mockHttpClient.response = http.Response('', 204);
+
+        await adminCommandClient.deleteUser('user-123');
+
+        expect(
+          mockHttpClient.lastUri.toString(),
+          startsWith(ApiEndpoints.commandBaseUrl),
         );
       });
 
@@ -260,7 +235,7 @@ void main() {
       });
 
       test(
-        'creates default ApiClient with admin base URL when not provided',
+        'creates default ApiClient with command base URL when not provided',
         () {
           final client = AdminCommandClient();
 

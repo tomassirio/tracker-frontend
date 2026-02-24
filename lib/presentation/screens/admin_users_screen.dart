@@ -595,8 +595,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     return _buildDesktopUserTile(user, isUserAdmin, isSelf);
   }
 
-  Widget _buildMobileUserTile(
-      UserProfile user, bool isUserAdmin, bool isSelf) {
+  Widget _buildMobileUserTile(UserProfile user, bool isUserAdmin, bool isSelf) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
@@ -693,7 +692,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Email
               Row(
                 children: [
@@ -710,7 +709,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Stats row in a subtle container
               Container(
                 padding: const EdgeInsets.all(8),
@@ -732,7 +731,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              
+
               // Join date
               Row(
                 children: [
@@ -744,7 +743,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   ),
                 ],
               ),
-              
+
               // Action buttons
               if (!isSelf) ...[
                 const SizedBox(height: 12),
