@@ -134,46 +134,6 @@ void main() {
       });
     });
 
-    group('getUserTripAchievements', () {
-      test('returns trip-specific achievements', () async {
-        mockQueryClient.mockUserAchievements = [
-          UserAchievement(
-            id: 'ua-3',
-            userId: 'user-1',
-            achievement: Achievement(
-              id: 'ach-1',
-              type: AchievementType.distanceOneHundredKm,
-              name: 'First Century',
-              description: 'Walk 100km in a single trip',
-              thresholdValue: 100,
-            ),
-            tripId: 'trip-1',
-            unlockedAt: DateTime.parse('2025-01-15T10:30:00.000Z'),
-            valueAchieved: 105.5,
-          ),
-        ];
-
-        final result = await achievementService.getUserTripAchievements(
-          'user-1',
-          'trip-1',
-        );
-
-        expect(result.length, 1);
-        expect(result[0].tripId, 'trip-1');
-        expect(mockQueryClient.lastUserId, 'user-1');
-        expect(mockQueryClient.lastTripId, 'trip-1');
-      });
-
-      test('passes through errors', () async {
-        mockQueryClient.shouldThrowError = true;
-
-        expect(
-          () => achievementService.getUserTripAchievements('user-1', 'trip-1'),
-          throwsException,
-        );
-      });
-    });
-
     group('getTripAchievements', () {
       test('returns all achievements for a trip', () async {
         mockQueryClient.mockUserAchievements = [
@@ -282,19 +242,6 @@ class MockAchievementQueryClient extends AchievementQueryClient {
   Future<List<UserAchievement>> getUserAchievements(String userId) async {
     lastUserId = userId;
     if (shouldThrowError) throw Exception('Failed to get user achievements');
-    return mockUserAchievements;
-  }
-
-  @override
-  Future<List<UserAchievement>> getUserTripAchievements(
-    String userId,
-    String tripId,
-  ) async {
-    lastUserId = userId;
-    lastTripId = tripId;
-    if (shouldThrowError) {
-      throw Exception('Failed to get user trip achievements');
-    }
     return mockUserAchievements;
   }
 

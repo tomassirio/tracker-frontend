@@ -42,20 +42,6 @@ class AchievementQueryClient {
     return _apiClient.handleListResponse(response, UserAchievement.fromJson);
   }
 
-  /// Get a user's achievements for a specific trip
-  /// Requires authentication
-  /// Returns 200 OK with array of user achievements (trip-specific only)
-  Future<List<UserAchievement>> getUserTripAchievements(
-    String userId,
-    String tripId,
-  ) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.userTripAchievements(userId, tripId),
-      requireAuth: true,
-    );
-    return _apiClient.handleListResponse(response, UserAchievement.fromJson);
-  }
-
   /// Get all achievements for a specific trip (across all users)
   /// Requires authentication
   /// Returns 200 OK with array of user achievements

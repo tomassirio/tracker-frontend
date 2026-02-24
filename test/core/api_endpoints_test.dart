@@ -264,7 +264,7 @@ void main() {
       });
 
       test('achievementsMe path is correct', () {
-        expect(ApiEndpoints.achievementsMe, '/achievements/me/achievements');
+        expect(ApiEndpoints.achievementsMe, '/users/me/achievements');
       });
 
       test('userAchievements generates correct path', () {
@@ -275,17 +275,6 @@ void main() {
         expect(
           ApiEndpoints.userAchievements('abc-def'),
           '/users/abc-def/achievements',
-        );
-      });
-
-      test('userTripAchievements generates correct path', () {
-        expect(
-          ApiEndpoints.userTripAchievements('user123', 'trip456'),
-          '/users/user123/trips/trip456/achievements',
-        );
-        expect(
-          ApiEndpoints.userTripAchievements('abc-def', 'ghi-jkl'),
-          '/users/abc-def/trips/ghi-jkl/achievements',
         );
       });
 
