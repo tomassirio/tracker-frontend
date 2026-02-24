@@ -297,7 +297,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
           if (_isLoggedIn) _buildSummaryCard(unlockedCount, totalCount),
           if (_isLoggedIn) const SizedBox(height: 16),
 
-          // Achievement categories
+          // Achievement categories as grids
           ...groups.entries.map((entry) => _buildCategorySection(
                 entry.key,
                 entry.value,
@@ -353,9 +353,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   ) {
     final categoryColor = _getCategoryColor(category);
     final categoryIcon = _getCategoryIcon(category);
-    final unlockedInCategory = achievements
-        .where((a) => _isUnlocked(a))
-        .length;
+    final unlockedInCategory =
+        achievements.where((a) => _isUnlocked(a)).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,82 +374,196 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 ),
               ),
               if (_isLoggedIn) ...[
-                const SizedBox(width: 8),
-                Text(
-                  '$unlockedInCategory/${achievements.length}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: categoryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$unlockedInCategory/${achievements.length}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: categoryColor,
+                    ),
                   ),
                 ),
               ],
             ],
           ),
         ),
-        ...achievements.map((a) => _buildAchievementCard(a)),
-        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.85,
+              ),
+              itemCount: achievements.length,
+              itemBuilder: (context, index) =>
+                  _buildAchievementTile(achievements[index]),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _buildAchievementCard(Achievement achievement) {
+  Widget _buildAchievementTile(Achievement achievement) {
     final unlocked = _isUnlocked(achievement);
     final userAchievement = _getUnlockedAchievement(achievement);
+    final categoryColor = _getCategoryColor(achievement.type.category);
 
-    return Card(
-      elevation: unlocked ? 2 : 1,
-      color: unlocked ? null : Colors.grey[50],
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: unlocked
-              ? _getCategoryColor(achievement.type.category)
-              : Colors.grey[300],
-          child: Icon(
-            unlocked ? Icons.emoji_events : Icons.lock_outline,
-            color: unlocked ? Colors.white : Colors.grey[600],
+    return GestureDetector(
+      onTap: () => _showAchievementDetail(achievement, userAchievement),
+      child: Container(
+        decoration: BoxDecoration(
+          color: unlocked ? categoryColor.withValues(alpha: 0.1) : Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: unlocked ? categoryColor : Colors.grey[300]!,
+            width: unlocked ? 2 : 1,
           ),
         ),
-        title: Text(
-          achievement.name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: unlocked ? null : Colors.grey[600],
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Trophy icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: unlocked ? categoryColor : Colors.grey[300],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                unlocked ? Icons.emoji_events : Icons.lock_outline,
+                color: unlocked ? Colors.white : Colors.grey[500],
+                size: 26,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Achievement name
+            Text(
+              achievement.name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: unlocked ? categoryColor : Colors.grey[500],
+              ),
+            ),
+            const SizedBox(height: 2),
+            // Threshold or achieved value
+            Text(
+              unlocked && userAchievement != null
+                  ? _formatValue(achievement, userAchievement.valueAchieved)
+                  : _formatThreshold(achievement),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                color: unlocked ? categoryColor : Colors.grey[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAchievementDetail(
+    Achievement achievement,
+    UserAchievement? userAchievement,
+  ) {
+    final unlocked = userAchievement != null;
+    final categoryColor = _getCategoryColor(achievement.type.category);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: unlocked ? categoryColor : Colors.grey[300],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                unlocked ? Icons.emoji_events : Icons.lock_outline,
+                color: unlocked ? Colors.white : Colors.grey[500],
+                size: 36,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              achievement.name,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: unlocked ? categoryColor : Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
               achievement.description,
+              textAlign: TextAlign.center,
               style: TextStyle(
+                fontSize: 14,
                 color: unlocked ? null : Colors.grey[500],
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             if (unlocked && userAchievement != null) ...[
               Text(
                 'Achieved: ${_formatValue(achievement, userAchievement.valueAchieved)}',
                 style: TextStyle(
-                  fontSize: 12,
-                  color: _getCategoryColor(achievement.type.category),
-                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: categoryColor,
                 ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Unlocked on ${_formatDate(userAchievement.unlockedAt)}',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ] else ...[
               Text(
-                'Threshold: ${_formatThreshold(achievement)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
+                'Goal: ${_formatThreshold(achievement)}',
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               ),
             ],
+            const SizedBox(height: 16),
           ],
         ),
-        trailing: unlocked
-            ? const Icon(Icons.check_circle, color: Colors.green)
-            : Icon(Icons.radio_button_unchecked, color: Colors.grey[400]),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
   }
 }
