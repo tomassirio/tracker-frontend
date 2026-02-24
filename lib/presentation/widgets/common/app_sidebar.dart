@@ -71,8 +71,8 @@ class AppSidebar extends StatelessWidget {
         AuthNavigationHelper.navigateToFriendsFollowers(context);
         break;
       case 3:
-        // Achievements coming soon
-        UiHelpers.showSuccessMessage(context, 'Achievements coming soon!');
+        // Navigate to Achievements - requires auth
+        AuthNavigationHelper.navigateToAchievements(context);
         break;
       case 4:
         // Navigate to Profile (right of home) - requires auth

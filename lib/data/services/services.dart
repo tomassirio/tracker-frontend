@@ -1,4 +1,5 @@
 // Export all services
+export 'achievement_service.dart';
 export 'auth_service.dart';
 export 'comment_service.dart';
 export 'trip_service.dart';

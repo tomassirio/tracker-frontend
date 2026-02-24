@@ -117,4 +117,12 @@ class ApiEndpoints {
   // WebSocket topics
   static String wsTripTopic(String tripId) => '/topic/trips/$tripId';
   static String wsUserTopic(String userId) => '/topic/users/$userId';
+
+  // Achievement Query endpoints (use queryBaseUrl)
+  static const String achievements = '/achievements';
+  static const String achievementsMe = '/achievements/me/achievements';
+  static String userAchievements(String userId) =>
+      '/achievements/users/$userId/achievements';
+  static String userTripAchievements(String userId, String tripId) =>
+      '/achievements/users/$userId/trips/$tripId/achievements';
 }

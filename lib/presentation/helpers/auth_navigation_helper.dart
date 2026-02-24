@@ -4,6 +4,7 @@ import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
 import 'package:tracker_frontend/presentation/screens/friends_followers_screen.dart';
 import 'package:tracker_frontend/presentation/screens/trip_plans_screen.dart';
+import 'package:tracker_frontend/presentation/screens/achievements_screen.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 
 /// Helper class for handling navigation to auth-protected screens.
@@ -142,6 +143,36 @@ class AuthNavigationHelper {
       Navigator.push(
         context,
         PageTransitions.slideLeft(const TripPlansScreen()),
+      );
+    }
+  }
+
+  /// Navigate to achievements screen.
+  /// If not logged in, redirects to auth screen first.
+  static Future<void> navigateToAchievements(BuildContext context) async {
+    final loggedIn = await isLoggedIn();
+
+    if (!loggedIn) {
+      if (context.mounted) {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthScreen()),
+        );
+
+        if (result == true && context.mounted) {
+          Navigator.push(
+            context,
+            PageTransitions.slideUp(const AchievementsScreen()),
+          );
+        }
+      }
+      return;
+    }
+
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        PageTransitions.slideUp(const AchievementsScreen()),
       );
     }
   }
