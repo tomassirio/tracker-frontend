@@ -12,10 +12,9 @@ class ApiEndpoints {
   static String get authBaseUrl =>
       getConfigValue('authBaseUrl', 'http://localhost:8083/api/1/auth');
 
-  // Admin base URL - same service as auth, different path prefix
-  // Derived from authBaseUrl by replacing /auth with /admin
-  static String get adminBaseUrl =>
-      authBaseUrl.replaceAll(RegExp(r'/auth$'), '/admin');
+  // Admin base URLs - admin operations now use command/query services (CQRS)
+  // Write operations (promote, demote, delete) → command service
+  // Read operations (get roles) → query service
 
   // WebSocket base URL - read from window.appConfig or use default
   static String get wsBaseUrl => getConfigValue('wsBaseUrl', '/ws');
@@ -104,10 +103,16 @@ class ApiEndpoints {
   static const String promotedTrips = '/promoted-trips';
   static String tripPromotion(String tripId) => '/trips/$tripId/promotion';
 
-  // Admin User Management endpoints (use adminBaseUrl, ADMIN only)
-  static String adminPromoteUser(String userId) => '/users/$userId/promote';
-  static String adminDeleteUser(String userId) => '/users/$userId';
-  static String adminUserRoles(String userId) => '/users/$userId/roles';
+  // Admin User Management endpoints (ADMIN only)
+  // Write operations: use commandBaseUrl
+  static String adminPromoteUser(String userId) =>
+      '/admin/users/$userId/promote';
+  static String adminDeleteUser(String userId) => '/admin/users/$userId';
+  // Read operations: use queryBaseUrl
+  static String adminUserRoles(String userId) => '/admin/users/$userId/roles';
+
+  // Self-deletion endpoint (use commandBaseUrl, any authenticated user)
+  static const String usersDeleteMe = '/users/me';
 
   // WebSocket topics
   static String wsTripTopic(String tripId) => '/topic/trips/$tripId';

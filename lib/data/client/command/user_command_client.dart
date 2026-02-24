@@ -102,4 +102,15 @@ class UserCommandClient {
     );
     return _apiClient.handleResponse(response, UserProfile.fromJson);
   }
+
+  /// Delete own account
+  /// Requires authentication (USER, ADMIN)
+  /// DELETE /api/1/users/me → 202 Accepted
+  Future<String> deleteMyAccount() async {
+    final response = await _apiClient.delete(
+      ApiEndpoints.usersDeleteMe,
+      requireAuth: true,
+    );
+    return _apiClient.handleAcceptedResponse(response);
+  }
 }

@@ -113,4 +113,10 @@ class UserService {
   Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
     return await _userCommandClient.updateProfile(request);
   }
+
+  /// Delete own account
+  /// Returns the ID from the response. Any authenticated user can delete their own account.
+  Future<String> deleteMyAccount() async {
+    return await _userCommandClient.deleteMyAccount();
+  }
 }
