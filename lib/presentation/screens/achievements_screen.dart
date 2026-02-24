@@ -534,7 +534,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            if (unlocked && userAchievement != null) ...[
+            if (userAchievement != null) ...[
               Text(
                 'Achieved: ${_formatValue(achievement, userAchievement.valueAchieved)}',
                 style: TextStyle(
