@@ -379,7 +379,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: categoryColor.withValues(alpha: 0.1),
+                    color: categoryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -427,7 +427,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       onTap: () => _showAchievementDetail(achievement, userAchievement),
       child: Container(
         decoration: BoxDecoration(
-          color: unlocked ? categoryColor.withValues(alpha: 0.1) : Colors.grey[100],
+          color: unlocked ? categoryColor.withOpacity(0.1) : Colors.grey[100],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: unlocked ? categoryColor : Colors.grey[300]!,
