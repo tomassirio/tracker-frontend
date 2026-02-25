@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tracker_frontend/data/client/command/trip_update_command_client.dart';
+import 'package:tracker_frontend/data/models/domain/location_update_result.dart';
 import 'package:tracker_frontend/data/models/requests/trip_update_request.dart';
 
 /// Service for sending trip updates (location, battery, message)
@@ -26,19 +30,21 @@ class TripUpdateService {
   /// [message] - Optional message (uses [automaticUpdateMessage] if null and isAutomatic is true)
   /// [isAutomatic] - Whether this is an automatic update
   ///
-  /// Returns true if the update was sent successfully
-  Future<bool> sendUpdate({
+  /// Returns a [LocationUpdateResult] indicating success or a specific failure reason.
+  Future<LocationUpdateResult> sendUpdate({
     required String tripId,
     String? message,
     bool isAutomatic = false,
   }) async {
-    try {
-      // Get current location
-      final position = await _getCurrentLocation();
-      if (position == null) {
-        return false;
-      }
+    // Get current location (returns failure reason if it fails)
+    final locationResult = await _getCurrentLocation();
+    if (locationResult.failureReason != null) {
+      return LocationUpdateResult.failure(locationResult.failureReason!);
+    }
 
+    final position = locationResult.position!;
+
+    try {
       // Get battery level
       final batteryLevel = await _getBatteryLevel();
 
@@ -55,49 +61,98 @@ class TripUpdateService {
       );
 
       await _tripUpdateCommandClient.createTripUpdate(tripId, request);
-      return true;
+      return const LocationUpdateResult.success();
+    } on SocketException catch (e) {
+      debugPrint('TripUpdateService: Network error: $e');
+      return const LocationUpdateResult.failure(
+        LocationFailureReason.networkError,
+      );
+    } on TimeoutException catch (e) {
+      debugPrint('TripUpdateService: Request timed out: $e');
+      return const LocationUpdateResult.failure(
+        LocationFailureReason.networkError,
+      );
     } catch (e) {
-      // Log error but don't throw - background tasks should fail silently
-      debugPrint('TripUpdateService: Failed to send update: $e');
-      return false;
+      // Server / API errors — surface the actual message so the user
+      // (and the developer via the snackbar) can see what went wrong.
+      final errorMsg = e.toString();
+      debugPrint('TripUpdateService: Failed to send update: $errorMsg');
+      return LocationUpdateResult.failureWithDetail(
+        LocationFailureReason.serverError,
+        errorMsg,
+      );
     }
   }
 
-  /// Gets the current location with permission handling
-  Future<Position?> _getCurrentLocation() async {
+  /// Gets the current location **without** requesting permissions.
+  ///
+  /// Permission requesting is a UI concern and must be handled by the caller
+  /// (e.g. the screen / repository) *before* invoking [sendUpdate].
+  /// This method only checks the current permission state and fails fast
+  /// if it isn't sufficient.
+  ///
+  /// Returns a [_LocationFetchResult] that either holds a [Position]
+  /// or a [LocationFailureReason] explaining why it failed.
+  Future<_LocationFetchResult> _getCurrentLocation() async {
     try {
-      // Check if location services are enabled
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         debugPrint('TripUpdateService: Location services are disabled');
-        return null;
+        return _LocationFetchResult.fail(
+          LocationFailureReason.servicesDisabled,
+        );
       }
 
-      // Check permission
-      var permission = await Geolocator.checkPermission();
+      final permission = await Geolocator.checkPermission();
+
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          debugPrint('TripUpdateService: Location permission denied');
-          return null;
-        }
+        debugPrint('TripUpdateService: Location permission denied');
+        return _LocationFetchResult.fail(
+          LocationFailureReason.permissionDenied,
+        );
       }
 
       if (permission == LocationPermission.deniedForever) {
-        debugPrint('TripUpdateService: Location permission permanently denied');
-        return null;
+        debugPrint(
+          'TripUpdateService: Location permission permanently denied',
+        );
+        return _LocationFetchResult.fail(
+          LocationFailureReason.permissionDeniedForever,
+        );
       }
 
-      // Get current position
-      return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw Exception('Location timeout'),
-      );
+      // Try getCurrentPosition first with a reasonable timeout.
+      try {
+        final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium,
+          timeLimit: const Duration(seconds: 15),
+        );
+        return _LocationFetchResult.ok(position);
+      } on TimeoutException {
+        debugPrint(
+          'TripUpdateService: getCurrentPosition timed out, '
+          'trying getLastKnownPosition as fallback',
+        );
+      }
+
+      // Fallback: use the last known position (cached by the OS).
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        debugPrint(
+          'TripUpdateService: Using last known position as fallback',
+        );
+        return _LocationFetchResult.ok(lastKnown);
+      }
+
+      debugPrint('TripUpdateService: No position available (timeout + '
+          'no cached position)');
+      return _LocationFetchResult.fail(LocationFailureReason.timeout);
+    } on TimeoutException catch (e) {
+      debugPrint('TripUpdateService: Location request timed out: $e');
+      return _LocationFetchResult.fail(LocationFailureReason.timeout);
     } catch (e) {
       debugPrint('TripUpdateService: Error getting location: $e');
-      return null;
+      return _LocationFetchResult.fail(LocationFailureReason.unknownError);
     }
   }
 
@@ -111,4 +166,19 @@ class TripUpdateService {
       return null;
     }
   }
+}
+
+/// Internal helper to carry either a [Position] or a failure reason
+/// out of [TripUpdateService._getCurrentLocation].
+class _LocationFetchResult {
+  final Position? position;
+  final LocationFailureReason? failureReason;
+
+  const _LocationFetchResult._({this.position, this.failureReason});
+
+  factory _LocationFetchResult.ok(Position position) =>
+      _LocationFetchResult._(position: position);
+
+  factory _LocationFetchResult.fail(LocationFailureReason reason) =>
+      _LocationFetchResult._(failureReason: reason);
 }

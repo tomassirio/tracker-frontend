@@ -4,18 +4,13 @@ import 'package:tracker_frontend/data/models/achievement_models.dart';
 void main() {
   group('AchievementType', () {
     test('toJson returns correct string for distance types', () {
+      expect(AchievementType.distanceOneHundredKm.toJson(), 'DISTANCE_100KM');
+      expect(AchievementType.distanceTwoHundredKm.toJson(), 'DISTANCE_200KM');
+      expect(AchievementType.distanceFiveHundredKm.toJson(), 'DISTANCE_500KM');
+      expect(AchievementType.distanceEightHundredKm.toJson(), 'DISTANCE_800KM');
+      expect(AchievementType.distanceOneThousandKm.toJson(), 'DISTANCE_1000KM');
       expect(
-          AchievementType.distanceOneHundredKm.toJson(), 'DISTANCE_100KM');
-      expect(
-          AchievementType.distanceTwoHundredKm.toJson(), 'DISTANCE_200KM');
-      expect(
-          AchievementType.distanceFiveHundredKm.toJson(), 'DISTANCE_500KM');
-      expect(AchievementType.distanceEightHundredKm.toJson(),
-          'DISTANCE_800KM');
-      expect(AchievementType.distanceOneThousandKm.toJson(),
-          'DISTANCE_1000KM');
-      expect(AchievementType.distanceSixteenHundredKm.toJson(),
-          'DISTANCE_1600KM');
+          AchievementType.distanceSixteenHundredKm.toJson(), 'DISTANCE_1600KM');
       expect(AchievementType.distanceTwentyTwoHundredKm.toJson(),
           'DISTANCE_2200KM');
     });
@@ -28,19 +23,16 @@ void main() {
 
     test('toJson returns correct string for duration types', () {
       expect(AchievementType.durationSevenDays.toJson(), 'DURATION_7_DAYS');
+      expect(AchievementType.durationThirtyDays.toJson(), 'DURATION_30_DAYS');
       expect(
-          AchievementType.durationThirtyDays.toJson(), 'DURATION_30_DAYS');
-      expect(AchievementType.durationFortyFiveDays.toJson(),
-          'DURATION_45_DAYS');
-      expect(
-          AchievementType.durationSixtyDays.toJson(), 'DURATION_60_DAYS');
+          AchievementType.durationFortyFiveDays.toJson(), 'DURATION_45_DAYS');
+      expect(AchievementType.durationSixtyDays.toJson(), 'DURATION_60_DAYS');
     });
 
     test('toJson returns correct string for social types', () {
       expect(AchievementType.followersTen.toJson(), 'FOLLOWERS_10');
       expect(AchievementType.followersFifty.toJson(), 'FOLLOWERS_50');
-      expect(
-          AchievementType.followersOneHundred.toJson(), 'FOLLOWERS_100');
+      expect(AchievementType.followersOneHundred.toJson(), 'FOLLOWERS_100');
       expect(AchievementType.friendsFive.toJson(), 'FRIENDS_5');
       expect(AchievementType.friendsTwenty.toJson(), 'FRIENDS_20');
       expect(AchievementType.friendsFifty.toJson(), 'FRIENDS_50');
@@ -49,21 +41,21 @@ void main() {
     test('fromJson parses all types correctly', () {
       expect(AchievementType.fromJson('DISTANCE_100KM'),
           AchievementType.distanceOneHundredKm);
-      expect(AchievementType.fromJson('UPDATES_10'),
-          AchievementType.updatesTen);
+      expect(
+          AchievementType.fromJson('UPDATES_10'), AchievementType.updatesTen);
       expect(AchievementType.fromJson('DURATION_7_DAYS'),
           AchievementType.durationSevenDays);
       expect(AchievementType.fromJson('FOLLOWERS_10'),
           AchievementType.followersTen);
-      expect(AchievementType.fromJson('FRIENDS_5'),
-          AchievementType.friendsFive);
+      expect(
+          AchievementType.fromJson('FRIENDS_5'), AchievementType.friendsFive);
     });
 
     test('fromJson is case insensitive', () {
       expect(AchievementType.fromJson('distance_100km'),
           AchievementType.distanceOneHundredKm);
-      expect(AchievementType.fromJson('updates_10'),
-          AchievementType.updatesTen);
+      expect(
+          AchievementType.fromJson('updates_10'), AchievementType.updatesTen);
     });
 
     test('fromJson throws on invalid value', () {
@@ -74,8 +66,7 @@ void main() {
     });
 
     test('category returns correct grouping', () {
-      expect(
-          AchievementType.distanceOneHundredKm.category, 'Distance');
+      expect(AchievementType.distanceOneHundredKm.category, 'Distance');
       expect(AchievementType.updatesTen.category, 'Updates');
       expect(AchievementType.durationSevenDays.category, 'Duration');
       expect(AchievementType.followersTen.category, 'Social');
@@ -167,15 +158,12 @@ void main() {
 
       final userAchievement = UserAchievement.fromJson(json);
 
-      expect(userAchievement.id,
-          '660e8400-e29b-41d4-a716-446655440000');
-      expect(userAchievement.userId,
-          '123e4567-e89b-12d3-a456-426614174000');
+      expect(userAchievement.id, '660e8400-e29b-41d4-a716-446655440000');
+      expect(userAchievement.userId, '123e4567-e89b-12d3-a456-426614174000');
       expect(userAchievement.achievement.name, 'First Century');
       expect(userAchievement.achievement.type,
           AchievementType.distanceOneHundredKm);
-      expect(userAchievement.tripId,
-          '789e0123-e89b-12d3-a456-426614174000');
+      expect(userAchievement.tripId, '789e0123-e89b-12d3-a456-426614174000');
       expect(userAchievement.unlockedAt,
           DateTime.parse('2025-01-15T10:30:00.000Z'));
       expect(userAchievement.valueAchieved, 105.5);
@@ -200,8 +188,7 @@ void main() {
       final userAchievement = UserAchievement.fromJson(json);
 
       expect(userAchievement.tripId, isNull);
-      expect(userAchievement.achievement.type,
-          AchievementType.followersTen);
+      expect(userAchievement.achievement.type, AchievementType.followersTen);
       expect(userAchievement.valueAchieved, 12.0);
     });
 

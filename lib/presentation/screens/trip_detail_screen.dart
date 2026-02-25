@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
@@ -685,19 +686,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isSendingUpdate = true);
 
     try {
-      final success =
+      // Ensure location permissions are granted before calling the service.
+      // The service intentionally does NOT request permissions (it's a UI concern).
+      final permissionReady = await _ensureLocationPermission();
+      if (!permissionReady) {
+        return;
+      }
+
+      final result =
           await _repository.sendTripUpdate(_trip.id, message: message);
 
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           UiHelpers.showSuccessMessage(context, 'Update sent successfully!');
           // Refresh timeline to show the new update
           await _loadTripUpdates();
         } else {
-          UiHelpers.showErrorMessage(
-            context,
-            'Failed to send update. Check location permissions.',
-          );
+          UiHelpers.showErrorMessage(context, result.userMessage);
         }
       }
     } catch (e) {
@@ -709,6 +714,52 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         setState(() => _isSendingUpdate = false);
       }
     }
+  }
+
+  /// Ensures location permission is granted, requesting it from the user
+  /// if necessary.  Returns `true` when permission is sufficient to proceed.
+  Future<bool> _ensureLocationPermission() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+          context,
+          'Location services are disabled. '
+          'Please enable GPS in your device settings.',
+        );
+      }
+      return false;
+    }
+
+    var permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+          context,
+          'Location permission is required to send updates.',
+        );
+      }
+      return false;
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+          context,
+          'Location permission is permanently denied. '
+          'Please enable it in your device settings.',
+        );
+        // Try to open app settings so the user can grant permission.
+        await Geolocator.openAppSettings();
+      }
+      return false;
+    }
+
+    return true;
   }
 
   /// Handle tap on a timeline update - animate map to that location

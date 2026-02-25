@@ -74,8 +74,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       // Load user's achievements if logged in
       if (isLoggedIn) {
         try {
-          final myAchievements =
-              await _achievementService.getMyAchievements();
+          final myAchievements = await _achievementService.getMyAchievements();
           setState(() {
             _myAchievements = myAchievements;
           });
@@ -130,8 +129,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
   /// Check if an achievement is unlocked by the current user
   bool _isUnlocked(Achievement achievement) {
-    return _myAchievements
-        .any((ua) => ua.achievement.id == achievement.id);
+    return _myAchievements.any((ua) => ua.achievement.id == achievement.id);
   }
 
   /// Get the UserAchievement for a given achievement, if unlocked
@@ -337,8 +335,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 value: progress,
                 minHeight: 8,
                 backgroundColor: Colors.grey[200],
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Colors.amber),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
               ),
             ),
           ],
@@ -353,8 +350,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   ) {
     final categoryColor = _getCategoryColor(category);
     final categoryIcon = _getCategoryIcon(category);
-    final unlockedInCategory =
-        achievements.where((a) => _isUnlocked(a)).length;
+    final unlockedInCategory = achievements.where((a) => _isUnlocked(a)).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +392,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
           ),
         ),
         LayoutBuilder(builder: (context, constraints) {
-          final crossAxisCount = constraints.maxWidth < 600 ? 5 : 7;
+          final isMobile = constraints.maxWidth < 600;
+          final crossAxisCount = isMobile ? 4 : 7;
+          final aspectRatio = isMobile ? 0.75 : 0.85;
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -404,7 +402,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 6,
               mainAxisSpacing: 6,
-              childAspectRatio: 0.85,
+              childAspectRatio: aspectRatio,
             ),
             itemCount: achievements.length,
             itemBuilder: (context, index) =>
@@ -452,15 +450,17 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ),
             const SizedBox(height: 3),
             // Achievement name
-            Text(
-              achievement.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: unlocked ? categoryColor : Colors.grey[500],
+            Flexible(
+              child: Text(
+                achievement.name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: unlocked ? categoryColor : Colors.grey[500],
+                ),
               ),
             ),
             const SizedBox(height: 1),

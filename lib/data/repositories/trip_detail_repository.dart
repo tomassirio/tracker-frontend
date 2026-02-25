@@ -1,6 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/data/models/domain/location_update_result.dart';
 import 'package:tracker_frontend/data/services/comment_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/services/trip_update_service.dart';
@@ -160,8 +161,11 @@ class TripDetailRepository {
   }
 
   /// Sends a manual trip update with current location and battery
-  /// Returns true if successful, false otherwise
-  Future<bool> sendTripUpdate(String tripId, {String? message}) async {
+  /// Returns a [LocationUpdateResult] indicating success or failure reason.
+  Future<LocationUpdateResult> sendTripUpdate(
+    String tripId, {
+    String? message,
+  }) async {
     return await _tripUpdateService.sendUpdate(
       tripId: tripId,
       message: message,
