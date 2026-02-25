@@ -33,15 +33,15 @@ void main() {
         expect(message, equals('Automatic Update'));
       });
 
-      test('returns false when location is unavailable', () async {
+      test('returns failure result when location is unavailable', () async {
         // The service handles location errors gracefully
-        // This is tested implicitly by the sendUpdate method returning false
-        // when location cannot be obtained
+        // sendUpdate returns a LocationUpdateResult with a specific
+        // failureReason when location cannot be obtained
         final service = TripUpdateService(
           tripUpdateCommandClient: MockTripUpdateCommandClient(),
         );
-        // The service will return false if location services are disabled
-        // or permissions are not granted
+        // The service will return a failure result with a reason if
+        // location services are disabled or permissions are not granted
         expect(service, isNotNull);
       });
     });

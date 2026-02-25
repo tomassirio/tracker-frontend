@@ -29,13 +29,13 @@ void callbackDispatcher() {
 
         // Send the automatic update
         final updateService = TripUpdateService();
-        final success = await updateService.sendUpdate(
+        final result = await updateService.sendUpdate(
           tripId: tripId,
           isAutomatic: true,
         );
 
         debugPrint(
-            'BackgroundUpdateManager: Auto update ${success ? 'sent' : 'failed'} for trip $tripId');
+            'BackgroundUpdateManager: Auto update ${result.isSuccess ? 'sent' : 'failed (${result.failureReason})'} for trip $tripId');
         return true; // Always return true to prevent excessive retries
       } catch (e) {
         debugPrint('BackgroundUpdateManager: Error in background task: $e');
