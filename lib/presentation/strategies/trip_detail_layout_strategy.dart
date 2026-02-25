@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
+import 'package:tracker_frontend/data/models/achievement_models.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
@@ -38,6 +39,7 @@ class TripDetailLayoutData {
   final bool isAlreadyFriends; // Track if already friends with trip owner
   final bool isPromoted; // Track if trip is promoted
   final String? donationLink; // Donation link for promoted trips
+  final List<UserAchievement> tripAchievements; // Achievements earned on trip
 
   // Callbacks
   final VoidCallback onToggleTripInfo;
@@ -84,6 +86,7 @@ class TripDetailLayoutData {
     this.isAlreadyFriends = false,
     this.isPromoted = false,
     this.donationLink,
+    this.tripAchievements = const [],
     required this.onToggleTripInfo,
     required this.onToggleComments,
     required this.onToggleTimeline,
@@ -139,6 +142,7 @@ abstract class TripDetailLayoutStrategy {
       hasSentFriendRequest: data.hasSentFriendRequest,
       isAlreadyFriends: data.isAlreadyFriends,
       isPromoted: data.isPromoted,
+      tripAchievements: data.tripAchievements,
     );
   }
 
