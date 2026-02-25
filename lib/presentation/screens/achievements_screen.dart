@@ -397,15 +397,15 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         ),
         LayoutBuilder(
           builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
+            final crossAxisCount = constraints.maxWidth > 600 ? 5 : 4;
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.85,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 0.9,
               ),
               itemCount: achievements.length,
               itemBuilder: (context, index) =>
@@ -434,14 +434,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             width: unlocked ? 2 : 1,
           ),
         ),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(6),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Trophy icon
             Container(
-              width: 48,
-              height: 48,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: unlocked ? categoryColor : Colors.grey[300],
                 shape: BoxShape.circle,
@@ -449,10 +449,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               child: Icon(
                 unlocked ? Icons.emoji_events : Icons.lock_outline,
                 color: unlocked ? Colors.white : Colors.grey[500],
-                size: 26,
+                size: 20,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             // Achievement name
             Text(
               achievement.name,
