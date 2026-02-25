@@ -266,5 +266,173 @@ void main() {
         expect(trip.effectiveUpdateRefresh, Trip.minUpdateRefresh);
       });
     });
+
+    group('Trip automaticUpdates', () {
+      test('automaticUpdates defaults to false when not provided', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        expect(trip.automaticUpdates, false);
+        expect(trip.timeInterval, null);
+      });
+
+      test('automaticUpdates can be set to true with timeInterval', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          automaticUpdates: true,
+          timeInterval: 30,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        expect(trip.automaticUpdates, true);
+        expect(trip.timeInterval, 30);
+      });
+
+      test('fromJson parses automaticUpdates and timeInterval from tripSettings',
+          () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'username': 'testuser',
+          'name': 'Test Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'tripSettings': {
+            'automaticUpdates': true,
+            'timeInterval': 45,
+          },
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.automaticUpdates, true);
+        expect(trip.timeInterval, 45);
+      });
+
+      test('fromJson defaults automaticUpdates to false when not in JSON', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'username': 'testuser',
+          'name': 'Test Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.automaticUpdates, false);
+        expect(trip.timeInterval, null);
+      });
+
+      test('toJson includes automaticUpdates and timeInterval', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          automaticUpdates: true,
+          timeInterval: 60,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final json = trip.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json['timeInterval'], 60);
+      });
+
+      test('copyWith updates automaticUpdates and timeInterval', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          automaticUpdates: false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final updatedTrip = trip.copyWith(
+          automaticUpdates: true,
+          timeInterval: 30,
+        );
+
+        expect(updatedTrip.automaticUpdates, true);
+        expect(updatedTrip.timeInterval, 30);
+        expect(updatedTrip.id, trip.id);
+        expect(updatedTrip.name, trip.name);
+      });
+    });
+
+    group('ChangeTripSettingsRequest', () {
+      test('toJson converts ChangeTripSettingsRequest correctly with both fields',
+          () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: true,
+          timeInterval: 30,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json['timeInterval'], 30);
+      });
+
+      test('toJson excludes null values', () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: true,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json.containsKey('timeInterval'), false);
+      });
+
+      test('toJson handles only timeInterval', () {
+        final request = ChangeTripSettingsRequest(
+          timeInterval: 45,
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('automaticUpdates'), false);
+        expect(json['timeInterval'], 45);
+      });
+
+      test('toJson with automaticUpdates false', () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: false,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], false);
+      });
+    });
   });
 }
