@@ -56,7 +56,7 @@ class TripDetailLayoutData {
   final VoidCallback onSendComment;
   final VoidCallback onCancelReply;
   final Function(TripStatus)? onStatusChange;
-  final Function(bool automaticUpdates, int? timeInterval)? onSettingsChange;
+  final Function(bool automaticUpdates, int? updateRefresh)? onSettingsChange;
   final Future<void> Function(String? message) onSendTripUpdate;
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;

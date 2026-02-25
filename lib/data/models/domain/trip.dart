@@ -38,7 +38,6 @@ class Trip {
   final int?
       updateRefresh; // interval in seconds for automatic location updates
   final bool automaticUpdates; // whether automatic updates are enabled
-  final int? timeInterval; // interval in minutes for automatic updates
   final DateTime? startDate;
   final DateTime? endDate;
   final List<TripLocation>? locations;
@@ -74,7 +73,6 @@ class Trip {
     required this.status,
     this.updateRefresh,
     this.automaticUpdates = false,
-    this.timeInterval,
     this.startDate,
     this.endDate,
     this.locations,
@@ -136,7 +134,6 @@ class Trip {
       updateRefresh: tripSettings?['updateRefresh'] as int?,
       automaticUpdates:
           (tripSettings?['automaticUpdates'] as bool?) ?? false,
-      timeInterval: tripSettings?['timeInterval'] as int?,
       startDate: json['startDate'] != null
           ? DateTime.tryParse(json['startDate'] as String)
           : null,
@@ -187,7 +184,6 @@ class Trip {
         'status': status.toJson(),
         if (updateRefresh != null) 'updateRefresh': updateRefresh,
         'automaticUpdates': automaticUpdates,
-        if (timeInterval != null) 'timeInterval': timeInterval,
         if (startDate != null) 'startDate': startDate!.toIso8601String(),
         if (endDate != null) 'endDate': endDate!.toIso8601String(),
         if (locations != null)
@@ -225,7 +221,6 @@ class Trip {
     TripStatus? status,
     int? updateRefresh,
     bool? automaticUpdates,
-    int? timeInterval,
     DateTime? startDate,
     DateTime? endDate,
     List<TripLocation>? locations,
@@ -248,7 +243,6 @@ class Trip {
       status: status ?? this.status,
       updateRefresh: updateRefresh ?? this.updateRefresh,
       automaticUpdates: automaticUpdates ?? this.automaticUpdates,
-      timeInterval: timeInterval ?? this.timeInterval,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       locations: locations ?? this.locations,

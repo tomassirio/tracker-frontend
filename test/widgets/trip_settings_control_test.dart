@@ -47,7 +47,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              timeInterval: 30,
+              updateRefresh: 1800, // 30 minutes in seconds
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
@@ -58,7 +58,7 @@ void main() {
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('Update Interval (minutes)'), findsOneWidget);
-      expect(find.text('30'), findsOneWidget);
+      expect(find.text('30'), findsOneWidget); // Should show 30 minutes
     });
 
     testWidgets('does not show time interval field when automaticUpdates is false',
@@ -83,19 +83,19 @@ void main() {
     testWidgets('calls onSettingsChange when Save is tapped with automaticUpdates enabled',
         (WidgetTester tester) async {
       bool? capturedAutomaticUpdates;
-      int? capturedTimeInterval;
+      int? capturedUpdateRefresh;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              timeInterval: 30,
+              updateRefresh: 1800, // 30 minutes in seconds
               isOwner: true,
               isLoading: false,
-              onSettingsChange: (automaticUpdates, timeInterval) {
+              onSettingsChange: (automaticUpdates, updateRefresh) {
                 capturedAutomaticUpdates = automaticUpdates;
-                capturedTimeInterval = timeInterval;
+                capturedUpdateRefresh = updateRefresh;
               },
             ),
           ),
@@ -106,13 +106,13 @@ void main() {
       await tester.pump();
 
       expect(capturedAutomaticUpdates, true);
-      expect(capturedTimeInterval, 30);
+      expect(capturedUpdateRefresh, 1800); // Should be in seconds
     });
 
     testWidgets('calls onSettingsChange when Save is tapped with automaticUpdates disabled',
         (WidgetTester tester) async {
       bool? capturedAutomaticUpdates;
-      int? capturedTimeInterval;
+      int? capturedUpdateRefresh;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -121,9 +121,9 @@ void main() {
               automaticUpdates: false,
               isOwner: true,
               isLoading: false,
-              onSettingsChange: (automaticUpdates, timeInterval) {
+              onSettingsChange: (automaticUpdates, updateRefresh) {
                 capturedAutomaticUpdates = automaticUpdates;
-                capturedTimeInterval = timeInterval;
+                capturedUpdateRefresh = updateRefresh;
               },
             ),
           ),
@@ -168,7 +168,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              timeInterval: 30,
+              updateRefresh: 1800, // 30 minutes in seconds
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
@@ -198,7 +198,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              timeInterval: 30,
+              updateRefresh: 1800, // 30 minutes in seconds
               isOwner: true,
               isLoading: true,
               onSettingsChange: (_, __) {},
@@ -219,14 +219,14 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('updates text field value when timeInterval prop changes',
+    testWidgets('updates text field value when updateRefresh prop changes',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              timeInterval: 30,
+              updateRefresh: 1800, // 30 minutes in seconds
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
@@ -237,13 +237,13 @@ void main() {
 
       expect(find.text('30'), findsOneWidget);
 
-      // Update the widget with new timeInterval
+      // Update the widget with new updateRefresh
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              timeInterval: 60,
+              updateRefresh: 3600, // 60 minutes in seconds
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},

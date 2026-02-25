@@ -5,15 +5,15 @@ import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 /// Only shown for trip owners
 class TripSettingsControl extends StatefulWidget {
   final bool automaticUpdates;
-  final int? timeInterval; // in minutes
+  final int? updateRefresh; // in seconds
   final bool isOwner;
   final bool isLoading;
-  final Function(bool automaticUpdates, int? timeInterval) onSettingsChange;
+  final Function(bool automaticUpdates, int? updateRefresh) onSettingsChange;
 
   const TripSettingsControl({
     super.key,
     required this.automaticUpdates,
-    this.timeInterval,
+    this.updateRefresh,
     required this.isOwner,
     required this.isLoading,
     required this.onSettingsChange,
@@ -31,8 +31,12 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
   void initState() {
     super.initState();
     _automaticUpdates = widget.automaticUpdates;
+    // Convert seconds to minutes for display
+    final minutes = widget.updateRefresh != null 
+        ? (widget.updateRefresh! / 60).round() 
+        : 30;
     _intervalController = TextEditingController(
-      text: widget.timeInterval?.toString() ?? '30',
+      text: minutes.toString(),
     );
   }
 
@@ -42,8 +46,12 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     if (oldWidget.automaticUpdates != widget.automaticUpdates) {
       _automaticUpdates = widget.automaticUpdates;
     }
-    if (oldWidget.timeInterval != widget.timeInterval) {
-      _intervalController.text = widget.timeInterval?.toString() ?? '30';
+    if (oldWidget.updateRefresh != widget.updateRefresh) {
+      // Convert seconds to minutes for display
+      final minutes = widget.updateRefresh != null 
+          ? (widget.updateRefresh! / 60).round() 
+          : 30;
+      _intervalController.text = minutes.toString();
     }
   }
 
@@ -54,8 +62,8 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
   }
 
   void _handleSave() {
-    final interval = int.tryParse(_intervalController.text);
-    if (_automaticUpdates && (interval == null || interval < 1)) {
+    final minutes = int.tryParse(_intervalController.text);
+    if (_automaticUpdates && (minutes == null || minutes < 1)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter a valid interval (minimum 1 minute)'),
@@ -64,7 +72,9 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       );
       return;
     }
-    widget.onSettingsChange(_automaticUpdates, interval);
+    // Convert minutes to seconds for the backend
+    final seconds = minutes != null ? minutes * 60 : null;
+    widget.onSettingsChange(_automaticUpdates, seconds);
   }
 
   @override

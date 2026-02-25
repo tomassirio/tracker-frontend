@@ -18,7 +18,7 @@ class TripInfoCard extends StatelessWidget {
   final bool isChangingStatus;
   final Function(TripStatus)? onStatusChange;
   final bool isChangingSettings;
-  final Function(bool automaticUpdates, int? timeInterval)? onSettingsChange;
+  final Function(bool automaticUpdates, int? updateRefresh)? onSettingsChange;
   final VoidCallback? onFollowUser;
   final VoidCallback? onSendFriendRequest;
   final bool isFollowing;
@@ -460,7 +460,7 @@ class TripInfoCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   TripSettingsControl(
                     automaticUpdates: trip.automaticUpdates,
-                    timeInterval: trip.timeInterval,
+                    updateRefresh: trip.updateRefresh,
                     isOwner: trip.userId == currentUserId,
                     isLoading: isChangingSettings,
                     onSettingsChange: onSettingsChange!,

@@ -95,11 +95,11 @@ class TripDetailRepository {
   Future<String> changeTripSettings(
     String tripId,
     bool automaticUpdates,
-    int? timeInterval,
+    int? updateRefresh,
   ) async {
     final request = ChangeTripSettingsRequest(
       automaticUpdates: automaticUpdates,
-      timeInterval: timeInterval,
+      updateRefresh: updateRefresh,
     );
     return await _tripService.changeSettings(tripId, request);
   }

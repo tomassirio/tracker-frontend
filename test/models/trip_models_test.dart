@@ -281,10 +281,10 @@ void main() {
         );
 
         expect(trip.automaticUpdates, false);
-        expect(trip.timeInterval, null);
+        expect(trip.updateRefresh, null);
       });
 
-      test('automaticUpdates can be set to true with timeInterval', () {
+      test('automaticUpdates can be set to true with updateRefresh', () {
         final trip = Trip(
           id: 'trip123',
           userId: 'user456',
@@ -293,16 +293,16 @@ void main() {
           visibility: Visibility.public,
           status: TripStatus.inProgress,
           automaticUpdates: true,
-          timeInterval: 30,
+          updateRefresh: 1800, // 30 minutes in seconds
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
 
         expect(trip.automaticUpdates, true);
-        expect(trip.timeInterval, 30);
+        expect(trip.updateRefresh, 1800);
       });
 
-      test('fromJson parses automaticUpdates and timeInterval from tripSettings',
+      test('fromJson parses automaticUpdates and updateRefresh from tripSettings',
           () {
         final json = {
           'id': 'trip123',
@@ -313,7 +313,7 @@ void main() {
           'status': 'IN_PROGRESS',
           'tripSettings': {
             'automaticUpdates': true,
-            'timeInterval': 45,
+            'updateRefresh': 2700, // 45 minutes in seconds
           },
           'createdAt': '2024-01-01T00:00:00.000Z',
           'updatedAt': '2024-01-02T00:00:00.000Z',
@@ -322,7 +322,7 @@ void main() {
         final trip = Trip.fromJson(json);
 
         expect(trip.automaticUpdates, true);
-        expect(trip.timeInterval, 45);
+        expect(trip.updateRefresh, 2700);
       });
 
       test('fromJson defaults automaticUpdates to false when not in JSON', () {
@@ -340,10 +340,10 @@ void main() {
         final trip = Trip.fromJson(json);
 
         expect(trip.automaticUpdates, false);
-        expect(trip.timeInterval, null);
+        expect(trip.updateRefresh, null);
       });
 
-      test('toJson includes automaticUpdates and timeInterval', () {
+      test('toJson includes automaticUpdates and updateRefresh', () {
         final trip = Trip(
           id: 'trip123',
           userId: 'user456',
@@ -352,7 +352,7 @@ void main() {
           visibility: Visibility.public,
           status: TripStatus.inProgress,
           automaticUpdates: true,
-          timeInterval: 60,
+          updateRefresh: 3600, // 60 minutes in seconds
           createdAt: DateTime(2024, 1, 1),
           updatedAt: DateTime(2024, 1, 2),
         );
@@ -360,10 +360,10 @@ void main() {
         final json = trip.toJson();
 
         expect(json['automaticUpdates'], true);
-        expect(json['timeInterval'], 60);
+        expect(json['updateRefresh'], 3600);
       });
 
-      test('copyWith updates automaticUpdates and timeInterval', () {
+      test('copyWith updates automaticUpdates and updateRefresh', () {
         final trip = Trip(
           id: 'trip123',
           userId: 'user456',
@@ -378,11 +378,11 @@ void main() {
 
         final updatedTrip = trip.copyWith(
           automaticUpdates: true,
-          timeInterval: 30,
+          updateRefresh: 1800, // 30 minutes in seconds
         );
 
         expect(updatedTrip.automaticUpdates, true);
-        expect(updatedTrip.timeInterval, 30);
+        expect(updatedTrip.updateRefresh, 1800);
         expect(updatedTrip.id, trip.id);
         expect(updatedTrip.name, trip.name);
       });
@@ -393,13 +393,13 @@ void main() {
           () {
         final request = ChangeTripSettingsRequest(
           automaticUpdates: true,
-          timeInterval: 30,
+          updateRefresh: 1800, // 30 minutes in seconds
         );
 
         final json = request.toJson();
 
         expect(json['automaticUpdates'], true);
-        expect(json['timeInterval'], 30);
+        expect(json['updateRefresh'], 1800);
       });
 
       test('toJson excludes null values', () {
@@ -410,18 +410,18 @@ void main() {
         final json = request.toJson();
 
         expect(json['automaticUpdates'], true);
-        expect(json.containsKey('timeInterval'), false);
+        expect(json.containsKey('updateRefresh'), false);
       });
 
-      test('toJson handles only timeInterval', () {
+      test('toJson handles only updateRefresh', () {
         final request = ChangeTripSettingsRequest(
-          timeInterval: 45,
+          updateRefresh: 2700, // 45 minutes in seconds
         );
 
         final json = request.toJson();
 
         expect(json.containsKey('automaticUpdates'), false);
-        expect(json['timeInterval'], 45);
+        expect(json['updateRefresh'], 2700);
       });
 
       test('toJson with automaticUpdates false', () {

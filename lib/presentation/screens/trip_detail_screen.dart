@@ -643,7 +643,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _handleSettingsChange(
-      bool automaticUpdates, int? timeInterval) async {
+      bool automaticUpdates, int? updateRefresh) async {
     // Only trip owner can change settings
     if (_userId == null || _trip.userId != _userId) {
       if (mounted) {
@@ -659,14 +659,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       await _repository.changeTripSettings(
         _trip.id,
         automaticUpdates,
-        timeInterval,
+        updateRefresh,
       );
 
       // Update local state optimistically - WebSocket will confirm the change
       setState(() {
         _trip = _trip.copyWith(
           automaticUpdates: automaticUpdates,
-          timeInterval: timeInterval,
+          updateRefresh: updateRefresh,
         );
         _isChangingSettings = false;
       });
