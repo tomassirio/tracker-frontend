@@ -83,6 +83,13 @@ class TripService {
     return await _tripCommandClient.changeStatus(tripId, request);
   }
 
+  /// Change trip settings (automatic updates, time interval)
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> changeSettings(
+      String tripId, ChangeTripSettingsRequest request) async {
+    return await _tripCommandClient.changeSettings(tripId, request);
+  }
+
   /// Delete a trip
   /// Returns the trip ID immediately. Deletion will be confirmed via WebSocket.
   Future<String> deleteTrip(String tripId) async {

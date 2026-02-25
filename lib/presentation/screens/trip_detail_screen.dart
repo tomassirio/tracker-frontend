@@ -67,6 +67,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   bool _isChangingStatus = false;
+  bool _isChangingSettings = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
@@ -641,6 +642,48 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  Future<void> _handleSettingsChange(
+      bool automaticUpdates, int? timeInterval) async {
+    // Only trip owner can change settings
+    if (_userId == null || _trip.userId != _userId) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Only trip owner can change settings');
+      }
+      return;
+    }
+
+    setState(() => _isChangingSettings = true);
+
+    try {
+      await _repository.changeTripSettings(
+        _trip.id,
+        automaticUpdates,
+        timeInterval,
+      );
+
+      // Update local state optimistically - WebSocket will confirm the change
+      setState(() {
+        _trip = _trip.copyWith(
+          automaticUpdates: automaticUpdates,
+          timeInterval: timeInterval,
+        );
+        _isChangingSettings = false;
+      });
+
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+            context, 'Trip settings updated successfully');
+      }
+    } catch (e) {
+      setState(() => _isChangingSettings = false);
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Error updating settings: $e');
+      }
+    }
+  }
+
   void _showReactionPicker(String commentId) {
     showModalBottomSheet(
       context: context,
@@ -1100,6 +1143,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       replyingToCommentId: _replyingToCommentId,
       currentUserId: _userId,
       isChangingStatus: _isChangingStatus,
+      isChangingSettings: _isChangingSettings,
       showTripUpdatePanel: _showTripUpdatePanel,
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
@@ -1120,6 +1164,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
+      onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner:
           _trip.userId != _userId ? _handleFollowTripOwner : null,
