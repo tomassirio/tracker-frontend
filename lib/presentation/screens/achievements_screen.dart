@@ -74,8 +74,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       // Load user's achievements if logged in
       if (isLoggedIn) {
         try {
-          final myAchievements =
-              await _achievementService.getMyAchievements();
+          final myAchievements = await _achievementService.getMyAchievements();
           setState(() {
             _myAchievements = myAchievements;
           });
@@ -130,8 +129,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
   /// Check if an achievement is unlocked by the current user
   bool _isUnlocked(Achievement achievement) {
-    return _myAchievements
-        .any((ua) => ua.achievement.id == achievement.id);
+    return _myAchievements.any((ua) => ua.achievement.id == achievement.id);
   }
 
   /// Get the UserAchievement for a given achievement, if unlocked
@@ -337,8 +335,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 value: progress,
                 minHeight: 8,
                 backgroundColor: Colors.grey[200],
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Colors.amber),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
               ),
             ),
           ],
@@ -353,8 +350,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   ) {
     final categoryColor = _getCategoryColor(category);
     final categoryIcon = _getCategoryIcon(category);
-    final unlockedInCategory =
-        achievements.where((a) => _isUnlocked(a)).length;
+    final unlockedInCategory = achievements.where((a) => _isUnlocked(a)).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

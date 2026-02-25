@@ -105,7 +105,7 @@ class GoogleRoutesApiClient {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': _apiKey,
         'X-Goog-FieldMask':
-            'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+            'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.polyline.encodedPolyline',
       },
       body: json.encode(requestBody),
     );
@@ -121,6 +121,7 @@ class GoogleRoutesApiClient {
       if (data['routes'] != null && (data['routes'] as List).isNotEmpty) {
         final route = data['routes'][0];
 
+        // Try top-level route polyline first
         if (route['polyline'] != null &&
             route['polyline']['encodedPolyline'] != null) {
           final encodedPolyline =
@@ -136,6 +137,38 @@ class GoogleRoutesApiClient {
             distanceMeters: distanceMeters,
             duration: durationString,
           );
+        }
+
+        // Fall back to combining leg polylines (needed for routes with intermediates)
+        if (route['legs'] != null && (route['legs'] as List).isNotEmpty) {
+          final legs = route['legs'] as List;
+          final allPoints = <LatLng>[];
+
+          for (int i = 0; i < legs.length; i++) {
+            final leg = legs[i];
+            if (leg['polyline'] != null &&
+                leg['polyline']['encodedPolyline'] != null) {
+              final legPoints =
+                  decodePolyline(leg['polyline']['encodedPolyline'] as String);
+              // Skip the first point of subsequent legs to avoid duplicates
+              if (i > 0 && allPoints.isNotEmpty && legPoints.isNotEmpty) {
+                allPoints.addAll(legPoints.sublist(1));
+              } else {
+                allPoints.addAll(legPoints);
+              }
+            }
+          }
+
+          if (allPoints.isNotEmpty) {
+            final distanceMeters = route['distanceMeters'] as int?;
+            final durationString = route['duration'] as String?;
+
+            return RouteResult(
+              points: allPoints,
+              distanceMeters: distanceMeters,
+              duration: durationString,
+            );
+          }
         }
       }
       throw Exception('No routes found in Routes API response');

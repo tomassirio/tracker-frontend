@@ -167,8 +167,7 @@ void main() {
           ),
         ];
 
-        final result =
-            await achievementService.getTripAchievements('trip-1');
+        final result = await achievementService.getTripAchievements('trip-1');
 
         expect(result.length, 2);
         expect(result[0].tripId, 'trip-1');
@@ -180,8 +179,7 @@ void main() {
       test('returns empty list when no trip achievements', () async {
         mockQueryClient.mockUserAchievements = [];
 
-        final result =
-            await achievementService.getTripAchievements('trip-1');
+        final result = await achievementService.getTripAchievements('trip-1');
 
         expect(result, isEmpty);
       });

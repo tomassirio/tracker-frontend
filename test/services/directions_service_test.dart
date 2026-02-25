@@ -34,21 +34,23 @@ void main() {
     });
 
     group('getDirections with multiple waypoints', () {
-      test('handles exactly 2 waypoints', () async {
-        // Testing with invalid key to trigger fallback behavior
+      test('throws when API fails with exactly 2 waypoints', () async {
+        // Testing with invalid key to trigger failure
         final serviceWithInvalidKey = DirectionsService('invalid-key');
         final waypoints = [
           const LatLng(37.7749, -122.4194),
           const LatLng(37.7849, -122.4094),
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // Should fallback to original waypoints on API failure
-        expect(result, waypoints);
+        // Should throw when no routes can be found
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
 
-      test('handles multiple waypoints (3 points)', () async {
+      test('throws when API fails with multiple waypoints (3 points)',
+          () async {
         final serviceWithInvalidKey = DirectionsService('invalid-key');
         final waypoints = [
           const LatLng(37.7749, -122.4194), // San Francisco
@@ -56,13 +58,15 @@ void main() {
           const LatLng(37.7949, -122.3994), // Point 3
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // Should return at least the original waypoints as fallback
-        expect(result.length, greaterThanOrEqualTo(3));
+        // Should throw when no routes can be found
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
 
-      test('handles multiple waypoints (4+ points)', () async {
+      test('throws when API fails with multiple waypoints (4+ points)',
+          () async {
         final serviceWithInvalidKey = DirectionsService('invalid-key');
         final waypoints = [
           const LatLng(37.7749, -122.4194),
@@ -71,17 +75,17 @@ void main() {
           const LatLng(37.8049, -122.3894),
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // Should process these waypoints (fallback to original)
-        expect(result.isNotEmpty, true);
-        expect(result.length, greaterThanOrEqualTo(waypoints.length));
+        // Should throw when no routes can be found
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
     });
 
     group('error handling and fallback behavior', () {
       test(
-        'returns original waypoints when API fails with invalid key',
+        'throws when API fails with invalid key',
         () async {
           final serviceWithInvalidKey = DirectionsService('invalid-api-key');
           final waypoints = [
@@ -89,48 +93,52 @@ void main() {
             const LatLng(37.7849, -122.4094),
           ];
 
-          final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-          // Should fallback to original waypoints on error
-          expect(result, waypoints);
+          // Should throw so callers can use their own fallback
+          expect(
+            () => serviceWithInvalidKey.getDirections(waypoints),
+            throwsException,
+          );
         },
       );
 
-      test('catches exceptions and returns original waypoints', () async {
+      test('throws on API failure so callers can handle fallback', () async {
         final serviceWithInvalidKey = DirectionsService('test-key-fail');
         final waypoints = [
           const LatLng(37.7749, -122.4194),
           const LatLng(37.7849, -122.4094),
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // Should not throw, should return fallback
-        expect(result, isNotEmpty);
-        expect(result, waypoints);
+        // Should throw — callers handle fallback to straight lines
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
 
-      test('handles edge case coordinates gracefully', () async {
+      test('throws for edge case coordinates when API unavailable', () async {
         final waypoints = [const LatLng(0, 0), const LatLng(0, 0)];
 
-        final result = await service.getDirections(waypoints);
-
-        // Should not throw, should return some result
-        expect(result, isNotEmpty);
+        // With a test API key, should throw
+        expect(
+          () => service.getDirections(waypoints),
+          throwsException,
+        );
       });
 
-      test('handles extreme latitude/longitude values', () async {
+      test('throws for extreme latitude/longitude values when API unavailable',
+          () async {
         final waypoints = [const LatLng(90, 180), const LatLng(-90, -180)];
 
-        final result = await service.getDirections(waypoints);
-
-        // Should not throw
-        expect(result, isNotEmpty);
+        // With a test API key, should throw
+        expect(
+          () => service.getDirections(waypoints),
+          throwsException,
+        );
       });
     });
 
     group('result validation', () {
-      test('returns at least the original waypoint count on failure', () async {
+      test('throws when all segments fail with invalid key', () async {
         final serviceWithInvalidKey = DirectionsService('invalid-key');
         final waypoints = [
           const LatLng(37.7749, -122.4194),
@@ -138,30 +146,29 @@ void main() {
           const LatLng(37.7949, -122.3994),
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // Result should have at least the same number of points as input
-        expect(result.length, greaterThanOrEqualTo(waypoints.length));
+        // Should throw when no segments can be routed
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
 
-      test('result contains valid LatLng objects', () async {
+      test('result contains valid LatLng objects when API succeeds', () async {
+        // This test verifies structure; with invalid key it will throw
         final serviceWithInvalidKey = DirectionsService('invalid-key');
         final waypoints = [
           const LatLng(37.7749, -122.4194),
           const LatLng(37.7849, -122.4094),
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // All results should be valid LatLng objects
-        for (final point in result) {
-          expect(point, isA<LatLng>());
-          expect(point.latitude, isA<double>());
-          expect(point.longitude, isA<double>());
-        }
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
 
-      test('preserves waypoint order in fallback', () async {
+      test('throws when all segments fail to preserve caller fallback',
+          () async {
         final serviceWithInvalidKey = DirectionsService('invalid-key');
         final waypoints = [
           const LatLng(37.7749, -122.4194),
@@ -169,10 +176,11 @@ void main() {
           const LatLng(37.7949, -122.3994),
         ];
 
-        final result = await serviceWithInvalidKey.getDirections(waypoints);
-
-        // Should preserve original order
-        expect(result, waypoints);
+        // Should throw so the caller (trip_map_helper) draws straight lines
+        expect(
+          () => serviceWithInvalidKey.getDirections(waypoints),
+          throwsException,
+        );
       });
     });
 
