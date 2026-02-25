@@ -395,19 +395,22 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ],
           ),
         ),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 80,
-            crossAxisSpacing: 6,
-            mainAxisSpacing: 6,
-            childAspectRatio: 0.85,
-          ),
-          itemCount: achievements.length,
-          itemBuilder: (context, index) =>
-              _buildAchievementTile(achievements[index]),
-        ),
+        LayoutBuilder(builder: (context, constraints) {
+          final crossAxisCount = constraints.maxWidth < 600 ? 5 : 7;
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 6,
+              mainAxisSpacing: 6,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: achievements.length,
+            itemBuilder: (context, index) =>
+                _buildAchievementTile(achievements[index]),
+          );
+        }),
         const SizedBox(height: 16),
       ],
     );
@@ -435,8 +438,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
           children: [
             // Trophy icon
             Container(
-              width: 28,
-              height: 28,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: unlocked ? categoryColor : Colors.grey[300],
                 shape: BoxShape.circle,
@@ -444,7 +447,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               child: Icon(
                 unlocked ? Icons.emoji_events : Icons.lock_outline,
                 color: unlocked ? Colors.white : Colors.grey[500],
-                size: 16,
+                size: 18,
               ),
             ),
             const SizedBox(height: 3),
@@ -455,7 +458,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: unlocked ? categoryColor : Colors.grey[500],
               ),
