@@ -13,6 +13,8 @@ void main() {
               isOwner: false,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
+              isWeb: false, // Simulate mobile for testing
             ),
           ),
         ),
@@ -21,7 +23,7 @@ void main() {
       expect(find.byType(Switch), findsNothing);
     });
 
-    testWidgets('shows switch for owners', (WidgetTester tester) async {
+    testWidgets('does not show on web platform', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -30,6 +32,27 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
+              isWeb: true, // Simulate web platform
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Switch), findsNothing);
+    });
+
+    testWidgets('shows switch for owners on mobile', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __) {},
+              isWeb: false,
+              isWeb: false, // Simulate mobile
             ),
           ),
         ),
@@ -51,6 +74,8 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
+              isWeb: false,
             ),
           ),
         ),
@@ -71,6 +96,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
             ),
           ),
         ),
@@ -97,6 +123,7 @@ void main() {
                 capturedAutomaticUpdates = automaticUpdates;
                 capturedUpdateRefresh = updateRefresh;
               },
+              isWeb: false,
             ),
           ),
         ),
@@ -125,6 +152,7 @@ void main() {
                 capturedAutomaticUpdates = automaticUpdates;
                 capturedUpdateRefresh = updateRefresh;
               },
+              isWeb: false,
             ),
           ),
         ),
@@ -147,6 +175,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
             ),
           ),
         ),
@@ -174,6 +203,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
             ),
           ),
         ),
@@ -204,6 +234,7 @@ void main() {
               isOwner: true,
               isLoading: true,
               onSettingsChange: (_, __) {},
+              isWeb: false,
             ),
           ),
         ),
@@ -232,6 +263,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
             ),
           ),
         ),
@@ -249,6 +281,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              isWeb: false,
             ),
           ),
         ),

@@ -1,14 +1,19 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for controlling trip automatic update settings
-/// Only shown for trip owners
+/// Only shown on mobile (not web) and only for trip owners
 class TripSettingsControl extends StatefulWidget {
   final bool automaticUpdates;
   final int? updateRefresh; // in seconds
   final bool isOwner;
   final bool isLoading;
   final Function(bool automaticUpdates, int? updateRefresh) onSettingsChange;
+
+  /// Whether running on web platform. Defaults to [kIsWeb].
+  /// Can be overridden for testing purposes.
+  final bool? isWeb;
 
   const TripSettingsControl({
     super.key,
@@ -17,6 +22,7 @@ class TripSettingsControl extends StatefulWidget {
     required this.isOwner,
     required this.isLoading,
     required this.onSettingsChange,
+    this.isWeb,
   });
 
   @override
@@ -79,6 +85,13 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveIsWeb = widget.isWeb ?? kIsWeb;
+
+    // Only show on mobile (not web)
+    if (effectiveIsWeb) {
+      return const SizedBox.shrink();
+    }
+
     // Only show for trip owners
     if (!widget.isOwner) {
       return const SizedBox.shrink();

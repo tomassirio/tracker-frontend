@@ -604,14 +604,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       // Manage background updates based on new status (Android only)
       if (_isAndroid) {
         final backgroundManager = BackgroundUpdateManager();
-        if (newStatus == TripStatus.inProgress) {
-          // Start automatic updates when trip starts/resumes
+        if (newStatus == TripStatus.inProgress && _trip.automaticUpdates) {
+          // Start automatic updates when trip starts/resumes AND automatic updates is enabled
           await backgroundManager.startAutoUpdates(
             _trip.id,
             _trip.effectiveUpdateRefresh,
           );
         } else {
-          // Stop automatic updates when trip is paused/finished
+          // Stop automatic updates when trip is paused/finished or automatic updates is disabled
           await backgroundManager.stopAutoUpdates(_trip.id);
         }
       }
@@ -670,6 +670,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         );
         _isChangingSettings = false;
       });
+
+      // Manage background updates based on new settings (Android only)
+      if (_isAndroid && _trip.status == TripStatus.inProgress) {
+        final backgroundManager = BackgroundUpdateManager();
+        if (automaticUpdates && updateRefresh != null) {
+          // Start/restart automatic updates with new interval
+          await backgroundManager.startAutoUpdates(_trip.id, updateRefresh);
+        } else {
+          // Stop automatic updates when disabled
+          await backgroundManager.stopAutoUpdates(_trip.id);
+        }
+      }
 
       if (mounted) {
         UiHelpers.showSuccessMessage(
@@ -744,6 +756,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           UiHelpers.showSuccessMessage(context, 'Update sent successfully!');
           // Refresh timeline to show the new update
           await _loadTripUpdates();
+
+          // Reschedule automatic updates after manual update (Android only)
+          if (_isAndroid &&
+              _trip.status == TripStatus.inProgress &&
+              _trip.automaticUpdates) {
+            final backgroundManager = BackgroundUpdateManager();
+            await backgroundManager.startAutoUpdates(
+              _trip.id,
+              _trip.effectiveUpdateRefresh,
+            );
+          }
         } else {
           UiHelpers.showErrorMessage(context, result.userMessage);
         }
