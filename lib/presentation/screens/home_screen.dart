@@ -507,14 +507,7 @@ class _HomeScreenState extends State<HomeScreen>
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
-            Theme.of(context).colorScheme.inversePrimary.withOpacity(0.15),
-          ],
-        ),
+        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.35),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1273,55 +1266,93 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                       ),
                     )
-                  : Column(
+                  : Stack(
                       children: [
-                        _buildFilterChips(),
-                        Expanded(
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              _buildMyTripsTab(),
-                              _buildFeedTab(),
-                              _buildDiscoverTab(),
-                            ],
-                          ),
+                        Column(
+                          children: [
+                            _buildFilterChips(),
+                            Expanded(
+                              child: TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  _buildMyTripsTab(),
+                                  _buildFeedTab(),
+                                  _buildDiscoverTab(),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
+                        if (_isLoggedIn)
+                          Positioned(
+                            left: 16,
+                            right: 16,
+                            bottom: 16,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(28),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.12),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(28),
+                                child: NavigationBar(
+                                  selectedIndex: _tabController.index,
+                                  onDestinationSelected: (index) {
+                                    setState(() {
+                                      _tabController.animateTo(index);
+                                    });
+                                  },
+                                  backgroundColor: Colors.transparent,
+                                  elevation: 0,
+                                  height: 64,
+                                  labelBehavior:
+                                      NavigationDestinationLabelBehavior
+                                          .alwaysShow,
+                                  destinations: const [
+                                    NavigationDestination(
+                                      icon: Icon(Icons.person_outline),
+                                      selectedIcon: Icon(Icons.person),
+                                      label: 'My Trips',
+                                    ),
+                                    NavigationDestination(
+                                      icon: Icon(Icons.dynamic_feed_outlined),
+                                      selectedIcon: Icon(Icons.dynamic_feed),
+                                      label: 'Feed',
+                                    ),
+                                    NavigationDestination(
+                                      icon: Icon(Icons.explore_outlined),
+                                      selectedIcon: Icon(Icons.explore),
+                                      label: 'Discover',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (_username != null)
+                          Positioned(
+                            right: 16,
+                            bottom: 92,
+                            child: FloatingActionButton.extended(
+                              onPressed: _navigateToCreateTrip,
+                              icon: const Icon(Icons.add),
+                              label: const Text('New Trip'),
+                            ),
+                          ),
                       ],
                     ),
-      bottomNavigationBar: _isLoggedIn
-          ? NavigationBar(
-              selectedIndex: _tabController.index,
-              onDestinationSelected: (index) {
-                setState(() {
-                  _tabController.animateTo(index);
-                });
-              },
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
-                  label: 'My Trips',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.dynamic_feed_outlined),
-                  selectedIcon: Icon(Icons.dynamic_feed),
-                  label: 'Feed',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.explore_outlined),
-                  selectedIcon: Icon(Icons.explore),
-                  label: 'Discover',
-                ),
-              ],
-            )
-          : null,
-      floatingActionButton: _username != null
-          ? FloatingActionButton.extended(
-              onPressed: _navigateToCreateTrip,
-              icon: const Icon(Icons.add),
-              label: const Text('New Trip'),
-            )
-          : null,
     );
   }
 }
