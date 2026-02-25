@@ -396,7 +396,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
           ),
         ),
         LayoutBuilder(builder: (context, constraints) {
-          final crossAxisCount = constraints.maxWidth < 600 ? 5 : 7;
+          final isMobile = constraints.maxWidth < 600;
+          final crossAxisCount = isMobile ? 4 : 7;
+          final aspectRatio = isMobile ? 0.75 : 0.85;
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -404,7 +406,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 6,
               mainAxisSpacing: 6,
-              childAspectRatio: 0.85,
+              childAspectRatio: aspectRatio,
             ),
             itemCount: achievements.length,
             itemBuilder: (context, index) =>
@@ -452,15 +454,17 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ),
             const SizedBox(height: 3),
             // Achievement name
-            Text(
-              achievement.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: unlocked ? categoryColor : Colors.grey[500],
+            Flexible(
+              child: Text(
+                achievement.name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: unlocked ? categoryColor : Colors.grey[500],
+                ),
               ),
             ),
             const SizedBox(height: 1),
