@@ -291,7 +291,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         children: [
           // Summary header
           if (_isLoggedIn) _buildSummaryCard(unlockedCount, totalCount),
@@ -395,23 +395,18 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ],
           ),
         ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 600 ? 5 : 4;
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.9,
-              ),
-              itemCount: achievements.length,
-              itemBuilder: (context, index) =>
-                  _buildAchievementTile(achievements[index]),
-            );
-          },
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 80,
+            crossAxisSpacing: 6,
+            mainAxisSpacing: 6,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: achievements.length,
+          itemBuilder: (context, index) =>
+              _buildAchievementTile(achievements[index]),
         ),
         const SizedBox(height: 16),
       ],
@@ -434,14 +429,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             width: unlocked ? 2 : 1,
           ),
         ),
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(4),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Trophy icon
             Container(
-              width: 36,
-              height: 36,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: unlocked ? categoryColor : Colors.grey[300],
                 shape: BoxShape.circle,
@@ -449,10 +444,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               child: Icon(
                 unlocked ? Icons.emoji_events : Icons.lock_outline,
                 color: unlocked ? Colors.white : Colors.grey[500],
-                size: 20,
+                size: 16,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             // Achievement name
             Text(
               achievement.name,
@@ -460,12 +455,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 9,
                 fontWeight: FontWeight.w600,
                 color: unlocked ? categoryColor : Colors.grey[500],
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 1),
             // Threshold or achieved value
             Text(
               unlocked && userAchievement != null
@@ -475,7 +470,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 8,
                 color: unlocked ? categoryColor : Colors.grey[400],
               ),
             ),
