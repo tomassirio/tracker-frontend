@@ -136,18 +136,21 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: AuthForm(
-                formKey: _formKey,
-                isLogin: _isLogin,
-                isLoading: _isLoading,
-                errorMessage: _errorMessage,
-                usernameController: _usernameController,
-                emailController: _emailController,
-                passwordController: _passwordController,
-                confirmPasswordController: _confirmPasswordController,
-                onSubmit: _submit,
-                onToggleMode: _toggleMode,
-                onForgotPassword: _forgotPassword,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 450),
+                child: AuthForm(
+                  formKey: _formKey,
+                  isLogin: _isLogin,
+                  isLoading: _isLoading,
+                  errorMessage: _errorMessage,
+                  usernameController: _usernameController,
+                  emailController: _emailController,
+                  passwordController: _passwordController,
+                  confirmPasswordController: _confirmPasswordController,
+                  onSubmit: _submit,
+                  onToggleMode: _toggleMode,
+                  onForgotPassword: _forgotPassword,
+                ),
               ),
             ),
           ),

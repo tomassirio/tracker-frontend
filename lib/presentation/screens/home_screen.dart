@@ -449,39 +449,94 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  Widget _buildFilterChipButton<T>({
+    required T? value,
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required List<PopupMenuEntry<T>> items,
+    required ValueChanged<T?> onSelected,
+    bool isActive = false,
+  }) {
+    final theme = Theme.of(context);
+    final chipColor = isActive
+        ? theme.colorScheme.secondaryContainer
+        : theme.colorScheme.surfaceContainerLow;
+    final contentColor = isActive
+        ? theme.colorScheme.onSecondaryContainer
+        : theme.colorScheme.onSurfaceVariant;
+
+    return PopupMenuButton<T>(
+      onSelected: onSelected,
+      itemBuilder: (_) => items,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 2,
+      child: Material(
+        color: chipColor,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.only(left: 8, right: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: iconColor),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: contentColor,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.arrow_drop_down, size: 18, color: contentColor),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterChips() {
     final bool isMyTripsTab = _tabController.index == 0;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
+        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.35),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Spacer(), // Push dropdowns to the right
-          // Status filter dropdown
-          PopupMenuButton<TripStatus?>(
+          // Status filter chip
+          _buildFilterChipButton<TripStatus?>(
+            value: _statusFilter,
+            label: _statusFilter == null
+                ? 'All Status'
+                : _getStatusLabel(_statusFilter!),
+            icon: _getStatusIcon(_statusFilter),
+            iconColor: _getStatusColor(_statusFilter),
+            isActive: _statusFilter != null,
             onSelected: (value) {
               setState(() => _statusFilter = value);
             },
-            itemBuilder: (context) => [
+            items: [
               PopupMenuItem<TripStatus?>(
                 value: null,
                 onTap: () {
-                  // Handle null selection explicitly
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     setState(() => _statusFilter = null);
                   });
                 },
                 child: Row(
                   children: [
-                    Icon(Icons.all_inclusive, size: 18),
-                    SizedBox(width: 8),
-                    Text('All Status'),
+                    Icon(Icons.all_inclusive, size: 18, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    const Text('All Status'),
                   ],
                 ),
               ),
@@ -505,7 +560,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ],
                 ),
               ),
-              // Only show Completed and Draft options on My Trips tab
               if (isMyTripsTab) ...[
                 PopupMenuItem<TripStatus?>(
                   value: TripStatus.finished,
@@ -530,54 +584,34 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _getStatusIcon(_statusFilter),
-                    size: 18,
-                    color: _getStatusColor(_statusFilter),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _statusFilter == null
-                        ? 'All Status'
-                        : _getStatusLabel(_statusFilter!),
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_drop_down, size: 20),
-                ],
-              ),
-            ),
           ),
-          // Only show visibility filter on My Trips tab
-          if (_tabController.index == 0) ...[
-            const SizedBox(width: 12),
-            PopupMenuButton<Visibility?>(
+          // Visibility filter chip (My Trips tab only)
+          if (isMyTripsTab) ...[
+            const SizedBox(width: 8),
+            _buildFilterChipButton<Visibility?>(
+              value: _visibilityFilter,
+              label: _visibilityFilter == null
+                  ? 'All Visibility'
+                  : _getVisibilityLabel(_visibilityFilter!),
+              icon: _getVisibilityIcon(_visibilityFilter),
+              iconColor: _getVisibilityColor(_visibilityFilter),
+              isActive: _visibilityFilter != null,
               onSelected: (value) {
                 setState(() => _visibilityFilter = value);
               },
-              itemBuilder: (context) => [
+              items: [
                 PopupMenuItem<Visibility?>(
                   value: null,
                   onTap: () {
-                    // Handle null selection explicitly
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       setState(() => _visibilityFilter = null);
                     });
                   },
                   child: Row(
                     children: [
-                      Icon(Icons.all_inclusive, size: 18),
-                      SizedBox(width: 8),
-                      Text('All Visibility'),
+                      Icon(Icons.all_inclusive, size: 18, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      const Text('All Visibility'),
                     ],
                   ),
                 ),
@@ -612,33 +646,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ],
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _getVisibilityIcon(_visibilityFilter),
-                      size: 18,
-                      color: _getVisibilityColor(_visibilityFilter),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _visibilityFilter == null
-                          ? 'All Visibility'
-                          : _getVisibilityLabel(_visibilityFilter!),
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_drop_down, size: 20),
-                  ],
-                ),
-              ),
             ),
           ],
         ],
@@ -1259,45 +1266,93 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                       ),
                     )
-                  : Column(
+                  : Stack(
                       children: [
-                        TabBar(
-                          controller: _tabController,
-                          tabs: const [
-                            Tab(
-                              icon: Icon(Icons.person),
-                              text: 'My Trips',
-                            ),
-                            Tab(
-                              icon: Icon(Icons.dynamic_feed),
-                              text: 'Feed',
-                            ),
-                            Tab(
-                              icon: Icon(Icons.explore),
-                              text: 'Discover',
+                        Column(
+                          children: [
+                            _buildFilterChips(),
+                            Expanded(
+                              child: TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  _buildMyTripsTab(),
+                                  _buildFeedTab(),
+                                  _buildDiscoverTab(),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                        _buildFilterChips(),
-                        Expanded(
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              _buildMyTripsTab(),
-                              _buildFeedTab(),
-                              _buildDiscoverTab(),
-                            ],
+                        if (_isLoggedIn)
+                          Positioned(
+                            left: 16,
+                            right: 16,
+                            bottom: 16,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(28),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.12),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(28),
+                                child: NavigationBar(
+                                  selectedIndex: _tabController.index,
+                                  onDestinationSelected: (index) {
+                                    setState(() {
+                                      _tabController.animateTo(index);
+                                    });
+                                  },
+                                  backgroundColor: Colors.transparent,
+                                  elevation: 0,
+                                  height: 64,
+                                  labelBehavior:
+                                      NavigationDestinationLabelBehavior
+                                          .alwaysShow,
+                                  destinations: const [
+                                    NavigationDestination(
+                                      icon: Icon(Icons.person_outline),
+                                      selectedIcon: Icon(Icons.person),
+                                      label: 'My Trips',
+                                    ),
+                                    NavigationDestination(
+                                      icon: Icon(Icons.dynamic_feed_outlined),
+                                      selectedIcon: Icon(Icons.dynamic_feed),
+                                      label: 'Feed',
+                                    ),
+                                    NavigationDestination(
+                                      icon: Icon(Icons.explore_outlined),
+                                      selectedIcon: Icon(Icons.explore),
+                                      label: 'Discover',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        if (_username != null)
+                          Positioned(
+                            right: 16,
+                            bottom: 92,
+                            child: FloatingActionButton.extended(
+                              onPressed: _navigateToCreateTrip,
+                              icon: const Icon(Icons.add),
+                              label: const Text('New Trip'),
+                            ),
+                          ),
                       ],
                     ),
-      floatingActionButton: _username != null
-          ? FloatingActionButton.extended(
-              onPressed: _navigateToCreateTrip,
-              icon: const Icon(Icons.add),
-              label: const Text('New Trip'),
-            )
-          : null,
     );
   }
 }

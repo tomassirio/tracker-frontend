@@ -185,13 +185,16 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
   String _formatValue(Achievement achievement, double value) {
     final type = achievement.type.toJson();
+    final cappedValue = value > achievement.thresholdValue
+        ? achievement.thresholdValue.toDouble()
+        : value;
     if (type.startsWith('DISTANCE_')) {
-      return '${value.toStringAsFixed(1)} km';
+      return '${cappedValue.toStringAsFixed(1)} km';
     }
     if (type.startsWith('DURATION_')) {
-      return '${value.toInt()} days';
+      return '${cappedValue.toInt()} days';
     }
-    return value.toInt().toString();
+    return cappedValue.toInt().toString();
   }
 
   String _formatThreshold(Achievement achievement) {
