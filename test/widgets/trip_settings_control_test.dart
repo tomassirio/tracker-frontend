@@ -14,7 +14,6 @@ void main() {
               isLoading: false,
               onSettingsChange: (_, __) {},
               isWeb: false,
-              isWeb: false, // Simulate mobile for testing
             ),
           ),
         ),
@@ -32,8 +31,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
-              isWeb: false,
-              isWeb: true, // Simulate web platform
+              isWeb: true,
             ),
           ),
         ),
@@ -52,7 +50,6 @@ void main() {
               isLoading: false,
               onSettingsChange: (_, __) {},
               isWeb: false,
-              isWeb: false, // Simulate mobile
             ),
           ),
         ),
@@ -70,11 +67,10 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              updateRefresh: 1800, // 30 minutes in seconds
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
-              isWeb: false,
               isWeb: false,
             ),
           ),
@@ -83,7 +79,7 @@ void main() {
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('Update Interval (minutes)'), findsOneWidget);
-      expect(find.text('30'), findsOneWidget); // Should show 30 minutes
+      expect(find.text('30'), findsOneWidget);
     });
 
     testWidgets('does not show time interval field when automaticUpdates is false',
@@ -116,7 +112,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              updateRefresh: 1800, // 30 minutes in seconds
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
               onSettingsChange: (automaticUpdates, updateRefresh) {
@@ -133,7 +129,7 @@ void main() {
       await tester.pump();
 
       expect(capturedAutomaticUpdates, true);
-      expect(capturedUpdateRefresh, 1800); // Should be in seconds
+      expect(capturedUpdateRefresh, 1800);
     });
 
     testWidgets('calls onSettingsChange when Save is tapped with automaticUpdates disabled',
@@ -162,7 +158,6 @@ void main() {
       await tester.pump();
 
       expect(capturedAutomaticUpdates, false);
-      // When automaticUpdates is false, updateRefresh can be null or any value
       expect(capturedUpdateRefresh, isNotNull);
     });
 
@@ -181,14 +176,11 @@ void main() {
         ),
       );
 
-      // Initial state: switch is off, no text field
       expect(find.byType(TextField), findsNothing);
 
-      // Tap the switch to turn it on
       await tester.tap(find.byType(Switch));
       await tester.pump();
 
-      // After toggle: text field should appear
       expect(find.byType(TextField), findsOneWidget);
     });
 
@@ -199,7 +191,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              updateRefresh: 1800, // 30 minutes in seconds
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
@@ -209,15 +201,12 @@ void main() {
         ),
       );
 
-      // Clear the text field and enter invalid value
       await tester.enterText(find.byType(TextField), '');
       await tester.pump();
 
-      // Tap Save
       await tester.tap(find.text('Save'));
       await tester.pump();
 
-      // Should show error snackbar
       expect(find.text('Please enter a valid interval (minimum 1 minute)'),
           findsOneWidget);
     });
@@ -230,7 +219,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              updateRefresh: 1800, // 30 minutes in seconds
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: true,
               onSettingsChange: (_, __) {},
@@ -240,15 +229,12 @@ void main() {
         ),
       );
 
-      // Find the switch widget
       final switchWidget = tester.widget<Switch>(find.byType(Switch));
       expect(switchWidget.onChanged, isNull);
 
-      // Find the text field widget
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.enabled, false);
 
-      // Find the save button - should show loading indicator
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
@@ -259,7 +245,7 @@ void main() {
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              updateRefresh: 1800, // 30 minutes in seconds
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
@@ -271,13 +257,12 @@ void main() {
 
       expect(find.text('30'), findsOneWidget);
 
-      // Update the widget with new updateRefresh
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: TripSettingsControl(
               automaticUpdates: true,
-              updateRefresh: 3600, // 60 minutes in seconds
+              updateRefresh: 3600,
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
