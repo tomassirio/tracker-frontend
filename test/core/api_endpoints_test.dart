@@ -257,5 +257,37 @@ void main() {
         );
       });
     });
+
+    group('Achievement Query endpoints', () {
+      test('achievements path is correct', () {
+        expect(ApiEndpoints.achievements, '/achievements');
+      });
+
+      test('achievementsMe path is correct', () {
+        expect(ApiEndpoints.achievementsMe, '/users/me/achievements');
+      });
+
+      test('userAchievements generates correct path', () {
+        expect(
+          ApiEndpoints.userAchievements('user123'),
+          '/users/user123/achievements',
+        );
+        expect(
+          ApiEndpoints.userAchievements('abc-def'),
+          '/users/abc-def/achievements',
+        );
+      });
+
+      test('tripAchievements generates correct path', () {
+        expect(
+          ApiEndpoints.tripAchievements('trip123'),
+          '/trips/trip123/achievements',
+        );
+        expect(
+          ApiEndpoints.tripAchievements('abc-def'),
+          '/trips/abc-def/achievements',
+        );
+      });
+    });
   });
 }

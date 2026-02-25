@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/data/models/achievement_models.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
@@ -21,6 +22,7 @@ class TripInfoCard extends StatelessWidget {
   final bool hasSentFriendRequest;
   final bool isAlreadyFriends;
   final bool isPromoted;
+  final List<UserAchievement> tripAchievements;
 
   const TripInfoCard({
     super.key,
@@ -36,6 +38,7 @@ class TripInfoCard extends StatelessWidget {
     this.hasSentFriendRequest = false,
     this.isAlreadyFriends = false,
     this.isPromoted = false,
+    this.tripAchievements = const [],
   });
 
   @override
@@ -390,6 +393,53 @@ class TripInfoCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                // Trip achievements
+                if (tripAchievements.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: WandererTheme.glassBorderColor,
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.emoji_events,
+                              size: 14,
+                              color: Colors.amber.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Achievements Earned',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: WandererTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: tripAchievements
+                              .map((ua) => _buildAchievementBadge(ua))
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 // Trip status control (mobile only, owner only)
                 if (onStatusChange != null && currentUserId != null) ...[
                   const SizedBox(height: 8),
@@ -404,6 +454,39 @@ class TripInfoCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAchievementBadge(UserAchievement userAchievement) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.amber.shade300,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.emoji_events,
+            size: 12,
+            color: Colors.amber.shade700,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            userAchievement.achievement.name,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.amber.shade900,
+            ),
+          ),
+        ],
       ),
     );
   }
