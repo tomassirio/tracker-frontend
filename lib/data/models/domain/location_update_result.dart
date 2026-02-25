@@ -17,6 +17,9 @@ enum LocationFailureReason {
 
   /// The API call to send the update failed (location was fine).
   networkError,
+
+  /// The server returned an error (e.g. 4xx/5xx).
+  serverError,
 }
 
 /// The result of a [TripUpdateService.sendUpdate] call.
@@ -28,14 +31,27 @@ class LocationUpdateResult {
   final bool isSuccess;
   final LocationFailureReason? failureReason;
 
+  /// Optional detail from the server / exception (shown to the user for
+  /// [serverError] and [networkError]).
+  final String? errorDetail;
+
   /// Successful update.
   const LocationUpdateResult.success()
       : isSuccess = true,
-        failureReason = null;
+        failureReason = null,
+        errorDetail = null;
 
   /// Failed update with a specific reason.
   const LocationUpdateResult.failure(LocationFailureReason reason)
       : isSuccess = false,
+        failureReason = reason,
+        errorDetail = null;
+
+  /// Failed update with a reason and extra detail text.
+  const LocationUpdateResult.failureWithDetail(
+    LocationFailureReason reason,
+    this.errorDetail,
+  )   : isSuccess = false,
         failureReason = reason;
 
   /// Returns a user-friendly message for the failure reason.
@@ -58,6 +74,11 @@ class LocationUpdateResult {
       case LocationFailureReason.networkError:
         return 'Failed to send the update. '
             'Please check your internet connection.';
+      case LocationFailureReason.serverError:
+        if (errorDetail != null && errorDetail!.isNotEmpty) {
+          return 'Server error: $errorDetail';
+        }
+        return 'The server returned an error. Please try again later.';
       case null:
         return '';
     }

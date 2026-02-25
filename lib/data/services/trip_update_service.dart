@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -61,11 +62,24 @@ class TripUpdateService {
 
       await _tripUpdateCommandClient.createTripUpdate(tripId, request);
       return const LocationUpdateResult.success();
-    } catch (e) {
-      // Log error but don't throw - background tasks should fail silently
-      debugPrint('TripUpdateService: Failed to send update: $e');
+    } on SocketException catch (e) {
+      debugPrint('TripUpdateService: Network error: $e');
       return const LocationUpdateResult.failure(
         LocationFailureReason.networkError,
+      );
+    } on TimeoutException catch (e) {
+      debugPrint('TripUpdateService: Request timed out: $e');
+      return const LocationUpdateResult.failure(
+        LocationFailureReason.networkError,
+      );
+    } catch (e) {
+      // Server / API errors — surface the actual message so the user
+      // (and the developer via the snackbar) can see what went wrong.
+      final errorMsg = e.toString();
+      debugPrint('TripUpdateService: Failed to send update: $errorMsg');
+      return LocationUpdateResult.failureWithDetail(
+        LocationFailureReason.serverError,
+        errorMsg,
       );
     }
   }

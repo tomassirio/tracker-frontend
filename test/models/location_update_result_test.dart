@@ -4,7 +4,7 @@ import 'package:tracker_frontend/data/models/domain/location_update_result.dart'
 void main() {
   group('LocationFailureReason', () {
     test('has all expected values', () {
-      expect(LocationFailureReason.values, hasLength(6));
+      expect(LocationFailureReason.values, hasLength(7));
       expect(
         LocationFailureReason.values,
         containsAll([
@@ -14,6 +14,7 @@ void main() {
           LocationFailureReason.timeout,
           LocationFailureReason.unknownError,
           LocationFailureReason.networkError,
+          LocationFailureReason.serverError,
         ]),
       );
     });
@@ -99,6 +100,44 @@ void main() {
         );
         expect(result.userMessage, contains('Failed to send'));
         expect(result.userMessage, contains('internet connection'));
+      });
+
+      test('serverError without detail returns generic server message', () {
+        const result = LocationUpdateResult.failure(
+          LocationFailureReason.serverError,
+        );
+        expect(result.userMessage, contains('server returned an error'));
+      });
+
+      test('serverError with detail includes the detail', () {
+        const result = LocationUpdateResult.failureWithDetail(
+          LocationFailureReason.serverError,
+          'API Error (403): Forbidden',
+        );
+        expect(result.userMessage, contains('Server error'));
+        expect(result.userMessage, contains('API Error (403): Forbidden'));
+      });
+
+      test('failureWithDetail sets errorDetail', () {
+        const result = LocationUpdateResult.failureWithDetail(
+          LocationFailureReason.serverError,
+          'some detail',
+        );
+        expect(result.isSuccess, isFalse);
+        expect(result.failureReason, LocationFailureReason.serverError);
+        expect(result.errorDetail, 'some detail');
+      });
+
+      test('failure constructor has null errorDetail', () {
+        const result = LocationUpdateResult.failure(
+          LocationFailureReason.networkError,
+        );
+        expect(result.errorDetail, isNull);
+      });
+
+      test('success constructor has null errorDetail', () {
+        const result = LocationUpdateResult.success();
+        expect(result.errorDetail, isNull);
       });
 
       test('every failure reason produces a non-empty message', () {
