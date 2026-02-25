@@ -123,7 +123,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                           _automaticUpdates = value;
                         });
                       },
-                activeColor: WandererTheme.primary,
+                activeColor: WandererTheme.primaryOrange,
               ),
             ],
           ),
@@ -155,7 +155,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                 ElevatedButton(
                   onPressed: widget.isLoading ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: WandererTheme.primary,
+                    backgroundColor: WandererTheme.primaryOrange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -196,7 +196,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
             ElevatedButton(
               onPressed: widget.isLoading ? null : _handleSave,
               style: ElevatedButton.styleFrom(
-                backgroundColor: WandererTheme.primary,
+                backgroundColor: WandererTheme.primaryOrange,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,

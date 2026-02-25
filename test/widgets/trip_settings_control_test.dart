@@ -134,6 +134,8 @@ void main() {
       await tester.pump();
 
       expect(capturedAutomaticUpdates, false);
+      // When automaticUpdates is false, updateRefresh can be null or any value
+      expect(capturedUpdateRefresh, isNotNull);
     });
 
     testWidgets('toggles switch value when tapped', (WidgetTester tester) async {
