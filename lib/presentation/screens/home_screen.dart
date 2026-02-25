@@ -1261,23 +1261,6 @@ class _HomeScreenState extends State<HomeScreen>
                     )
                   : Column(
                       children: [
-                        TabBar(
-                          controller: _tabController,
-                          tabs: const [
-                            Tab(
-                              icon: Icon(Icons.person),
-                              text: 'My Trips',
-                            ),
-                            Tab(
-                              icon: Icon(Icons.dynamic_feed),
-                              text: 'Feed',
-                            ),
-                            Tab(
-                              icon: Icon(Icons.explore),
-                              text: 'Discover',
-                            ),
-                          ],
-                        ),
                         _buildFilterChips(),
                         Expanded(
                           child: TabBarView(
@@ -1291,6 +1274,33 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ],
                     ),
+      bottomNavigationBar: _isLoggedIn
+          ? NavigationBar(
+              selectedIndex: _tabController.index,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _tabController.animateTo(index);
+                });
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: 'My Trips',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.dynamic_feed_outlined),
+                  selectedIcon: Icon(Icons.dynamic_feed),
+                  label: 'Feed',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.explore_outlined),
+                  selectedIcon: Icon(Icons.explore),
+                  label: 'Discover',
+                ),
+              ],
+            )
+          : null,
       floatingActionButton: _username != null
           ? FloatingActionButton.extended(
               onPressed: _navigateToCreateTrip,
