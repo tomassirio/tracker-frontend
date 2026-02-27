@@ -34,6 +34,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
   String? _userId;
   String? _username;
   String? _displayName;
+  String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 5; // Admin panel index
@@ -57,6 +58,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
     final username = await _homeRepository.getCurrentUsername();
     final userId = await _homeRepository.getCurrentUserId();
     final displayName = await _homeRepository.getCurrentDisplayName();
+    final avatarUrl = await _homeRepository.getCurrentAvatarUrl();
     final isLoggedIn = await _homeRepository.isLoggedIn();
     final isAdmin = await _homeRepository.isAdmin();
 
@@ -64,6 +66,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -293,6 +296,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onLogout: _handleLogout,
         onSettings: _handleSettings,
         onProfile: () => AuthNavigationHelper.navigateToOwnProfile(context),
@@ -301,6 +305,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _handleLogout,
         onSettings: _handleSettings,

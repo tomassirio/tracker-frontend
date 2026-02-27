@@ -128,6 +128,11 @@ class AuthService {
     return await _tokenStorage.getDisplayName();
   }
 
+  /// Get current user's avatar URL
+  Future<String?> getCurrentAvatarUrl() async {
+    return await _tokenStorage.getAvatarUrl();
+  }
+
   /// Check if current user is admin
   Future<bool> isAdmin() async {
     return await _tokenStorage.isAdmin();

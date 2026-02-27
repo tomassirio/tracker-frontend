@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
   String? _userId;
   String? _username;
   String? _displayName;
+  String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 0;
@@ -160,6 +161,7 @@ class _HomeScreenState extends State<HomeScreen>
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
     final displayName = await _repository.getCurrentDisplayName();
+    final avatarUrl = await _repository.getCurrentAvatarUrl();
     final isLoggedIn = await _repository.isLoggedIn();
     final isAdmin = await _repository.isAdmin();
 
@@ -167,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen>
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -1071,6 +1074,7 @@ class _HomeScreenState extends State<HomeScreen>
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -1079,6 +1083,7 @@ class _HomeScreenState extends State<HomeScreen>
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,

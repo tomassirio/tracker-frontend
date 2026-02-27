@@ -11,6 +11,7 @@ class TokenStorage {
   static const String _userIdKey = 'userId';
   static const String _usernameKey = 'username';
   static const String _displayNameKey = 'displayName';
+  static const String _avatarUrlKey = 'avatarUrl';
 
   /// Force SharedPreferences to re-read from native storage.
   /// Must be called in background isolates (e.g. WorkManager) before
@@ -98,6 +99,22 @@ class TokenStorage {
     }
   }
 
+  /// Get avatar URL
+  Future<String?> getAvatarUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_avatarUrlKey);
+  }
+
+  /// Save avatar URL (used after profile update)
+  Future<void> saveAvatarUrl(String? avatarUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (avatarUrl != null) {
+      await prefs.setString(_avatarUrlKey, avatarUrl);
+    } else {
+      await prefs.remove(_avatarUrlKey);
+    }
+  }
+
   /// Get admin status by decoding the JWT access token
   Future<bool> isAdmin() async {
     final token = await getAccessToken();
@@ -162,5 +179,6 @@ class TokenStorage {
     await prefs.remove(_userIdKey);
     await prefs.remove(_usernameKey);
     await prefs.remove(_displayNameKey);
+    await prefs.remove(_avatarUrlKey);
   }
 }

@@ -12,6 +12,7 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? username;
   final String? userId;
   final String? displayName;
+  final String? avatarUrl;
   final VoidCallback? onProfile;
   final VoidCallback? onSettings;
   final VoidCallback? onLogout;
@@ -26,6 +27,7 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.username,
     this.userId,
     this.displayName,
+    this.avatarUrl,
     this.onProfile,
     this.onSettings,
     this.onLogout,
@@ -85,13 +87,18 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: PopupMenuButton<String>(
               icon: CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text(
-                  _avatarInitial,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+                    ? NetworkImage(avatarUrl!)
+                    : null,
+                child: avatarUrl == null || avatarUrl!.isEmpty
+                    ? Text(
+                        _avatarInitial,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
               ),
               tooltip: 'Profile',
               onSelected: (value) {
@@ -122,13 +129,19 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.primary,
-                              child: Text(
-                                _avatarInitial,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              backgroundImage:
+                                  avatarUrl != null && avatarUrl!.isNotEmpty
+                                      ? NetworkImage(avatarUrl!)
+                                      : null,
+                              child: avatarUrl == null || avatarUrl!.isEmpty
+                                  ? Text(
+                                      _avatarInitial,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
                             ),
                             const SizedBox(width: 12),
                             Expanded(

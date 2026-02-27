@@ -49,6 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _currentUserId; // Track the logged-in user's ID
   String? _currentUsername; // Track the logged-in user's username
   String? _currentDisplayName; // Track the logged-in user's display name
+  String? _currentAvatarUrl; // Track the logged-in user's avatar URL
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -115,6 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _currentUserId = currentUser.id;
             _currentUsername = currentUser.username;
             _currentDisplayName = currentUser.displayName;
+            _currentAvatarUrl = currentUser.avatarUrl;
           });
         } catch (e) {
           // Ignore error loading current user
@@ -524,6 +526,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _profile = refreshedProfile;
           _currentDisplayName = refreshedProfile.displayName;
+          _currentAvatarUrl = refreshedProfile.avatarUrl;
         });
       } catch (_) {
         // If re-fetch fails, optimistically update local state
@@ -545,6 +548,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               createdAt: _profile!.createdAt,
             );
             _currentDisplayName = displayName.isEmpty ? null : displayName;
+            _currentAvatarUrl = avatarUrl.isEmpty ? null : avatarUrl;
           });
         }
       }
@@ -571,6 +575,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         username: _currentUsername,
         userId: _currentUserId,
         displayName: _currentDisplayName,
+        avatarUrl: _currentAvatarUrl,
         onProfile: () {},
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -579,6 +584,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         username: _currentUsername,
         userId: _currentUserId,
         displayName: _currentDisplayName,
+        avatarUrl: _currentAvatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,

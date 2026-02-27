@@ -13,6 +13,7 @@ class AppSidebar extends StatelessWidget {
   final String? username;
   final String? userId;
   final String? displayName;
+  final String? avatarUrl;
   final int selectedIndex;
   final VoidCallback? onLogout;
   final VoidCallback? onSettings;
@@ -23,6 +24,7 @@ class AppSidebar extends StatelessWidget {
     this.username,
     this.userId,
     this.displayName,
+    this.avatarUrl,
     required this.selectedIndex,
     this.onLogout,
     this.onSettings,
@@ -141,11 +143,27 @@ class AppSidebar extends StatelessWidget {
             accountEmail: isLoggedIn ? Text('@${username ?? ''}') : null,
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(
-                isLoggedIn ? Icons.person : Icons.person_outline,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+                  ? NetworkImage(avatarUrl!)
+                  : null,
+              child: avatarUrl == null || avatarUrl!.isEmpty
+                  ? (isLoggedIn
+                      ? Text(
+                          (displayName ?? username ?? '?')
+                              .substring(0, 1)
+                              .toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        )
+                      : Icon(
+                          Icons.person_outline,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.primary,
+                        ))
+                  : null,
             ),
           ),
           ListTile(

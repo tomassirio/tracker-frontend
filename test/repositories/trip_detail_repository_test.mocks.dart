@@ -596,6 +596,15 @@ class MockAuthService extends _i1.Mock implements _i10.AuthService {
       ) as _i6.Future<String?>);
 
   @override
+  _i6.Future<String?> getCurrentAvatarUrl() => (super.noSuchMethod(
+        Invocation.method(
+          #getCurrentAvatarUrl,
+          [],
+        ),
+        returnValue: _i6.Future<String?>.value(),
+      ) as _i6.Future<String?>);
+
+  @override
   _i6.Future<bool> isAdmin() => (super.noSuchMethod(
         Invocation.method(
           #isAdmin,

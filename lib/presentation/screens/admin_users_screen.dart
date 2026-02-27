@@ -29,6 +29,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String? _userId;
   String? _username;
   String? _displayName;
+  String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 6; // Admin users index
@@ -64,6 +65,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final username = await _homeRepository.getCurrentUsername();
     final userId = await _homeRepository.getCurrentUserId();
     final displayName = await _homeRepository.getCurrentDisplayName();
+    final avatarUrl = await _homeRepository.getCurrentAvatarUrl();
     final isLoggedIn = await _homeRepository.isLoggedIn();
     final isAdmin = await _homeRepository.isAdmin();
 
@@ -71,6 +73,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -321,6 +324,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onLogout: _handleLogout,
         onSettings: _handleSettings,
         onProfile: () => AuthNavigationHelper.navigateToOwnProfile(context),
@@ -329,6 +333,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _handleLogout,
         onSettings: _handleSettings,

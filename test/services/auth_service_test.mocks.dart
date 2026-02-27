@@ -441,6 +441,25 @@ class MockTokenStorage extends _i1.Mock implements _i8.TokenStorage {
       ) as _i6.Future<void>);
 
   @override
+  _i6.Future<String?> getAvatarUrl() => (super.noSuchMethod(
+        Invocation.method(
+          #getAvatarUrl,
+          [],
+        ),
+        returnValue: _i6.Future<String?>.value(),
+      ) as _i6.Future<String?>);
+
+  @override
+  _i6.Future<void> saveAvatarUrl(String? avatarUrl) => (super.noSuchMethod(
+        Invocation.method(
+          #saveAvatarUrl,
+          [avatarUrl],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
   _i6.Future<bool> isAdmin() => (super.noSuchMethod(
         Invocation.method(
           #isAdmin,

@@ -119,6 +119,11 @@ class TripDetailRepository {
     return await _authService.getCurrentDisplayName();
   }
 
+  /// Gets the current user's avatar URL
+  Future<String?> getCurrentAvatarUrl() async {
+    return await _authService.getCurrentAvatarUrl();
+  }
+
   /// Gets the current user's ID
   Future<String?> getCurrentUserId() async {
     return await _authService.getCurrentUserId();

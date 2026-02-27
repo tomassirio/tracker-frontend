@@ -74,6 +74,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   String? _username;
   String? _userId;
   String? _displayName;
+  String? _avatarUrl;
 
   // Track social interactions
   bool _isFollowingTripOwner = false;
@@ -362,12 +363,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
     final displayName = await _repository.getCurrentDisplayName();
+    final avatarUrl = await _repository.getCurrentAvatarUrl();
     final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isAdmin = isAdmin;
     });
 
@@ -1030,6 +1033,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -1038,6 +1042,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
