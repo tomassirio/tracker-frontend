@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 class AppSidebar extends StatelessWidget {
   final String? username;
   final String? userId;
+  final String? displayName;
   final int selectedIndex;
   final VoidCallback? onLogout;
   final VoidCallback? onSettings;
@@ -21,6 +22,7 @@ class AppSidebar extends StatelessWidget {
     super.key,
     this.username,
     this.userId,
+    this.displayName,
     required this.selectedIndex,
     this.onLogout,
     this.onSettings,
@@ -133,10 +135,10 @@ class AppSidebar extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             accountName: Text(
-              username ?? 'Guest',
+              displayName ?? username ?? 'Guest',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            accountEmail: isLoggedIn ? Text('ID: ${userId ?? 'N/A'}') : null,
+            accountEmail: isLoggedIn ? Text('@${username ?? ''}') : null,
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(

@@ -3,6 +3,94 @@ import 'package:tracker_frontend/data/models/user_models.dart';
 
 void main() {
   group('UserModels', () {
+    group('UserProfile', () {
+      test('fromJson parses nested userDetails object', () {
+        final json = {
+          'id': 'user-123',
+          'username': 'johndoe',
+          'email': 'john@example.com',
+          'userDetails': {
+            'displayName': 'John Doe',
+            'bio': 'Walking the Camino',
+            'avatarUrl': 'https://example.com/avatar.png',
+          },
+          'followersCount': 10,
+          'followingCount': 5,
+          'friendsCount': 3,
+          'tripsCount': 2,
+          'isFollowing': false,
+          'createdAt': '2024-01-15T10:30:00Z',
+        };
+
+        final profile = UserProfile.fromJson(json);
+
+        expect(profile.id, 'user-123');
+        expect(profile.username, 'johndoe');
+        expect(profile.displayName, 'John Doe');
+        expect(profile.bio, 'Walking the Camino');
+        expect(profile.avatarUrl, 'https://example.com/avatar.png');
+      });
+
+      test('fromJson handles null fields in userDetails', () {
+        final json = {
+          'id': 'user-123',
+          'username': 'johndoe',
+          'userDetails': {
+            'displayName': null,
+            'bio': null,
+            'avatarUrl': null,
+          },
+          'createdAt': '2024-01-15T10:30:00Z',
+        };
+
+        final profile = UserProfile.fromJson(json);
+
+        expect(profile.displayName, isNull);
+        expect(profile.bio, isNull);
+        expect(profile.avatarUrl, isNull);
+      });
+
+      test('fromJson falls back to flat fields when userDetails is absent', () {
+        final json = {
+          'id': 'user-123',
+          'username': 'johndoe',
+          'displayName': 'Flat Name',
+          'bio': 'Flat Bio',
+          'avatarUrl': 'https://example.com/flat.png',
+          'createdAt': '2024-01-15T10:30:00Z',
+        };
+
+        final profile = UserProfile.fromJson(json);
+
+        expect(profile.displayName, 'Flat Name');
+        expect(profile.bio, 'Flat Bio');
+        expect(profile.avatarUrl, 'https://example.com/flat.png');
+      });
+
+      test(
+          'fromJson prefers userDetails over flat fields when both are present',
+          () {
+        final json = {
+          'id': 'user-123',
+          'username': 'johndoe',
+          'displayName': 'Flat Name',
+          'bio': 'Flat Bio',
+          'userDetails': {
+            'displayName': 'Nested Name',
+            'bio': 'Nested Bio',
+            'avatarUrl': 'https://example.com/nested.png',
+          },
+          'createdAt': '2024-01-15T10:30:00Z',
+        };
+
+        final profile = UserProfile.fromJson(json);
+
+        expect(profile.displayName, 'Nested Name');
+        expect(profile.bio, 'Nested Bio');
+        expect(profile.avatarUrl, 'https://example.com/nested.png');
+      });
+    });
+
     group('FriendRequest', () {
       test('fromJson creates FriendRequest from JSON', () {
         final json = {

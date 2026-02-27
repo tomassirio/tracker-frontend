@@ -316,6 +316,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
         onLoginPressed: _navigateToAuth,
         username: _currentUser?.username,
         userId: _currentUser?.id,
+        displayName: _currentUser?.displayName,
         onProfile: _navigateToProfile,
         onSettings: _handleSettings,
         onLogout: _handleLogout,
@@ -323,6 +324,7 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
       drawer: AppSidebar(
         username: _currentUser?.username,
         userId: _currentUser?.id,
+        displayName: _currentUser?.displayName,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _handleLogout,
         onSettings: _handleSettings,

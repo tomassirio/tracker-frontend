@@ -94,13 +94,14 @@ class UserCommandClient {
 
   /// Update current user's profile
   /// Requires authentication (USER, ADMIN)
-  Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
-    final response = await _apiClient.put(
+  /// Returns the user ID from 202 Accepted response
+  Future<String> updateProfile(UpdateProfileRequest request) async {
+    final response = await _apiClient.patch(
       ApiEndpoints.usersUpdate,
       body: request.toJson(),
       requireAuth: true,
     );
-    return _apiClient.handleResponse(response, UserProfile.fromJson);
+    return _apiClient.handleAcceptedResponse(response);
   }
 
   /// Delete own account

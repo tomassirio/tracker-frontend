@@ -92,14 +92,14 @@ class MockUserService extends UserService {
   }
 
   @override
-  Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
+  Future<String> updateProfile(UpdateProfileRequest request) async {
     updateProfileCalled = true;
 
     if (shouldThrowError) {
       throw Exception('Failed to update profile');
     }
 
-    return mockProfile!;
+    return mockProfile!.id;
   }
 }
 

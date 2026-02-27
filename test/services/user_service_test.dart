@@ -503,16 +503,14 @@ void main() {
           displayName: 'John Doe',
           bio: 'Test bio',
         );
-        final mockProfile = createMockUserProfile('user-123', 'johndoe');
 
         when(
           mockUserCommandClient.updateProfile(request),
-        ).thenAnswer((_) async => mockProfile);
+        ).thenAnswer((_) async => 'user-123');
 
         final result = await userService.updateProfile(request);
 
-        expect(result.id, 'user-123');
-        expect(result.username, 'johndoe');
+        expect(result, 'user-123');
         verify(mockUserCommandClient.updateProfile(request)).called(1);
       });
 
@@ -531,11 +529,10 @@ void main() {
           displayName: 'Updated Name',
           bio: 'Updated bio',
         );
-        final mockProfile = createMockUserProfile('user-123', 'testuser');
 
         when(
           mockUserCommandClient.updateProfile(request),
-        ).thenAnswer((_) async => mockProfile);
+        ).thenAnswer((_) async => 'user-123');
 
         await userService.updateProfile(request);
 

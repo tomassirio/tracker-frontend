@@ -40,6 +40,73 @@ void main() {
       expect(dividerFinder, findsWidgets);
     });
 
+    testWidgets('shows displayName when provided and @username below', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: AppSidebar(
+              username: 'testuser',
+              userId: 'user-123',
+              displayName: 'John Doe',
+              selectedIndex: 0,
+              onLogout: () {},
+              onSettings: () {},
+            ),
+            body: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      // Verify displayName is shown as account name
+      expect(find.text('John Doe'), findsOneWidget);
+      // Verify @username is shown
+      expect(find.text('@testuser'), findsOneWidget);
+      // Verify ID is NOT shown
+      expect(find.textContaining('ID:'), findsNothing);
+    });
+
+    testWidgets('shows username when displayName is null', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: AppSidebar(
+              username: 'testuser',
+              userId: 'user-123',
+              selectedIndex: 0,
+              onLogout: () {},
+              onSettings: () {},
+            ),
+            body: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      // Verify username is shown as account name (fallback)
+      expect(find.text('testuser'), findsOneWidget);
+      // Verify @username is shown below
+      expect(find.text('@testuser'), findsOneWidget);
+    });
+
     testWidgets('displays Buy Me a Coffee link for guest users', (
       WidgetTester tester,
     ) async {

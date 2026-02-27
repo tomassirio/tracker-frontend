@@ -40,6 +40,7 @@ class AuthService {
         expiresIn: authResponse.expiresIn,
         userId: profile.id,
         username: profile.username,
+        displayName: profile.displayName,
       );
     } catch (e) {
       // If profile fetch fails, continue with just tokens
@@ -73,6 +74,7 @@ class AuthService {
         expiresIn: authResponse.expiresIn,
         userId: profile.id,
         username: profile.username,
+        displayName: profile.displayName,
       );
     } catch (e) {
       // If profile fetch fails, continue with just tokens
@@ -119,6 +121,11 @@ class AuthService {
   /// Get current username
   Future<String?> getCurrentUsername() async {
     return await _tokenStorage.getUsername();
+  }
+
+  /// Get current user's display name
+  Future<String?> getCurrentDisplayName() async {
+    return await _tokenStorage.getDisplayName();
   }
 
   /// Check if current user is admin

@@ -356,6 +356,7 @@ class MockTokenStorage extends _i1.Mock implements _i8.TokenStorage {
     required int? expiresIn,
     String? userId,
     String? username,
+    String? displayName,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -368,6 +369,7 @@ class MockTokenStorage extends _i1.Mock implements _i8.TokenStorage {
             #expiresIn: expiresIn,
             #userId: userId,
             #username: username,
+            #displayName: displayName,
           },
         ),
         returnValue: _i6.Future<void>.value(),
@@ -418,6 +420,25 @@ class MockTokenStorage extends _i1.Mock implements _i8.TokenStorage {
         ),
         returnValue: _i6.Future<String?>.value(),
       ) as _i6.Future<String?>);
+
+  @override
+  _i6.Future<String?> getDisplayName() => (super.noSuchMethod(
+        Invocation.method(
+          #getDisplayName,
+          [],
+        ),
+        returnValue: _i6.Future<String?>.value(),
+      ) as _i6.Future<String?>);
+
+  @override
+  _i6.Future<void> saveDisplayName(String? displayName) => (super.noSuchMethod(
+        Invocation.method(
+          #saveDisplayName,
+          [displayName],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
   _i6.Future<bool> isAdmin() => (super.noSuchMethod(

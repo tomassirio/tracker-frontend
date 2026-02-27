@@ -10,6 +10,7 @@ class TokenStorage {
   static const String _expiresAtKey = 'expires_at';
   static const String _userIdKey = 'userId';
   static const String _usernameKey = 'username';
+  static const String _displayNameKey = 'displayName';
 
   /// Force SharedPreferences to re-read from native storage.
   /// Must be called in background isolates (e.g. WorkManager) before
@@ -28,6 +29,7 @@ class TokenStorage {
     required int expiresIn,
     String? userId,
     String? username,
+    String? displayName,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final expiresAt =
@@ -44,6 +46,9 @@ class TokenStorage {
     }
     if (username != null) {
       await prefs.setString(_usernameKey, username);
+    }
+    if (displayName != null) {
+      await prefs.setString(_displayNameKey, displayName);
     }
   }
 
@@ -75,6 +80,22 @@ class TokenStorage {
   Future<String?> getUsername() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_usernameKey);
+  }
+
+  /// Get display name
+  Future<String?> getDisplayName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_displayNameKey);
+  }
+
+  /// Save display name (used after profile update)
+  Future<void> saveDisplayName(String? displayName) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (displayName != null) {
+      await prefs.setString(_displayNameKey, displayName);
+    } else {
+      await prefs.remove(_displayNameKey);
+    }
   }
 
   /// Get admin status by decoding the JWT access token
@@ -140,5 +161,6 @@ class TokenStorage {
     await prefs.remove(_expiresAtKey);
     await prefs.remove(_userIdKey);
     await prefs.remove(_usernameKey);
+    await prefs.remove(_displayNameKey);
   }
 }

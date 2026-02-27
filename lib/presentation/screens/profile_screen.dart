@@ -48,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _sentFriendRequestId; // Store the request ID for cancellation
   String? _currentUserId; // Track the logged-in user's ID
   String? _currentUsername; // Track the logged-in user's username
+  String? _currentDisplayName; // Track the logged-in user's display name
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -113,6 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             _currentUserId = currentUser.id;
             _currentUsername = currentUser.username;
+            _currentDisplayName = currentUser.displayName;
           });
         } catch (e) {
           // Ignore error loading current user
@@ -513,10 +515,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
         avatarUrl: avatarUrl.isEmpty ? null : avatarUrl,
       );
 
-      final updatedProfile = await _repository.updateProfile(request);
-      setState(() {
-        _profile = updatedProfile;
-      });
+      // PATCH returns 202 Accepted with just a UUID
+      await _repository.updateProfile(request);
+
+      // Re-fetch profile to get the updated data
+      try {
+        final refreshedProfile = await _repository.getMyProfile();
+        setState(() {
+          _profile = refreshedProfile;
+          _currentDisplayName = refreshedProfile.displayName;
+        });
+      } catch (_) {
+        // If re-fetch fails, optimistically update local state
+        // with the values the user just submitted
+        if (_profile != null) {
+          setState(() {
+            _profile = UserProfile(
+              id: _profile!.id,
+              username: _profile!.username,
+              email: _profile!.email,
+              displayName: displayName.isEmpty ? null : displayName,
+              bio: bio.isEmpty ? null : bio,
+              avatarUrl: avatarUrl.isEmpty ? null : avatarUrl,
+              followersCount: _profile!.followersCount,
+              followingCount: _profile!.followingCount,
+              friendsCount: _profile!.friendsCount,
+              tripsCount: _profile!.tripsCount,
+              isFollowing: _profile!.isFollowing,
+              createdAt: _profile!.createdAt,
+            );
+            _currentDisplayName = displayName.isEmpty ? null : displayName;
+          });
+        }
+      }
 
       if (mounted) {
         UiHelpers.showSuccessMessage(context, 'Profile updated successfully!');
@@ -539,6 +570,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onLoginPressed: _navigateToAuth,
         username: _currentUsername,
         userId: _currentUserId,
+        displayName: _currentDisplayName,
         onProfile: () {},
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -546,6 +578,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       drawer: AppSidebar(
         username: _currentUsername,
         userId: _currentUserId,
+        displayName: _currentDisplayName,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,

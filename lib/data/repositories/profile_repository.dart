@@ -29,7 +29,8 @@ class ProfileRepository {
   }
 
   /// Updates the current user's profile
-  Future<UserProfile> updateProfile(UpdateProfileRequest request) async {
+  /// Returns the user ID from 202 Accepted response
+  Future<String> updateProfile(UpdateProfileRequest request) async {
     return await _userService.updateProfile(request);
   }
 

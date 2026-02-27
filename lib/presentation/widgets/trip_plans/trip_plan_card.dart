@@ -136,8 +136,8 @@ class _TripPlanCardState extends State<TripPlanCard> {
     // Multiple points: show route with A (first) and B (last) markers
     // If we have a road-snapped polyline, use it; otherwise encode the
     // raw points so the map still renders a path through all waypoints.
-    final polyline = _encodedPolyline ??
-        GoogleRoutesApiClient.encodePolyline(allPoints);
+    final polyline =
+        _encodedPolyline ?? GoogleRoutesApiClient.encodePolyline(allPoints);
 
     return _mapsClient.generateRouteMapUrl(
       startPoint: allPoints.first,

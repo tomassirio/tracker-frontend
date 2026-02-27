@@ -70,7 +70,8 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
       }
     } catch (e) {
       // Fallback: encode the raw points as straight-line segments
-      debugPrint('Failed to fetch route for trip card, using straight lines: $e');
+      debugPrint(
+          'Failed to fetch route for trip card, using straight lines: $e');
       try {
         final allPoints = widget.trip.locations!
             .map((loc) => LatLng(loc.latitude, loc.longitude))

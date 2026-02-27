@@ -73,6 +73,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
   String? _username;
   String? _userId;
+  String? _displayName;
 
   // Track social interactions
   bool _isFollowingTripOwner = false;
@@ -360,11 +361,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Future<void> _loadUserInfo() async {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
+    final displayName = await _repository.getCurrentDisplayName();
     final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
+      _displayName = displayName;
       _isAdmin = isAdmin;
     });
 
@@ -1026,6 +1029,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         onLoginPressed: _navigateToAuth,
         username: _username,
         userId: _userId,
+        displayName: _displayName,
         onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -1033,6 +1037,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       drawer: AppSidebar(
         username: _username,
         userId: _userId,
+        displayName: _displayName,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,

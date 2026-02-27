@@ -337,21 +337,20 @@ class MockUserCommandClient extends _i1.Mock implements _i6.UserCommandClient {
       ) as _i5.Future<String>);
 
   @override
-  _i5.Future<_i3.UserProfile> updateProfile(
-          _i3.UpdateProfileRequest? request) =>
+  _i5.Future<String> updateProfile(_i3.UpdateProfileRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateProfile,
           [request],
         ),
-        returnValue: _i5.Future<_i3.UserProfile>.value(_FakeUserProfile_1(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #updateProfile,
             [request],
           ),
         )),
-      ) as _i5.Future<_i3.UserProfile>);
+      ) as _i5.Future<String>);
 
   @override
   _i5.Future<String> deleteMyAccount() => (super.noSuchMethod(

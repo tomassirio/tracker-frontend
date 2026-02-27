@@ -435,6 +435,7 @@ class MockTokenStorage extends TokenStorage {
     required int expiresIn,
     String? userId,
     String? username,
+    String? displayName,
   }) async {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;

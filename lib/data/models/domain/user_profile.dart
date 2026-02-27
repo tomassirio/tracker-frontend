@@ -29,13 +29,19 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    // Backend nests displayName, bio, avatarUrl under 'userDetails'.
+    // Fall back to flat fields for backward compatibility.
+    final userDetails = json['userDetails'] as Map<String, dynamic>?;
+
     return UserProfile(
       id: json['id'] as String? ?? json['userId'] as String? ?? '',
       username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      displayName: json['displayName'] as String?,
-      bio: json['bio'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
+      displayName: userDetails?['displayName'] as String? ??
+          json['displayName'] as String?,
+      bio: userDetails?['bio'] as String? ?? json['bio'] as String?,
+      avatarUrl:
+          userDetails?['avatarUrl'] as String? ?? json['avatarUrl'] as String?,
       followersCount: json['followersCount'] as int? ?? 0,
       followingCount: json['followingCount'] as int? ?? 0,
       friendsCount: json['friendsCount'] as int? ?? 0,

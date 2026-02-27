@@ -54,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen>
   String? _error;
   String? _userId;
   String? _username;
+  String? _displayName;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 0;
@@ -158,12 +159,14 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _loadUserInfo() async {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
+    final displayName = await _repository.getCurrentDisplayName();
     final isLoggedIn = await _repository.isLoggedIn();
     final isAdmin = await _repository.isAdmin();
 
     setState(() {
       _username = username;
       _userId = userId;
+      _displayName = displayName;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -1067,6 +1070,7 @@ class _HomeScreenState extends State<HomeScreen>
         onLoginPressed: _navigateToAuth,
         username: _username,
         userId: _userId,
+        displayName: _displayName,
         onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -1074,6 +1078,7 @@ class _HomeScreenState extends State<HomeScreen>
       drawer: AppSidebar(
         username: _username,
         userId: _userId,
+        displayName: _displayName,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
