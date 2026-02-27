@@ -917,8 +917,13 @@ class _HomeScreenState extends State<HomeScreen>
     final filteredTrips = _getFilteredTrips(_discoverTrips);
     final promotedTripsList =
         _allTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
+    
+    // Exclude promoted trips from discover section
+    final nonPromotedTrips = filteredTrips
+        .where((t) => !_promotedTripIds.contains(t.id))
+        .toList();
 
-    if (filteredTrips.isEmpty && promotedTripsList.isEmpty) {
+    if (nonPromotedTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -957,14 +962,16 @@ class _HomeScreenState extends State<HomeScreen>
             _buildTripGrid(promotedTripsList, showRelationship: true),
             const SizedBox(height: 24),
           ],
-          FeedSectionHeader(
-            title: 'Discover',
-            icon: Icons.public,
-            count: filteredTrips.length,
-            subtitle: 'Explore public trips from the community',
-          ),
-          const SizedBox(height: 12),
-          _buildTripGrid(filteredTrips, showRelationship: true),
+          if (nonPromotedTrips.isNotEmpty) ...[
+            FeedSectionHeader(
+              title: 'Discover',
+              icon: Icons.public,
+              count: nonPromotedTrips.length,
+              subtitle: 'Explore public trips from the community',
+            ),
+            const SizedBox(height: 12),
+            _buildTripGrid(nonPromotedTrips, showRelationship: true),
+          ],
         ],
       ),
     );
