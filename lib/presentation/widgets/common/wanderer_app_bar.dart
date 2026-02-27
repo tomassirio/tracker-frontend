@@ -3,7 +3,7 @@ import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart'
 import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.dart';
 
 /// Reusable AppBar for the Wanderer application
-class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
+class WandererAppBar extends StatefulWidget implements PreferredSizeWidget {
   final TextEditingController searchController;
   final VoidCallback? onSearch;
   final VoidCallback? onClear;
@@ -33,64 +33,114 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onLogout,
   });
 
+  @override
+  State<WandererAppBar> createState() => _WandererAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _WandererAppBarState extends State<WandererAppBar> {
+  bool _isSearchExpanded = false;
+
   /// Get the initial letter for the avatar, preferring displayName over username
   String get _avatarInitial {
-    final name = displayName ?? username ?? '';
+    final name = widget.displayName ?? widget.username ?? '';
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearchExpanded = !_isSearchExpanded;
+      if (!_isSearchExpanded) {
+        // Clear search when closing
+        widget.searchController.clear();
+        widget.onClear?.call();
+      }
+    });
+  }
+
+  void _showNotImplementedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Notifications feature not yet implemented'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      title: Row(
-        children: [
-          InkWell(
-            onTap: () {
-              // Navigate to home screen by popping all routes until first route
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            borderRadius: BorderRadius.circular(18),
-            child: const Padding(
-              padding: EdgeInsets.all(4.0),
-              child: WandererLogo(size: 36),
+      title: _isSearchExpanded
+          ? SearchBarWidget(
+              controller: widget.searchController,
+              onSearch: (_) => widget.onSearch?.call(),
+              onClear: () {
+                widget.searchController.clear();
+                widget.onClear?.call();
+              },
+            )
+          : Row(
+              children: [
+                InkWell(
+                  onTap: () {
+                    // Navigate to home screen by popping all routes until first route
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                  borderRadius: BorderRadius.circular(18),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4.0),
+                    child: WandererLogo(size: 36),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Wanderer',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: 12),
-          const Text(
-            'Wanderer',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: SearchBarWidget(
-              controller: searchController,
-              onSearch: (_) => onSearch?.call(),
-              onClear: onClear ?? () => searchController.clear(),
-            ),
-          ),
-        ],
-      ),
       actions: [
-        if (!isLoggedIn && onLoginPressed != null)
+        // Search icon
+        if (_isSearchExpanded)
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Close search',
+            onPressed: _toggleSearch,
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: _toggleSearch,
+          ),
+        // Notifications icon
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          tooltip: 'Notifications',
+          onPressed: _showNotImplementedMessage,
+        ),
+        if (!widget.isLoggedIn && widget.onLoginPressed != null)
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: TextButton.icon(
-              onPressed: onLoginPressed,
+              onPressed: widget.onLoginPressed,
               icon: const Icon(Icons.login, color: Colors.white),
               label: const Text('Login', style: TextStyle(color: Colors.white)),
             ),
           ),
-        if (isLoggedIn && username != null)
+        if (widget.isLoggedIn && widget.username != null)
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: PopupMenuButton<String>(
               icon: CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
-                    ? NetworkImage(avatarUrl!)
+                backgroundImage: widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
+                    ? NetworkImage(widget.avatarUrl!)
                     : null,
-                child: avatarUrl == null || avatarUrl!.isEmpty
+                child: widget.avatarUrl == null || widget.avatarUrl!.isEmpty
                     ? Text(
                         _avatarInitial,
                         style: const TextStyle(
@@ -104,13 +154,13 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
               onSelected: (value) {
                 switch (value) {
                   case 'profile':
-                    onProfile?.call();
+                    widget.onProfile?.call();
                     break;
                   case 'settings':
-                    onSettings?.call();
+                    widget.onSettings?.call();
                     break;
                   case 'logout':
-                    onLogout?.call();
+                    widget.onLogout?.call();
                     break;
                 }
               },
@@ -130,10 +180,10 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 context,
                               ).colorScheme.primary,
                               backgroundImage:
-                                  avatarUrl != null && avatarUrl!.isNotEmpty
-                                      ? NetworkImage(avatarUrl!)
+                                  widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
+                                      ? NetworkImage(widget.avatarUrl!)
                                       : null,
-                              child: avatarUrl == null || avatarUrl!.isEmpty
+                              child: widget.avatarUrl == null || widget.avatarUrl!.isEmpty
                                   ? Text(
                                       _avatarInitial,
                                       style: const TextStyle(
@@ -149,14 +199,14 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    displayName ?? username!,
+                                    widget.displayName ?? widget.username!,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
                                   Text(
-                                    '@${username!}',
+                                    '@${widget.username!}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],
@@ -208,7 +258,4 @@ class WandererAppBar extends StatelessWidget implements PreferredSizeWidget {
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
