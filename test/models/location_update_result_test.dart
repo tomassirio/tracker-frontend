@@ -36,6 +36,35 @@ void main() {
         const result = LocationUpdateResult.success();
         expect(result.userMessage, isEmpty);
       });
+
+      test('location and battery default to null', () {
+        const result = LocationUpdateResult.success();
+        expect(result.latitude, isNull);
+        expect(result.longitude, isNull);
+        expect(result.batteryLevel, isNull);
+      });
+
+      test('success with location and battery data', () {
+        const result = LocationUpdateResult.success(
+          latitude: 40.7128,
+          longitude: -74.0060,
+          batteryLevel: 85,
+        );
+        expect(result.isSuccess, isTrue);
+        expect(result.latitude, 40.7128);
+        expect(result.longitude, -74.0060);
+        expect(result.batteryLevel, 85);
+      });
+
+      test('success with partial location data', () {
+        const result = LocationUpdateResult.success(
+          latitude: 51.5074,
+          longitude: -0.1278,
+        );
+        expect(result.latitude, 51.5074);
+        expect(result.longitude, -0.1278);
+        expect(result.batteryLevel, isNull);
+      });
     });
 
     group('failure', () {
@@ -133,6 +162,25 @@ void main() {
           LocationFailureReason.networkError,
         );
         expect(result.errorDetail, isNull);
+      });
+
+      test('failure constructor has null location and battery', () {
+        const result = LocationUpdateResult.failure(
+          LocationFailureReason.networkError,
+        );
+        expect(result.latitude, isNull);
+        expect(result.longitude, isNull);
+        expect(result.batteryLevel, isNull);
+      });
+
+      test('failureWithDetail has null location and battery', () {
+        const result = LocationUpdateResult.failureWithDetail(
+          LocationFailureReason.serverError,
+          'error detail',
+        );
+        expect(result.latitude, isNull);
+        expect(result.longitude, isNull);
+        expect(result.batteryLevel, isNull);
       });
 
       test('success constructor has null errorDetail', () {

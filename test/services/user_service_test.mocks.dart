@@ -3,15 +3,17 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i5;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
+import 'package:mockito/src/dummies.dart' as _i7;
 import 'package:tracker_frontend/data/client/command/user_command_client.dart'
-    as _i5;
+    as _i6;
 import 'package:tracker_frontend/data/client/query/user_query_client.dart'
-    as _i3;
-import 'package:tracker_frontend/data/models/user_models.dart' as _i2;
+    as _i4;
+import 'package:tracker_frontend/data/models/responses/page_response.dart'
+    as _i2;
+import 'package:tracker_frontend/data/models/user_models.dart' as _i3;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -28,8 +30,19 @@ import 'package:tracker_frontend/data/models/user_models.dart' as _i2;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeUserProfile_0 extends _i1.SmartFake implements _i2.UserProfile {
-  _FakeUserProfile_0(
+class _FakePageResponse_0<T> extends _i1.SmartFake
+    implements _i2.PageResponse<T> {
+  _FakePageResponse_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeUserProfile_1 extends _i1.SmartFake implements _i3.UserProfile {
+  _FakeUserProfile_1(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -41,238 +54,317 @@ class _FakeUserProfile_0 extends _i1.SmartFake implements _i2.UserProfile {
 /// A class which mocks [UserQueryClient].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUserQueryClient extends _i1.Mock implements _i3.UserQueryClient {
+class MockUserQueryClient extends _i1.Mock implements _i4.UserQueryClient {
   MockUserQueryClient() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.UserProfile> getUserById(String? userId) =>
+  _i5.Future<_i2.PageResponse<_i3.UserProfile>> getAllUsers({
+    int? page = 0,
+    int? size = 20,
+    String? sort = 'username',
+    String? direction = 'asc',
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getAllUsers,
+          [],
+          {
+            #page: page,
+            #size: size,
+            #sort: sort,
+            #direction: direction,
+          },
+        ),
+        returnValue: _i5.Future<_i2.PageResponse<_i3.UserProfile>>.value(
+            _FakePageResponse_0<_i3.UserProfile>(
+          this,
+          Invocation.method(
+            #getAllUsers,
+            [],
+            {
+              #page: page,
+              #size: size,
+              #sort: sort,
+              #direction: direction,
+            },
+          ),
+        )),
+      ) as _i5.Future<_i2.PageResponse<_i3.UserProfile>>);
+
+  @override
+  _i5.Future<_i3.UserProfile> getUserById(String? userId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getUserById,
           [userId],
         ),
-        returnValue: _i4.Future<_i2.UserProfile>.value(_FakeUserProfile_0(
+        returnValue: _i5.Future<_i3.UserProfile>.value(_FakeUserProfile_1(
           this,
           Invocation.method(
             #getUserById,
             [userId],
           ),
         )),
-      ) as _i4.Future<_i2.UserProfile>);
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i4.Future<_i2.UserProfile> getUserByUsername(String? username) =>
+  _i5.Future<_i3.UserProfile> getUserByUsername(String? username) =>
       (super.noSuchMethod(
         Invocation.method(
           #getUserByUsername,
           [username],
         ),
-        returnValue: _i4.Future<_i2.UserProfile>.value(_FakeUserProfile_0(
+        returnValue: _i5.Future<_i3.UserProfile>.value(_FakeUserProfile_1(
           this,
           Invocation.method(
             #getUserByUsername,
             [username],
           ),
         )),
-      ) as _i4.Future<_i2.UserProfile>);
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i4.Future<_i2.UserProfile> getCurrentUser() => (super.noSuchMethod(
+  _i5.Future<_i3.UserProfile> getCurrentUser() => (super.noSuchMethod(
         Invocation.method(
           #getCurrentUser,
           [],
         ),
-        returnValue: _i4.Future<_i2.UserProfile>.value(_FakeUserProfile_0(
+        returnValue: _i5.Future<_i3.UserProfile>.value(_FakeUserProfile_1(
           this,
           Invocation.method(
             #getCurrentUser,
             [],
           ),
         )),
-      ) as _i4.Future<_i2.UserProfile>);
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i4.Future<List<_i2.Friendship>> getFriends() => (super.noSuchMethod(
+  _i5.Future<List<_i3.Friendship>> getFriends() => (super.noSuchMethod(
         Invocation.method(
           #getFriends,
           [],
         ),
-        returnValue: _i4.Future<List<_i2.Friendship>>.value(<_i2.Friendship>[]),
-      ) as _i4.Future<List<_i2.Friendship>>);
+        returnValue: _i5.Future<List<_i3.Friendship>>.value(<_i3.Friendship>[]),
+      ) as _i5.Future<List<_i3.Friendship>>);
 
   @override
-  _i4.Future<List<_i2.FriendRequest>> getReceivedFriendRequests() =>
+  _i5.Future<List<_i3.FriendRequest>> getReceivedFriendRequests() =>
       (super.noSuchMethod(
         Invocation.method(
           #getReceivedFriendRequests,
           [],
         ),
         returnValue:
-            _i4.Future<List<_i2.FriendRequest>>.value(<_i2.FriendRequest>[]),
-      ) as _i4.Future<List<_i2.FriendRequest>>);
+            _i5.Future<List<_i3.FriendRequest>>.value(<_i3.FriendRequest>[]),
+      ) as _i5.Future<List<_i3.FriendRequest>>);
 
   @override
-  _i4.Future<List<_i2.FriendRequest>> getSentFriendRequests() =>
+  _i5.Future<List<_i3.FriendRequest>> getSentFriendRequests() =>
       (super.noSuchMethod(
         Invocation.method(
           #getSentFriendRequests,
           [],
         ),
         returnValue:
-            _i4.Future<List<_i2.FriendRequest>>.value(<_i2.FriendRequest>[]),
-      ) as _i4.Future<List<_i2.FriendRequest>>);
+            _i5.Future<List<_i3.FriendRequest>>.value(<_i3.FriendRequest>[]),
+      ) as _i5.Future<List<_i3.FriendRequest>>);
 
   @override
-  _i4.Future<List<_i2.UserFollow>> getFollowing() => (super.noSuchMethod(
+  _i5.Future<List<_i3.UserFollow>> getFollowing() => (super.noSuchMethod(
         Invocation.method(
           #getFollowing,
           [],
         ),
-        returnValue: _i4.Future<List<_i2.UserFollow>>.value(<_i2.UserFollow>[]),
-      ) as _i4.Future<List<_i2.UserFollow>>);
+        returnValue: _i5.Future<List<_i3.UserFollow>>.value(<_i3.UserFollow>[]),
+      ) as _i5.Future<List<_i3.UserFollow>>);
 
   @override
-  _i4.Future<List<_i2.UserFollow>> getFollowers() => (super.noSuchMethod(
+  _i5.Future<List<_i3.UserFollow>> getFollowers() => (super.noSuchMethod(
         Invocation.method(
           #getFollowers,
           [],
         ),
-        returnValue: _i4.Future<List<_i2.UserFollow>>.value(<_i2.UserFollow>[]),
-      ) as _i4.Future<List<_i2.UserFollow>>);
+        returnValue: _i5.Future<List<_i3.UserFollow>>.value(<_i3.UserFollow>[]),
+      ) as _i5.Future<List<_i3.UserFollow>>);
+
+  @override
+  _i5.Future<List<_i3.UserFollow>> getUserFollowing(String? userId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getUserFollowing,
+          [userId],
+        ),
+        returnValue: _i5.Future<List<_i3.UserFollow>>.value(<_i3.UserFollow>[]),
+      ) as _i5.Future<List<_i3.UserFollow>>);
+
+  @override
+  _i5.Future<List<_i3.UserFollow>> getUserFollowers(String? userId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getUserFollowers,
+          [userId],
+        ),
+        returnValue: _i5.Future<List<_i3.UserFollow>>.value(<_i3.UserFollow>[]),
+      ) as _i5.Future<List<_i3.UserFollow>>);
+
+  @override
+  _i5.Future<List<_i3.Friendship>> getUserFriends(String? userId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getUserFriends,
+          [userId],
+        ),
+        returnValue: _i5.Future<List<_i3.Friendship>>.value(<_i3.Friendship>[]),
+      ) as _i5.Future<List<_i3.Friendship>>);
 }
 
 /// A class which mocks [UserCommandClient].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUserCommandClient extends _i1.Mock implements _i5.UserCommandClient {
+class MockUserCommandClient extends _i1.Mock implements _i6.UserCommandClient {
   MockUserCommandClient() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.UserProfile> createUser(Map<String, dynamic>? userData) =>
+  _i5.Future<_i3.UserProfile> createUser(Map<String, dynamic>? userData) =>
       (super.noSuchMethod(
         Invocation.method(
           #createUser,
           [userData],
         ),
-        returnValue: _i4.Future<_i2.UserProfile>.value(_FakeUserProfile_0(
+        returnValue: _i5.Future<_i3.UserProfile>.value(_FakeUserProfile_1(
           this,
           Invocation.method(
             #createUser,
             [userData],
           ),
         )),
-      ) as _i4.Future<_i2.UserProfile>);
+      ) as _i5.Future<_i3.UserProfile>);
 
   @override
-  _i4.Future<String> sendFriendRequest(String? userId) => (super.noSuchMethod(
+  _i5.Future<String> sendFriendRequest(String? userId) => (super.noSuchMethod(
         Invocation.method(
           #sendFriendRequest,
           [userId],
         ),
-        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #sendFriendRequest,
             [userId],
           ),
         )),
-      ) as _i4.Future<String>);
+      ) as _i5.Future<String>);
 
   @override
-  _i4.Future<String> acceptFriendRequest(String? requestId) =>
+  _i5.Future<String> acceptFriendRequest(String? requestId) =>
       (super.noSuchMethod(
         Invocation.method(
           #acceptFriendRequest,
           [requestId],
         ),
-        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #acceptFriendRequest,
             [requestId],
           ),
         )),
-      ) as _i4.Future<String>);
+      ) as _i5.Future<String>);
 
   @override
-  _i4.Future<String> deleteFriendRequest(String? requestId) =>
+  _i5.Future<String> deleteFriendRequest(String? requestId) =>
       (super.noSuchMethod(
         Invocation.method(
           #deleteFriendRequest,
           [requestId],
         ),
-        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #deleteFriendRequest,
             [requestId],
           ),
         )),
-      ) as _i4.Future<String>);
+      ) as _i5.Future<String>);
 
   @override
-  _i4.Future<String> removeFriend(String? friendId) => (super.noSuchMethod(
+  _i5.Future<String> removeFriend(String? friendId) => (super.noSuchMethod(
         Invocation.method(
           #removeFriend,
           [friendId],
         ),
-        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #removeFriend,
             [friendId],
           ),
         )),
-      ) as _i4.Future<String>);
+      ) as _i5.Future<String>);
 
   @override
-  _i4.Future<String> followUser(String? userId) => (super.noSuchMethod(
+  _i5.Future<String> followUser(String? userId) => (super.noSuchMethod(
         Invocation.method(
           #followUser,
           [userId],
         ),
-        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #followUser,
             [userId],
           ),
         )),
-      ) as _i4.Future<String>);
+      ) as _i5.Future<String>);
 
   @override
-  _i4.Future<String> unfollowUser(String? followedId) => (super.noSuchMethod(
+  _i5.Future<String> unfollowUser(String? followedId) => (super.noSuchMethod(
         Invocation.method(
           #unfollowUser,
           [followedId],
         ),
-        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
           this,
           Invocation.method(
             #unfollowUser,
             [followedId],
           ),
         )),
-      ) as _i4.Future<String>);
+      ) as _i5.Future<String>);
 
   @override
-  _i4.Future<_i2.UserProfile> updateProfile(
-          _i2.UpdateProfileRequest? request) =>
+  _i5.Future<_i3.UserProfile> updateProfile(
+          _i3.UpdateProfileRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateProfile,
           [request],
         ),
-        returnValue: _i4.Future<_i2.UserProfile>.value(_FakeUserProfile_0(
+        returnValue: _i5.Future<_i3.UserProfile>.value(_FakeUserProfile_1(
           this,
           Invocation.method(
             #updateProfile,
             [request],
           ),
         )),
-      ) as _i4.Future<_i2.UserProfile>);
+      ) as _i5.Future<_i3.UserProfile>);
+
+  @override
+  _i5.Future<String> deleteMyAccount() => (super.noSuchMethod(
+        Invocation.method(
+          #deleteMyAccount,
+          [],
+        ),
+        returnValue: _i5.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #deleteMyAccount,
+            [],
+          ),
+        )),
+      ) as _i5.Future<String>);
 }

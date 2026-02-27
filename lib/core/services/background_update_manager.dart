@@ -1,9 +1,11 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:tracker_frontend/core/services/notification_service.dart';
 import 'package:tracker_frontend/data/services/trip_update_service.dart';
-import 'package:tracker_frontend/data/models/domain/trip.dart';
+import 'package:tracker_frontend/data/storage/token_storage.dart';
 
 /// Unique task name for trip updates
 const String tripUpdateTaskName = 'tripAutoUpdate';
@@ -11,43 +13,160 @@ const String tripUpdateTaskName = 'tripAutoUpdate';
 /// Key for storing active trip ID in shared preferences
 const String _activeTripIdKey = 'active_trip_id_for_updates';
 
+/// Key for storing the active trip name for notifications
+const String _activeTripNameKey = 'active_trip_name_for_updates';
+
+/// Key for storing the desired update interval (seconds)
+const String _updateIntervalKey = 'update_interval_seconds';
+
+/// Key to signal the background isolate that chained updates are active
+const String _chainedUpdatesActiveKey = 'chained_updates_active';
+
+/// Schedules the next chained one-off task with the user's desired delay.
+/// Called from the background isolate after each successful execution.
+Future<void> _scheduleNextChainedTask(SharedPreferences prefs) async {
+  final isActive = prefs.getBool(_chainedUpdatesActiveKey) ?? false;
+  final tripId = prefs.getString(_activeTripIdKey);
+  final intervalSeconds = prefs.getInt(_updateIntervalKey) ?? 900;
+
+  if (!isActive || tripId == null || tripId.isEmpty) {
+    debugPrint(
+        'BG_CHAIN: Not scheduling next task — active=$isActive, tripId=$tripId');
+    return;
+  }
+
+  final taskId = 'trip_update_chain_${DateTime.now().millisecondsSinceEpoch}';
+  debugPrint('BG_CHAIN: Scheduling next task in ${intervalSeconds}s '
+      '(${(intervalSeconds / 60).toStringAsFixed(1)} min), taskId=$taskId');
+
+  await Workmanager().registerOneOffTask(
+    taskId,
+    tripUpdateTaskName,
+    initialDelay: Duration(seconds: intervalSeconds),
+    constraints: Constraints(
+      networkType: NetworkType.connected,
+      requiresBatteryNotLow: false,
+      requiresCharging: false,
+      requiresDeviceIdle: false,
+      requiresStorageNotLow: false,
+    ),
+    existingWorkPolicy: ExistingWorkPolicy.append,
+    backoffPolicy: BackoffPolicy.linear,
+    backoffPolicyDelay: const Duration(minutes: 1),
+  );
+}
+
 /// Top-level callback dispatcher for WorkManager
 /// Must be a top-level function (not a class method)
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
+    final startTime = DateTime.now();
+    final tag =
+        'BG_UPDATE[${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}:${startTime.second.toString().padLeft(2, '0')}]';
+
+    WidgetsFlutterBinding.ensureInitialized();
+    debugPrint('$tag: ⚡ WorkManager task fired. taskName=$taskName');
+
     if (taskName == tripUpdateTaskName) {
+      final notificationService = NotificationService();
+      await notificationService.initialize();
+
       try {
-        // Get the trip ID from shared preferences (WorkManager doesn't persist inputData reliably)
         final prefs = await SharedPreferences.getInstance();
+        await prefs.reload();
         final tripId = prefs.getString(_activeTripIdKey);
+        final tripName = prefs.getString(_activeTripNameKey) ?? 'Trip Update';
+        final intervalSeconds = prefs.getInt(_updateIntervalKey) ?? 900;
+
+        debugPrint(
+            '$tag: tripId=${tripId ?? 'NULL'}, name=$tripName, interval=${intervalSeconds}s');
 
         if (tripId == null || tripId.isEmpty) {
-          debugPrint('BackgroundUpdateManager: No active trip ID found');
-          return true; // Return true to prevent retry
+          debugPrint('$tag: No active trip ID — skipping');
+          return true;
         }
 
-        // Send the automatic update
+        final tokenStorage = TokenStorage();
+        await tokenStorage.reloadFromDisk();
+        final accessToken = await tokenStorage.getAccessToken();
+
+        debugPrint('$tag: hasToken=${accessToken != null}');
+
+        if (accessToken == null) {
+          debugPrint('$tag: No access token — user may be logged out');
+          await notificationService.showUpdateFailure(
+            tripName: tripName,
+            reason: 'Please open the app and log in again',
+          );
+          await _scheduleNextChainedTask(prefs);
+          return true;
+        }
+
+        debugPrint('$tag: Sending update for trip $tripId');
         final updateService = TripUpdateService();
         final result = await updateService.sendUpdate(
           tripId: tripId,
           isAutomatic: true,
         );
 
-        debugPrint(
-            'BackgroundUpdateManager: Auto update ${result.isSuccess ? 'sent' : 'failed (${result.failureReason})'} for trip $tripId');
-        return true; // Always return true to prevent excessive retries
-      } catch (e) {
-        debugPrint('BackgroundUpdateManager: Error in background task: $e');
-        return true; // Return true to prevent retry on error
+        final elapsed = DateTime.now().difference(startTime).inMilliseconds;
+
+        if (result.isSuccess) {
+          await notificationService.showUpdateSuccess(
+            tripName: tripName,
+            latitude: result.latitude!,
+            longitude: result.longitude!,
+            batteryLevel: result.batteryLevel,
+          );
+          debugPrint('$tag: ✅ SUCCESS in ${elapsed}ms');
+        } else {
+          await notificationService.showUpdateFailure(
+            tripName: tripName,
+            reason: result.userMessage,
+          );
+          debugPrint('$tag: ❌ FAILED in ${elapsed}ms — '
+              'reason=${result.failureReason}, detail=${result.errorDetail}');
+        }
+
+        await _scheduleNextChainedTask(prefs);
+        return true;
+      } catch (e, stackTrace) {
+        final elapsed = DateTime.now().difference(startTime).inMilliseconds;
+        debugPrint('$tag: 💥 EXCEPTION in ${elapsed}ms: $e\n$stackTrace');
+
+        try {
+          final tripName = (await SharedPreferences.getInstance())
+                  .getString(_activeTripNameKey) ??
+              'Trip Update';
+          await notificationService.showUpdateFailure(
+            tripName: tripName,
+            reason: 'Something went wrong. Will retry next cycle.',
+          );
+        } catch (_) {}
+
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.reload();
+          await _scheduleNextChainedTask(prefs);
+        } catch (_) {}
+
+        return true;
       }
     }
+
+    debugPrint('$tag: Unknown task name: $taskName — skipping');
     return true;
   });
 }
 
 /// Manages background updates for trips using WorkManager
 /// Only works on Android - no-ops on other platforms
+///
+/// Uses chained one-off tasks instead of periodic tasks to bypass
+/// Android's 15-minute minimum interval for periodic WorkManager tasks.
+/// After each execution, the callback schedules the next one-off task
+/// with the user's desired delay.
 class BackgroundUpdateManager {
   static final BackgroundUpdateManager _instance =
       BackgroundUpdateManager._internal();
@@ -64,52 +183,71 @@ class BackgroundUpdateManager {
   /// Initialize the WorkManager
   /// Call this once at app startup (e.g., in main.dart)
   Future<void> initialize() async {
-    if (!_isSupported || _isInitialized) return;
+    if (!_isSupported) {
+      debugPrint(
+          'BackgroundUpdateManager: Skipped init — platform not supported');
+      return;
+    }
+    if (_isInitialized) {
+      debugPrint('BackgroundUpdateManager: Already initialized');
+      return;
+    }
 
     try {
       await Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: false, // Set to true for debugging
+        isInDebugMode: false,
       );
       _isInitialized = true;
-      debugPrint('BackgroundUpdateManager: Initialized successfully');
+      debugPrint(
+          'BackgroundUpdateManager: ✅ Initialized successfully (debug mode ON)');
     } catch (e) {
-      debugPrint('BackgroundUpdateManager: Failed to initialize: $e');
+      debugPrint('BackgroundUpdateManager: ❌ Failed to initialize: $e');
     }
   }
 
-  /// Start automatic updates for a trip
+  /// Start automatic updates for a trip using chained one-off tasks.
   ///
   /// [tripId] - The ID of the trip to send updates for
-  /// [intervalSeconds] - The interval between updates (will be clamped to 15 min minimum)
-  Future<void> startAutoUpdates(String tripId, int intervalSeconds) async {
+  /// [tripName] - The name of the trip (shown in notifications)
+  /// [intervalSeconds] - The interval between updates (any value, no 15 min minimum)
+  Future<void> startAutoUpdates(
+      String tripId, String tripName, int intervalSeconds) async {
     if (!_isSupported) {
       debugPrint('BackgroundUpdateManager: Not supported on this platform');
       return;
     }
 
     if (!_isInitialized) {
+      debugPrint(
+          'BackgroundUpdateManager: Not initialized yet, initializing now...');
       await initialize();
     }
 
     try {
-      // Store trip ID in shared preferences for the background task
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_activeTripIdKey, tripId);
-
-      // Clamp interval to WorkManager minimum (15 minutes)
-      final clampedInterval = intervalSeconds < Trip.minUpdateRefresh
-          ? Trip.minUpdateRefresh
-          : intervalSeconds;
-
-      // Cancel any existing task first
+      // Cancel any existing tasks first
       await stopAutoUpdates(tripId);
 
-      // Register periodic task
-      await Workmanager().registerPeriodicTask(
-        'trip_update_$tripId', // Unique task ID
+      // Store trip ID and interval in shared preferences for the background task
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_activeTripIdKey, tripId);
+      await prefs.setString(_activeTripNameKey, tripName);
+      await prefs.setInt(_updateIntervalKey, intervalSeconds);
+      await prefs.setBool(_chainedUpdatesActiveKey, true);
+
+      // Verify the writes
+      debugPrint('BackgroundUpdateManager: 📝 Stored: tripId=$tripId, '
+          'interval=${intervalSeconds}s (${(intervalSeconds / 60).toStringAsFixed(1)} min), '
+          'chainActive=true');
+
+      // Schedule the first one-off task with the desired delay
+      final taskId =
+          'trip_update_chain_${DateTime.now().millisecondsSinceEpoch}';
+
+      await Workmanager().registerOneOffTask(
+        taskId,
         tripUpdateTaskName,
-        frequency: Duration(seconds: clampedInterval),
+        initialDelay: Duration(seconds: intervalSeconds),
         constraints: Constraints(
           networkType: NetworkType.connected,
           requiresBatteryNotLow: false,
@@ -123,9 +261,13 @@ class BackgroundUpdateManager {
       );
 
       debugPrint(
-          'BackgroundUpdateManager: Started auto updates for trip $tripId every ${clampedInterval}s');
+          'BackgroundUpdateManager: ✅ Started auto updates for trip $tripId '
+          'every ${intervalSeconds}s (${(intervalSeconds / 60).toStringAsFixed(1)} min)');
+
+      debugPrint(
+          'BackgroundUpdateManager: 🔑 SharedPrefs keys: ${prefs.getKeys().join(', ')}');
     } catch (e) {
-      debugPrint('BackgroundUpdateManager: Failed to start auto updates: $e');
+      debugPrint('BackgroundUpdateManager: ❌ Failed to start auto updates: $e');
     }
   }
 
@@ -134,16 +276,63 @@ class BackgroundUpdateManager {
     if (!_isSupported) return;
 
     try {
-      // Clear stored trip ID
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_activeTripIdKey);
+      await prefs.remove(_activeTripNameKey);
+      await prefs.remove(_updateIntervalKey);
+      await prefs.setBool(_chainedUpdatesActiveKey, false);
 
-      // Cancel the task
-      await Workmanager().cancelByUniqueName('trip_update_$tripId');
+      // Cancel all tasks (chained one-off tasks have dynamic names)
+      await Workmanager().cancelAll();
       debugPrint(
           'BackgroundUpdateManager: Stopped auto updates for trip $tripId');
     } catch (e) {
       debugPrint('BackgroundUpdateManager: Failed to stop auto updates: $e');
+    }
+  }
+
+  /// Trigger a single background update NOW for testing.
+  /// Uses registerOneOffTask which fires almost immediately,
+  /// bypassing the 15-minute minimum of periodic tasks.
+  /// This exercises the exact same code path as the periodic task
+  /// (separate isolate, callbackDispatcher, SharedPreferences, etc.)
+  Future<void> triggerTestUpdate(String tripId, {String? tripName}) async {
+    if (!_isSupported) {
+      debugPrint('BackgroundUpdateManager: Not supported on this platform');
+      return;
+    }
+
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    try {
+      // Store trip ID so the background isolate can read it
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_activeTripIdKey, tripId);
+      if (tripName != null) {
+        await prefs.setString(_activeTripNameKey, tripName);
+      }
+
+      final taskId =
+          'trip_update_test_${DateTime.now().millisecondsSinceEpoch}';
+      debugPrint(
+          'BackgroundUpdateManager: 🧪 Triggering test update for trip $tripId (taskId=$taskId)');
+
+      await Workmanager().registerOneOffTask(
+        taskId,
+        tripUpdateTaskName,
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+        ),
+        existingWorkPolicy: ExistingWorkPolicy.replace,
+      );
+
+      debugPrint(
+          'BackgroundUpdateManager: 🧪 One-off test task registered — should fire within seconds');
+    } catch (e) {
+      debugPrint(
+          'BackgroundUpdateManager: ❌ Failed to trigger test update: $e');
     }
   }
 
@@ -154,6 +343,9 @@ class BackgroundUpdateManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_activeTripIdKey);
+      await prefs.remove(_activeTripNameKey);
+      await prefs.remove(_updateIntervalKey);
+      await prefs.setBool(_chainedUpdatesActiveKey, false);
 
       await Workmanager().cancelAll();
       debugPrint('BackgroundUpdateManager: Stopped all auto updates');

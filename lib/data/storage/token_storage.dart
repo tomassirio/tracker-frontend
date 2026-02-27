@@ -11,6 +11,15 @@ class TokenStorage {
   static const String _userIdKey = 'userId';
   static const String _usernameKey = 'username';
 
+  /// Force SharedPreferences to re-read from native storage.
+  /// Must be called in background isolates (e.g. WorkManager) before
+  /// reading tokens, because the background isolate starts with a
+  /// stale cache that doesn't reflect writes from the main isolate.
+  Future<void> reloadFromDisk() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+  }
+
   /// Save authentication tokens
   Future<void> saveTokens({
     required String accessToken,

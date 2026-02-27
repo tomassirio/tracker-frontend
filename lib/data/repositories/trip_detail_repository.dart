@@ -90,6 +90,20 @@ class TripDetailRepository {
     return await _tripService.changeStatus(tripId, request);
   }
 
+  /// Changes the automatic update settings of a trip
+  /// Returns the trip ID. Full trip data will be delivered via WebSocket.
+  Future<String> changeTripSettings(
+    String tripId,
+    bool automaticUpdates,
+    int? updateRefresh,
+  ) async {
+    final request = ChangeTripSettingsRequest(
+      automaticUpdates: automaticUpdates,
+      updateRefresh: updateRefresh,
+    );
+    return await _tripService.changeSettings(tripId, request);
+  }
+
   /// Checks if user is logged in
   Future<bool> isLoggedIn() async {
     return await _authService.isLoggedIn();

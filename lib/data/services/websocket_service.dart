@@ -230,6 +230,8 @@ class WebSocketService {
         return TripStatusChangedEvent.fromJson(data);
       case WebSocketEventType.tripVisibilityChanged:
         return TripVisibilityChangedEvent.fromJson(data);
+      case WebSocketEventType.tripSettingsUpdated:
+        return TripSettingsUpdatedEvent.fromJson(data);
 
       // Trip update events
       case WebSocketEventType.tripUpdateCreated:

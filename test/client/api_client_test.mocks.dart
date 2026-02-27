@@ -293,6 +293,16 @@ class MockTokenStorage extends _i1.Mock implements _i7.TokenStorage {
   }
 
   @override
+  _i3.Future<void> reloadFromDisk() => (super.noSuchMethod(
+        Invocation.method(
+          #reloadFromDisk,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
   _i3.Future<void> saveTokens({
     required String? accessToken,
     required String? refreshToken,
@@ -364,6 +374,15 @@ class MockTokenStorage extends _i1.Mock implements _i7.TokenStorage {
       ) as _i3.Future<String?>);
 
   @override
+  _i3.Future<bool> isAdmin() => (super.noSuchMethod(
+        Invocation.method(
+          #isAdmin,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
   _i3.Future<bool> isAccessTokenExpired() => (super.noSuchMethod(
         Invocation.method(
           #isAccessTokenExpired,
@@ -376,15 +395,6 @@ class MockTokenStorage extends _i1.Mock implements _i7.TokenStorage {
   _i3.Future<bool> isLoggedIn() => (super.noSuchMethod(
         Invocation.method(
           #isLoggedIn,
-          [],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
-
-  @override
-  _i3.Future<bool> isAdmin() => (super.noSuchMethod(
-        Invocation.method(
-          #isAdmin,
           [],
         ),
         returnValue: _i3.Future<bool>.value(false),

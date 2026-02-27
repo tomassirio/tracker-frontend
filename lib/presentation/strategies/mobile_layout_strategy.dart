@@ -8,7 +8,7 @@ import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_stra
 class MobileLayoutStrategy extends TripDetailLayoutStrategy {
   static const double _collapsedWidth = 88.0;
   static const double _expandedWidthRatio = 0.85;
-  static const double _maxHeightRatio = 0.5;
+  static const double _maxHeightRatio = 0.7;
   @override
   double calculateLeftPanelWidth(
       BoxConstraints constraints, TripDetailLayoutData data) {

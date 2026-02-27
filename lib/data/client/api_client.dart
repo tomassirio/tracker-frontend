@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_endpoints.dart';
 import '../storage/token_storage.dart';
@@ -272,14 +273,21 @@ class ApiClient {
 
   /// Ensure access token is valid, refreshing proactively if expired
   /// This follows OAuth2 best practices by checking expiration before making requests
+  /// The reload() call ensures background isolates read fresh token data
   Future<void> _ensureValidToken() async {
     try {
+      // Reload SharedPreferences from disk so background isolates
+      // see tokens written by the main isolate
+      await _tokenStorage.reloadFromDisk();
+
       final isExpired = await _tokenStorage.isAccessTokenExpired();
       if (isExpired) {
-        await _refreshTokenIfNeeded();
+        debugPrint('ApiClient: Token expired, attempting refresh...');
+        final refreshed = await _refreshTokenIfNeeded();
+        debugPrint('ApiClient: Token refresh result: $refreshed');
       }
     } catch (e) {
-      // If isAccessTokenExpired is not implemented (e.g., in tests), skip proactive refresh
+      debugPrint('ApiClient: Error in _ensureValidToken: $e');
       // Fallback to 401 handling will still work
     }
   }
@@ -307,9 +315,13 @@ class ApiClient {
     try {
       final refreshToken = await _tokenStorage.getRefreshToken();
       if (refreshToken == null) {
+        debugPrint('ApiClient: No refresh token available — clearing tokens');
         await _tokenStorage.clearTokens();
         return false;
       }
+
+      debugPrint('ApiClient: Refreshing token with refresh token '
+          '${refreshToken.substring(0, (refreshToken.length).clamp(0, 10))}...');
 
       final uri = Uri.parse(
         '${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}',
@@ -325,6 +337,8 @@ class ApiClient {
         body: jsonEncode({'refreshToken': refreshToken}),
       );
 
+      debugPrint('ApiClient: Refresh response status: ${response.statusCode}');
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
@@ -336,6 +350,8 @@ class ApiClient {
         final expiresIn = data['expiresIn'] ?? data['expires_in'] ?? 3600;
 
         if (newAccessToken == null) {
+          debugPrint(
+              'ApiClient: Refresh response missing accessToken — clearing tokens');
           // Invalid response format
           await _tokenStorage.clearTokens();
           return false;
@@ -349,13 +365,18 @@ class ApiClient {
               ? expiresIn
               : int.tryParse(expiresIn.toString()) ?? 3600,
         );
+        debugPrint('ApiClient: ✅ Token refreshed successfully');
         return true;
       } else {
+        debugPrint(
+            'ApiClient: Refresh failed with status ${response.statusCode}: '
+            '${response.body.substring(0, (response.body.length).clamp(0, 200))}');
         // Refresh failed, clear tokens
         await _tokenStorage.clearTokens();
         return false;
       }
     } catch (e) {
+      debugPrint('ApiClient: ❌ Token refresh exception: $e');
       // On any error, clear tokens to force re-login
       await _tokenStorage.clearTokens();
       return false;

@@ -177,8 +177,8 @@ void main() {
         expect(Trip.defaultUpdateRefresh, 1800);
       });
 
-      test('minUpdateRefresh is 15 minutes (900 seconds)', () {
-        expect(Trip.minUpdateRefresh, 900);
+      test('minUpdateRefresh is 1 minute (60 seconds)', () {
+        expect(Trip.minUpdateRefresh, 60);
       });
 
       test(
@@ -224,7 +224,7 @@ void main() {
           name: 'Test Trip',
           visibility: Visibility.public,
           status: TripStatus.inProgress,
-          updateRefresh: 300, // 5 minutes - below minimum
+          updateRefresh: 30, // 30 seconds - below minimum
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -264,6 +264,176 @@ void main() {
 
         // Zero should be clamped to minimum
         expect(trip.effectiveUpdateRefresh, Trip.minUpdateRefresh);
+      });
+    });
+
+    group('Trip automaticUpdates', () {
+      test('automaticUpdates defaults to false when not provided', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        expect(trip.automaticUpdates, false);
+        expect(trip.updateRefresh, null);
+      });
+
+      test('automaticUpdates can be set to true with updateRefresh', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          automaticUpdates: true,
+          updateRefresh: 1800, // 30 minutes in seconds
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        expect(trip.automaticUpdates, true);
+        expect(trip.updateRefresh, 1800);
+      });
+
+      test(
+          'fromJson parses automaticUpdates and updateRefresh from tripSettings',
+          () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'username': 'testuser',
+          'name': 'Test Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'tripSettings': {
+            'automaticUpdates': true,
+            'updateRefresh': 2700, // 45 minutes in seconds
+          },
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.automaticUpdates, true);
+        expect(trip.updateRefresh, 2700);
+      });
+
+      test('fromJson defaults automaticUpdates to false when not in JSON', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'username': 'testuser',
+          'name': 'Test Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.automaticUpdates, false);
+        expect(trip.updateRefresh, null);
+      });
+
+      test('toJson includes automaticUpdates and updateRefresh', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          automaticUpdates: true,
+          updateRefresh: 3600, // 60 minutes in seconds
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final json = trip.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json['updateRefresh'], 3600);
+      });
+
+      test('copyWith updates automaticUpdates and updateRefresh', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          automaticUpdates: false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final updatedTrip = trip.copyWith(
+          automaticUpdates: true,
+          updateRefresh: 1800, // 30 minutes in seconds
+        );
+
+        expect(updatedTrip.automaticUpdates, true);
+        expect(updatedTrip.updateRefresh, 1800);
+        expect(updatedTrip.id, trip.id);
+        expect(updatedTrip.name, trip.name);
+      });
+    });
+
+    group('ChangeTripSettingsRequest', () {
+      test(
+          'toJson converts ChangeTripSettingsRequest correctly with both fields',
+          () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: true,
+          updateRefresh: 1800, // 30 minutes in seconds
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json['updateRefresh'], 1800);
+      });
+
+      test('toJson excludes null values', () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: true,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json.containsKey('updateRefresh'), false);
+      });
+
+      test('toJson handles only updateRefresh', () {
+        final request = ChangeTripSettingsRequest(
+          updateRefresh: 2700, // 45 minutes in seconds
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('automaticUpdates'), false);
+        expect(json['updateRefresh'], 2700);
+      });
+
+      test('toJson with automaticUpdates false', () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: false,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], false);
       });
     });
   });

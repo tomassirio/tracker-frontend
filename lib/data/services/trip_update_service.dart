@@ -36,17 +36,32 @@ class TripUpdateService {
     String? message,
     bool isAutomatic = false,
   }) async {
+    final sw = Stopwatch()..start();
+    debugPrint(
+        'TripUpdateService: 🚀 sendUpdate START (tripId=${tripId.substring(0, 8)}..., auto=$isAutomatic)');
+
     // Get current location (returns failure reason if it fails)
     final locationResult = await _getCurrentLocation();
+    debugPrint(
+        'TripUpdateService: 📍 Location fetch completed in ${sw.elapsedMilliseconds}ms '
+        '— success=${locationResult.failureReason == null}');
+
     if (locationResult.failureReason != null) {
+      debugPrint(
+          'TripUpdateService: ❌ Location failed: ${locationResult.failureReason}');
       return LocationUpdateResult.failure(locationResult.failureReason!);
     }
 
     final position = locationResult.position!;
+    debugPrint(
+        'TripUpdateService: 📍 Position: ${position.latitude.toStringAsFixed(4)}, '
+        '${position.longitude.toStringAsFixed(4)}');
 
     try {
       // Get battery level
       final batteryLevel = await _getBatteryLevel();
+      debugPrint(
+          'TripUpdateService: 🔋 Battery: $batteryLevel% (${sw.elapsedMilliseconds}ms)');
 
       // Determine message
       final updateMessage =
@@ -60,8 +75,17 @@ class TripUpdateService {
         battery: batteryLevel,
       );
 
+      debugPrint(
+          'TripUpdateService: 📡 Sending API request... (${sw.elapsedMilliseconds}ms)');
       await _tripUpdateCommandClient.createTripUpdate(tripId, request);
-      return const LocationUpdateResult.success();
+      debugPrint(
+          'TripUpdateService: ✅ API call SUCCESS (${sw.elapsedMilliseconds}ms total)');
+
+      return LocationUpdateResult.success(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        batteryLevel: batteryLevel,
+      );
     } on SocketException catch (e) {
       debugPrint('TripUpdateService: Network error: $e');
       return const LocationUpdateResult.failure(
@@ -95,7 +119,10 @@ class TripUpdateService {
   /// or a [LocationFailureReason] explaining why it failed.
   Future<_LocationFetchResult> _getCurrentLocation() async {
     try {
+      debugPrint('TripUpdateService: 🔍 Checking location service enabled...');
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      debugPrint(
+          'TripUpdateService: 🔍 Location service enabled: $serviceEnabled');
       if (!serviceEnabled) {
         debugPrint('TripUpdateService: Location services are disabled');
         return _LocationFetchResult.fail(
@@ -103,7 +130,9 @@ class TripUpdateService {
         );
       }
 
+      debugPrint('TripUpdateService: 🔍 Checking location permission...');
       final permission = await Geolocator.checkPermission();
+      debugPrint('TripUpdateService: 🔍 Location permission: $permission');
 
       if (permission == LocationPermission.denied) {
         debugPrint('TripUpdateService: Location permission denied');

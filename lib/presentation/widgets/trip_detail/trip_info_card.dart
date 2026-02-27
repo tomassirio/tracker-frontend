@@ -6,6 +6,7 @@ import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dar
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
 
 /// Widget displaying trip information card with glassmorphism design
 /// Supports collapsible state that shows as a floating bubble
@@ -16,6 +17,8 @@ class TripInfoCard extends StatelessWidget {
   final String? currentUserId;
   final bool isChangingStatus;
   final Function(TripStatus)? onStatusChange;
+  final bool isChangingSettings;
+  final Function(bool automaticUpdates, int? updateRefresh)? onSettingsChange;
   final VoidCallback? onFollowUser;
   final VoidCallback? onSendFriendRequest;
   final bool isFollowing;
@@ -23,6 +26,7 @@ class TripInfoCard extends StatelessWidget {
   final bool isAlreadyFriends;
   final bool isPromoted;
   final List<UserAchievement> tripAchievements;
+  final VoidCallback? onTestBackgroundUpdate;
 
   const TripInfoCard({
     super.key,
@@ -32,6 +36,8 @@ class TripInfoCard extends StatelessWidget {
     this.currentUserId,
     this.isChangingStatus = false,
     this.onStatusChange,
+    this.isChangingSettings = false,
+    this.onSettingsChange,
     this.onFollowUser,
     this.onSendFriendRequest,
     this.isFollowing = false,
@@ -39,6 +45,7 @@ class TripInfoCard extends StatelessWidget {
     this.isAlreadyFriends = false,
     this.isPromoted = false,
     this.tripAchievements = const [],
+    this.onTestBackgroundUpdate,
   });
 
   @override
@@ -448,6 +455,20 @@ class TripInfoCard extends StatelessWidget {
                     isOwner: trip.userId == currentUserId,
                     isLoading: isChangingStatus,
                     onStatusChange: onStatusChange!,
+                  ),
+                ],
+                // Trip settings control (owner only)
+                if (onSettingsChange != null && currentUserId != null) ...[
+                  const SizedBox(height: 8),
+                  TripSettingsControl(
+                    automaticUpdates: trip.automaticUpdates,
+                    updateRefresh: trip.updateRefresh,
+                    isOwner: trip.userId == currentUserId,
+                    isLoading: isChangingSettings,
+                    onSettingsChange: onSettingsChange!,
+                    tripStatus: trip.status,
+                    tripId: trip.id,
+                    onTestBackgroundUpdate: onTestBackgroundUpdate,
                   ),
                 ],
               ],

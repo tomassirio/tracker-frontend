@@ -67,6 +67,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   bool _isChangingStatus = false;
+  bool _isChangingSettings = false;
   String? _replyingToCommentId;
   CommentSortOption _sortOption = CommentSortOption.latest;
   final int _selectedSidebarIndex = -1; // Trip detail is not a main nav item
@@ -154,6 +155,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       case WebSocketEventType.commentReactionRemoved:
         _handleCommentReaction(event as CommentReactionEvent);
         break;
+      case WebSocketEventType.tripSettingsUpdated:
+        _handleTripSettingsUpdated(event as TripSettingsUpdatedEvent);
+        break;
       default:
         break;
     }
@@ -186,6 +190,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       // Update the map to show the new location
       _updateMapData();
     }
+  }
+
+  void _handleTripSettingsUpdated(TripSettingsUpdatedEvent event) {
+    // Only update UI state from the server confirmation.
+    // Background update management is already handled optimistically
+    // in _handleSettingsChange to avoid duplicate stop/start cycles.
+    setState(() {
+      _trip = _trip.copyWith(
+        automaticUpdates: event.automaticUpdates ?? _trip.automaticUpdates,
+        updateRefresh: event.updateRefresh ?? _trip.updateRefresh,
+      );
+    });
   }
 
   void _handleCommentAdded(CommentAddedEvent event) {
@@ -603,14 +619,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       // Manage background updates based on new status (Android only)
       if (_isAndroid) {
         final backgroundManager = BackgroundUpdateManager();
-        if (newStatus == TripStatus.inProgress) {
-          // Start automatic updates when trip starts/resumes
+        if (newStatus == TripStatus.inProgress && _trip.automaticUpdates) {
+          // Start automatic updates when trip starts/resumes AND automatic updates is enabled
           await backgroundManager.startAutoUpdates(
             _trip.id,
+            _trip.name,
             _trip.effectiveUpdateRefresh,
           );
         } else {
-          // Stop automatic updates when trip is paused/finished
+          // Stop automatic updates when trip is paused/finished or automatic updates is disabled
           await backgroundManager.stopAutoUpdates(_trip.id);
         }
       }
@@ -638,6 +655,72 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       if (mounted) {
         UiHelpers.showErrorMessage(context, 'Error changing status: $e');
       }
+    }
+  }
+
+  Future<void> _handleSettingsChange(
+      bool automaticUpdates, int? updateRefresh) async {
+    // Only trip owner can change settings
+    if (_userId == null || _trip.userId != _userId) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Only trip owner can change settings');
+      }
+      return;
+    }
+
+    setState(() => _isChangingSettings = true);
+
+    try {
+      await _repository.changeTripSettings(
+        _trip.id,
+        automaticUpdates,
+        updateRefresh,
+      );
+
+      // Update local state optimistically - WebSocket will confirm the change
+      setState(() {
+        _trip = _trip.copyWith(
+          automaticUpdates: automaticUpdates,
+          updateRefresh: updateRefresh,
+        );
+        _isChangingSettings = false;
+      });
+
+      // Manage background updates based on new settings (Android only)
+      if (_isAndroid && _trip.status == TripStatus.inProgress) {
+        final backgroundManager = BackgroundUpdateManager();
+        if (automaticUpdates && updateRefresh != null) {
+          // Start/restart automatic updates with new interval
+          await backgroundManager.startAutoUpdates(
+              _trip.id, _trip.name, updateRefresh);
+        } else {
+          // Stop automatic updates when disabled
+          await backgroundManager.stopAutoUpdates(_trip.id);
+        }
+      }
+
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+            context, 'Trip settings updated successfully');
+      }
+    } catch (e) {
+      setState(() => _isChangingSettings = false);
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error updating settings: $e');
+      }
+    }
+  }
+
+  /// Trigger a one-off background update for testing (bypasses 15-min minimum)
+  Future<void> _triggerTestBackgroundUpdate() async {
+    final backgroundManager = BackgroundUpdateManager();
+    await backgroundManager.triggerTestUpdate(_trip.id, tripName: _trip.name);
+    if (mounted) {
+      UiHelpers.showSuccessMessage(
+        context,
+        '🧪 Test background update triggered — check notifications',
+      );
     }
   }
 
@@ -701,6 +784,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           UiHelpers.showSuccessMessage(context, 'Update sent successfully!');
           // Refresh timeline to show the new update
           await _loadTripUpdates();
+
+          // Reschedule automatic updates after manual update (Android only)
+          if (_isAndroid &&
+              _trip.status == TripStatus.inProgress &&
+              _trip.automaticUpdates) {
+            final backgroundManager = BackgroundUpdateManager();
+            await backgroundManager.startAutoUpdates(
+              _trip.id,
+              _trip.name,
+              _trip.effectiveUpdateRefresh,
+            );
+          }
         } else {
           UiHelpers.showErrorMessage(context, result.userMessage);
         }
@@ -1100,6 +1195,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       replyingToCommentId: _replyingToCommentId,
       currentUserId: _userId,
       isChangingStatus: _isChangingStatus,
+      isChangingSettings: _isChangingSettings,
       showTripUpdatePanel: _showTripUpdatePanel,
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
@@ -1120,11 +1216,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
+      onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner:
           _trip.userId != _userId ? _handleFollowTripOwner : null,
       onSendFriendRequestToTripOwner:
           _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
+      onTestBackgroundUpdate:
+          _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
     );
   }
 

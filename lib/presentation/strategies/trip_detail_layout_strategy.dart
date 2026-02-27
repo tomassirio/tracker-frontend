@@ -32,6 +32,7 @@ class TripDetailLayoutData {
   final String? replyingToCommentId;
   final String? currentUserId;
   final bool isChangingStatus;
+  final bool isChangingSettings;
   final bool
       showTripUpdatePanel; // Only show on Android for owner when trip is in progress
   final bool isFollowingTripOwner; // Track if following trip owner
@@ -55,9 +56,11 @@ class TripDetailLayoutData {
   final VoidCallback onSendComment;
   final VoidCallback onCancelReply;
   final Function(TripStatus)? onStatusChange;
+  final Function(bool automaticUpdates, int? updateRefresh)? onSettingsChange;
   final Future<void> Function(String? message) onSendTripUpdate;
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
+  final VoidCallback? onTestBackgroundUpdate;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -80,6 +83,7 @@ class TripDetailLayoutData {
     this.replyingToCommentId,
     this.currentUserId,
     this.isChangingStatus = false,
+    this.isChangingSettings = false,
     this.showTripUpdatePanel = false,
     this.isFollowingTripOwner = false,
     this.hasSentFriendRequest = false,
@@ -100,9 +104,11 @@ class TripDetailLayoutData {
     required this.onSendComment,
     required this.onCancelReply,
     this.onStatusChange,
+    this.onSettingsChange,
     required this.onSendTripUpdate,
     this.onFollowTripOwner,
     this.onSendFriendRequestToTripOwner,
+    this.onTestBackgroundUpdate,
   });
 }
 
@@ -136,6 +142,8 @@ abstract class TripDetailLayoutStrategy {
       currentUserId: data.currentUserId,
       isChangingStatus: data.isChangingStatus,
       onStatusChange: data.onStatusChange,
+      isChangingSettings: data.isChangingSettings,
+      onSettingsChange: data.onSettingsChange,
       onFollowUser: data.onFollowTripOwner,
       onSendFriendRequest: data.onSendFriendRequestToTripOwner,
       isFollowing: data.isFollowingTripOwner,
@@ -143,6 +151,7 @@ abstract class TripDetailLayoutStrategy {
       isAlreadyFriends: data.isAlreadyFriends,
       isPromoted: data.isPromoted,
       tripAchievements: data.tripAchievements,
+      onTestBackgroundUpdate: data.onTestBackgroundUpdate,
     );
   }
 

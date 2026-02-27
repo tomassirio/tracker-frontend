@@ -63,6 +63,19 @@ class TripCommandClient {
     return _apiClient.handleAcceptedResponse(response);
   }
 
+  /// Change trip settings (automatic updates, time interval)
+  /// Requires authentication (USER, ADMIN - owner only)
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> changeSettings(
+      String tripId, ChangeTripSettingsRequest request) async {
+    final response = await _apiClient.patch(
+      ApiEndpoints.tripSettings(tripId),
+      body: request.toJson(),
+      requireAuth: true,
+    );
+    return _apiClient.handleAcceptedResponse(response);
+  }
+
   /// Delete trip
   /// Requires authentication (USER, ADMIN - owner only)
   /// Returns the trip ID immediately. Deletion will be confirmed via WebSocket.

@@ -37,6 +37,7 @@ class Trip {
   final TripStatus status;
   final int?
       updateRefresh; // interval in seconds for automatic location updates
+  final bool automaticUpdates; // whether automatic updates are enabled
   final DateTime? startDate;
   final DateTime? endDate;
   final List<TripLocation>? locations;
@@ -53,8 +54,10 @@ class Trip {
   /// Default update refresh interval in seconds (30 minutes)
   static const int defaultUpdateRefresh = 1800;
 
-  /// Minimum update refresh interval in seconds (15 minutes - WorkManager minimum)
-  static const int minUpdateRefresh = 900;
+  /// Minimum update refresh interval in seconds (1 minute)
+  /// No longer bound by WorkManager's 15-min periodic limit since
+  /// we use chained one-off tasks instead.
+  static const int minUpdateRefresh = 60;
 
   /// Gets the effective update refresh interval, clamped to minimum
   int get effectiveUpdateRefresh {
@@ -71,6 +74,7 @@ class Trip {
     required this.visibility,
     required this.status,
     this.updateRefresh,
+    this.automaticUpdates = false,
     this.startDate,
     this.endDate,
     this.locations,
@@ -130,6 +134,7 @@ class Trip {
             'CREATED',
       ),
       updateRefresh: tripSettings?['updateRefresh'] as int?,
+      automaticUpdates: (tripSettings?['automaticUpdates'] as bool?) ?? false,
       startDate: json['startDate'] != null
           ? DateTime.tryParse(json['startDate'] as String)
           : null,
@@ -179,6 +184,7 @@ class Trip {
         'visibility': visibility.toJson(),
         'status': status.toJson(),
         if (updateRefresh != null) 'updateRefresh': updateRefresh,
+        'automaticUpdates': automaticUpdates,
         if (startDate != null) 'startDate': startDate!.toIso8601String(),
         if (endDate != null) 'endDate': endDate!.toIso8601String(),
         if (locations != null)
@@ -215,6 +221,7 @@ class Trip {
     Visibility? visibility,
     TripStatus? status,
     int? updateRefresh,
+    bool? automaticUpdates,
     DateTime? startDate,
     DateTime? endDate,
     List<TripLocation>? locations,
@@ -236,6 +243,7 @@ class Trip {
       visibility: visibility ?? this.visibility,
       status: status ?? this.status,
       updateRefresh: updateRefresh ?? this.updateRefresh,
+      automaticUpdates: automaticUpdates ?? this.automaticUpdates,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       locations: locations ?? this.locations,
