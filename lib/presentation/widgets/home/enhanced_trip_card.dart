@@ -8,6 +8,7 @@ import '../../../data/client/google_maps_api_client.dart';
 import '../../../data/client/google_routes_api_client.dart';
 import '../../../data/services/directions_service.dart';
 import '../../helpers/auth_navigation_helper.dart';
+import '../common/user_avatar.dart';
 import 'visibility_badge.dart';
 import 'status_badge.dart';
 import 'relationship_badge.dart';
@@ -243,15 +244,10 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color:
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.person,
-                            size: 10, color: Theme.of(context).primaryColor),
+                      UserAvatar(
+                        avatarUrl: widget.trip.avatarUrl,
+                        username: widget.trip.username,
+                        radius: 8,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -312,14 +308,10 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.person,
-                      size: 12, color: Theme.of(context).primaryColor),
+                UserAvatar(
+                  avatarUrl: widget.trip.avatarUrl,
+                  username: widget.trip.username,
+                  radius: 10,
                 ),
                 const SizedBox(width: 4),
                 Flexible(

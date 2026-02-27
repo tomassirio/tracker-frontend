@@ -10,6 +10,7 @@ import '../../../data/client/google_maps_api_client.dart';
 import '../../../data/client/google_routes_api_client.dart';
 import '../../../data/services/directions_service.dart';
 import '../../helpers/auth_navigation_helper.dart';
+import '../common/user_avatar.dart';
 
 class TripCard extends StatefulWidget {
   final Trip trip;
@@ -370,20 +371,10 @@ class _TripCardState extends State<TripCard> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircleAvatar(
+                      UserAvatar(
+                        avatarUrl: widget.trip.avatarUrl,
+                        username: widget.trip.username,
                         radius: 8,
-                        backgroundColor:
-                            WandererTheme.primaryOrange.withOpacity(0.15),
-                        child: Text(
-                          widget.trip.username.isNotEmpty
-                              ? widget.trip.username[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            color: WandererTheme.primaryOrange,
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -446,20 +437,10 @@ class _TripCardState extends State<TripCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircleAvatar(
+                UserAvatar(
+                  avatarUrl: widget.trip.avatarUrl,
+                  username: widget.trip.username,
                   radius: 10,
-                  backgroundColor:
-                      WandererTheme.primaryOrange.withOpacity(0.15),
-                  child: Text(
-                    widget.trip.username.isNotEmpty
-                        ? widget.trip.username[0].toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                      color: WandererTheme.primaryOrange,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ),
                 const SizedBox(width: 6),
                 Flexible(
