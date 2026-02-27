@@ -64,6 +64,11 @@ class ProfileRepository {
     return await _authService.getCurrentUserId();
   }
 
+  /// Refreshes user details (displayName, avatarUrl) from the API
+  Future<bool> refreshUserDetails() async {
+    return await _authService.refreshUserDetails();
+  }
+
   /// Logs out the current user
   Future<void> logout() async {
     await _authService.logout();

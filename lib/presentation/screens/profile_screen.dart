@@ -523,6 +523,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Re-fetch profile to get the updated data
       try {
         final refreshedProfile = await _repository.getMyProfile();
+        // Save updated details to local storage for sidebar/appbar
+        await _repository.refreshUserDetails();
         setState(() {
           _profile = refreshedProfile;
           _currentDisplayName = refreshedProfile.displayName;

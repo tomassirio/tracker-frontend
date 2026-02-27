@@ -160,10 +160,16 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _loadUserInfo() async {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
-    final displayName = await _repository.getCurrentDisplayName();
-    final avatarUrl = await _repository.getCurrentAvatarUrl();
     final isLoggedIn = await _repository.isLoggedIn();
     final isAdmin = await _repository.isAdmin();
+
+    // Refresh displayName and avatarUrl from API (in case they changed)
+    if (isLoggedIn) {
+      await _repository.refreshUserDetails();
+    }
+
+    final displayName = await _repository.getCurrentDisplayName();
+    final avatarUrl = await _repository.getCurrentAvatarUrl();
 
     setState(() {
       _username = username;

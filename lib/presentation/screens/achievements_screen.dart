@@ -57,9 +57,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       final isAdmin = await _authService.isAdmin();
       final userId = await _authService.getCurrentUserId();
       final username = await _authService.getCurrentUsername();
+      final isLoggedIn = userId != null && userId.isNotEmpty;
+
+      if (isLoggedIn) {
+        await _authService.refreshUserDetails();
+      }
+
       final displayName = await _authService.getCurrentDisplayName();
       final avatarUrl = await _authService.getCurrentAvatarUrl();
-      final isLoggedIn = userId != null && userId.isNotEmpty;
 
       setState(() {
         _isAdmin = isAdmin;

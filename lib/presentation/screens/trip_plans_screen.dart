@@ -58,10 +58,15 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   Future<void> _loadUserInfo() async {
     final username = await _homeRepository.getCurrentUsername();
     final userId = await _homeRepository.getCurrentUserId();
-    final displayName = await _homeRepository.getCurrentDisplayName();
-    final avatarUrl = await _homeRepository.getCurrentAvatarUrl();
     final isLoggedIn = await _homeRepository.isLoggedIn();
     final isAdmin = await _homeRepository.isAdmin();
+
+    if (isLoggedIn) {
+      await _homeRepository.refreshUserDetails();
+    }
+
+    final displayName = await _homeRepository.getCurrentDisplayName();
+    final avatarUrl = await _homeRepository.getCurrentAvatarUrl();
 
     setState(() {
       _username = username;
