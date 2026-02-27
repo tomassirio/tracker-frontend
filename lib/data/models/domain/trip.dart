@@ -93,6 +93,7 @@ class Trip {
   factory Trip.fromJson(Map<String, dynamic> json) {
     final tripSettings = json['tripSettings'] as Map<String, dynamic>?;
     final tripDetails = json['tripDetails'] as Map<String, dynamic>?;
+    final userDetails = json['userDetails'] as Map<String, dynamic>?;
 
     // Parse planned waypoints from tripDetails
     PlannedWaypoint? plannedStart;
@@ -126,7 +127,8 @@ class Trip {
           json['title'] as String? ??
           'Untitled Trip',
       username: json['username'] as String? ?? '',
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl:
+          userDetails?['avatarUrl'] as String? ?? json['avatarUrl'] as String?,
       description: json['description'] as String?,
       visibility: Visibility.fromJson(
         ((tripSettings?['visibility'] ?? json['visibility']) as String?) ??
