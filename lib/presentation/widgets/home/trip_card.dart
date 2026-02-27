@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../data/client/google_maps_api_client.dart';
 import '../../../data/client/google_routes_api_client.dart';
+import '../../../data/services/directions_service.dart';
 import '../../helpers/auth_navigation_helper.dart';
 
 class TripCard extends StatefulWidget {
@@ -29,44 +30,52 @@ class TripCard extends StatefulWidget {
 class _TripCardState extends State<TripCard> {
   String? _encodedPolyline;
   late final GoogleMapsApiClient _mapsClient;
-  late final GoogleRoutesApiClient _routesClient;
+  late final DirectionsService _directionsService;
 
   @override
   void initState() {
     super.initState();
     final apiKey = ApiEndpoints.googleMapsApiKey;
     _mapsClient = GoogleMapsApiClient(apiKey);
-    _routesClient = GoogleRoutesApiClient(apiKey);
+    _directionsService = DirectionsService(apiKey);
     _fetchRoute();
   }
 
-  /// Fetch the walking route between first and last location
+  /// Fetch a road-snapped route through all recorded trip locations
+  /// so the miniature shows the actual walking path, not straight lines.
   Future<void> _fetchRoute() async {
     if (widget.trip.locations == null || widget.trip.locations!.length < 2) {
       return;
     }
 
     try {
-      // Get route between first and last location
-      final firstLocation = widget.trip.locations!.first;
-      final lastLocation = widget.trip.locations!.last;
+      final allPoints = widget.trip.locations!
+          .map((loc) => LatLng(loc.latitude, loc.longitude))
+          .toList();
 
-      final waypoints = [
-        LatLng(firstLocation.latitude, firstLocation.longitude),
-        LatLng(lastLocation.latitude, lastLocation.longitude),
-      ];
+      final routePoints = await _directionsService.getDirections(allPoints);
+      final encoded = GoogleRoutesApiClient.encodePolyline(routePoints);
 
-      final result = await _routesClient.getWalkingRoute(waypoints);
-
-      if (result.isSuccess && mounted) {
-        // Encode the route points to use in Static Maps API
-        final encoded = GoogleRoutesApiClient.encodePolyline(result.points);
+      if (mounted) {
         setState(() {
           _encodedPolyline = encoded;
         });
       }
     } catch (e) {
-      debugPrint('Failed to fetch route for trip card: $e');
+      // Fallback: encode the raw points as straight-line segments
+      debugPrint(
+          'Failed to fetch route for trip card, using straight lines: $e');
+      try {
+        final allPoints = widget.trip.locations!
+            .map((loc) => LatLng(loc.latitude, loc.longitude))
+            .toList();
+        final encoded = GoogleRoutesApiClient.encodePolyline(allPoints);
+        if (mounted) {
+          setState(() {
+            _encodedPolyline = encoded;
+          });
+        }
+      } catch (_) {}
     }
   }
 

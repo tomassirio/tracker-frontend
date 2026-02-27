@@ -120,11 +120,8 @@ void main() {
           endPoint: endPoint,
         );
 
-        // Center should be midpoint
-        final centerLat = (37.7749 + 37.7849) / 2;
-        final centerLng = (-122.4194 + -122.4094) / 2;
-
-        expect(url, contains('center=$centerLat,$centerLng'));
+        // Should NOT contain center - lets API auto-fit to markers + path
+        expect(url, isNot(contains('center=')));
         expect(url, contains('markers=color:green|label:A|37.7749,-122.4194'));
         expect(url, contains('markers=color:red|label:B|37.7849,-122.4094'));
         expect(
