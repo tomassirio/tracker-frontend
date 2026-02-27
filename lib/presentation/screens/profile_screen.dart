@@ -683,7 +683,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (_isFollowingUser && !_isViewingOwnProfile) ...[
