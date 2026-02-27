@@ -29,11 +29,18 @@ class UserAvatar extends StatelessWidget {
       return CircleAvatar(
         radius: radius,
         backgroundColor: bgColor,
-        backgroundImage: NetworkImage(avatarUrl!),
-        onBackgroundImageError: (_, __) {
-          // Fallback is handled by the child
+        foregroundImage: NetworkImage(avatarUrl!),
+        onForegroundImageError: (_, __) {
+          // Fallback to showing initial letter
         },
-        child: _buildFallback(txtColor),
+        child: Text(
+          username.isNotEmpty ? username[0].toUpperCase() : '?',
+          style: TextStyle(
+            color: txtColor,
+            fontSize: radius * 0.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       );
     }
 
@@ -41,17 +48,13 @@ class UserAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: bgColor,
-      child: _buildFallback(txtColor),
-    );
-  }
-
-  Widget _buildFallback(Color txtColor) {
-    return Text(
-      username.isNotEmpty ? username[0].toUpperCase() : '?',
-      style: TextStyle(
-        color: txtColor,
-        fontSize: radius * 0.5,
-        fontWeight: FontWeight.w600,
+      child: Text(
+        username.isNotEmpty ? username[0].toUpperCase() : '?',
+        style: TextStyle(
+          color: txtColor,
+          fontSize: radius * 0.5,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
