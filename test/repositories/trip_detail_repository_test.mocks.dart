@@ -331,6 +331,31 @@ class MockTripService extends _i1.Mock implements _i8.TripService {
       ) as _i6.Future<String>);
 
   @override
+  _i6.Future<String> changeSettings(
+    String? tripId,
+    _i3.ChangeTripSettingsRequest? request,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #changeSettings,
+          [
+            tripId,
+            request,
+          ],
+        ),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #changeSettings,
+            [
+              tripId,
+              request,
+            ],
+          ),
+        )),
+      ) as _i6.Future<String>);
+
+  @override
   _i6.Future<String> deleteTrip(String? tripId) => (super.noSuchMethod(
         Invocation.method(
           #deleteTrip,
@@ -560,6 +585,15 @@ class MockAuthService extends _i1.Mock implements _i10.AuthService {
         ),
         returnValue: _i6.Future<String?>.value(),
       ) as _i6.Future<String?>);
+
+  @override
+  _i6.Future<bool> isAdmin() => (super.noSuchMethod(
+        Invocation.method(
+          #isAdmin,
+          [],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
   _i6.Future<bool> refreshAccessToken() => (super.noSuchMethod(

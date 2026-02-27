@@ -3,9 +3,10 @@ import 'package:tracker_frontend/data/models/domain/trip.dart';
 
 void main() {
   group('BackgroundUpdateManager Constants', () {
-    test('Trip minUpdateRefresh is 15 minutes (900 seconds)', () {
-      // The minimum is 15 minutes because WorkManager has this constraint
-      expect(Trip.minUpdateRefresh, 900);
+    test('Trip minUpdateRefresh is 1 minute (60 seconds)', () {
+      // Minimum is 1 minute since we use chained one-off tasks
+      // instead of periodic tasks (no 15 min WorkManager constraint)
+      expect(Trip.minUpdateRefresh, 60);
     });
 
     test('Trip defaultUpdateRefresh is 30 minutes (1800 seconds)', () {
@@ -19,7 +20,7 @@ void main() {
 
   group('Update Interval Clamping Logic', () {
     test('interval below minimum is clamped to minimum', () {
-      const intervalSeconds = 300; // 5 minutes
+      const intervalSeconds = 30; // 30 seconds - below minimum
       final clampedInterval = intervalSeconds < Trip.minUpdateRefresh
           ? Trip.minUpdateRefresh
           : intervalSeconds;

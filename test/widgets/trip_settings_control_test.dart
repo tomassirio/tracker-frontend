@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
 
 void main() {
@@ -13,6 +14,7 @@ void main() {
               isOwner: false,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -31,6 +33,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: true,
             ),
           ),
@@ -40,7 +43,8 @@ void main() {
       expect(find.byType(Switch), findsNothing);
     });
 
-    testWidgets('shows switch for owners on mobile', (WidgetTester tester) async {
+    testWidgets('does not show when trip is not in progress',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -49,6 +53,67 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.created,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Switch), findsNothing);
+    });
+
+    testWidgets('does not show when trip is finished',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.finished,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Switch), findsNothing);
+    });
+
+    testWidgets('does not show when trip is paused',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.paused,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Switch), findsNothing);
+    });
+
+    testWidgets('shows switch for owners on mobile when trip is in progress',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -71,6 +136,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -78,11 +144,12 @@ void main() {
       );
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Update Interval (minutes)'), findsOneWidget);
+      expect(find.text('Update Interval (min 15 min)'), findsOneWidget);
       expect(find.text('30'), findsOneWidget);
     });
 
-    testWidgets('does not show time interval field when automaticUpdates is false',
+    testWidgets(
+        'does not show time interval field when automaticUpdates is false',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -92,6 +159,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -99,10 +167,11 @@ void main() {
       );
 
       expect(find.byType(TextField), findsNothing);
-      expect(find.text('Update Interval (minutes)'), findsNothing);
+      expect(find.text('Update Interval (min 15 min)'), findsNothing);
     });
 
-    testWidgets('calls onSettingsChange when Save is tapped with automaticUpdates enabled',
+    testWidgets(
+        'calls onSettingsChange when Save is tapped with automaticUpdates enabled',
         (WidgetTester tester) async {
       bool? capturedAutomaticUpdates;
       int? capturedUpdateRefresh;
@@ -119,6 +188,7 @@ void main() {
                 capturedAutomaticUpdates = automaticUpdates;
                 capturedUpdateRefresh = updateRefresh;
               },
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -132,7 +202,8 @@ void main() {
       expect(capturedUpdateRefresh, 1800);
     });
 
-    testWidgets('calls onSettingsChange when Save is tapped with automaticUpdates disabled',
+    testWidgets(
+        'calls onSettingsChange when Save is tapped with automaticUpdates disabled',
         (WidgetTester tester) async {
       bool? capturedAutomaticUpdates;
       int? capturedUpdateRefresh;
@@ -148,6 +219,7 @@ void main() {
                 capturedAutomaticUpdates = automaticUpdates;
                 capturedUpdateRefresh = updateRefresh;
               },
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -161,7 +233,8 @@ void main() {
       expect(capturedUpdateRefresh, isNotNull);
     });
 
-    testWidgets('toggles switch value when tapped', (WidgetTester tester) async {
+    testWidgets('toggles switch value when tapped',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -170,6 +243,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -195,6 +269,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -207,8 +282,7 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pump();
 
-      expect(find.text('Please enter a valid interval (minimum 1 minute)'),
-          findsOneWidget);
+      expect(find.text('Minimum interval is 15 minutes'), findsOneWidget);
     });
 
     testWidgets('disables controls when isLoading is true', (
@@ -223,6 +297,7 @@ void main() {
               isOwner: true,
               isLoading: true,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -249,6 +324,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),
@@ -266,6 +342,7 @@ void main() {
               isOwner: true,
               isLoading: false,
               onSettingsChange: (_, __) {},
+              tripStatus: TripStatus.inProgress,
               isWeb: false,
             ),
           ),

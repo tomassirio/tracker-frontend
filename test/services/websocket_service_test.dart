@@ -91,6 +91,11 @@ void main() {
       expect(type, WebSocketEventType.commentReactionRemoved);
     });
 
+    test('parseEventType handles TRIP_SETTINGS_UPDATED', () {
+      final type = WebSocketEvent.parseEventType('TRIP_SETTINGS_UPDATED');
+      expect(type, WebSocketEventType.tripSettingsUpdated);
+    });
+
     test('parseEventType handles unknown types', () {
       final type = WebSocketEvent.parseEventType('UNKNOWN_TYPE');
       expect(type, WebSocketEventType.unknown);
@@ -238,6 +243,52 @@ void main() {
       final event = CommentReactionEvent.fromJson(json, isRemoval: true);
       expect(event.isRemoval, isTrue);
       expect(event.type, WebSocketEventType.commentReactionRemoved);
+    });
+  });
+
+  group('TripSettingsUpdatedEvent', () {
+    test('fromJson parses correctly with all fields', () {
+      final json = {
+        'type': 'TRIP_SETTINGS_UPDATED',
+        'tripId': 'test-trip',
+        'payload': {
+          'tripId': 'test-trip',
+          'automaticUpdates': true,
+          'updateRefresh': 1800,
+        },
+      };
+      final event = TripSettingsUpdatedEvent.fromJson(json);
+      expect(event.tripId, 'test-trip');
+      expect(event.automaticUpdates, true);
+      expect(event.updateRefresh, 1800);
+      expect(event.type, WebSocketEventType.tripSettingsUpdated);
+    });
+
+    test('fromJson handles partial payload', () {
+      final json = {
+        'type': 'TRIP_SETTINGS_UPDATED',
+        'tripId': 'test-trip',
+        'payload': {
+          'tripId': 'test-trip',
+          'automaticUpdates': false,
+        },
+      };
+      final event = TripSettingsUpdatedEvent.fromJson(json);
+      expect(event.tripId, 'test-trip');
+      expect(event.automaticUpdates, false);
+      expect(event.updateRefresh, isNull);
+    });
+
+    test('fromJson handles empty payload', () {
+      final json = {
+        'type': 'TRIP_SETTINGS_UPDATED',
+        'tripId': 'test-trip',
+        'payload': <String, dynamic>{},
+      };
+      final event = TripSettingsUpdatedEvent.fromJson(json);
+      expect(event.tripId, 'test-trip');
+      expect(event.automaticUpdates, isNull);
+      expect(event.updateRefresh, isNull);
     });
   });
 }

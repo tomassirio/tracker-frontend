@@ -31,6 +31,9 @@ enum WebSocketEventType {
   friendshipCreated,
   friendshipRemoved,
 
+  // Trip settings events
+  tripSettingsUpdated,
+
   // Legacy events for backwards compatibility
   commentReactionAdded,
   commentReactionRemoved,
@@ -68,6 +71,8 @@ class WebSocketEvent {
         return WebSocketEventType.tripVisibilityChanged;
       case 'TRIP_METADATA_UPDATED':
         return WebSocketEventType.tripMetadataUpdated;
+      case 'TRIP_SETTINGS_UPDATED':
+        return WebSocketEventType.tripSettingsUpdated;
 
       // Trip update events
       case 'TRIP_UPDATE_CREATED':
@@ -374,6 +379,37 @@ class TripVisibilityChangedEvent extends WebSocketEvent {
       tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
       newVisibility: payload['newVisibility'] as String? ?? 'PRIVATE',
       previousVisibility: payload['previousVisibility'] as String?,
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for trip settings changes (automatic updates, update refresh interval)
+class TripSettingsUpdatedEvent extends WebSocketEvent {
+  final bool? automaticUpdates;
+  final int? updateRefresh;
+
+  TripSettingsUpdatedEvent({
+    required String tripId,
+    this.automaticUpdates,
+    this.updateRefresh,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.tripSettingsUpdated,
+          tripId: tripId,
+        );
+
+  factory TripSettingsUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return TripSettingsUpdatedEvent(
+      tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
+      automaticUpdates: payload['automaticUpdates'] as bool?,
+      updateRefresh: payload['updateRefresh'] as int?,
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)

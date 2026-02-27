@@ -177,8 +177,8 @@ void main() {
         expect(Trip.defaultUpdateRefresh, 1800);
       });
 
-      test('minUpdateRefresh is 15 minutes (900 seconds)', () {
-        expect(Trip.minUpdateRefresh, 900);
+      test('minUpdateRefresh is 1 minute (60 seconds)', () {
+        expect(Trip.minUpdateRefresh, 60);
       });
 
       test(
@@ -224,7 +224,7 @@ void main() {
           name: 'Test Trip',
           visibility: Visibility.public,
           status: TripStatus.inProgress,
-          updateRefresh: 300, // 5 minutes - below minimum
+          updateRefresh: 30, // 30 seconds - below minimum
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -302,7 +302,8 @@ void main() {
         expect(trip.updateRefresh, 1800);
       });
 
-      test('fromJson parses automaticUpdates and updateRefresh from tripSettings',
+      test(
+          'fromJson parses automaticUpdates and updateRefresh from tripSettings',
           () {
         final json = {
           'id': 'trip123',
@@ -389,7 +390,8 @@ void main() {
     });
 
     group('ChangeTripSettingsRequest', () {
-      test('toJson converts ChangeTripSettingsRequest correctly with both fields',
+      test(
+          'toJson converts ChangeTripSettingsRequest correctly with both fields',
           () {
         final request = ChangeTripSettingsRequest(
           automaticUpdates: true,

@@ -1,15 +1,29 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
+/// Minimum allowed update interval in minutes (Android WorkManager limitation)
+const int _minIntervalMinutes = 15;
+
 /// Widget for controlling trip automatic update settings
-/// Only shown on mobile (not web) and only for trip owners
+/// Only shown on mobile (not web), only for trip owners, and only when trip is in progress
 class TripSettingsControl extends StatefulWidget {
   final bool automaticUpdates;
   final int? updateRefresh; // in seconds
   final bool isOwner;
   final bool isLoading;
   final Function(bool automaticUpdates, int? updateRefresh) onSettingsChange;
+
+  /// Current trip status - settings only shown when trip is in progress
+  final TripStatus tripStatus;
+
+  /// Trip ID for triggering test background updates
+  final String? tripId;
+
+  /// Callback to trigger a test background update immediately
+  final VoidCallback? onTestBackgroundUpdate;
 
   /// Whether running on web platform. Defaults to [kIsWeb].
   /// Can be overridden for testing purposes.
@@ -22,6 +36,9 @@ class TripSettingsControl extends StatefulWidget {
     required this.isOwner,
     required this.isLoading,
     required this.onSettingsChange,
+    required this.tripStatus,
+    this.tripId,
+    this.onTestBackgroundUpdate,
     this.isWeb,
   });
 
@@ -37,10 +54,10 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
   void initState() {
     super.initState();
     _automaticUpdates = widget.automaticUpdates;
-    // Convert seconds to minutes for display
-    final minutes = widget.updateRefresh != null 
-        ? (widget.updateRefresh! / 60).round() 
-        : 30;
+    // Convert seconds to minutes for display, enforce minimum
+    final minutes = widget.updateRefresh != null
+        ? (widget.updateRefresh! / 60).round().clamp(_minIntervalMinutes, 9999)
+        : _minIntervalMinutes;
     _intervalController = TextEditingController(
       text: minutes.toString(),
     );
@@ -53,10 +70,12 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       _automaticUpdates = widget.automaticUpdates;
     }
     if (oldWidget.updateRefresh != widget.updateRefresh) {
-      // Convert seconds to minutes for display
-      final minutes = widget.updateRefresh != null 
-          ? (widget.updateRefresh! / 60).round() 
-          : 30;
+      // Convert seconds to minutes for display, enforce minimum
+      final minutes = widget.updateRefresh != null
+          ? (widget.updateRefresh! / 60)
+              .round()
+              .clamp(_minIntervalMinutes, 9999)
+          : _minIntervalMinutes;
       _intervalController.text = minutes.toString();
     }
   }
@@ -67,15 +86,48 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     super.dispose();
   }
 
+  /// Validates the interval field when the user finishes editing.
+  /// If the value is empty or below the minimum, resets to the minimum
+  /// and shows a snackbar informing the user.
+  void _validateAndClampInterval() {
+    final text = _intervalController.text.trim();
+    final parsed = int.tryParse(text);
+    if (text.isEmpty || parsed == null || parsed < _minIntervalMinutes) {
+      setState(() {
+        _intervalController.text = _minIntervalMinutes.toString();
+        _intervalController.selection = TextSelection.collapsed(
+          offset: _intervalController.text.length,
+        );
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Minimum interval is $_minIntervalMinutes minutes'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   void _handleSave() {
+    _validateAndClampInterval();
     final minutes = int.tryParse(_intervalController.text);
-    if (_automaticUpdates && (minutes == null || minutes < 1)) {
+    if (_automaticUpdates &&
+        (minutes == null || minutes < _minIntervalMinutes)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid interval (minimum 1 minute)'),
+          content: Text('Minimum interval is $_minIntervalMinutes minutes'),
           backgroundColor: Colors.red,
         ),
       );
+      // Reset to minimum if invalid
+      if (minutes != null && minutes < _minIntervalMinutes) {
+        setState(() {
+          _intervalController.text = _minIntervalMinutes.toString();
+        });
+      }
       return;
     }
     // Convert minutes to seconds for the backend
@@ -94,6 +146,11 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
 
     // Only show for trip owners
     if (!widget.isOwner) {
+      return const SizedBox.shrink();
+    }
+
+    // Only show when trip is in progress
+    if (widget.tripStatus != TripStatus.inProgress) {
       return const SizedBox.shrink();
     }
 
@@ -149,9 +206,13 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                     controller: _intervalController,
                     enabled: !widget.isLoading,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     decoration: InputDecoration(
-                      labelText: 'Update Interval (minutes)',
-                      hintText: 'e.g., 30',
+                      labelText:
+                          'Update Interval (min $_minIntervalMinutes min)',
+                      hintText: 'e.g., 15',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -160,8 +221,14 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                         vertical: 8,
                       ),
                       isDense: true,
+                      suffixText: 'min',
                     ),
                     style: const TextStyle(fontSize: 13),
+                    onEditingComplete: _validateAndClampInterval,
+                    onTapOutside: (_) {
+                      _validateAndClampInterval();
+                      FocusScope.of(context).unfocus();
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -223,8 +290,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : const Text(
@@ -234,6 +300,41 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+            ),
+          ],
+          // Debug-only: Test background update button
+          if (kDebugMode && widget.onTestBackgroundUpdate != null) ...[
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed:
+                    widget.isLoading ? null : widget.onTestBackgroundUpdate,
+                icon: const Icon(Icons.bug_report, size: 16),
+                label: const Text(
+                  '🧪 Test Background Update Now',
+                  style: TextStyle(fontSize: 12),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.deepOrange,
+                  side: const BorderSide(color: Colors.deepOrange),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+              ),
+            ),
+            const Text(
+              'Fires a one-off WorkManager task immediately '
+              '(same code path as periodic, no 15 min wait)',
+              style: TextStyle(
+                fontSize: 10,
+                color: WandererTheme.textTertiary,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ],

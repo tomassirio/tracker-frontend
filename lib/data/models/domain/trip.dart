@@ -54,8 +54,10 @@ class Trip {
   /// Default update refresh interval in seconds (30 minutes)
   static const int defaultUpdateRefresh = 1800;
 
-  /// Minimum update refresh interval in seconds (15 minutes - WorkManager minimum)
-  static const int minUpdateRefresh = 900;
+  /// Minimum update refresh interval in seconds (1 minute)
+  /// No longer bound by WorkManager's 15-min periodic limit since
+  /// we use chained one-off tasks instead.
+  static const int minUpdateRefresh = 60;
 
   /// Gets the effective update refresh interval, clamped to minimum
   int get effectiveUpdateRefresh {
@@ -132,8 +134,7 @@ class Trip {
             'CREATED',
       ),
       updateRefresh: tripSettings?['updateRefresh'] as int?,
-      automaticUpdates:
-          (tripSettings?['automaticUpdates'] as bool?) ?? false,
+      automaticUpdates: (tripSettings?['automaticUpdates'] as bool?) ?? false,
       startDate: json['startDate'] != null
           ? DateTime.tryParse(json['startDate'] as String)
           : null,

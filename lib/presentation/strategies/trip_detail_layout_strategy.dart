@@ -60,6 +60,7 @@ class TripDetailLayoutData {
   final Future<void> Function(String? message) onSendTripUpdate;
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
+  final VoidCallback? onTestBackgroundUpdate;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -107,6 +108,7 @@ class TripDetailLayoutData {
     required this.onSendTripUpdate,
     this.onFollowTripOwner,
     this.onSendFriendRequestToTripOwner,
+    this.onTestBackgroundUpdate,
   });
 }
 
@@ -149,6 +151,7 @@ abstract class TripDetailLayoutStrategy {
       isAlreadyFriends: data.isAlreadyFriends,
       isPromoted: data.isPromoted,
       tripAchievements: data.tripAchievements,
+      onTestBackgroundUpdate: data.onTestBackgroundUpdate,
     );
   }
 

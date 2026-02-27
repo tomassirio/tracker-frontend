@@ -26,6 +26,7 @@ class TripInfoCard extends StatelessWidget {
   final bool isAlreadyFriends;
   final bool isPromoted;
   final List<UserAchievement> tripAchievements;
+  final VoidCallback? onTestBackgroundUpdate;
 
   const TripInfoCard({
     super.key,
@@ -44,6 +45,7 @@ class TripInfoCard extends StatelessWidget {
     this.isAlreadyFriends = false,
     this.isPromoted = false,
     this.tripAchievements = const [],
+    this.onTestBackgroundUpdate,
   });
 
   @override
@@ -464,6 +466,9 @@ class TripInfoCard extends StatelessWidget {
                     isOwner: trip.userId == currentUserId,
                     isLoading: isChangingSettings,
                     onSettingsChange: onSettingsChange!,
+                    tripStatus: trip.status,
+                    tripId: trip.id,
+                    onTestBackgroundUpdate: onTestBackgroundUpdate,
                   ),
                 ],
               ],

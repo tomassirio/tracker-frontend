@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/core/services/navigation_service.dart';
+import 'package:tracker_frontend/core/services/notification_service.dart';
 import 'package:tracker_frontend/presentation/screens/initial_screen.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 
@@ -14,9 +15,12 @@ final RouteObserver<ModalRoute<void>> routeObserver =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize background update manager for Android only
+  // Initialize Android-only services
   if (!kIsWeb && Platform.isAndroid) {
     await BackgroundUpdateManager().initialize();
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    await notificationService.requestPermission();
   }
 
   runApp(const MyApp());

@@ -35,9 +35,19 @@ class LocationUpdateResult {
   /// [serverError] and [networkError]).
   final String? errorDetail;
 
+  /// Location and battery data captured during the update attempt.
+  /// Available on both success and some failures (e.g. network errors
+  /// where the location was obtained but the API call failed).
+  final double? latitude;
+  final double? longitude;
+  final int? batteryLevel;
+
   /// Successful update.
-  const LocationUpdateResult.success()
-      : isSuccess = true,
+  const LocationUpdateResult.success({
+    this.latitude,
+    this.longitude,
+    this.batteryLevel,
+  })  : isSuccess = true,
         failureReason = null,
         errorDetail = null;
 
@@ -45,14 +55,20 @@ class LocationUpdateResult {
   const LocationUpdateResult.failure(LocationFailureReason reason)
       : isSuccess = false,
         failureReason = reason,
-        errorDetail = null;
+        errorDetail = null,
+        latitude = null,
+        longitude = null,
+        batteryLevel = null;
 
   /// Failed update with a reason and extra detail text.
   const LocationUpdateResult.failureWithDetail(
     LocationFailureReason reason,
     this.errorDetail,
   )   : isSuccess = false,
-        failureReason = reason;
+        failureReason = reason,
+        latitude = null,
+        longitude = null,
+        batteryLevel = null;
 
   /// Returns a user-friendly message for the failure reason.
   String get userMessage {

@@ -155,6 +155,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       case WebSocketEventType.commentReactionRemoved:
         _handleCommentReaction(event as CommentReactionEvent);
         break;
+      case WebSocketEventType.tripSettingsUpdated:
+        _handleTripSettingsUpdated(event as TripSettingsUpdatedEvent);
+        break;
       default:
         break;
     }
@@ -187,6 +190,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       // Update the map to show the new location
       _updateMapData();
     }
+  }
+
+  void _handleTripSettingsUpdated(TripSettingsUpdatedEvent event) {
+    // Only update UI state from the server confirmation.
+    // Background update management is already handled optimistically
+    // in _handleSettingsChange to avoid duplicate stop/start cycles.
+    setState(() {
+      _trip = _trip.copyWith(
+        automaticUpdates: event.automaticUpdates ?? _trip.automaticUpdates,
+        updateRefresh: event.updateRefresh ?? _trip.updateRefresh,
+      );
+    });
   }
 
   void _handleCommentAdded(CommentAddedEvent event) {
@@ -608,6 +623,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Start automatic updates when trip starts/resumes AND automatic updates is enabled
           await backgroundManager.startAutoUpdates(
             _trip.id,
+            _trip.name,
             _trip.effectiveUpdateRefresh,
           );
         } else {
@@ -676,7 +692,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         final backgroundManager = BackgroundUpdateManager();
         if (automaticUpdates && updateRefresh != null) {
           // Start/restart automatic updates with new interval
-          await backgroundManager.startAutoUpdates(_trip.id, updateRefresh);
+          await backgroundManager.startAutoUpdates(
+              _trip.id, _trip.name, updateRefresh);
         } else {
           // Stop automatic updates when disabled
           await backgroundManager.stopAutoUpdates(_trip.id);
@@ -690,9 +707,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     } catch (e) {
       setState(() => _isChangingSettings = false);
       if (mounted) {
-        UiHelpers.showErrorMessage(
-            context, 'Error updating settings: $e');
+        UiHelpers.showErrorMessage(context, 'Error updating settings: $e');
       }
+    }
+  }
+
+  /// Trigger a one-off background update for testing (bypasses 15-min minimum)
+  Future<void> _triggerTestBackgroundUpdate() async {
+    final backgroundManager = BackgroundUpdateManager();
+    await backgroundManager.triggerTestUpdate(_trip.id, tripName: _trip.name);
+    if (mounted) {
+      UiHelpers.showSuccessMessage(
+        context,
+        '🧪 Test background update triggered — check notifications',
+      );
     }
   }
 
@@ -764,6 +792,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             final backgroundManager = BackgroundUpdateManager();
             await backgroundManager.startAutoUpdates(
               _trip.id,
+              _trip.name,
               _trip.effectiveUpdateRefresh,
             );
           }
@@ -1193,6 +1222,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _trip.userId != _userId ? _handleFollowTripOwner : null,
       onSendFriendRequestToTripOwner:
           _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
+      onTestBackgroundUpdate:
+          _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
     );
   }
 
