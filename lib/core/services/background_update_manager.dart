@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
+import 'package:geolocator_android/geolocator_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:tracker_frontend/core/services/notification_service.dart';
@@ -22,6 +23,9 @@ const String _updateIntervalKey = 'update_interval_seconds';
 /// Key to signal the background isolate that chained updates are active
 const String _chainedUpdatesActiveKey = 'chained_updates_active';
 
+/// Tag used for all chained update tasks — allows cancellation by tag
+const String _chainedTaskTag = 'trip_auto_update_chain';
+
 /// Schedules the next chained one-off task with the user's desired delay.
 /// Called from the background isolate after each successful execution.
 Future<void> _scheduleNextChainedTask(SharedPreferences prefs) async {
@@ -42,6 +46,7 @@ Future<void> _scheduleNextChainedTask(SharedPreferences prefs) async {
   await Workmanager().registerOneOffTask(
     taskId,
     tripUpdateTaskName,
+    tag: _chainedTaskTag,
     initialDelay: Duration(seconds: intervalSeconds),
     constraints: Constraints(
       networkType: NetworkType.connected,
@@ -50,7 +55,7 @@ Future<void> _scheduleNextChainedTask(SharedPreferences prefs) async {
       requiresDeviceIdle: false,
       requiresStorageNotLow: false,
     ),
-    existingWorkPolicy: ExistingWorkPolicy.append,
+    existingWorkPolicy: ExistingWorkPolicy.keep,
     backoffPolicy: BackoffPolicy.linear,
     backoffPolicyDelay: const Duration(minutes: 1),
   );
@@ -66,6 +71,15 @@ void callbackDispatcher() {
         'BG_UPDATE[${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}:${startTime.second.toString().padLeft(2, '0')}]';
 
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Background isolates don't auto-register platform plugins.
+    // Explicitly register GeolocatorAndroid so the geolocator package
+    // routes through the Android LocationManager (via forceLocationManager)
+    // instead of the Fused Location Provider which hangs in background.
+    if (!kIsWeb && Platform.isAndroid) {
+      GeolocatorAndroid.registerWith();
+    }
+
     debugPrint('$tag: ⚡ WorkManager task fired. taskName=$taskName');
 
     if (taskName == tripUpdateTaskName) {
@@ -247,6 +261,7 @@ class BackgroundUpdateManager {
       await Workmanager().registerOneOffTask(
         taskId,
         tripUpdateTaskName,
+        tag: _chainedTaskTag,
         initialDelay: Duration(seconds: intervalSeconds),
         constraints: Constraints(
           networkType: NetworkType.connected,
@@ -277,12 +292,15 @@ class BackgroundUpdateManager {
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Mark chained updates as inactive FIRST so any in-flight task
+      // that completes won't schedule a successor.
+      await prefs.setBool(_chainedUpdatesActiveKey, false);
       await prefs.remove(_activeTripIdKey);
       await prefs.remove(_activeTripNameKey);
       await prefs.remove(_updateIntervalKey);
-      await prefs.setBool(_chainedUpdatesActiveKey, false);
 
-      // Cancel all tasks (chained one-off tasks have dynamic names)
+      // Cancel by tag first (more targeted), then cancel all as fallback
+      await Workmanager().cancelByTag(_chainedTaskTag);
       await Workmanager().cancelAll();
       debugPrint(
           'BackgroundUpdateManager: Stopped auto updates for trip $tripId');
@@ -342,11 +360,12 @@ class BackgroundUpdateManager {
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_chainedUpdatesActiveKey, false);
       await prefs.remove(_activeTripIdKey);
       await prefs.remove(_activeTripNameKey);
       await prefs.remove(_updateIntervalKey);
-      await prefs.setBool(_chainedUpdatesActiveKey, false);
 
+      await Workmanager().cancelByTag(_chainedTaskTag);
       await Workmanager().cancelAll();
       debugPrint('BackgroundUpdateManager: Stopped all auto updates');
     } catch (e) {

@@ -39,6 +39,8 @@ dependencies:
   google_maps_flutter: ^2.5.0
   google_maps_flutter_web: ^0.5.10
   geolocator: 12.0.0
+  geolocator_android: 4.6.1
+  geolocator_platform_interface: ^4.2.6
   intl: ^0.20.2
   battery_plus: ^6.0.3
   workmanager: ^0.6.0

@@ -1063,6 +1063,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   markers: _markers,
                   polylines: _polylines,
                   onMapCreated: (controller) => _mapController = controller,
+                  isOwner: _userId != null && _trip.userId == _userId,
                 ),
               ),
 

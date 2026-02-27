@@ -150,12 +150,27 @@ class TripUpdateService {
         );
       }
 
-      // Try getCurrentPosition first with a reasonable timeout.
+      // On Android, use AndroidSettings with forceLocationManager: true.
+      // The Fused Location Provider (Google Play Services) does NOT deliver
+      // results inside WorkManager background isolates — the request hangs
+      // until the app returns to the foreground. Using the raw Android
+      // LocationManager API fixes this.
       try {
-        final position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.medium,
-          timeLimit: const Duration(seconds: 15),
-        );
+        Position position;
+        if (!kIsWeb && Platform.isAndroid) {
+          position = await GeolocatorPlatform.instance.getCurrentPosition(
+            locationSettings: AndroidSettings(
+              accuracy: LocationAccuracy.medium,
+              forceLocationManager: true,
+              timeLimit: const Duration(seconds: 20),
+            ),
+          );
+        } else {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 15),
+          );
+        }
         return _LocationFetchResult.ok(position);
       } on TimeoutException {
         debugPrint(

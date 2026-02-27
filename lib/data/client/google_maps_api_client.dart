@@ -23,13 +23,13 @@ class GoogleMapsApiClient {
   /// Generate a static map image URL
   ///
   /// Parameters:
-  /// - [center]: Center point of the map
+  /// - [center]: Center point of the map (if null, auto-fits to markers/path)
   /// - [size]: Image size in format "widthxheight" (defaults to 16:9 aspect ratio)
   /// - [markers]: List of markers to display
   /// - [path]: Optional path/polyline to display
   /// - [zoom]: Optional zoom level (if null, auto-zooms to fit content)
   String generateStaticMapUrl({
-    required LatLng center,
+    LatLng? center,
     String? size,
     List<MapMarker>? markers,
     MapPath? path,
@@ -38,8 +38,10 @@ class GoogleMapsApiClient {
     final baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
     final params = <String>[];
 
-    // Center
-    params.add('center=${center.latitude},${center.longitude}');
+    // Center (omit to let API auto-fit to markers/path)
+    if (center != null) {
+      params.add('center=${center.latitude},${center.longitude}');
+    }
 
     // Size (default to 16:9 card aspect ratio)
     params.add('size=${size ?? defaultCardSize}');
@@ -80,12 +82,7 @@ class GoogleMapsApiClient {
     String pathColor = '0x0088ffff',
     int pathWeight = 4,
   }) {
-    // Calculate center point
-    final centerLat = (startPoint.latitude + endPoint.latitude) / 2;
-    final centerLng = (startPoint.longitude + endPoint.longitude) / 2;
-    final center = LatLng(centerLat, centerLng);
-
-    // Create markers
+    // Create markers for start and end points only
     final markers = [
       MapMarker(position: startPoint, color: startColor, label: startLabel),
       MapMarker(position: endPoint, color: endColor, label: endLabel),
@@ -108,8 +105,8 @@ class GoogleMapsApiClient {
       );
     }
 
+    // Omit center so the API auto-fits the viewport to markers + path
     return generateStaticMapUrl(
-      center: center,
       size: size,
       markers: markers,
       path: path,

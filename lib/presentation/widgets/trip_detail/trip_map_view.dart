@@ -9,6 +9,11 @@ class TripMapView extends StatefulWidget {
   final Set<Polyline> polylines;
   final Function(GoogleMapController) onMapCreated;
 
+  /// Whether the current user is the owner of this trip.
+  /// When false, the user's current location (blue dot) is hidden
+  /// to protect the viewer's privacy.
+  final bool isOwner;
+
   const TripMapView({
     super.key,
     required this.initialLocation,
@@ -16,6 +21,7 @@ class TripMapView extends StatefulWidget {
     required this.markers,
     required this.polylines,
     required this.onMapCreated,
+    this.isOwner = false,
   });
 
   @override
@@ -113,8 +119,8 @@ class _TripMapViewState extends State<TripMapView> {
               debugPrint('Map creation error: $e');
             }
           },
-          myLocationButtonEnabled: true,
-          myLocationEnabled: true,
+          myLocationButtonEnabled: widget.isOwner,
+          myLocationEnabled: widget.isOwner,
           mapToolbarEnabled: false,
           zoomControlsEnabled: true,
         ),
