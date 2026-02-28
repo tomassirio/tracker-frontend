@@ -17,6 +17,7 @@ void main() {
                       context,
                       'Success message',
                       NotificationType.success,
+                      duration: const Duration(milliseconds: 100),
                     );
                   },
                   child: const Text('Show Success'),
@@ -29,14 +30,17 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Success'));
-      await tester.pump(); // Start the animation
-      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
+      await tester.pump(); // Trigger overlay insertion
+      await tester.pump(const Duration(milliseconds: 50)); // Advance animation
 
       // Verify the notification appears with correct text
       expect(find.text('Success message'), findsOneWidget);
 
       // Verify the success icon is shown
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      
+      // Clean up - wait for auto-dismiss
+      await tester.pumpAndSettle();
     });
 
     testWidgets('displays error notification with correct icon',
@@ -52,6 +56,7 @@ void main() {
                       context,
                       'Error message',
                       NotificationType.error,
+                      duration: const Duration(milliseconds: 100),
                     );
                   },
                   child: const Text('Show Error'),
@@ -64,14 +69,17 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Error'));
-      await tester.pump(); // Start the animation
-      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
+      await tester.pump(); // Trigger overlay insertion
+      await tester.pump(const Duration(milliseconds: 50)); // Advance animation
 
       // Verify the notification appears with correct text
       expect(find.text('Error message'), findsOneWidget);
 
       // Verify the error icon is shown
       expect(find.byIcon(Icons.error), findsOneWidget);
+      
+      // Clean up - wait for auto-dismiss
+      await tester.pumpAndSettle();
     });
 
     testWidgets('displays info notification with correct icon',
@@ -87,6 +95,7 @@ void main() {
                       context,
                       'Info message',
                       NotificationType.info,
+                      duration: const Duration(milliseconds: 100),
                     );
                   },
                   child: const Text('Show Info'),
@@ -99,14 +108,17 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Info'));
-      await tester.pump(); // Start the animation
-      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
+      await tester.pump(); // Trigger overlay insertion
+      await tester.pump(const Duration(milliseconds: 50)); // Advance animation
 
       // Verify the notification appears with correct text
       expect(find.text('Info message'), findsOneWidget);
 
       // Verify the info icon is shown
       expect(find.byIcon(Icons.info), findsOneWidget);
+      
+      // Clean up - wait for auto-dismiss
+      await tester.pumpAndSettle();
     });
 
     testWidgets('displays warning notification with correct icon',
@@ -122,6 +134,7 @@ void main() {
                       context,
                       'Warning message',
                       NotificationType.warning,
+                      duration: const Duration(milliseconds: 100),
                     );
                   },
                   child: const Text('Show Warning'),
@@ -134,14 +147,17 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Warning'));
-      await tester.pump(); // Start the animation
-      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
+      await tester.pump(); // Trigger overlay insertion
+      await tester.pump(const Duration(milliseconds: 50)); // Advance animation
 
       // Verify the notification appears with correct text
       expect(find.text('Warning message'), findsOneWidget);
 
       // Verify the warning icon is shown
       expect(find.byIcon(Icons.warning), findsOneWidget);
+      
+      // Clean up - wait for auto-dismiss
+      await tester.pumpAndSettle();
     });
 
     testWidgets('notification auto-dismisses after duration',
@@ -157,7 +173,7 @@ void main() {
                       context,
                       'Auto dismiss',
                       NotificationType.info,
-                      duration: const Duration(milliseconds: 500),
+                      duration: const Duration(milliseconds: 200),
                     );
                   },
                   child: const Text('Show'),
@@ -171,15 +187,13 @@ void main() {
       // Show notification
       await tester.tap(find.text('Show'));
       await tester.pump(); // Trigger overlay insertion
-      await tester.pump(const Duration(milliseconds: 350)); // Complete entry animation
+      await tester.pump(const Duration(milliseconds: 50)); // Advance to show notification
 
       // Verify notification is visible
       expect(find.text('Auto dismiss'), findsOneWidget);
 
-      // Wait for the full auto-dismiss duration plus exit animation
-      await tester.pump(const Duration(milliseconds: 500)); // Auto-dismiss duration
-      await tester.pump(const Duration(milliseconds: 300)); // Exit animation
-      await tester.pump(); // Final frame
+      // Wait for auto-dismiss to complete
+      await tester.pumpAndSettle();
 
       // Verify notification is dismissed
       expect(find.text('Auto dismiss'), findsNothing);
