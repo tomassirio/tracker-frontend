@@ -139,29 +139,33 @@ class CommentsSection extends StatelessWidget {
 
   /// Expanded state - full comments section
   Widget _buildExpandedSection(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-        boxShadow: WandererTheme.floatingShadow,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: WandererTheme.glassBlurSigma,
-            sigmaY: WandererTheme.glassBlurSigma,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: WandererTheme.glassBackground,
-              borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-              border: Border.all(
-                color: WandererTheme.glassBorderColor,
-                width: 1,
-              ),
+    return Listener(
+      onPointerDown: (_) {}, // Absorb pointer events to prevent propagation to map
+      onPointerMove: (_) {},
+      onPointerUp: (_) {},
+      child: Container(
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+          boxShadow: WandererTheme.floatingShadow,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: WandererTheme.glassBlurSigma,
+              sigmaY: WandererTheme.glassBlurSigma,
             ),
-            child: Column(
+            child: Container(
+              decoration: BoxDecoration(
+                color: WandererTheme.glassBackground,
+                borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+                border: Border.all(
+                  color: WandererTheme.glassBorderColor,
+                  width: 1,
+                ),
+              ),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Comments section header with glass styling
@@ -261,37 +265,30 @@ class CommentsSection extends StatelessWidget {
                         )
                       : comments.isEmpty
                           ? _buildEmptyCommentsState()
-                          : NotificationListener<ScrollNotification>(
-                              onNotification: (notification) {
-                                // Prevent scroll events from propagating to parent widgets
-                                // This fixes scroll propagation to the map on mobile web
-                                return true;
-                              },
-                              child: ListView.builder(
-                                controller: scrollController,
-                                shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                itemCount: comments.length,
-                                itemBuilder: (context, index) {
-                                  final comment = comments[index];
-                                  final isExpanded =
-                                      expandedComments[comment.id] ?? false;
-                                  final commentReplies =
-                                      replies[comment.id] ?? [];
+                          : ListView.builder(
+                              controller: scrollController,
+                              shrinkWrap: true,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = comments[index];
+                                final isExpanded =
+                                    expandedComments[comment.id] ?? false;
+                                final commentReplies =
+                                    replies[comment.id] ?? [];
 
-                                  return CommentCard(
-                                    comment: comment,
-                                    tripUserId: tripUserId,
-                                    isExpanded: isExpanded,
-                                    replies: commentReplies,
-                                    onReact: () => onReact(comment.id),
-                                    onReply: () => onReply(comment.id),
-                                    onToggleReplies: () =>
-                                        onToggleReplies(comment.id, isExpanded),
-                                    isLoggedIn: isLoggedIn,
-                                  );
-                                },
-                              ),
+                                return CommentCard(
+                                  comment: comment,
+                                  tripUserId: tripUserId,
+                                  isExpanded: isExpanded,
+                                  replies: commentReplies,
+                                  onReact: () => onReact(comment.id),
+                                  onReply: () => onReply(comment.id),
+                                  onToggleReplies: () =>
+                                      onToggleReplies(comment.id, isExpanded),
+                                  isLoggedIn: isLoggedIn,
+                                );
+                              },
                             ),
                 ),
                 // Comment input (disabled if not logged in)
@@ -352,6 +349,7 @@ class CommentsSection extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 

@@ -110,30 +110,34 @@ class TimelinePanel extends StatelessWidget {
 
   /// Expanded state - floating detached card
   Widget _buildExpandedPanel() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      width: 320,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-        boxShadow: WandererTheme.floatingShadow,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: WandererTheme.glassBlurSigma,
-            sigmaY: WandererTheme.glassBlurSigma,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: WandererTheme.glassBackground,
-              borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-              border: Border.all(
-                color: WandererTheme.glassBorderColor,
-                width: 1,
-              ),
+    return Listener(
+      onPointerDown: (_) {}, // Absorb pointer events to prevent propagation to map
+      onPointerMove: (_) {},
+      onPointerUp: (_) {},
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        width: 320,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+          boxShadow: WandererTheme.floatingShadow,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: WandererTheme.glassBlurSigma,
+              sigmaY: WandererTheme.glassBlurSigma,
             ),
-            child: Column(
+            child: Container(
+              decoration: BoxDecoration(
+                color: WandererTheme.glassBackground,
+                borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+                border: Border.all(
+                  color: WandererTheme.glassBorderColor,
+                  width: 1,
+                ),
+              ),
+              child: Column(
               children: [
                 // Header with glass styling
                 Container(
@@ -214,6 +218,7 @@ class TimelinePanel extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
