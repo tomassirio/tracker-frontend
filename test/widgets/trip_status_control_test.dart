@@ -194,7 +194,7 @@ void main() {
       expect(changedStatus, TripStatus.paused);
     });
 
-    testWidgets('calls onStatusChange when Finish is tapped', (
+    testWidgets('shows confirmation dialog when Finish is tapped', (
       WidgetTester tester,
     ) async {
       // Skip on web
@@ -217,10 +217,61 @@ void main() {
         ),
       );
 
+      // Tap the Finish button
       await tester.tap(find.text('Finish'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
+      // Verify confirmation dialog is shown
+      expect(find.text('Finish Trip'), findsOneWidget);
+      expect(
+        find.text(
+          'Are you sure you want to finish this trip? This will mark the trip as completed.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Cancel'), findsOneWidget);
+
+      // Tap the confirm button in the dialog using its key
+      await tester.tap(find.byKey(const Key('confirm_finish_button')));
+      await tester.pumpAndSettle();
+
+      // Verify onStatusChange was called
       expect(changedStatus, TripStatus.finished);
+    });
+
+    testWidgets('does not change status when confirmation is cancelled', (
+      WidgetTester tester,
+    ) async {
+      // Skip on web
+      if (kIsWeb) return;
+
+      TripStatus? changedStatus;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripStatusControl(
+              currentStatus: TripStatus.inProgress,
+              isOwner: true,
+              isLoading: false,
+              onStatusChange: (status) {
+                changedStatus = status;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Tap the Finish button
+      await tester.tap(find.text('Finish'));
+      await tester.pumpAndSettle();
+
+      // Tap the Cancel button in the dialog
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Verify onStatusChange was NOT called
+      expect(changedStatus, isNull);
     });
 
     testWidgets('disables buttons when isLoading is true', (
