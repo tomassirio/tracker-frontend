@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_input.dart';
+import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 enum CommentSortOption { latest, oldest, mostReplies, mostReactions }
@@ -281,6 +283,7 @@ class CommentsSection extends StatelessWidget {
                                   onReply: () => onReply(comment.id),
                                   onToggleReplies: () =>
                                       onToggleReplies(comment.id, isExpanded),
+                                  isLoggedIn: isLoggedIn,
                                 );
                               },
                             ),
@@ -307,11 +310,33 @@ class CommentsSection extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Text(
-                        'Please log in to comment',
-                        style: TextStyle(
-                          color: WandererTheme.textSecondary,
-                          fontStyle: FontStyle.italic,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const AuthScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: WandererTheme.primaryOrange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Please log in to comment',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),

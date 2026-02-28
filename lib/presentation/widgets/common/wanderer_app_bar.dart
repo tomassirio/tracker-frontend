@@ -116,12 +116,13 @@ class _WandererAppBarState extends State<WandererAppBar> {
             tooltip: 'Search',
             onPressed: _toggleSearch,
           ),
-        // Notifications icon
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          tooltip: 'Notifications',
-          onPressed: _showNotImplementedMessage,
-        ),
+        // Notifications icon (only for logged in users)
+        if (widget.isLoggedIn)
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            tooltip: 'Notifications',
+            onPressed: _showNotImplementedMessage,
+          ),
         if (!widget.isLoggedIn && widget.onLoginPressed != null)
           Padding(
             padding: const EdgeInsets.only(right: 16),
