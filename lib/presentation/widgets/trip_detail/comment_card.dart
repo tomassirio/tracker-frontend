@@ -24,7 +24,7 @@ class CommentCard extends StatelessWidget {
     required this.onReact,
     required this.onReply,
     required this.onToggleReplies,
-    this.isLoggedIn = true,
+    required this.isLoggedIn,
   });
 
   void _navigateToProfile(BuildContext context) {
