@@ -1225,11 +1225,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner:
-          _trip.userId != _userId ? _handleFollowTripOwner : null,
+          _isLoggedIn && _trip.userId != _userId ? _handleFollowTripOwner : null,
       onSendFriendRequestToTripOwner:
-          _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
+          _isLoggedIn && _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
       onTestBackgroundUpdate:
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
+      onLogin: _navigateToAuth,
     );
   }
 

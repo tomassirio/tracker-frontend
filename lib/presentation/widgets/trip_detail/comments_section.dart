@@ -29,6 +29,7 @@ class CommentsSection extends StatelessWidget {
   final Function(String, bool) onToggleReplies;
   final VoidCallback onSendComment;
   final VoidCallback onCancelReply;
+  final VoidCallback? onLogin;
 
   const CommentsSection({
     super.key,
@@ -51,6 +52,7 @@ class CommentsSection extends StatelessWidget {
     required this.onToggleReplies,
     required this.onSendComment,
     required this.onCancelReply,
+    this.onLogin,
   });
 
   @override
@@ -277,6 +279,7 @@ class CommentsSection extends StatelessWidget {
                                   tripUserId: tripUserId,
                                   isExpanded: isExpanded,
                                   replies: commentReplies,
+                                  isLoggedIn: isLoggedIn,
                                   onReact: () => onReact(comment.id),
                                   onReply: () => onReply(comment.id),
                                   onToggleReplies: () =>
@@ -307,11 +310,12 @@ class CommentsSection extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Text(
-                        'Please log in to comment',
-                        style: TextStyle(
-                          color: WandererTheme.textSecondary,
-                          fontStyle: FontStyle.italic,
+                      child: TextButton.icon(
+                        onPressed: onLogin,
+                        icon: const Icon(Icons.login),
+                        label: const Text('Please log in to comment'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: WandererTheme.textSecondary,
                         ),
                       ),
                     ),

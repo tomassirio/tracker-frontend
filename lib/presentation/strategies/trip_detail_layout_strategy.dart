@@ -61,6 +61,7 @@ class TripDetailLayoutData {
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
   final VoidCallback? onTestBackgroundUpdate;
+  final VoidCallback? onLogin;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -109,6 +110,7 @@ class TripDetailLayoutData {
     this.onFollowTripOwner,
     this.onSendFriendRequestToTripOwner,
     this.onTestBackgroundUpdate,
+    this.onLogin,
   });
 }
 
@@ -178,6 +180,7 @@ abstract class TripDetailLayoutStrategy {
       onToggleReplies: data.onToggleReplies,
       onSendComment: data.onSendComment,
       onCancelReply: data.onCancelReply,
+      onLogin: data.onLogin,
     );
   }
 
