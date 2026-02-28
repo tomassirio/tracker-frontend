@@ -26,6 +26,7 @@ void main() {
               tripUserId: 'trip-owner-id',
               isExpanded: false,
               replies: [],
+              isLoggedIn: true,
               onReact: () {},
               onReply: () {},
               onToggleReplies: () {},
@@ -59,6 +60,7 @@ void main() {
               tripUserId: 'trip-owner-id',
               isExpanded: false,
               replies: [],
+              isLoggedIn: true,
               onReact: () {},
               onReply: () {},
               onToggleReplies: () {},
@@ -104,6 +106,7 @@ void main() {
               tripUserId: 'trip-owner-id',
               isExpanded: false,
               replies: [],
+              isLoggedIn: true,
               onReact: () {},
               onReply: () {},
               onToggleReplies: () {},
@@ -136,6 +139,7 @@ void main() {
               tripUserId: 'trip-owner-id',
               isExpanded: false,
               replies: [],
+              isLoggedIn: true,
               onReact: () {},
               onReply: () {},
               onToggleReplies: () {},
@@ -145,6 +149,74 @@ void main() {
       );
 
       expect(find.text('AUTHOR'), findsNothing);
+    });
+
+    testWidgets('shows React and Reply buttons when logged in', (
+      WidgetTester tester,
+    ) async {
+      final comment = Comment(
+        id: 'comment-1',
+        tripId: 'trip-1',
+        userId: 'user-123',
+        username: 'testuser',
+        message: 'Test comment message',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CommentCard(
+              comment: comment,
+              tripUserId: 'trip-owner-id',
+              isExpanded: false,
+              replies: [],
+              isLoggedIn: true,
+              onReact: () {},
+              onReply: () {},
+              onToggleReplies: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('React'), findsOneWidget);
+      expect(find.text('Reply'), findsOneWidget);
+    });
+
+    testWidgets('hides React and Reply buttons when not logged in', (
+      WidgetTester tester,
+    ) async {
+      final comment = Comment(
+        id: 'comment-1',
+        tripId: 'trip-1',
+        userId: 'user-123',
+        username: 'testuser',
+        message: 'Test comment message',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CommentCard(
+              comment: comment,
+              tripUserId: 'trip-owner-id',
+              isExpanded: false,
+              replies: [],
+              isLoggedIn: false,
+              onReact: () {},
+              onReply: () {},
+              onToggleReplies: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('React'), findsNothing);
+      expect(find.text('Reply'), findsNothing);
     });
   });
 }
