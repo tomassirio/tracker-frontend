@@ -151,7 +151,8 @@ void main() {
       test('removes reaction successfully', () async {
         mockCommentCommandClient.mockCommentId = 'comment-1';
 
-        final result = await commentService.removeReaction('comment-1');
+        final request = AddReactionRequest(reactionType: ReactionType.heart);
+        final result = await commentService.removeReaction('comment-1', request);
 
         expect(result, 'comment-1');
         expect(mockCommentCommandClient.removeReactionCalled, true);
@@ -161,8 +162,9 @@ void main() {
       test('passes through errors when removing reaction', () async {
         mockCommentCommandClient.shouldThrowError = true;
 
+        final request = AddReactionRequest(reactionType: ReactionType.smiley);
         expect(
-          () => commentService.removeReaction('comment-1'),
+          () => commentService.removeReaction('comment-1', request),
           throwsException,
         );
       });
@@ -235,7 +237,8 @@ class MockCommentCommandClient extends CommentCommandClient {
   }
 
   @override
-  Future<String> removeReaction(String commentId) async {
+  Future<String> removeReaction(
+      String commentId, AddReactionRequest request) async {
     removeReactionCalled = true;
     lastCommentIdForRemove = commentId;
     if (shouldThrowError) throw Exception('Failed to remove reaction');
