@@ -287,16 +287,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleCommentReaction(CommentReactionEvent event) {
-    debugPrint(
-        'WebSocket: Received reaction event - commentId: ${event.commentId}, type: ${event.reactionType}, userId: ${event.userId}, isRemoval: ${event.isRemoval}');
-
     // Update local state directly from WebSocket event instead of making a GET request
     setState(() {
       // Find and update the comment in top-level comments
       final commentIndex = _comments.indexWhere((c) => c.id == event.commentId);
       if (commentIndex != -1) {
-        debugPrint(
-            'WebSocket: Found comment at index $commentIndex in top-level comments');
         final comment = _comments[commentIndex];
         final updatedReactions = Map<String, int>.from(comment.reactions ?? {});
         final updatedIndividualReactions =
@@ -348,8 +343,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           createdAt: comment.createdAt,
           updatedAt: comment.updatedAt,
         );
-        debugPrint(
-            'WebSocket: Updated comment - reactions: $updatedReactions, individualReactions count: ${updatedIndividualReactions.length}');
         return;
       }
 
@@ -358,8 +351,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         final replies = _replies[parentId]!;
         final replyIndex = replies.indexWhere((c) => c.id == event.commentId);
         if (replyIndex != -1) {
-          debugPrint(
-              'WebSocket: Found comment at index $replyIndex in replies of $parentId');
           final reply = replies[replyIndex];
           final updatedReactions = Map<String, int>.from(reply.reactions ?? {});
           final updatedIndividualReactions =
@@ -406,13 +397,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             createdAt: reply.createdAt,
             updatedAt: reply.updatedAt,
           );
-          debugPrint(
-              'WebSocket: Updated reply - reactions: $updatedReactions, individualReactions count: ${updatedIndividualReactions.length}');
           return;
         }
       }
-      debugPrint(
-          'WebSocket: Comment ${event.commentId} not found in loaded comments or replies');
     });
   }
 
