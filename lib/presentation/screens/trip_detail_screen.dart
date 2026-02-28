@@ -223,13 +223,63 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       if (event.parentCommentId != null) {
         // It's a reply
         final parentId = event.parentCommentId!;
+        bool isNewReply = false;
+        
         if (_replies.containsKey(parentId)) {
-          _replies[parentId] = [..._replies[parentId]!, newComment];
+          // Check if reply already exists (avoid duplicates from optimistic updates)
+          final existingIndex =
+              _replies[parentId]!.indexWhere((c) => c.id == event.commentId);
+          if (existingIndex != -1) {
+            // Replace optimistic reply with server version (has correct timestamp, etc.)
+            _replies[parentId]![existingIndex] = newComment;
+          } else {
+            // New reply from another user or WebSocket arrived before optimistic update
+            _replies[parentId] = [..._replies[parentId]!, newComment];
+            isNewReply = true;
+          }
+        } else {
+          // First reply to this comment
+          _replies[parentId] = [newComment];
+          isNewReply = true;
+        }
+        
+        // Update the parent comment's responsesCount if this is a new reply
+        // (not an optimistic update replacement)
+        if (isNewReply) {
+          final parentIndex = _comments.indexWhere((c) => c.id == parentId);
+          if (parentIndex != -1) {
+            final parentComment = _comments[parentIndex];
+            _comments[parentIndex] = Comment(
+              id: parentComment.id,
+              tripId: parentComment.tripId,
+              userId: parentComment.userId,
+              username: parentComment.username,
+              userAvatarUrl: parentComment.userAvatarUrl,
+              message: parentComment.message,
+              parentCommentId: parentComment.parentCommentId,
+              reactions: parentComment.reactions,
+              replies: parentComment.replies,
+              reactionsCount: parentComment.reactionsCount,
+              responsesCount: parentComment.responsesCount + 1,
+              createdAt: parentComment.createdAt,
+              updatedAt: parentComment.updatedAt,
+            );
+          }
         }
       } else {
         // It's a top-level comment
-        _comments.insert(0, newComment);
-        _sortComments();
+        // Check if comment already exists (avoid duplicates from optimistic updates)
+        final existingIndex =
+            _comments.indexWhere((c) => c.id == event.commentId);
+        if (existingIndex != -1) {
+          // Replace optimistic comment with server version (has correct timestamp, etc.)
+          _comments[existingIndex] = newComment;
+          _sortComments();
+        } else {
+          // New comment from another user or WebSocket arrived before optimistic update
+          _comments.insert(0, newComment);
+          _sortComments();
+        }
       }
     });
   }
@@ -559,23 +609,87 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isAddingComment = true);
 
     try {
+      String commentId;
       if (_replyingToCommentId != null) {
-        await _repository.addReply(
+        // Add reply via API
+        commentId = await _repository.addReply(
           _trip.id,
           _replyingToCommentId!,
           message,
         );
 
-        // Clear the reply state - the comment will arrive via WebSocket
+        // Optimistically add the reply to the UI immediately
+        final optimisticReply = Comment(
+          id: commentId,
+          tripId: _trip.id,
+          userId: _userId ?? '',
+          username: _username ?? 'You',
+          userAvatarUrl: _avatarUrl,
+          message: message,
+          parentCommentId: _replyingToCommentId,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
         setState(() {
+          final parentId = _replyingToCommentId!;
+          if (!_replies.containsKey(parentId)) {
+            _replies[parentId] = [];
+          }
+          // Check if comment already exists (shouldn't happen, but be safe)
+          if (!_replies[parentId]!.any((c) => c.id == commentId)) {
+            _replies[parentId] = [..._replies[parentId]!, optimisticReply];
+            
+            // Update the parent comment's responsesCount only when actually adding a new reply
+            final parentIndex = _comments.indexWhere((c) => c.id == parentId);
+            if (parentIndex != -1) {
+              final parentComment = _comments[parentIndex];
+              _comments[parentIndex] = Comment(
+                id: parentComment.id,
+                tripId: parentComment.tripId,
+                userId: parentComment.userId,
+                username: parentComment.username,
+                userAvatarUrl: parentComment.userAvatarUrl,
+                message: parentComment.message,
+                parentCommentId: parentComment.parentCommentId,
+                reactions: parentComment.reactions,
+                replies: parentComment.replies,
+                reactionsCount: parentComment.reactionsCount,
+                responsesCount: parentComment.responsesCount + 1,
+                createdAt: parentComment.createdAt,
+                updatedAt: parentComment.updatedAt,
+              );
+            }
+          }
+          
+          // Ensure the replies section is expanded so the new reply is visible
+          _expandedComments[parentId] = true;
           _commentController.clear();
           _replyingToCommentId = null;
         });
       } else {
-        await _repository.addComment(_trip.id, message);
+        // Add top-level comment via API
+        commentId = await _repository.addComment(_trip.id, message);
 
-        // Clear the input - the comment will arrive via WebSocket
+        // Optimistically add the comment to the UI immediately
+        final optimisticComment = Comment(
+          id: commentId,
+          tripId: _trip.id,
+          userId: _userId ?? '',
+          username: _username ?? 'You',
+          userAvatarUrl: _avatarUrl,
+          message: message,
+          parentCommentId: null,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
         setState(() {
+          // Check if comment already exists (shouldn't happen, but be safe)
+          if (!_comments.any((c) => c.id == commentId)) {
+            _comments.insert(0, optimisticComment);
+            _sortComments();
+          }
           _commentController.clear();
         });
       }
