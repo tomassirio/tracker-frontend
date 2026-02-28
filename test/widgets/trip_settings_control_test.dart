@@ -280,13 +280,13 @@ void main() {
       await tester.pump();
 
       await tester.tap(find.text('Save'));
-      await tester.pump(); // Trigger the error notification
-      await tester.pump(const Duration(milliseconds: 50)); // Advance animation
+      await tester.pumpAndSettle(); // Wait for notification to appear
 
       expect(find.text('Minimum interval is 15 minutes'), findsOneWidget);
       
-      // Clean up - wait for auto-dismiss with longer timeout
-      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      // Clean up - advance past auto-dismiss duration and exit animation
+      await tester.pump(const Duration(seconds: 4)); // 3s auto-dismiss + 300ms exit animation
+      await tester.pumpAndSettle();
     });
 
     testWidgets('disables controls when isLoading is true', (
