@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:tracker_frontend/presentation/widgets/common/floating_notification.dart';
 
 /// Helper class for UI-related utilities
 class UiHelpers {
@@ -29,36 +30,33 @@ class UiHelpers {
     }
   }
 
-  /// Shows a success snackbar
+  /// Shows a success notification
   static void showSuccessMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
+    FloatingNotification.show(
+      context,
+      message,
+      NotificationType.success,
+      duration: const Duration(seconds: 2),
     );
   }
 
-  /// Shows an error snackbar
+  /// Shows an error notification
   static void showErrorMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
+    FloatingNotification.show(
+      context,
+      message,
+      NotificationType.error,
+      duration: const Duration(seconds: 3),
     );
   }
 
-  /// Shows an info snackbar
+  /// Shows an info notification
   static void showInfoMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 2),
-      ),
+    FloatingNotification.show(
+      context,
+      message,
+      NotificationType.info,
+      duration: const Duration(seconds: 2),
     );
   }
 }
