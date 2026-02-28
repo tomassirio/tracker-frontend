@@ -59,7 +59,7 @@ class CommentsSection extends StatelessWidget {
     if (isCollapsed) {
       return _buildCollapsedBubble();
     }
-    return _buildExpandedSection();
+    return _buildExpandedSection(context);
   }
 
   /// Collapsed state - floating bubble with comment icon and count badge
@@ -138,7 +138,7 @@ class CommentsSection extends StatelessWidget {
   }
 
   /// Expanded state - full comments section
-  Widget _buildExpandedSection() {
+  Widget _buildExpandedSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       decoration: BoxDecoration(
