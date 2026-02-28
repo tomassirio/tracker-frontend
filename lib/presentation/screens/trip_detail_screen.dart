@@ -1193,6 +1193,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   polylines: _polylines,
                   onMapCreated: (controller) => _mapController = controller,
                   isOwner: _userId != null && _trip.userId == _userId,
+                  // Disable map gestures when any panel is expanded to prevent
+                  // scroll-through on mobile web
+                  gesturesEnabled: _isTripInfoCollapsed &&
+                      _isCommentsCollapsed &&
+                      _isTimelineCollapsed &&
+                      _isTripUpdateCollapsed,
                 ),
               ),
 
