@@ -1,34 +1,30 @@
 import 'reaction_type.dart';
 
-/// Reaction model
+/// Reaction model for individual reactions on comments
 class Reaction {
-  final String id;
   final String userId;
   final String username;
   final ReactionType type;
-  final DateTime createdAt;
+  final DateTime timestamp;
 
   Reaction({
-    required this.id,
     required this.userId,
     required this.username,
     required this.type,
-    required this.createdAt,
+    required this.timestamp,
   });
 
   factory Reaction.fromJson(Map<String, dynamic> json) => Reaction(
-        id: json['id'] as String,
         userId: json['userId'] as String,
         username: json['username'] as String,
-        type: ReactionType.fromJson(json['type'] as String),
-        createdAt: DateTime.parse(json['createdAt'] as String),
+        type: ReactionType.fromJson(json['reactionType'] as String),
+        timestamp: DateTime.parse(json['timestamp'] as String),
       );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
         'userId': userId,
         'username': username,
-        'type': type.toJson(),
-        'createdAt': createdAt.toIso8601String(),
+        'reactionType': type.toJson(),
+        'timestamp': timestamp.toIso8601String(),
       };
 }
