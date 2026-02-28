@@ -797,7 +797,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     try {
       if (currentReaction == type) {
         // User clicked their existing reaction → remove it
-        await _repository.removeReaction(commentId);
+        await _repository.removeReaction(commentId, type);
         if (mounted) {
           UiHelpers.showSuccessMessage(context, 'Reaction removed!');
         }
