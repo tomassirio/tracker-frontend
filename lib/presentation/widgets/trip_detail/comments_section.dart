@@ -139,33 +139,29 @@ class CommentsSection extends StatelessWidget {
 
   /// Expanded state - full comments section
   Widget _buildExpandedSection(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) {}, // Absorb pointer events to prevent propagation to map
-      onPointerMove: (_) {},
-      onPointerUp: (_) {},
-      child: Container(
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-          boxShadow: WandererTheme.floatingShadow,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: WandererTheme.glassBlurSigma,
-              sigmaY: WandererTheme.glassBlurSigma,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: WandererTheme.glassBackground,
-                borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-                border: Border.all(
-                  color: WandererTheme.glassBorderColor,
-                  width: 1,
-                ),
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+        boxShadow: WandererTheme.floatingShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: WandererTheme.glassBlurSigma,
+            sigmaY: WandererTheme.glassBlurSigma,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: WandererTheme.glassBackground,
+              borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+              border: Border.all(
+                color: WandererTheme.glassBorderColor,
+                width: 1,
               ),
-              child: Column(
+            ),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Comments section header with glass styling
@@ -349,7 +345,6 @@ class CommentsSection extends StatelessWidget {
           ),
         ),
       ),
-    ),
     );
   }
 

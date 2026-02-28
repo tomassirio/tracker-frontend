@@ -14,6 +14,11 @@ class TripMapView extends StatefulWidget {
   /// to protect the viewer's privacy.
   final bool isOwner;
 
+  /// Whether map gestures (scroll, zoom, pan) are enabled.
+  /// Set to false when overlays are open to prevent touch events
+  /// from propagating to the map on mobile web.
+  final bool gesturesEnabled;
+
   const TripMapView({
     super.key,
     required this.initialLocation,
@@ -22,6 +27,7 @@ class TripMapView extends StatefulWidget {
     required this.polylines,
     required this.onMapCreated,
     this.isOwner = false,
+    this.gesturesEnabled = true,
   });
 
   @override
@@ -122,7 +128,11 @@ class _TripMapViewState extends State<TripMapView> {
           myLocationButtonEnabled: widget.isOwner,
           myLocationEnabled: widget.isOwner,
           mapToolbarEnabled: false,
-          zoomControlsEnabled: true,
+          zoomControlsEnabled: widget.gesturesEnabled,
+          scrollGesturesEnabled: widget.gesturesEnabled,
+          zoomGesturesEnabled: widget.gesturesEnabled,
+          tiltGesturesEnabled: widget.gesturesEnabled,
+          rotateGesturesEnabled: widget.gesturesEnabled,
         ),
         // Loading indicator while map initializes
         if (!_isMapReady && !_hasError)
