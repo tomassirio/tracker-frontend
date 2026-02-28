@@ -92,16 +92,22 @@ class TripTimeline extends StatelessWidget {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      color: WandererTheme.primaryOrange,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: updates.length,
-        itemBuilder: (context, index) {
-          final update = updates[index];
-          final isLast = index == updates.length - 1;
-          final isFirst = index == 0;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        // Prevent scroll events from propagating to parent widgets
+        // This fixes scroll propagation to the map on mobile web
+        return true;
+      },
+      child: RefreshIndicator(
+        onRefresh: () async => onRefresh(),
+        color: WandererTheme.primaryOrange,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          itemCount: updates.length,
+          itemBuilder: (context, index) {
+            final update = updates[index];
+            final isLast = index == updates.length - 1;
+            final isFirst = index == 0;
 
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,7 +302,8 @@ class TripTimeline extends StatelessWidget {
               ), // closes Expanded
             ], // closes Row children
           ); // closes Row
-        },
+          },
+        ),
       ),
     );
   }

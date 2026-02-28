@@ -261,30 +261,37 @@ class CommentsSection extends StatelessWidget {
                         )
                       : comments.isEmpty
                           ? _buildEmptyCommentsState()
-                          : ListView.builder(
-                              controller: scrollController,
-                              shrinkWrap: true,
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              itemCount: comments.length,
-                              itemBuilder: (context, index) {
-                                final comment = comments[index];
-                                final isExpanded =
-                                    expandedComments[comment.id] ?? false;
-                                final commentReplies =
-                                    replies[comment.id] ?? [];
-
-                                return CommentCard(
-                                  comment: comment,
-                                  tripUserId: tripUserId,
-                                  isExpanded: isExpanded,
-                                  replies: commentReplies,
-                                  onReact: () => onReact(comment.id),
-                                  onReply: () => onReply(comment.id),
-                                  onToggleReplies: () =>
-                                      onToggleReplies(comment.id, isExpanded),
-                                  isLoggedIn: isLoggedIn,
-                                );
+                          : NotificationListener<ScrollNotification>(
+                              onNotification: (notification) {
+                                // Prevent scroll events from propagating to parent widgets
+                                // This fixes scroll propagation to the map on mobile web
+                                return true;
                               },
+                              child: ListView.builder(
+                                controller: scrollController,
+                                shrinkWrap: true,
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                itemCount: comments.length,
+                                itemBuilder: (context, index) {
+                                  final comment = comments[index];
+                                  final isExpanded =
+                                      expandedComments[comment.id] ?? false;
+                                  final commentReplies =
+                                      replies[comment.id] ?? [];
+
+                                  return CommentCard(
+                                    comment: comment,
+                                    tripUserId: tripUserId,
+                                    isExpanded: isExpanded,
+                                    replies: commentReplies,
+                                    onReact: () => onReact(comment.id),
+                                    onReply: () => onReply(comment.id),
+                                    onToggleReplies: () =>
+                                        onToggleReplies(comment.id, isExpanded),
+                                    isLoggedIn: isLoggedIn,
+                                  );
+                                },
+                              ),
                             ),
                 ),
                 // Comment input (disabled if not logged in)
