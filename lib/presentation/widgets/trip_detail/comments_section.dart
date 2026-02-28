@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_input.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
@@ -311,8 +310,8 @@ class CommentsSection extends StatelessWidget {
                     ),
                     child: Center(
                       child: ElevatedButton(
-                        onPressed: () async {
-                          await Navigator.push(
+                        onPressed: () {
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
