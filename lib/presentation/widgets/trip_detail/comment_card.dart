@@ -13,6 +13,7 @@ class CommentCard extends StatelessWidget {
   final VoidCallback onReact;
   final VoidCallback onReply;
   final VoidCallback onToggleReplies;
+  final bool isLoggedIn;
 
   const CommentCard({
     super.key,
@@ -23,6 +24,7 @@ class CommentCard extends StatelessWidget {
     required this.onReact,
     required this.onReply,
     required this.onToggleReplies,
+    required this.isLoggedIn,
   });
 
   void _navigateToProfile(BuildContext context) {
@@ -132,34 +134,36 @@ class CommentCard extends StatelessWidget {
           ],
           Row(
             children: [
-              InkWell(
-                onTap: onReact,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add_reaction_outlined,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'React',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                    ),
-                  ],
+              if (isLoggedIn) ...[
+                InkWell(
+                  onTap: onReact,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.add_reaction_outlined,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'React',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              InkWell(
-                onTap: onReply,
-                child: Row(
-                  children: [
-                    Icon(Icons.reply, size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    const Text('Reply', style: TextStyle(fontSize: 12)),
-                  ],
+                const SizedBox(width: 16),
+                InkWell(
+                  onTap: onReply,
+                  child: Row(
+                    children: [
+                      Icon(Icons.reply, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      const Text('Reply', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
                 ),
-              ),
+              ],
               if (comment.responsesCount > 0) ...[
                 const SizedBox(width: 16),
                 InkWell(
