@@ -16,7 +16,7 @@ class TripTitleField extends StatelessWidget {
         border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.title),
       ),
-      textCapitalization: TextCapitalization.sentences,
+      textCapitalization: TextCapitalization.words,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Please enter a title';
