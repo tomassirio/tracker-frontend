@@ -182,6 +182,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                   maxLength: 500,
                   maxLines: isMobile ? 2 : 1,
                   keyboardType: TextInputType.url,
+                  textCapitalization: TextCapitalization.none,
                 ),
               ],
             ),
@@ -536,6 +537,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
+              textCapitalization: TextCapitalization.sentences,
             ),
             const SizedBox(height: 16),
             if (_filteredTrips.isEmpty)

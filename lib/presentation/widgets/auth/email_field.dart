@@ -16,6 +16,7 @@ class EmailField extends StatelessWidget {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       keyboardType: TextInputType.emailAddress,
+      textCapitalization: TextCapitalization.none,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Please enter your email';

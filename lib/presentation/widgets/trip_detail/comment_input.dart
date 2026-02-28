@@ -110,6 +110,7 @@ class CommentInput extends StatelessWidget {
                     ),
                   ),
                   maxLines: null,
+                  textCapitalization: TextCapitalization.sentences,
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => onSend(),
                 ),

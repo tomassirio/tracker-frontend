@@ -445,6 +445,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                   labelText: 'Name',
                   border: OutlineInputBorder(),
                 ),
+                textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 16),
               // Plan Type
