@@ -487,6 +487,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
+                textCapitalization: TextCapitalization.none,
               ),
             ],
           ),
@@ -522,6 +523,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
+                textCapitalization: TextCapitalization.none,
               ),
             ),
           ],

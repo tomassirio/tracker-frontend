@@ -20,6 +20,7 @@ class UsernameField extends StatelessWidget {
         prefixIcon: const Icon(Icons.person),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
+      textCapitalization: TextCapitalization.none,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Please enter your username';

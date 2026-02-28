@@ -206,6 +206,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                     controller: _intervalController,
                     enabled: !widget.isLoading,
                     keyboardType: TextInputType.number,
+                    textCapitalization: TextCapitalization.none,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                     ],

@@ -360,6 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   labelText: 'Display Name',
                   hintText: 'Your display name',
                 ),
+                textCapitalization: TextCapitalization.words,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -369,6 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   hintText: 'Tell us about yourself',
                 ),
                 maxLines: 3,
+                textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -377,6 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   labelText: 'Avatar URL',
                   hintText: 'https://example.com/avatar.jpg',
                 ),
+                textCapitalization: TextCapitalization.none,
               ),
             ],
           ),
