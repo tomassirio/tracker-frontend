@@ -639,27 +639,27 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Check if comment already exists (shouldn't happen, but be safe)
           if (!_replies[parentId]!.any((c) => c.id == commentId)) {
             _replies[parentId] = [..._replies[parentId]!, optimisticReply];
-          }
-          
-          // Update the parent comment's responsesCount
-          final parentIndex = _comments.indexWhere((c) => c.id == parentId);
-          if (parentIndex != -1) {
-            final parentComment = _comments[parentIndex];
-            _comments[parentIndex] = Comment(
-              id: parentComment.id,
-              tripId: parentComment.tripId,
-              userId: parentComment.userId,
-              username: parentComment.username,
-              userAvatarUrl: parentComment.userAvatarUrl,
-              message: parentComment.message,
-              parentCommentId: parentComment.parentCommentId,
-              reactions: parentComment.reactions,
-              replies: parentComment.replies,
-              reactionsCount: parentComment.reactionsCount,
-              responsesCount: parentComment.responsesCount + 1,
-              createdAt: parentComment.createdAt,
-              updatedAt: parentComment.updatedAt,
-            );
+            
+            // Update the parent comment's responsesCount only when actually adding a new reply
+            final parentIndex = _comments.indexWhere((c) => c.id == parentId);
+            if (parentIndex != -1) {
+              final parentComment = _comments[parentIndex];
+              _comments[parentIndex] = Comment(
+                id: parentComment.id,
+                tripId: parentComment.tripId,
+                userId: parentComment.userId,
+                username: parentComment.username,
+                userAvatarUrl: parentComment.userAvatarUrl,
+                message: parentComment.message,
+                parentCommentId: parentComment.parentCommentId,
+                reactions: parentComment.reactions,
+                replies: parentComment.replies,
+                reactionsCount: parentComment.reactionsCount,
+                responsesCount: parentComment.responsesCount + 1,
+                createdAt: parentComment.createdAt,
+                updatedAt: parentComment.updatedAt,
+              );
+            }
           }
           
           // Ensure the replies section is expanded so the new reply is visible
