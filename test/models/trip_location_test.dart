@@ -146,18 +146,16 @@ void main() {
         timestamp: DateTime.now(),
         reactions: [
           Reaction(
-            id: 'r1',
             userId: 'u1',
             username: 'user1',
-            type: ReactionType.heart,
-            createdAt: DateTime.now(),
+            reactionType: ReactionType.heart,
+            timestamp: DateTime.now(),
           ),
           Reaction(
-            id: 'r2',
             userId: 'u2',
             username: 'user2',
-            type: ReactionType.smiley,
-            createdAt: DateTime.now(),
+            reactionType: ReactionType.smiley,
+            timestamp: DateTime.now(),
           ),
         ],
       );
@@ -208,11 +206,10 @@ void main() {
         'timestamp': '2024-01-01T12:00:00Z',
         'reactions': [
           {
-            'id': 'r1',
             'userId': 'u1',
             'username': 'user1',
-            'type': 'HEART',
-            'createdAt': '2024-01-01T12:00:00Z',
+            'reactionType': 'HEART',
+            'timestamp': '2024-01-01T12:00:00Z',
           },
         ],
       };
@@ -221,7 +218,7 @@ void main() {
 
       expect(location.reactions, isNotNull);
       expect(location.reactions!.length, 1);
-      expect(location.reactions![0].id, 'r1');
+      expect(location.reactions![0].userId, 'u1');
       expect(location.reactionCount, 1);
     });
 
@@ -234,11 +231,10 @@ void main() {
         'reactions': {
           'HEART': [
             {
-              'id': 'r1',
               'userId': 'u1',
               'username': 'user1',
-              'type': 'HEART',
-              'createdAt': '2024-01-01T12:00:00Z',
+              'reactionType': 'HEART',
+              'timestamp': '2024-01-01T12:00:00Z',
             },
           ],
         },
@@ -248,7 +244,7 @@ void main() {
 
       expect(location.reactions, isNotNull);
       expect(location.reactions!.length, 1);
-      expect(location.reactions![0].id, 'r1');
+      expect(location.reactions![0].userId, 'u1');
       expect(location.reactionCount, 1);
     });
   });

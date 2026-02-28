@@ -209,12 +209,12 @@ class CommentCard extends StatelessWidget {
         comment.individualReactions != null &&
         comment.individualReactions!.any((r) =>
             r.userId == currentUserId &&
-            r.type.toJson().toUpperCase() == reactionType.toUpperCase());
+            r.reactionType.toJson().toUpperCase() == reactionType.toUpperCase());
 
     // Get list of usernames who reacted with this emoji
     final reactedUsernames = comment.individualReactions
             ?.where((r) =>
-                r.type.toJson().toUpperCase() == reactionType.toUpperCase())
+                r.reactionType.toJson().toUpperCase() == reactionType.toUpperCase())
             .map((r) => r.username.isNotEmpty ? r.username : 'Unknown')
             .toList() ??
         [];
