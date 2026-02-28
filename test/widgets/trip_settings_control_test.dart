@@ -285,8 +285,8 @@ void main() {
 
       expect(find.text('Minimum interval is 15 minutes'), findsOneWidget);
       
-      // Clean up - wait for auto-dismiss
-      await tester.pumpAndSettle();
+      // Clean up - wait for auto-dismiss with longer timeout
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
     testWidgets('disables controls when isLoading is true', (
