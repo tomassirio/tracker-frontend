@@ -29,8 +29,8 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Success'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(); // Start the animation
+      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
 
       // Verify the notification appears with correct text
       expect(find.text('Success message'), findsOneWidget);
@@ -64,8 +64,8 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Error'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(); // Start the animation
+      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
 
       // Verify the notification appears with correct text
       expect(find.text('Error message'), findsOneWidget);
@@ -99,8 +99,8 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Info'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(); // Start the animation
+      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
 
       // Verify the notification appears with correct text
       expect(find.text('Info message'), findsOneWidget);
@@ -134,8 +134,8 @@ void main() {
 
       // Tap the button to show notification
       await tester.tap(find.text('Show Warning'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(); // Start the animation
+      await tester.pump(const Duration(milliseconds: 350)); // Complete animation
 
       // Verify the notification appears with correct text
       expect(find.text('Warning message'), findsOneWidget);
@@ -170,14 +170,16 @@ void main() {
 
       // Show notification
       await tester.tap(find.text('Show'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(); // Trigger overlay insertion
+      await tester.pump(const Duration(milliseconds: 350)); // Complete entry animation
 
       // Verify notification is visible
       expect(find.text('Auto dismiss'), findsOneWidget);
 
-      // Wait for auto-dismiss duration and all animations to complete
-      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+      // Wait for the full auto-dismiss duration plus exit animation
+      await tester.pump(const Duration(milliseconds: 500)); // Auto-dismiss duration
+      await tester.pump(const Duration(milliseconds: 300)); // Exit animation
+      await tester.pump(); // Final frame
 
       // Verify notification is dismissed
       expect(find.text('Auto dismiss'), findsNothing);
