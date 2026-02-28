@@ -313,7 +313,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           updatedIndividualReactions.add(Reaction(
             userId: event.userId,
             username: '', // Will be populated from full data refresh if needed
-            type: ReactionType.fromJson(event.reactionType),
+            reactionType: ReactionType.fromJson(event.reactionType),
             timestamp: DateTime.now(),
           ));
           // Increment reaction count
@@ -369,7 +369,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             updatedIndividualReactions.add(Reaction(
               userId: event.userId,
               username: '',
-              type: ReactionType.fromJson(event.reactionType),
+              reactionType: ReactionType.fromJson(event.reactionType),
               timestamp: DateTime.now(),
             ));
             updatedReactions[event.reactionType] =
@@ -782,12 +782,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       orElse: () => Reaction(
         userId: '',
         username: '',
-        type: ReactionType.heart,
+        reactionType: ReactionType.heart,
         timestamp: DateTime.now(),
       ),
     );
 
-    return userReaction.userId.isNotEmpty ? userReaction.type : null;
+    return userReaction.userId.isNotEmpty ? userReaction.reactionType : null;
   }
 
   Future<void> _handleReactionClick(
