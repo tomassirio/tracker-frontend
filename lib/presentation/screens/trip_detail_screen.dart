@@ -223,6 +223,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       if (event.parentCommentId != null) {
         // It's a reply
         final parentId = event.parentCommentId!;
+        bool isNewReply = false;
+        
         if (_replies.containsKey(parentId)) {
           // Check if reply already exists (avoid duplicates from optimistic updates)
           final existingIndex =
@@ -233,10 +235,36 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           } else {
             // New reply from another user or WebSocket arrived before optimistic update
             _replies[parentId] = [..._replies[parentId]!, newComment];
+            isNewReply = true;
           }
         } else {
           // First reply to this comment
           _replies[parentId] = [newComment];
+          isNewReply = true;
+        }
+        
+        // Update the parent comment's responsesCount if this is a new reply
+        // (not an optimistic update replacement)
+        if (isNewReply) {
+          final parentIndex = _comments.indexWhere((c) => c.id == parentId);
+          if (parentIndex != -1) {
+            final parentComment = _comments[parentIndex];
+            _comments[parentIndex] = Comment(
+              id: parentComment.id,
+              tripId: parentComment.tripId,
+              userId: parentComment.userId,
+              username: parentComment.username,
+              userAvatarUrl: parentComment.userAvatarUrl,
+              message: parentComment.message,
+              parentCommentId: parentComment.parentCommentId,
+              reactions: parentComment.reactions,
+              replies: parentComment.replies,
+              reactionsCount: parentComment.reactionsCount,
+              responsesCount: parentComment.responsesCount + 1,
+              createdAt: parentComment.createdAt,
+              updatedAt: parentComment.updatedAt,
+            );
+          }
         }
       } else {
         // It's a top-level comment
@@ -612,6 +640,28 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           if (!_replies[parentId]!.any((c) => c.id == commentId)) {
             _replies[parentId] = [..._replies[parentId]!, optimisticReply];
           }
+          
+          // Update the parent comment's responsesCount
+          final parentIndex = _comments.indexWhere((c) => c.id == parentId);
+          if (parentIndex != -1) {
+            final parentComment = _comments[parentIndex];
+            _comments[parentIndex] = Comment(
+              id: parentComment.id,
+              tripId: parentComment.tripId,
+              userId: parentComment.userId,
+              username: parentComment.username,
+              userAvatarUrl: parentComment.userAvatarUrl,
+              message: parentComment.message,
+              parentCommentId: parentComment.parentCommentId,
+              reactions: parentComment.reactions,
+              replies: parentComment.replies,
+              reactionsCount: parentComment.reactionsCount,
+              responsesCount: parentComment.responsesCount + 1,
+              createdAt: parentComment.createdAt,
+              updatedAt: parentComment.updatedAt,
+            );
+          }
+          
           // Ensure the replies section is expanded so the new reply is visible
           _expandedComments[parentId] = true;
           _commentController.clear();
