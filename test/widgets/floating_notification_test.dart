@@ -176,9 +176,8 @@ void main() {
       // Verify notification is visible
       expect(find.text('Auto dismiss'), findsOneWidget);
 
-      // Wait for auto-dismiss duration plus animation
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 300));
+      // Wait for auto-dismiss duration and all animations to complete
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
 
       // Verify notification is dismissed
       expect(find.text('Auto dismiss'), findsNothing);
