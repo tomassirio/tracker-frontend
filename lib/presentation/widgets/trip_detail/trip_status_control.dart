@@ -103,18 +103,19 @@ class TripStatusControl extends StatelessWidget {
   Future<void> _showFinishConfirmation(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Finish Trip'),
         content: const Text(
           'Are you sure you want to finish this trip? This will mark the trip as completed.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            key: const Key('confirm_finish_button'),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: WandererTheme.statusCompleted,
               foregroundColor: Colors.white,

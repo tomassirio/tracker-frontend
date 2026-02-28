@@ -231,8 +231,8 @@ void main() {
       );
       expect(find.text('Cancel'), findsOneWidget);
 
-      // Tap the confirm button in the dialog
-      await tester.tap(find.text('Finish').last); // Last one is in the dialog
+      // Tap the confirm button in the dialog using its key
+      await tester.tap(find.byKey(const Key('confirm_finish_button')));
       await tester.pumpAndSettle();
 
       // Verify onStatusChange was called
