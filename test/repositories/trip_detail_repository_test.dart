@@ -222,20 +222,20 @@ void main() {
       test('removes reaction from a comment successfully', () async {
         when(
           mockCommentService.removeReaction(
-              'comment-1', any as AddReactionRequest),
+              'comment-1', any),
         ).thenAnswer((_) async => 'comment-1');
 
         await repository.removeReaction('comment-1', ReactionType.heart);
 
         verify(mockCommentService.removeReaction(
-                'comment-1', any as AddReactionRequest))
+                'comment-1', any))
             .called(1);
       });
 
       test('handles API errors gracefully', () async {
         when(
           mockCommentService.removeReaction(
-              'comment-1', any as AddReactionRequest),
+              'comment-1', any),
         ).thenThrow(Exception('API Error'));
 
         expect(

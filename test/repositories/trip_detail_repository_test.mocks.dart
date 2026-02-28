@@ -157,7 +157,7 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
   @override
   _i6.Future<String> removeReaction(
     String? commentId,
-    _i8.AddReactionRequest? request,
+    _i2.AddReactionRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
