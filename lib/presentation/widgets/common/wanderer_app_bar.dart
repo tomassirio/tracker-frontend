@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
 import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.dart';
+import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 
 /// Reusable AppBar for the Wanderer application
 class WandererAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -61,11 +62,9 @@ class _WandererAppBarState extends State<WandererAppBar> {
   }
 
   void _showNotImplementedMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Notifications feature not yet implemented'),
-        duration: Duration(seconds: 2),
-      ),
+    UiHelpers.showInfoMessage(
+      context,
+      'Notifications feature not yet implemented',
     );
   }
 
