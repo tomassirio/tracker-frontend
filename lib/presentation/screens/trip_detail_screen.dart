@@ -612,6 +612,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           if (!_replies[parentId]!.any((c) => c.id == commentId)) {
             _replies[parentId] = [..._replies[parentId]!, optimisticReply];
           }
+          // Ensure the replies section is expanded so the new reply is visible
+          _expandedComments[parentId] = true;
           _commentController.clear();
           _replyingToCommentId = null;
         });
