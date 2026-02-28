@@ -52,28 +52,6 @@ class CommentsSection extends StatelessWidget {
     required this.onSortChanged,
     required this.onReact,
     required this.onReactionChipTap,
-  final Function(String) onReply;
-  final Function(String, bool) onToggleReplies;
-  final VoidCallback onSendComment;
-  final VoidCallback onCancelReply;
-
-  const CommentsSection({
-    super.key,
-    required this.comments,
-    required this.replies,
-    required this.expandedComments,
-    required this.tripUserId,
-    required this.isLoading,
-    required this.isLoggedIn,
-    required this.isAddingComment,
-    required this.isCollapsed,
-    required this.sortOption,
-    required this.commentController,
-    required this.scrollController,
-    this.replyingToCommentId,
-    required this.onToggleCollapse,
-    required this.onSortChanged,
-    required this.onReact,
     required this.onReply,
     required this.onToggleReplies,
     required this.onSendComment,
