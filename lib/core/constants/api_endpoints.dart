@@ -112,6 +112,10 @@ class ApiEndpoints {
   // Read operations: use queryBaseUrl
   static String adminUserRoles(String userId) => '/admin/users/$userId/roles';
 
+  // Admin Trip Management endpoints (ADMIN only, commandBaseUrl)
+  static String adminRecomputePolyline(String tripId) =>
+      '/admin/trips/$tripId/recompute-polyline';
+
   // Self-deletion endpoint (use commandBaseUrl, any authenticated user)
   static const String usersDeleteMe = '/users/me';
 

@@ -222,6 +222,59 @@ void main() {
       });
     });
 
+    group('recomputePolyline', () {
+      test('successful recomputation completes without error', () async {
+        mockHttpClient.response = http.Response('', 204);
+
+        await adminCommandClient.recomputePolyline('trip-123');
+
+        expect(mockHttpClient.lastMethod, 'POST');
+        expect(
+          mockHttpClient.lastUri.toString(),
+          contains('/admin/trips/trip-123/recompute-polyline'),
+        );
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
+      });
+
+      test('recomputePolyline requires authentication', () async {
+        mockHttpClient.response = http.Response('', 204);
+
+        await adminCommandClient.recomputePolyline('trip-123');
+
+        expect(
+          mockHttpClient.lastHeaders?['Authorization'],
+          'Bearer test-token',
+        );
+      });
+
+      test('recomputePolyline throws on 404 not found', () async {
+        mockHttpClient.response = http.Response(
+          '{"message":"Trip not found"}',
+          404,
+        );
+
+        expect(
+          () => adminCommandClient.recomputePolyline('nonexistent'),
+          throwsException,
+        );
+      });
+
+      test('recomputePolyline throws on 403 forbidden', () async {
+        mockHttpClient.response = http.Response(
+          '{"message":"Forbidden"}',
+          403,
+        );
+
+        expect(
+          () => adminCommandClient.recomputePolyline('trip-123'),
+          throwsException,
+        );
+      });
+    });
+
     group('AdminCommandClient initialization', () {
       test('uses provided ApiClient', () {
         final customApiClient = ApiClient(

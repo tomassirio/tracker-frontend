@@ -159,6 +159,25 @@ void main() {
           );
         });
       });
+
+      group('recomputePolyline', () {
+        test('recomputes polyline successfully', () async {
+          await serviceWithAdmin.recomputePolyline('trip-123');
+
+          expect(mockAdminCommandClient.recomputePolylineCalled, true);
+          expect(mockAdminCommandClient.lastTripId, 'trip-123');
+        });
+
+        test('passes through errors when recomputing polyline', () async {
+          mockAdminCommandClient.shouldThrowError = true;
+          mockAdminCommandClient.errorMessage = 'Trip not found';
+
+          expect(
+            () => serviceWithAdmin.recomputePolyline('trip-123'),
+            throwsA(predicate((e) => e.toString().contains('not found'))),
+          );
+        });
+      });
     });
 
     group('AdminService initialization', () {
@@ -215,7 +234,9 @@ class MockAdminCommandClient extends AdminCommandClient {
   bool promoteToAdminCalled = false;
   bool demoteFromAdminCalled = false;
   bool deleteUserCalled = false;
+  bool recomputePolylineCalled = false;
   String? lastUserId;
+  String? lastTripId;
   bool shouldThrowError = false;
   String errorMessage = 'Admin command failed';
 
@@ -241,6 +262,15 @@ class MockAdminCommandClient extends AdminCommandClient {
   Future<void> deleteUser(String userId) async {
     deleteUserCalled = true;
     lastUserId = userId;
+    if (shouldThrowError) {
+      throw Exception(errorMessage);
+    }
+  }
+
+  @override
+  Future<void> recomputePolyline(String tripId) async {
+    recomputePolylineCalled = true;
+    lastTripId = tripId;
     if (shouldThrowError) {
       throw Exception(errorMessage);
     }
