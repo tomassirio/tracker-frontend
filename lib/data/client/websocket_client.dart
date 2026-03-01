@@ -369,6 +369,12 @@ class WebSocketClient {
       return;
     }
     
+    // Check if we're actually connected before subscribing
+    if (!isConnected || _channel == null) {
+      debugPrint('WebSocket: Cannot subscribe to $topic - not connected');
+      return;
+    }
+    
     // Generate a unique subscription ID for this topic
     final subscriptionId = 'sub-${_nextSubscriptionId++}';
     _topicSubscriptions[topic] = subscriptionId;
