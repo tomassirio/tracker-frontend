@@ -797,30 +797,47 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     try {
       if (currentReaction == type) {
         // User clicked their existing reaction → remove it
+        debugPrint(
+            'Removing reaction: commentId=$commentId, type=${type.toJson()}');
         await _repository.removeReaction(commentId, type);
         if (mounted) {
           UiHelpers.showSuccessMessage(context, 'Reaction removed!');
         }
       } else if (currentReaction != null) {
         // User clicked a different reaction → backend will auto-replace
+        debugPrint(
+            'Replacing reaction: commentId=$commentId, from=${currentReaction.toJson()} to=${type.toJson()}');
         await _repository.addReaction(commentId, type);
         if (mounted) {
           UiHelpers.showSuccessMessage(context, 'Reaction changed!');
         }
       } else {
         // User has no reaction → add new one
+        debugPrint(
+            'Adding new reaction: commentId=$commentId, type=${type.toJson()}');
         await _repository.addReaction(commentId, type);
         if (mounted) {
           UiHelpers.showSuccessMessage(context, 'Reaction added!');
         }
       }
     } catch (e) {
+      // Enhanced error logging for debugging backend issues
+      debugPrint('Reaction error: $e');
+      debugPrint(
+          'Context: commentId=$commentId, targetType=${type.toJson()}, currentReaction=${currentReaction?.toJson()}');
+
       // Handle 409 Conflict (shouldn't happen with proper UI logic, but be safe)
       final errorMessage = e.toString();
       if (errorMessage.contains('409') || errorMessage.contains('Conflict')) {
         if (mounted) {
           UiHelpers.showInfoMessage(
               context, 'You already have this reaction on the comment');
+        }
+      } else if (errorMessage.contains('500')) {
+        // Backend error during reaction replacement
+        if (mounted) {
+          UiHelpers.showErrorMessage(context,
+              'Server error while changing reaction. This may be a backend issue.');
         }
       } else {
         if (mounted) {
