@@ -155,10 +155,17 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
       ) as _i6.Future<String>);
 
   @override
-  _i6.Future<String> removeReaction(String? commentId) => (super.noSuchMethod(
+  _i6.Future<String> removeReaction(
+    String? commentId,
+    _i2.AddReactionRequest? request,
+  ) =>
+      (super.noSuchMethod(
         Invocation.method(
           #removeReaction,
-          [commentId],
+          [
+            commentId,
+            request,
+          ],
         ),
         returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
           this,

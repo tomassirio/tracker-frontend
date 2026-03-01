@@ -15,6 +15,7 @@ class CommentsSection extends StatelessWidget {
   final Map<String, List<Comment>> replies;
   final Map<String, bool> expandedComments;
   final String tripUserId;
+  final String? currentUserId;
   final bool isLoading;
   final bool isLoggedIn;
   final bool isAddingComment;
@@ -26,6 +27,7 @@ class CommentsSection extends StatelessWidget {
   final VoidCallback onToggleCollapse;
   final Function(CommentSortOption) onSortChanged;
   final Function(String) onReact;
+  final Function(String, ReactionType) onReactionChipTap;
   final Function(String) onReply;
   final Function(String, bool) onToggleReplies;
   final VoidCallback onSendComment;
@@ -37,6 +39,7 @@ class CommentsSection extends StatelessWidget {
     required this.replies,
     required this.expandedComments,
     required this.tripUserId,
+    this.currentUserId,
     required this.isLoading,
     required this.isLoggedIn,
     required this.isAddingComment,
@@ -48,6 +51,7 @@ class CommentsSection extends StatelessWidget {
     required this.onToggleCollapse,
     required this.onSortChanged,
     required this.onReact,
+    required this.onReactionChipTap,
     required this.onReply,
     required this.onToggleReplies,
     required this.onSendComment,
@@ -276,9 +280,12 @@ class CommentsSection extends StatelessWidget {
                                 return CommentCard(
                                   comment: comment,
                                   tripUserId: tripUserId,
+                                  currentUserId: currentUserId,
                                   isExpanded: isExpanded,
                                   replies: commentReplies,
                                   onReact: () => onReact(comment.id),
+                                  onReactionChipTap: (type) =>
+                                      onReactionChipTap(comment.id, type),
                                   onReply: () => onReply(comment.id),
                                   onToggleReplies: () =>
                                       onToggleReplies(comment.id, isExpanded),

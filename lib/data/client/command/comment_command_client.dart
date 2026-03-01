@@ -41,9 +41,11 @@ class CommentCommandClient {
   /// Remove a reaction from a comment
   /// Requires authentication (USER, ADMIN)
   /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
-  Future<String> removeReaction(String commentId) async {
+  Future<String> removeReaction(
+      String commentId, AddReactionRequest request) async {
     final response = await _apiClient.delete(
       ApiEndpoints.commentReactions(commentId),
+      body: request.toJson(),
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);

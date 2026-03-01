@@ -79,8 +79,10 @@ class TripDetailRepository {
   }
 
   /// Removes a reaction from a comment
-  Future<void> removeReaction(String commentId) async {
-    await _commentService.removeReaction(commentId);
+  Future<void> removeReaction(
+      String commentId, ReactionType reactionType) async {
+    final request = AddReactionRequest(reactionType: reactionType);
+    await _commentService.removeReaction(commentId, request);
   }
 
   /// Changes the status of a trip
