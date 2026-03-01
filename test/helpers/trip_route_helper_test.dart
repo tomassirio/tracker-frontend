@@ -166,6 +166,97 @@ void main() {
         final result = await TripRouteHelper.fetchEncodedPolyline(trip);
         expect(result, 'pre_cached_polyline');
       });
+
+      test('returns backend-provided polyline immediately', () async {
+        final trip = _createTrip(
+          id: 'backend-trip',
+          locations: null,
+          encodedPolyline: 'backend_encoded_polyline',
+        );
+
+        final result = await TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'backend_encoded_polyline');
+      });
+
+      test('backend polyline is cached in memory', () async {
+        final trip = _createTrip(
+          id: 'backend-cache-trip',
+          encodedPolyline: 'backend_polyline_data',
+        );
+
+        await TripRouteHelper.fetchEncodedPolyline(trip);
+
+        expect(
+          TripRouteHelper.getCachedPolyline('backend-cache-trip'),
+          'backend_polyline_data',
+        );
+      });
+
+      test('backend polyline takes priority over in-memory cache', () async {
+        // Pre-populate cache with stale data
+        TripRouteHelper.cachePolyline('priority-trip', 'stale_cached_data');
+
+        final trip = _createTrip(
+          id: 'priority-trip',
+          encodedPolyline: 'fresh_backend_polyline',
+        );
+
+        final result = await TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'fresh_backend_polyline');
+        // Cache should also be updated
+        expect(
+          TripRouteHelper.getCachedPolyline('priority-trip'),
+          'fresh_backend_polyline',
+        );
+      });
+
+      test('ignores empty backend polyline string', () async {
+        final loc1 = _createLocation(
+          id: 'loc1',
+          lat: 52.0,
+          lng: 5.0,
+          timestamp: DateTime(2025, 1, 1, 8, 0),
+        );
+        final loc2 = _createLocation(
+          id: 'loc2',
+          lat: 52.1,
+          lng: 5.1,
+          timestamp: DateTime(2025, 1, 1, 12, 0),
+        );
+
+        // Pre-populate cache so it returns something (proves it skipped empty backend)
+        TripRouteHelper.cachePolyline('empty-poly-trip', 'cached_fallback');
+
+        final trip = _createTrip(
+          id: 'empty-poly-trip',
+          locations: [loc1, loc2],
+          encodedPolyline: '',
+        );
+
+        final result = await TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'cached_fallback');
+      });
+
+      test('returns backend polyline even with fewer than 2 locations',
+          () async {
+        // Backend can have a polyline from before a location was deleted
+        // or from a planned route — we should trust it
+        final trip = _createTrip(
+          id: 'single-loc-backend',
+          locations: [
+            _createLocation(
+              id: 'loc1',
+              lat: 52.0,
+              lng: 5.0,
+              timestamp: DateTime(2025, 1, 1),
+            ),
+          ],
+          encodedPolyline: 'backend_single_loc_polyline',
+        );
+
+        final result = await TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'backend_single_loc_polyline');
+      });
     });
   });
 }
@@ -174,6 +265,7 @@ void main() {
 Trip _createTrip({
   String id = 'test-trip-id',
   List<TripLocation>? locations,
+  String? encodedPolyline,
 }) {
   return Trip(
     id: id,
@@ -185,6 +277,7 @@ Trip _createTrip({
     createdAt: DateTime(2025, 1, 1),
     updatedAt: DateTime(2025, 1, 1),
     locations: locations,
+    encodedPolyline: encodedPolyline,
   );
 }
 

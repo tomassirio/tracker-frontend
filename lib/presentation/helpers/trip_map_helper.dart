@@ -185,46 +185,47 @@ class TripMapHelper {
         );
       }
 
-      // Get route from Directions API (or straight lines on web)
+      // Get route: prefer backend-computed polyline, fallback to Directions API
       if (waypoints.length > 1) {
-        try {
-          final apiKey = ApiEndpoints.googleMapsApiKey;
+        // Try backend-provided encoded polyline first (zero API calls)
+        if (trip.encodedPolyline != null && trip.encodedPolyline!.isNotEmpty) {
+          try {
+            final routePoints = GoogleRoutesApiClient.decodePolyline(
+              trip.encodedPolyline!,
+            );
+            TripRouteHelper.cachePolyline(trip.id, trip.encodedPolyline!);
 
-          final directionsService = DirectionsService(apiKey);
-          final routePoints = await directionsService.getDirections(waypoints);
-
-          // Cache the encoded polyline so card miniatures can reuse it
-          // without making additional API calls
-          final encoded = GoogleRoutesApiClient.encodePolyline(routePoints);
-          TripRouteHelper.cachePolyline(trip.id, encoded);
-
-          // Create polyline with the route points
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('route'),
-              points: routePoints,
-              color: Colors.blue,
-              width: 5,
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
-            ),
-          );
-        } catch (e) {
-          // Fallback to straight lines if Directions API fails
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('route'),
-              points: waypoints,
-              color: Colors.red,
-              width: 4,
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-            ),
+            polylines.add(
+              Polyline(
+                polylineId: const PolylineId('route'),
+                points: routePoints,
+                color: Colors.blue,
+                width: 5,
+                geodesic: false,
+                visible: true,
+                startCap: Cap.roundCap,
+                endCap: Cap.roundCap,
+                jointType: JointType.round,
+              ),
+            );
+          } catch (e) {
+            // Backend polyline decode failed — fall through to Directions API
+            debugPrint(
+              'TripMapHelper: Failed to decode backend polyline, '
+              'falling back to Directions API: $e',
+            );
+            await _addDirectionsPolyline(
+              trip,
+              waypoints,
+              polylines,
+            );
+          }
+        } else {
+          // No backend polyline — use Directions API (existing behavior)
+          await _addDirectionsPolyline(
+            trip,
+            waypoints,
+            polylines,
           );
         }
       }
@@ -237,6 +238,52 @@ class TripMapHelper {
     }
 
     return MapData(markers: markers, polylines: polylines);
+  }
+
+  /// Fetches a road-snapped route via Directions API and adds it to
+  /// [polylines]. Caches the result for card miniatures. Falls back to
+  /// straight lines on failure.
+  static Future<void> _addDirectionsPolyline(
+    Trip trip,
+    List<LatLng> waypoints,
+    Set<Polyline> polylines,
+  ) async {
+    try {
+      final apiKey = ApiEndpoints.googleMapsApiKey;
+      final directionsService = DirectionsService(apiKey);
+      final routePoints = await directionsService.getDirections(waypoints);
+
+      final encoded = GoogleRoutesApiClient.encodePolyline(routePoints);
+      TripRouteHelper.cachePolyline(trip.id, encoded);
+
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('route'),
+          points: routePoints,
+          color: Colors.blue,
+          width: 5,
+          geodesic: false,
+          visible: true,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+          jointType: JointType.round,
+        ),
+      );
+    } catch (e) {
+      // Fallback to straight lines if Directions API fails
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('route'),
+          points: waypoints,
+          color: Colors.red,
+          width: 4,
+          geodesic: false,
+          visible: true,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+        ),
+      );
+    }
   }
 
   /// Creates planned route map data with directions API

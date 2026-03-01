@@ -55,15 +55,22 @@ class TripRouteHelper {
 
   /// Fetches a road-snapped encoded polyline for a trip's locations.
   ///
-  /// 1. Checks the in-memory [_polylineCache] first (instant).
-  /// 2. Falls back to [DirectionsService.getDirections], which itself
-  ///    caches individual segments — so if the trip detail screen already
-  ///    computed the route, no Google API calls are made.
-  /// 3. On any failure, falls back to encoding the raw sorted points as
-  ///    a straight-line polyline.
+  /// Priority order:
+  /// 1. Backend-provided [Trip.encodedPolyline] (zero API calls — best case).
+  /// 2. In-memory [_polylineCache] (instant, survives navigation).
+  /// 3. Client-side [DirectionsService.getDirections] (uses segment cache,
+  ///    so if the trip detail screen already computed the route, no Google
+  ///    API calls are made).
+  /// 4. Straight-line fallback encoding the raw sorted points.
   ///
   /// Returns null only if the trip has fewer than 2 locations.
   static Future<String?> fetchEncodedPolyline(Trip trip) async {
+    // 0. Backend-provided polyline (best case: zero API calls)
+    if (trip.encodedPolyline != null && trip.encodedPolyline!.isNotEmpty) {
+      _polylineCache[trip.id] = trip.encodedPolyline!;
+      return trip.encodedPolyline;
+    }
+
     if (trip.locations == null || trip.locations!.length < 2) return null;
 
     // 1. Check trip-level polyline cache

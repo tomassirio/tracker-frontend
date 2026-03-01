@@ -51,6 +51,9 @@ class Trip {
   final PlannedWaypoint? plannedStartLocation;
   final PlannedWaypoint? plannedEndLocation;
   final List<PlannedWaypoint>? plannedWaypoints;
+  // Backend-computed encoded polyline (Google Encoded Polyline Algorithm)
+  final String? encodedPolyline;
+  final DateTime? polylineUpdatedAt;
 
   /// Default update refresh interval in seconds (30 minutes)
   static const int defaultUpdateRefresh = 1800;
@@ -88,6 +91,8 @@ class Trip {
     this.plannedStartLocation,
     this.plannedEndLocation,
     this.plannedWaypoints,
+    this.encodedPolyline,
+    this.polylineUpdatedAt,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -177,6 +182,10 @@ class Trip {
       plannedStartLocation: plannedStart,
       plannedEndLocation: plannedEnd,
       plannedWaypoints: plannedWaypoints,
+      encodedPolyline: json['encodedPolyline'] as String?,
+      polylineUpdatedAt: json['polylineUpdatedAt'] != null
+          ? DateTime.tryParse(json['polylineUpdatedAt'] as String)
+          : null,
     );
   }
 
@@ -208,6 +217,9 @@ class Trip {
         if (plannedWaypoints != null)
           'plannedWaypoints':
               plannedWaypoints!.map((wp) => wp.toJson()).toList(),
+        if (encodedPolyline != null) 'encodedPolyline': encodedPolyline,
+        if (polylineUpdatedAt != null)
+          'polylineUpdatedAt': polylineUpdatedAt!.toIso8601String(),
       };
 
   /// Check if trip has planned route from a trip plan
@@ -240,6 +252,8 @@ class Trip {
     PlannedWaypoint? plannedStartLocation,
     PlannedWaypoint? plannedEndLocation,
     List<PlannedWaypoint>? plannedWaypoints,
+    String? encodedPolyline,
+    DateTime? polylineUpdatedAt,
   }) {
     return Trip(
       id: id ?? this.id,
@@ -263,6 +277,8 @@ class Trip {
       plannedStartLocation: plannedStartLocation ?? this.plannedStartLocation,
       plannedEndLocation: plannedEndLocation ?? this.plannedEndLocation,
       plannedWaypoints: plannedWaypoints ?? this.plannedWaypoints,
+      encodedPolyline: encodedPolyline ?? this.encodedPolyline,
+      polylineUpdatedAt: polylineUpdatedAt ?? this.polylineUpdatedAt,
     );
   }
 }
