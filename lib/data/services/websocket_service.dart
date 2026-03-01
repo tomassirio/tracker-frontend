@@ -249,6 +249,8 @@ class WebSocketService {
         return CommentReactionEvent.fromJson(data, isRemoval: false);
       case WebSocketEventType.commentReactionRemoved:
         return CommentReactionEvent.fromJson(data, isRemoval: true);
+      case WebSocketEventType.commentReactionReplaced:
+        return CommentReactionEvent.fromJson(data, isRemoval: false);
 
       // Trip plan events
       case WebSocketEventType.tripPlanCreated:
