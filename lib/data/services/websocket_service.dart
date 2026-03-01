@@ -122,10 +122,10 @@ class WebSocketService {
     
     if (_subscribedTrips.contains(tripId)) {
       _subscribedTrips.remove(tripId);
-      if (isConnected) {
-        _client?.unsubscribe(ApiEndpoints.wsTripTopic(tripId));
-        debugPrint('WebSocketService: Unsubscribed from trip $tripId');
-      }
+      // Always call unsubscribe to clean up client-side tracking,
+      // even if not connected (the client will handle it gracefully)
+      _client?.unsubscribe(ApiEndpoints.wsTripTopic(tripId));
+      debugPrint('WebSocketService: Unsubscribed from trip $tripId');
     }
 
     // Close and remove the controller
@@ -173,10 +173,10 @@ class WebSocketService {
   void unsubscribeFromUser(String userId) {
     if (_subscribedUsers.contains(userId)) {
       _subscribedUsers.remove(userId);
-      if (isConnected) {
-        _client?.unsubscribe(ApiEndpoints.wsUserTopic(userId));
-        debugPrint('WebSocketService: Unsubscribed from user $userId');
-      }
+      // Always call unsubscribe to clean up client-side tracking,
+      // even if not connected (the client will handle it gracefully)
+      _client?.unsubscribe(ApiEndpoints.wsUserTopic(userId));
+      debugPrint('WebSocketService: Unsubscribed from user $userId');
     }
 
     // Close and remove the controller

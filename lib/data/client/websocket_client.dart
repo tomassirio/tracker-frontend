@@ -287,6 +287,8 @@ class WebSocketClient {
   void _handleError(dynamic error) {
     debugPrint('WebSocket: Error: $error');
     _updateConnectionState(WebSocketConnectionState.disconnected);
+    // Clear subscription tracking on disconnection so they can be reestablished
+    _topicSubscriptions.clear();
     _scheduleReconnect();
   }
 
@@ -294,6 +296,8 @@ class WebSocketClient {
     debugPrint('WebSocket: Connection closed');
     _updateConnectionState(WebSocketConnectionState.disconnected);
     _stopPingTimer();
+    // Clear subscription tracking on disconnection so they can be reestablished
+    _topicSubscriptions.clear();
     _scheduleReconnect();
   }
 
@@ -359,6 +363,12 @@ class WebSocketClient {
 
   /// Subscribe to a topic
   void subscribe(String topic) {
+    // Check if already subscribed to this topic
+    if (_topicSubscriptions.containsKey(topic)) {
+      debugPrint('WebSocket: Already subscribed to $topic with ID ${_topicSubscriptions[topic]}, skipping duplicate subscription');
+      return;
+    }
+    
     // Generate a unique subscription ID for this topic
     final subscriptionId = 'sub-${_nextSubscriptionId++}';
     _topicSubscriptions[topic] = subscriptionId;
