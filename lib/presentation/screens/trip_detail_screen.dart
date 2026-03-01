@@ -893,8 +893,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       String commentId, ReactionType type) async {
     final currentReaction = _getUserReaction(commentId);
 
+    // Determine the target reaction state for optimistic update
+    // If clicking existing reaction → remove it (newReaction = null)
+    // If clicking different reaction → replace it (newReaction = type)
+    // If no current reaction → add it (newReaction = type)
+    final newReaction = currentReaction == type ? null : type;
+
     // Optimistically update the UI first for immediate feedback
-    _applyOptimisticReactionUpdate(commentId, currentReaction, type);
+    _applyOptimisticReactionUpdate(commentId, currentReaction, newReaction);
 
     try {
       if (currentReaction == type) {
@@ -929,7 +935,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           'Context: commentId=$commentId, targetType=${type.toJson()}, currentReaction=${currentReaction?.toJson()}');
 
       // Revert the optimistic update on error
-      _revertOptimisticReactionUpdate(commentId, currentReaction, type);
+      _revertOptimisticReactionUpdate(commentId, currentReaction, newReaction);
 
       // Handle 409 Conflict (shouldn't happen with proper UI logic, but be safe)
       final errorMessage = e.toString();
@@ -953,14 +959,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _applyOptimisticReactionUpdate(
-      String commentId, ReactionType? currentReaction, ReactionType newType) {
+      String commentId, ReactionType? currentReaction, ReactionType? newType) {
     setState(() {
       _updateReactionInComments(commentId, currentReaction, newType, isOptimistic: true);
     });
   }
 
   void _revertOptimisticReactionUpdate(
-      String commentId, ReactionType? previousReaction, ReactionType attemptedType) {
+      String commentId, ReactionType? previousReaction, ReactionType? attemptedType) {
     setState(() {
       // Revert by applying the reverse operation
       _updateReactionInComments(commentId, attemptedType, previousReaction, isOptimistic: true);
