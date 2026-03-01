@@ -133,11 +133,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _initWebSocket() async {
+    debugPrint('TripDetailScreen: Initializing WebSocket for trip ${_trip.id}');
     // Connect to WebSocket server first
     await _webSocketService.connect();
     // Subscribe to events for this specific trip
     final tripStream = _webSocketService.subscribeToTrip(_trip.id);
     _wsSubscription = tripStream.listen(_handleWebSocketEvent);
+    debugPrint('TripDetailScreen: WebSocket initialized and listening for trip ${_trip.id}');
   }
 
   void _handleWebSocketEvent(WebSocketEvent event) {
@@ -288,6 +290,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleCommentReaction(CommentReactionEvent event) {
+    debugPrint('TripDetailScreen: Handling comment reaction event for comment ${event.commentId}');
+    debugPrint('TripDetailScreen: Event type=${event.type}, reactionType=${event.reactionType}, userId=${event.userId}, isRemoval=${event.isRemoval}');
+    
+    // Normalize reaction type strings to ensure consistent map keys
+    // Backend might send "SMILEY" or "smiley", but we need consistency with ReactionType.toJson()
+    final normalizedReactionType = ReactionType.fromJson(event.reactionType).toJson();
+    final normalizedPreviousReactionType = event.previousReactionType != null
+        ? ReactionType.fromJson(event.previousReactionType!).toJson()
+        : null;
+    
     // Update local state directly from WebSocket event instead of making a GET request
     setState(() {
       // Find and update the comment in top-level comments
@@ -298,17 +310,25 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         final updatedIndividualReactions =
             List<Reaction>.from(comment.individualReactions ?? []);
 
-        if (event.previousReactionType != null) {
+        if (normalizedPreviousReactionType != null) {
           // REPLACED event: remove old reaction and add new reaction
+          // Check if user already has the new reaction (duplicate event detection)
+          final hasNewReaction = updatedIndividualReactions
+              .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+          if (hasNewReaction) {
+            debugPrint('TripDetailScreen: Ignoring duplicate REPLACED event for comment ${event.commentId}');
+            return; // Skip duplicate event
+          }
+          
           // Remove user's old reaction from individualReactions
           updatedIndividualReactions
               .removeWhere((r) => r.userId == event.userId);
           // Decrement old reaction count
-          final oldCount = updatedReactions[event.previousReactionType] ?? 0;
+          final oldCount = updatedReactions[normalizedPreviousReactionType] ?? 0;
           if (oldCount > 1) {
-            updatedReactions[event.previousReactionType!] = oldCount - 1;
+            updatedReactions[normalizedPreviousReactionType] = oldCount - 1;
           } else {
-            updatedReactions.remove(event.previousReactionType);
+            updatedReactions.remove(normalizedPreviousReactionType);
           }
           // Add new reaction to individualReactions
           updatedIndividualReactions.add(Reaction(
@@ -318,21 +338,37 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             timestamp: DateTime.now(),
           ));
           // Increment new reaction count
-          updatedReactions[event.reactionType] =
-              (updatedReactions[event.reactionType] ?? 0) + 1;
+          updatedReactions[normalizedReactionType] =
+              (updatedReactions[normalizedReactionType] ?? 0) + 1;
         } else if (event.isRemoval) {
           // REMOVED event: remove the individual reaction
+          // Check if user actually has this reaction to remove (duplicate event detection)
+          final hasReaction = updatedIndividualReactions
+              .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+          if (!hasReaction) {
+            debugPrint('TripDetailScreen: Ignoring duplicate REMOVED event for comment ${event.commentId}');
+            return; // Skip duplicate event
+          }
+          
           updatedIndividualReactions
-              .removeWhere((r) => r.userId == event.userId);
+              .removeWhere((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
           // Decrement reaction count
-          final currentCount = updatedReactions[event.reactionType] ?? 0;
+          final currentCount = updatedReactions[normalizedReactionType] ?? 0;
           if (currentCount > 1) {
-            updatedReactions[event.reactionType] = currentCount - 1;
+            updatedReactions[normalizedReactionType] = currentCount - 1;
           } else {
-            updatedReactions.remove(event.reactionType);
+            updatedReactions.remove(normalizedReactionType);
           }
         } else {
           // ADDED event: add the individual reaction
+          // Check if user already has this reaction (duplicate event detection)
+          final hasReaction = updatedIndividualReactions
+              .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+          if (hasReaction) {
+            debugPrint('TripDetailScreen: Ignoring duplicate ADDED event for comment ${event.commentId}');
+            return; // Skip duplicate event
+          }
+          
           updatedIndividualReactions.add(Reaction(
             userId: event.userId,
             username: '', // Will be populated from full data refresh if needed
@@ -340,8 +376,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             timestamp: DateTime.now(),
           ));
           // Increment reaction count
-          updatedReactions[event.reactionType] =
-              (updatedReactions[event.reactionType] ?? 0) + 1;
+          updatedReactions[normalizedReactionType] =
+              (updatedReactions[normalizedReactionType] ?? 0) + 1;
         }
 
         // Calculate new total reactions count
@@ -379,15 +415,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           final updatedIndividualReactions =
               List<Reaction>.from(reply.individualReactions ?? []);
 
-          if (event.previousReactionType != null) {
+          if (normalizedPreviousReactionType != null) {
             // REPLACED event: remove old reaction and add new reaction
+            // Check if user already has the new reaction (duplicate event detection)
+            final hasNewReaction = updatedIndividualReactions
+                .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            if (hasNewReaction) {
+              debugPrint('TripDetailScreen: Ignoring duplicate REPLACED event for reply ${event.commentId}');
+              return; // Skip duplicate event
+            }
+            
             updatedIndividualReactions
                 .removeWhere((r) => r.userId == event.userId);
-            final oldCount = updatedReactions[event.previousReactionType] ?? 0;
+            final oldCount = updatedReactions[normalizedPreviousReactionType] ?? 0;
             if (oldCount > 1) {
-              updatedReactions[event.previousReactionType!] = oldCount - 1;
+              updatedReactions[normalizedPreviousReactionType] = oldCount - 1;
             } else {
-              updatedReactions.remove(event.previousReactionType);
+              updatedReactions.remove(normalizedPreviousReactionType);
             }
             updatedIndividualReactions.add(Reaction(
               userId: event.userId,
@@ -395,28 +439,44 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               reactionType: ReactionType.fromJson(event.reactionType),
               timestamp: DateTime.now(),
             ));
-            updatedReactions[event.reactionType] =
-                (updatedReactions[event.reactionType] ?? 0) + 1;
+            updatedReactions[normalizedReactionType] =
+                (updatedReactions[normalizedReactionType] ?? 0) + 1;
           } else if (event.isRemoval) {
             // REMOVED event
+            // Check if user actually has this reaction to remove (duplicate event detection)
+            final hasReaction = updatedIndividualReactions
+                .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            if (!hasReaction) {
+              debugPrint('TripDetailScreen: Ignoring duplicate REMOVED event for reply ${event.commentId}');
+              return; // Skip duplicate event
+            }
+            
             updatedIndividualReactions
-                .removeWhere((r) => r.userId == event.userId);
-            final currentCount = updatedReactions[event.reactionType] ?? 0;
+                .removeWhere((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            final currentCount = updatedReactions[normalizedReactionType] ?? 0;
             if (currentCount > 1) {
-              updatedReactions[event.reactionType] = currentCount - 1;
+              updatedReactions[normalizedReactionType] = currentCount - 1;
             } else {
-              updatedReactions.remove(event.reactionType);
+              updatedReactions.remove(normalizedReactionType);
             }
           } else {
             // ADDED event
+            // Check if user already has this reaction (duplicate event detection)
+            final hasReaction = updatedIndividualReactions
+                .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            if (hasReaction) {
+              debugPrint('TripDetailScreen: Ignoring duplicate ADDED event for reply ${event.commentId}');
+              return; // Skip duplicate event
+            }
+            
             updatedIndividualReactions.add(Reaction(
               userId: event.userId,
               username: '',
               reactionType: ReactionType.fromJson(event.reactionType),
               timestamp: DateTime.now(),
             ));
-            updatedReactions[event.reactionType] =
-                (updatedReactions[event.reactionType] ?? 0) + 1;
+            updatedReactions[normalizedReactionType] =
+                (updatedReactions[normalizedReactionType] ?? 0) + 1;
           }
 
           final newReactionsCount =
@@ -473,8 +533,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   @override
   void dispose() {
+    debugPrint('TripDetailScreen: Disposing for trip ${_trip.id}');
     _wsSubscription?.cancel();
+    debugPrint('TripDetailScreen: Cancelled WebSocket subscription');
     _webSocketService.unsubscribeFromTrip(_trip.id);
+    debugPrint('TripDetailScreen: Unsubscribed from trip');
     _commentController.dispose();
     _scrollController.dispose();
     _searchController.dispose();
@@ -837,6 +900,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       String commentId, ReactionType type) async {
     final currentReaction = _getUserReaction(commentId);
 
+    // Determine the target reaction state for optimistic update
+    // If clicking existing reaction → remove it (newReaction = null)
+    // If clicking different reaction → replace it (newReaction = type)
+    // If no current reaction → add it (newReaction = type)
+    final newReaction = currentReaction == type ? null : type;
+
+    // Optimistically update the UI first for immediate feedback
+    _applyOptimisticReactionUpdate(commentId, currentReaction, newReaction);
+
     try {
       if (currentReaction == type) {
         // User clicked their existing reaction → remove it
@@ -869,6 +941,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       debugPrint(
           'Context: commentId=$commentId, targetType=${type.toJson()}, currentReaction=${currentReaction?.toJson()}');
 
+      // Revert the optimistic update on error
+      _revertOptimisticReactionUpdate(commentId, currentReaction, newReaction);
+
       // Handle 409 Conflict (shouldn't happen with proper UI logic, but be safe)
       final errorMessage = e.toString();
       if (errorMessage.contains('409') || errorMessage.contains('Conflict')) {
@@ -888,6 +963,158 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         }
       }
     }
+  }
+
+  void _applyOptimisticReactionUpdate(
+      String commentId, ReactionType? currentReaction, ReactionType? newType) {
+    setState(() {
+      _updateReactionInComments(commentId, currentReaction, newType, isOptimistic: true);
+    });
+  }
+
+  void _revertOptimisticReactionUpdate(
+      String commentId, ReactionType? previousReaction, ReactionType? attemptedType) {
+    setState(() {
+      // Revert by applying the reverse operation
+      _updateReactionInComments(commentId, attemptedType, previousReaction, isOptimistic: true);
+    });
+  }
+
+  void _updateReactionInComments(
+      String commentId, 
+      ReactionType? oldReaction, 
+      ReactionType? newReaction,
+      {bool isOptimistic = false}) {
+    // Find and update the comment in top-level comments
+    final commentIndex = _comments.indexWhere((c) => c.id == commentId);
+    if (commentIndex != -1) {
+      _updateCommentReaction(_comments, commentIndex, oldReaction, newReaction, isOptimistic);
+      return;
+    }
+
+    // Check in replies
+    for (final parentId in _replies.keys) {
+      final replies = _replies[parentId]!;
+      final replyIndex = replies.indexWhere((c) => c.id == commentId);
+      if (replyIndex != -1) {
+        _updateReplyReaction(parentId, replyIndex, oldReaction, newReaction, isOptimistic);
+        return;
+      }
+    }
+  }
+
+  void _updateCommentReaction(
+      List<Comment> comments,
+      int commentIndex,
+      ReactionType? oldReaction,
+      ReactionType? newReaction,
+      bool isOptimistic) {
+    final comment = comments[commentIndex];
+    final updatedReactions = Map<String, int>.from(comment.reactions ?? {});
+    final updatedIndividualReactions =
+        List<Reaction>.from(comment.individualReactions ?? []);
+
+    // Remove old reaction if exists
+    if (oldReaction != null) {
+      updatedIndividualReactions.removeWhere((r) => r.userId == _userId);
+      final oldCount = updatedReactions[oldReaction.toJson()] ?? 0;
+      if (oldCount > 1) {
+        updatedReactions[oldReaction.toJson()] = oldCount - 1;
+      } else {
+        updatedReactions.remove(oldReaction.toJson());
+      }
+    }
+
+    // Add new reaction if specified
+    if (newReaction != null) {
+      updatedIndividualReactions.add(Reaction(
+        userId: _userId ?? '',
+        username: _username ?? '',
+        reactionType: newReaction,
+        timestamp: DateTime.now(),
+      ));
+      updatedReactions[newReaction.toJson()] =
+          (updatedReactions[newReaction.toJson()] ?? 0) + 1;
+    }
+
+    final newReactionsCount =
+        updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+    comments[commentIndex] = Comment(
+      id: comment.id,
+      tripId: comment.tripId,
+      userId: comment.userId,
+      username: comment.username,
+      userAvatarUrl: comment.userAvatarUrl,
+      message: comment.message,
+      parentCommentId: comment.parentCommentId,
+      reactions: updatedReactions.isEmpty ? null : updatedReactions,
+      individualReactions: updatedIndividualReactions.isEmpty
+          ? null
+          : updatedIndividualReactions,
+      replies: comment.replies,
+      reactionsCount: newReactionsCount,
+      responsesCount: comment.responsesCount,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    );
+  }
+
+  void _updateReplyReaction(
+      String parentId,
+      int replyIndex,
+      ReactionType? oldReaction,
+      ReactionType? newReaction,
+      bool isOptimistic) {
+    final reply = _replies[parentId]![replyIndex];
+    final updatedReactions = Map<String, int>.from(reply.reactions ?? {});
+    final updatedIndividualReactions =
+        List<Reaction>.from(reply.individualReactions ?? []);
+
+    // Remove old reaction if exists
+    if (oldReaction != null) {
+      updatedIndividualReactions.removeWhere((r) => r.userId == _userId);
+      final oldCount = updatedReactions[oldReaction.toJson()] ?? 0;
+      if (oldCount > 1) {
+        updatedReactions[oldReaction.toJson()] = oldCount - 1;
+      } else {
+        updatedReactions.remove(oldReaction.toJson());
+      }
+    }
+
+    // Add new reaction if specified
+    if (newReaction != null) {
+      updatedIndividualReactions.add(Reaction(
+        userId: _userId ?? '',
+        username: _username ?? '',
+        reactionType: newReaction,
+        timestamp: DateTime.now(),
+      ));
+      updatedReactions[newReaction.toJson()] =
+          (updatedReactions[newReaction.toJson()] ?? 0) + 1;
+    }
+
+    final newReactionsCount =
+        updatedReactions.values.fold(0, (sum, count) => sum + count);
+
+    _replies[parentId]![replyIndex] = Comment(
+      id: reply.id,
+      tripId: reply.tripId,
+      userId: reply.userId,
+      username: reply.username,
+      userAvatarUrl: reply.userAvatarUrl,
+      message: reply.message,
+      parentCommentId: reply.parentCommentId,
+      reactions: updatedReactions.isEmpty ? null : updatedReactions,
+      individualReactions: updatedIndividualReactions.isEmpty
+          ? null
+          : updatedIndividualReactions,
+      replies: reply.replies,
+      reactionsCount: newReactionsCount,
+      responsesCount: reply.responsesCount,
+      createdAt: reply.createdAt,
+      updatedAt: reply.updatedAt,
+    );
   }
 
   Future<void> _addReaction(String commentId, ReactionType type) async {
