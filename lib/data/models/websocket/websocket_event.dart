@@ -16,6 +16,7 @@ enum WebSocketEventType {
   // Comment events
   commentAdded,
   commentReaction,
+  commentReactionReplaced,
 
   // Trip plan events
   tripPlanCreated,
@@ -87,6 +88,8 @@ class WebSocketEvent {
         return WebSocketEventType.commentReactionAdded;
       case 'COMMENT_REACTION_REMOVED':
         return WebSocketEventType.commentReactionRemoved;
+      case 'COMMENT_REACTION_REPLACED':
+        return WebSocketEventType.commentReactionReplaced;
 
       // Trip plan events
       case 'TRIP_PLAN_CREATED':
@@ -264,6 +267,7 @@ class CommentReactionEvent extends WebSocketEvent {
   final String reactionType;
   final String userId;
   final bool isRemoval;
+  final String? previousReactionType; // For COMMENT_REACTION_REPLACED events
 
   CommentReactionEvent({
     required String tripId,
@@ -271,12 +275,15 @@ class CommentReactionEvent extends WebSocketEvent {
     required this.reactionType,
     required this.userId,
     required this.isRemoval,
+    this.previousReactionType,
     required super.payload,
     super.timestamp,
   }) : super(
-          type: isRemoval
-              ? WebSocketEventType.commentReactionRemoved
-              : WebSocketEventType.commentReactionAdded,
+          type: previousReactionType != null
+              ? WebSocketEventType.commentReactionReplaced
+              : (isRemoval
+                  ? WebSocketEventType.commentReactionRemoved
+                  : WebSocketEventType.commentReactionAdded),
           tripId: tripId,
         );
 
@@ -290,6 +297,7 @@ class CommentReactionEvent extends WebSocketEvent {
       reactionType: payload['reactionType'] as String? ?? '',
       userId: payload['userId'] as String? ?? '',
       isRemoval: isRemoval,
+      previousReactionType: payload['previousReactionType'] as String?,
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)

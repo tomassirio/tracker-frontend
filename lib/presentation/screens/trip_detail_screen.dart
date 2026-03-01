@@ -155,6 +155,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         break;
       case WebSocketEventType.commentReactionAdded:
       case WebSocketEventType.commentReactionRemoved:
+      case WebSocketEventType.commentReactionReplaced:
         _handleCommentReaction(event as CommentReactionEvent);
         break;
       case WebSocketEventType.tripSettingsUpdated:
@@ -297,8 +298,30 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         final updatedIndividualReactions =
             List<Reaction>.from(comment.individualReactions ?? []);
 
-        if (event.isRemoval) {
-          // Remove the individual reaction
+        if (event.previousReactionType != null) {
+          // REPLACED event: remove old reaction and add new reaction
+          // Remove user's old reaction from individualReactions
+          updatedIndividualReactions
+              .removeWhere((r) => r.userId == event.userId);
+          // Decrement old reaction count
+          final oldCount = updatedReactions[event.previousReactionType] ?? 0;
+          if (oldCount > 1) {
+            updatedReactions[event.previousReactionType!] = oldCount - 1;
+          } else {
+            updatedReactions.remove(event.previousReactionType);
+          }
+          // Add new reaction to individualReactions
+          updatedIndividualReactions.add(Reaction(
+            userId: event.userId,
+            username: '', // Will be populated from full data refresh if needed
+            reactionType: ReactionType.fromJson(event.reactionType),
+            timestamp: DateTime.now(),
+          ));
+          // Increment new reaction count
+          updatedReactions[event.reactionType] =
+              (updatedReactions[event.reactionType] ?? 0) + 1;
+        } else if (event.isRemoval) {
+          // REMOVED event: remove the individual reaction
           updatedIndividualReactions
               .removeWhere((r) => r.userId == event.userId);
           // Decrement reaction count
@@ -309,7 +332,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             updatedReactions.remove(event.reactionType);
           }
         } else {
-          // Add the individual reaction
+          // ADDED event: add the individual reaction
           updatedIndividualReactions.add(Reaction(
             userId: event.userId,
             username: '', // Will be populated from full data refresh if needed
@@ -356,7 +379,26 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           final updatedIndividualReactions =
               List<Reaction>.from(reply.individualReactions ?? []);
 
-          if (event.isRemoval) {
+          if (event.previousReactionType != null) {
+            // REPLACED event: remove old reaction and add new reaction
+            updatedIndividualReactions
+                .removeWhere((r) => r.userId == event.userId);
+            final oldCount = updatedReactions[event.previousReactionType] ?? 0;
+            if (oldCount > 1) {
+              updatedReactions[event.previousReactionType!] = oldCount - 1;
+            } else {
+              updatedReactions.remove(event.previousReactionType);
+            }
+            updatedIndividualReactions.add(Reaction(
+              userId: event.userId,
+              username: '',
+              reactionType: ReactionType.fromJson(event.reactionType),
+              timestamp: DateTime.now(),
+            ));
+            updatedReactions[event.reactionType] =
+                (updatedReactions[event.reactionType] ?? 0) + 1;
+          } else if (event.isRemoval) {
+            // REMOVED event
             updatedIndividualReactions
                 .removeWhere((r) => r.userId == event.userId);
             final currentCount = updatedReactions[event.reactionType] ?? 0;
@@ -366,6 +408,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               updatedReactions.remove(event.reactionType);
             }
           } else {
+            // ADDED event
             updatedIndividualReactions.add(Reaction(
               userId: event.userId,
               username: '',
