@@ -133,11 +133,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _initWebSocket() async {
+    debugPrint('TripDetailScreen: Initializing WebSocket for trip ${_trip.id}');
     // Connect to WebSocket server first
     await _webSocketService.connect();
     // Subscribe to events for this specific trip
     final tripStream = _webSocketService.subscribeToTrip(_trip.id);
     _wsSubscription = tripStream.listen(_handleWebSocketEvent);
+    debugPrint('TripDetailScreen: WebSocket initialized and listening for trip ${_trip.id}');
   }
 
   void _handleWebSocketEvent(WebSocketEvent event) {
@@ -288,6 +290,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleCommentReaction(CommentReactionEvent event) {
+    debugPrint('TripDetailScreen: Handling comment reaction event for comment ${event.commentId}');
+    debugPrint('TripDetailScreen: Event type=${event.type}, reactionType=${event.reactionType}, userId=${event.userId}, isRemoval=${event.isRemoval}');
+    
     // Update local state directly from WebSocket event instead of making a GET request
     setState(() {
       // Find and update the comment in top-level comments
@@ -473,8 +478,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   @override
   void dispose() {
+    debugPrint('TripDetailScreen: Disposing for trip ${_trip.id}');
     _wsSubscription?.cancel();
+    debugPrint('TripDetailScreen: Cancelled WebSocket subscription');
     _webSocketService.unsubscribeFromTrip(_trip.id);
+    debugPrint('TripDetailScreen: Unsubscribed from trip');
     _commentController.dispose();
     _scrollController.dispose();
     _searchController.dispose();

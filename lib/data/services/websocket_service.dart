@@ -90,9 +90,14 @@ class WebSocketService {
 
   /// Subscribe to events for a specific trip
   Stream<WebSocketEvent> subscribeToTrip(String tripId) {
+    debugPrint('WebSocketService: subscribeToTrip called for $tripId');
+    debugPrint('WebSocketService: Controller exists? ${_tripEventControllers.containsKey(tripId)}');
+    debugPrint('WebSocketService: Already subscribed? ${_subscribedTrips.contains(tripId)}');
+    
     if (!_tripEventControllers.containsKey(tripId)) {
       _tripEventControllers[tripId] =
           StreamController<WebSocketEvent>.broadcast();
+      debugPrint('WebSocketService: Created new controller for trip $tripId');
     }
 
     if (!_subscribedTrips.contains(tripId)) {
@@ -100,7 +105,11 @@ class WebSocketService {
       if (isConnected) {
         _client?.subscribe(ApiEndpoints.wsTripTopic(tripId));
         debugPrint('WebSocketService: Subscribed to trip $tripId');
+      } else {
+        debugPrint('WebSocketService: NOT connected, cannot subscribe to trip $tripId');
       }
+    } else {
+      debugPrint('WebSocketService: Trip $tripId already in subscribed set, skipping subscribe');
     }
 
     return _tripEventControllers[tripId]!.stream;
@@ -108,6 +117,9 @@ class WebSocketService {
 
   /// Unsubscribe from events for a specific trip
   void unsubscribeFromTrip(String tripId) {
+    debugPrint('WebSocketService: unsubscribeFromTrip called for $tripId');
+    debugPrint('WebSocketService: Was subscribed? ${_subscribedTrips.contains(tripId)}');
+    
     if (_subscribedTrips.contains(tripId)) {
       _subscribedTrips.remove(tripId);
       if (isConnected) {
@@ -117,8 +129,11 @@ class WebSocketService {
     }
 
     // Close and remove the controller
-    _tripEventControllers[tripId]?.close();
-    _tripEventControllers.remove(tripId);
+    if (_tripEventControllers.containsKey(tripId)) {
+      _tripEventControllers[tripId]?.close();
+      _tripEventControllers.remove(tripId);
+      debugPrint('WebSocketService: Closed and removed controller for trip $tripId');
+    }
   }
 
   /// Subscribe to multiple trips at once
