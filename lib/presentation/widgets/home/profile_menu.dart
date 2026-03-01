@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class ProfileMenu extends StatelessWidget {
   final String username;
   final String? userId;
-  final String? displayName;
   final VoidCallback onLogout;
   final VoidCallback onProfile;
 
@@ -12,16 +11,9 @@ class ProfileMenu extends StatelessWidget {
     super.key,
     required this.username,
     this.userId,
-    this.displayName,
     required this.onLogout,
     required this.onProfile,
   });
-
-  /// Get the initial letter for the avatar, preferring displayName over username
-  String get _avatarInitial {
-    final name = displayName ?? username;
-    return name.isNotEmpty ? name[0].toUpperCase() : '?';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +41,7 @@ class ProfileMenu extends StatelessWidget {
                     CircleAvatar(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       child: Text(
-                        _avatarInitial,
+                        username.isNotEmpty ? username[0].toUpperCase() : '?',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -62,19 +54,20 @@ class ProfileMenu extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            displayName ?? username,
+                            username,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
-                          Text(
-                            '@$username',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                          if (userId != null)
+                            Text(
+                              'ID: ${userId?.substring(0, 8)}...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),

@@ -17,6 +17,7 @@ class TripDescriptionField extends StatelessWidget {
         prefixIcon: Icon(Icons.description),
       ),
       maxLines: 3,
+      textCapitalization: TextCapitalization.sentences,
     );
   }
 }

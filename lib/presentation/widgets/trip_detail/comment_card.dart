@@ -8,21 +8,27 @@ import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 class CommentCard extends StatelessWidget {
   final Comment comment;
   final String tripUserId;
+  final String? currentUserId;
   final bool isExpanded;
   final List<Comment> replies;
   final VoidCallback onReact;
+  final Function(ReactionType) onReactionChipTap;
   final VoidCallback onReply;
   final VoidCallback onToggleReplies;
+  final bool isLoggedIn;
 
   const CommentCard({
     super.key,
     required this.comment,
     required this.tripUserId,
+    this.currentUserId,
     required this.isExpanded,
     required this.replies,
     required this.onReact,
+    required this.onReactionChipTap,
     required this.onReply,
     required this.onToggleReplies,
+    required this.isLoggedIn,
   });
 
   void _navigateToProfile(BuildContext context) {
@@ -132,34 +138,36 @@ class CommentCard extends StatelessWidget {
           ],
           Row(
             children: [
-              InkWell(
-                onTap: onReact,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add_reaction_outlined,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'React',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                    ),
-                  ],
+              if (isLoggedIn) ...[
+                InkWell(
+                  onTap: onReact,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.add_reaction_outlined,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'React',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              InkWell(
-                onTap: onReply,
-                child: Row(
-                  children: [
-                    Icon(Icons.reply, size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    const Text('Reply', style: TextStyle(fontSize: 12)),
-                  ],
+                const SizedBox(width: 16),
+                InkWell(
+                  onTap: onReply,
+                  child: Row(
+                    children: [
+                      Icon(Icons.reply, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      const Text('Reply', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
                 ),
-              ),
+              ],
               if (comment.responsesCount > 0) ...[
                 const SizedBox(width: 16),
                 InkWell(
@@ -194,29 +202,85 @@ class CommentCard extends StatelessWidget {
 
   Widget _buildReactionChip(String reactionType, int count) {
     final emoji = _getReactionEmoji(reactionType);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
+    final type = _getReactionType(reactionType);
+    
+    // Check if current user has this reaction
+    final userHasReaction = currentUserId != null &&
+        comment.individualReactions != null &&
+        comment.individualReactions!.any((r) =>
+            r.userId == currentUserId &&
+            r.reactionType.toJson().toUpperCase() == reactionType.toUpperCase());
+
+    // Get list of usernames who reacted with this emoji
+    final reactedUsernames = comment.individualReactions
+            ?.where((r) =>
+                r.reactionType.toJson().toUpperCase() == reactionType.toUpperCase())
+            .map((r) => r.username.isNotEmpty ? r.username : 'Unknown')
+            .toList() ??
+        [];
+
+    final tooltipMessage = reactedUsernames.isEmpty
+        ? '$count ${count == 1 ? 'person' : 'people'} reacted with $emoji'
+        : reactedUsernames.length <= 3
+            ? '${reactedUsernames.join(', ')} reacted with $emoji'
+            : '${reactedUsernames.take(3).join(', ')}, and ${reactedUsernames.length - 3} others reacted with $emoji';
+
+    return Tooltip(
+      message: tooltipMessage,
+      child: InkWell(
+        onTap: isLoggedIn ? () => onReactionChipTap(type) : null,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 4),
-          Text(
-            count.toString(),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: userHasReaction
+                ? WandererTheme.primaryOrange.withOpacity(0.2)
+                : Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: userHasReaction
+                  ? WandererTheme.primaryOrange
+                  : Colors.grey[300]!,
+              width: userHasReaction ? 2 : 1,
             ),
           ),
-        ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 4),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: userHasReaction ? FontWeight.bold : FontWeight.w600,
+                  color: userHasReaction
+                      ? WandererTheme.primaryOrange
+                      : Colors.grey[700],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  ReactionType _getReactionType(String reactionType) {
+    switch (reactionType.toUpperCase()) {
+      case 'HEART':
+        return ReactionType.heart;
+      case 'SMILEY':
+        return ReactionType.smiley;
+      case 'LAUGH':
+        return ReactionType.laugh;
+      case 'SAD':
+        return ReactionType.sad;
+      case 'ANGER':
+        return ReactionType.anger;
+      default:
+        return ReactionType.heart;
+    }
   }
 
   String _getReactionEmoji(String reactionType) {

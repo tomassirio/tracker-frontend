@@ -79,8 +79,10 @@ class TripDetailRepository {
   }
 
   /// Removes a reaction from a comment
-  Future<void> removeReaction(String commentId) async {
-    await _commentService.removeReaction(commentId);
+  Future<void> removeReaction(
+      String commentId, ReactionType reactionType) async {
+    final request = AddReactionRequest(reactionType: reactionType);
+    await _commentService.removeReaction(commentId, request);
   }
 
   /// Changes the status of a trip
@@ -117,6 +119,16 @@ class TripDetailRepository {
   /// Gets the current user's display name
   Future<String?> getCurrentDisplayName() async {
     return await _authService.getCurrentDisplayName();
+  }
+
+  /// Gets the current user's avatar URL
+  Future<String?> getCurrentAvatarUrl() async {
+    return await _authService.getCurrentAvatarUrl();
+  }
+
+  /// Refreshes user details (displayName, avatarUrl) from the API
+  Future<bool> refreshUserDetails() async {
+    return await _authService.refreshUserDetails();
   }
 
   /// Gets the current user's ID

@@ -28,6 +28,16 @@ class HomeRepository {
     return await _authService.getCurrentDisplayName();
   }
 
+  /// Gets the current user's avatar URL
+  Future<String?> getCurrentAvatarUrl() async {
+    return await _authService.getCurrentAvatarUrl();
+  }
+
+  /// Refreshes user details (displayName, avatarUrl) from the API
+  Future<bool> refreshUserDetails() async {
+    return await _authService.refreshUserDetails();
+  }
+
   /// Gets the current user's ID
   Future<String?> getCurrentUserId() async {
     return await _authService.getCurrentUserId();

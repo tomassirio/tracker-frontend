@@ -242,6 +242,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                           ),
                         ),
                         maxLines: 2,
+                        textCapitalization: TextCapitalization.sentences,
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _handleSend(),
                       ),

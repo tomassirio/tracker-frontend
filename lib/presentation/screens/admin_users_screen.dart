@@ -29,6 +29,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String? _userId;
   String? _username;
   String? _displayName;
+  String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 6; // Admin users index
@@ -63,14 +64,21 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   Future<void> _loadUserInfo() async {
     final username = await _homeRepository.getCurrentUsername();
     final userId = await _homeRepository.getCurrentUserId();
-    final displayName = await _homeRepository.getCurrentDisplayName();
     final isLoggedIn = await _homeRepository.isLoggedIn();
     final isAdmin = await _homeRepository.isAdmin();
+
+    if (isLoggedIn) {
+      await _homeRepository.refreshUserDetails();
+    }
+
+    final displayName = await _homeRepository.getCurrentDisplayName();
+    final avatarUrl = await _homeRepository.getCurrentAvatarUrl();
 
     setState(() {
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -321,6 +329,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onLogout: _handleLogout,
         onSettings: _handleSettings,
         onProfile: () => AuthNavigationHelper.navigateToOwnProfile(context),
@@ -329,6 +338,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _handleLogout,
         onSettings: _handleSettings,
@@ -477,6 +487,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
+                textCapitalization: TextCapitalization.none,
               ),
             ],
           ),
@@ -512,6 +523,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
+                textCapitalization: TextCapitalization.none,
               ),
             ),
           ],

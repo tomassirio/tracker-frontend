@@ -49,6 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _currentUserId; // Track the logged-in user's ID
   String? _currentUsername; // Track the logged-in user's username
   String? _currentDisplayName; // Track the logged-in user's display name
+  String? _currentAvatarUrl; // Track the logged-in user's avatar URL
   final int _selectedSidebarIndex = 4; // Profile is index 4
 
   // Actual counts loaded from API (for own profile)
@@ -115,6 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _currentUserId = currentUser.id;
             _currentUsername = currentUser.username;
             _currentDisplayName = currentUser.displayName;
+            _currentAvatarUrl = currentUser.avatarUrl;
           });
         } catch (e) {
           // Ignore error loading current user
@@ -358,6 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   labelText: 'Display Name',
                   hintText: 'Your display name',
                 ),
+                textCapitalization: TextCapitalization.words,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -367,6 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   hintText: 'Tell us about yourself',
                 ),
                 maxLines: 3,
+                textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -375,6 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   labelText: 'Avatar URL',
                   hintText: 'https://example.com/avatar.jpg',
                 ),
+                textCapitalization: TextCapitalization.none,
               ),
             ],
           ),
@@ -521,9 +526,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Re-fetch profile to get the updated data
       try {
         final refreshedProfile = await _repository.getMyProfile();
+        // Save updated details to local storage for sidebar/appbar
+        await _repository.refreshUserDetails();
         setState(() {
           _profile = refreshedProfile;
           _currentDisplayName = refreshedProfile.displayName;
+          _currentAvatarUrl = refreshedProfile.avatarUrl;
         });
       } catch (_) {
         // If re-fetch fails, optimistically update local state
@@ -545,6 +553,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               createdAt: _profile!.createdAt,
             );
             _currentDisplayName = displayName.isEmpty ? null : displayName;
+            _currentAvatarUrl = avatarUrl.isEmpty ? null : avatarUrl;
           });
         }
       }
@@ -571,6 +580,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         username: _currentUsername,
         userId: _currentUserId,
         displayName: _currentDisplayName,
+        avatarUrl: _currentAvatarUrl,
         onProfile: () {},
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -579,6 +589,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         username: _currentUsername,
         userId: _currentUserId,
         displayName: _currentDisplayName,
+        avatarUrl: _currentAvatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
@@ -637,12 +648,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader() {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 500;
+
+            final userInfoSection = Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
                   radius: 40,
@@ -680,6 +696,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: Colors.blue,
                             ),
                           ],
+                          if (!isWide) ...[
+                            const Spacer(),
+                            _buildActionButtons(),
+                          ],
                         ],
                       ),
                       Text(
@@ -687,67 +707,134 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        _profile!.email,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      SelectableText(
+                        _profile!.id,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: primaryColor.withValues(alpha: 0.8),
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                if (_isViewingOwnProfile)
-                  // Only show edit button for own profile
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: _showEditProfileDialog,
-                    tooltip: 'Edit Profile',
-                  )
-                else
-                  // Show follow/friend request buttons for other users
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          _isFollowingUser
-                              ? Icons.person_remove
-                              : Icons.person_add,
-                        ),
-                        onPressed: _handleFollowUser,
-                        tooltip: _isFollowingUser ? 'Unfollow' : 'Follow',
-                        color: _isFollowingUser ? Colors.blue : null,
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          _isAlreadyFriends
-                              ? Icons.people
-                              : _hasSentFriendRequest
-                                  ? Icons.person_add_disabled
-                                  : Icons.person_add_alt,
-                        ),
-                        onPressed: _handleSendFriendRequest,
-                        tooltip: _isAlreadyFriends
-                            ? 'Unfriend'
-                            : _hasSentFriendRequest
-                                ? 'Cancel Friend Request'
-                                : 'Send Friend Request',
-                        color: _isAlreadyFriends
-                            ? Colors.green
-                            : _hasSentFriendRequest
-                                ? Colors.orange
-                                : null,
-                      ),
-                    ],
-                  ),
               ],
-            ),
-            if (_profile!.bio != null) ...[
-              const SizedBox(height: 16),
-              Text(_profile!.bio!, style: const TextStyle(fontSize: 16)),
-            ],
-          ],
+            );
+
+            final bioSection = Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: primaryColor.withValues(alpha: 0.25),
+                ),
+              ),
+              constraints: const BoxConstraints(minHeight: 60),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _profile!.bio != null && _profile!.bio!.isNotEmpty
+                        ? Text(
+                            _profile!.bio!,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.grey[800],
+                              height: 1.4,
+                            ),
+                          )
+                        : Text(
+                            _isViewingOwnProfile
+                                ? 'Tap the pencil to add a bio...'
+                                : 'No bio yet.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[400],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                  ),
+                  if (isWide) _buildActionButtons(),
+                ],
+              ),
+            );
+
+            if (isWide) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: constraints.maxWidth * 0.35,
+                    child: userInfoSection,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(child: bioSection),
+                ],
+              );
+            } else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  userInfoSection,
+                  const SizedBox(height: 12),
+                  bioSection,
+                ],
+              );
+            }
+          },
         ),
       ),
     );
+  }
+
+  Widget _buildActionButtons() {
+    if (_isViewingOwnProfile) {
+      return IconButton(
+        icon: const Icon(Icons.edit),
+        onPressed: _showEditProfileDialog,
+        tooltip: 'Edit Profile',
+        iconSize: 20,
+      );
+    } else {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(
+              _isFollowingUser ? Icons.person_remove : Icons.person_add,
+            ),
+            onPressed: _handleFollowUser,
+            tooltip: _isFollowingUser ? 'Unfollow' : 'Follow',
+            color: _isFollowingUser ? Colors.blue : null,
+            iconSize: 20,
+          ),
+          IconButton(
+            icon: Icon(
+              _isAlreadyFriends
+                  ? Icons.people
+                  : _hasSentFriendRequest
+                      ? Icons.person_add_disabled
+                      : Icons.person_add_alt,
+            ),
+            onPressed: _handleSendFriendRequest,
+            tooltip: _isAlreadyFriends
+                ? 'Unfriend'
+                : _hasSentFriendRequest
+                    ? 'Cancel Friend Request'
+                    : 'Send Friend Request',
+            color: _isAlreadyFriends
+                ? Colors.green
+                : _hasSentFriendRequest
+                    ? Colors.orange
+                    : null,
+            iconSize: 20,
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildStatsRow() {

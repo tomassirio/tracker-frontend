@@ -41,6 +41,10 @@ class WebSocketClient {
 
   bool _shouldReconnect = true;
   bool _isRefreshingToken = false;
+  
+  // Track subscription IDs for STOMP protocol
+  int _nextSubscriptionId = 0;
+  final Map<String, String> _topicSubscriptions = {}; // topic -> subscription ID
 
   WebSocketClient({
     TokenStorage? tokenStorage,
@@ -283,6 +287,8 @@ class WebSocketClient {
   void _handleError(dynamic error) {
     debugPrint('WebSocket: Error: $error');
     _updateConnectionState(WebSocketConnectionState.disconnected);
+    // Clear subscription tracking on disconnection so they can be reestablished
+    _topicSubscriptions.clear();
     _scheduleReconnect();
   }
 
@@ -290,6 +296,8 @@ class WebSocketClient {
     debugPrint('WebSocket: Connection closed');
     _updateConnectionState(WebSocketConnectionState.disconnected);
     _stopPingTimer();
+    // Clear subscription tracking on disconnection so they can be reestablished
+    _topicSubscriptions.clear();
     _scheduleReconnect();
   }
 
@@ -355,18 +363,43 @@ class WebSocketClient {
 
   /// Subscribe to a topic
   void subscribe(String topic) {
+    // Check if already subscribed to this topic
+    if (_topicSubscriptions.containsKey(topic)) {
+      debugPrint('WebSocket: Already subscribed to $topic with ID ${_topicSubscriptions[topic]}, skipping duplicate subscription');
+      return;
+    }
+    
+    // Check if we're actually connected before subscribing
+    if (!isConnected || _channel == null) {
+      debugPrint('WebSocket: Cannot subscribe to $topic - not connected');
+      return;
+    }
+    
+    // Generate a unique subscription ID for this topic
+    final subscriptionId = 'sub-${_nextSubscriptionId++}';
+    _topicSubscriptions[topic] = subscriptionId;
+    
     send({
       'type': 'SUBSCRIBE',
       'destination': topic,
+      'id': subscriptionId,
     });
+    debugPrint('WebSocket: Subscribed to $topic with ID $subscriptionId');
   }
 
   /// Unsubscribe from a topic
   void unsubscribe(String topic) {
-    send({
-      'type': 'UNSUBSCRIBE',
-      'destination': topic,
-    });
+    final subscriptionId = _topicSubscriptions[topic];
+    if (subscriptionId != null) {
+      send({
+        'type': 'UNSUBSCRIBE',
+        'id': subscriptionId,
+      });
+      _topicSubscriptions.remove(topic);
+      debugPrint('WebSocket: Unsubscribed from $topic (ID: $subscriptionId)');
+    } else {
+      debugPrint('WebSocket: Cannot unsubscribe from $topic - no subscription ID found');
+    }
   }
 
   /// Disconnect from the WebSocket server
@@ -381,6 +414,8 @@ class WebSocketClient {
 
     _channel = null;
     _subscription = null;
+    _topicSubscriptions.clear(); // Clear subscription tracking
+    _nextSubscriptionId = 0; // Reset subscription ID counter
 
     _updateConnectionState(WebSocketConnectionState.disconnected);
   }

@@ -32,6 +32,7 @@ class Trip {
   final String userId;
   final String name;
   final String username;
+  final String? avatarUrl;
   final String? description;
   final Visibility visibility;
   final TripStatus status;
@@ -70,6 +71,7 @@ class Trip {
     required this.userId,
     required this.name,
     required this.username,
+    this.avatarUrl,
     this.description,
     required this.visibility,
     required this.status,
@@ -91,6 +93,7 @@ class Trip {
   factory Trip.fromJson(Map<String, dynamic> json) {
     final tripSettings = json['tripSettings'] as Map<String, dynamic>?;
     final tripDetails = json['tripDetails'] as Map<String, dynamic>?;
+    final userDetails = json['userDetails'] as Map<String, dynamic>?;
 
     // Parse planned waypoints from tripDetails
     PlannedWaypoint? plannedStart;
@@ -124,6 +127,8 @@ class Trip {
           json['title'] as String? ??
           'Untitled Trip',
       username: json['username'] as String? ?? '',
+      avatarUrl:
+          userDetails?['avatarUrl'] as String? ?? json['avatarUrl'] as String?,
       description: json['description'] as String?,
       visibility: Visibility.fromJson(
         ((tripSettings?['visibility'] ?? json['visibility']) as String?) ??
@@ -180,6 +185,7 @@ class Trip {
         'userId': userId,
         'name': name,
         'username': username,
+        if (avatarUrl != null) 'avatarUrl': avatarUrl,
         if (description != null) 'description': description,
         'visibility': visibility.toJson(),
         'status': status.toJson(),
@@ -217,6 +223,7 @@ class Trip {
     String? userId,
     String? name,
     String? username,
+    String? avatarUrl,
     String? description,
     Visibility? visibility,
     TripStatus? status,
@@ -239,6 +246,7 @@ class Trip {
       userId: userId ?? this.userId,
       name: name ?? this.name,
       username: username ?? this.username,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
       description: description ?? this.description,
       visibility: visibility ?? this.visibility,
       status: status ?? this.status,

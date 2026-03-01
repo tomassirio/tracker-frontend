@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_input.dart';
+import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 
 enum CommentSortOption { latest, oldest, mostReplies, mostReactions }
@@ -14,6 +15,7 @@ class CommentsSection extends StatelessWidget {
   final Map<String, List<Comment>> replies;
   final Map<String, bool> expandedComments;
   final String tripUserId;
+  final String? currentUserId;
   final bool isLoading;
   final bool isLoggedIn;
   final bool isAddingComment;
@@ -25,6 +27,7 @@ class CommentsSection extends StatelessWidget {
   final VoidCallback onToggleCollapse;
   final Function(CommentSortOption) onSortChanged;
   final Function(String) onReact;
+  final Function(String, ReactionType) onReactionChipTap;
   final Function(String) onReply;
   final Function(String, bool) onToggleReplies;
   final VoidCallback onSendComment;
@@ -36,6 +39,7 @@ class CommentsSection extends StatelessWidget {
     required this.replies,
     required this.expandedComments,
     required this.tripUserId,
+    this.currentUserId,
     required this.isLoading,
     required this.isLoggedIn,
     required this.isAddingComment,
@@ -47,6 +51,7 @@ class CommentsSection extends StatelessWidget {
     required this.onToggleCollapse,
     required this.onSortChanged,
     required this.onReact,
+    required this.onReactionChipTap,
     required this.onReply,
     required this.onToggleReplies,
     required this.onSendComment,
@@ -58,7 +63,7 @@ class CommentsSection extends StatelessWidget {
     if (isCollapsed) {
       return _buildCollapsedBubble();
     }
-    return _buildExpandedSection();
+    return _buildExpandedSection(context);
   }
 
   /// Collapsed state - floating bubble with comment icon and count badge
@@ -137,7 +142,7 @@ class CommentsSection extends StatelessWidget {
   }
 
   /// Expanded state - full comments section
-  Widget _buildExpandedSection() {
+  Widget _buildExpandedSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       decoration: BoxDecoration(
@@ -275,12 +280,16 @@ class CommentsSection extends StatelessWidget {
                                 return CommentCard(
                                   comment: comment,
                                   tripUserId: tripUserId,
+                                  currentUserId: currentUserId,
                                   isExpanded: isExpanded,
                                   replies: commentReplies,
                                   onReact: () => onReact(comment.id),
+                                  onReactionChipTap: (type) =>
+                                      onReactionChipTap(comment.id, type),
                                   onReply: () => onReply(comment.id),
                                   onToggleReplies: () =>
                                       onToggleReplies(comment.id, isExpanded),
+                                  isLoggedIn: isLoggedIn,
                                 );
                               },
                             ),
@@ -307,11 +316,33 @@ class CommentsSection extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Text(
-                        'Please log in to comment',
-                        style: TextStyle(
-                          color: WandererTheme.textSecondary,
-                          fontStyle: FontStyle.italic,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const AuthScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: WandererTheme.primaryOrange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Please log in to comment',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),

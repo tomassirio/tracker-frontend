@@ -186,7 +186,9 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        final result = await commentCommandClient.removeReaction('comment-123');
+        final request = AddReactionRequest(reactionType: ReactionType.heart);
+        final result =
+            await commentCommandClient.removeReaction('comment-123', request);
 
         expect(result, 'reaction-123');
         expect(mockHttpClient.lastMethod, 'DELETE');
@@ -206,7 +208,8 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await commentCommandClient.removeReaction('comment-123');
+        final request = AddReactionRequest(reactionType: ReactionType.smiley);
+        await commentCommandClient.removeReaction('comment-123', request);
 
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
@@ -217,8 +220,9 @@ void main() {
           404,
         );
 
+        final request = AddReactionRequest(reactionType: ReactionType.laugh);
         expect(
-          () => commentCommandClient.removeReaction('comment-invalid'),
+          () => commentCommandClient.removeReaction('comment-invalid', request),
           throwsException,
         );
       });
@@ -229,8 +233,9 @@ void main() {
           404,
         );
 
+        final request = AddReactionRequest(reactionType: ReactionType.sad);
         expect(
-          () => commentCommandClient.removeReaction('comment-123'),
+          () => commentCommandClient.removeReaction('comment-123', request),
           throwsException,
         );
       });

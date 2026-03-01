@@ -221,6 +221,7 @@ class ApiClient {
   /// DELETE request
   Future<http.Response> delete(
     String endpoint, {
+    Map<String, dynamic>? body,
     bool requireAuth = false,
     Map<String, String>? headers,
   }) async {
@@ -232,13 +233,21 @@ class ApiClient {
     final uri = Uri.parse('$baseUrl$endpoint');
     final requestHeaders = await _buildHeaders(requireAuth, headers);
 
-    var response = await _httpClient.delete(uri, headers: requestHeaders);
+    var response = await _httpClient.delete(
+      uri,
+      headers: requestHeaders,
+      body: body != null ? jsonEncode(body) : null,
+    );
 
     if (response.statusCode == 401 && requireAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       if (refreshed) {
         final newHeaders = await _buildHeaders(requireAuth, headers);
-        response = await _httpClient.delete(uri, headers: newHeaders);
+        response = await _httpClient.delete(
+          uri,
+          headers: newHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
       } else {
         // Refresh failed, redirect to login
         _handleUnauthorized();

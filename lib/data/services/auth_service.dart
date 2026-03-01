@@ -42,6 +42,7 @@ class AuthService {
         username: profile.username,
         displayName: profile.displayName,
       );
+      await _tokenStorage.saveAvatarUrl(profile.avatarUrl);
     } catch (e) {
       // If profile fetch fails, continue with just tokens
       // Error is silently ignored in production
@@ -76,6 +77,7 @@ class AuthService {
         username: profile.username,
         displayName: profile.displayName,
       );
+      await _tokenStorage.saveAvatarUrl(profile.avatarUrl);
     } catch (e) {
       // If profile fetch fails, continue with just tokens
       // Error is silently ignored in production
@@ -126,6 +128,24 @@ class AuthService {
   /// Get current user's display name
   Future<String?> getCurrentDisplayName() async {
     return await _tokenStorage.getDisplayName();
+  }
+
+  /// Get current user's avatar URL
+  Future<String?> getCurrentAvatarUrl() async {
+    return await _tokenStorage.getAvatarUrl();
+  }
+
+  /// Refresh user details (displayName, avatarUrl) from the API
+  /// and save them to local storage. Returns true if successful.
+  Future<bool> refreshUserDetails() async {
+    try {
+      final profile = await _userQueryClient.getCurrentUser();
+      await _tokenStorage.saveDisplayName(profile.displayName);
+      await _tokenStorage.saveAvatarUrl(profile.avatarUrl);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Check if current user is admin
