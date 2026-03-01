@@ -39,7 +39,13 @@ class Comment {
     Map<String, int>? reactionsMap;
     int totalReactions = 0;
     if (json['reactions'] != null) {
-      reactionsMap = Map<String, int>.from(json['reactions'] as Map);
+      // Normalize reaction keys to uppercase to ensure consistency
+      final rawReactions = json['reactions'] as Map;
+      reactionsMap = {};
+      for (final entry in rawReactions.entries) {
+        final normalizedKey = entry.key.toString().toUpperCase();
+        reactionsMap[normalizedKey] = entry.value as int;
+      }
       totalReactions = reactionsMap.values.fold(0, (sum, count) => sum + count);
     }
 
