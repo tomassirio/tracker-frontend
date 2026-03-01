@@ -36,6 +36,7 @@ class SearchBarWidget extends StatelessWidget {
             vertical: 12,
           ),
         ),
+        textCapitalization: TextCapitalization.sentences,
         onSubmitted: onSearch,
       ),
     );

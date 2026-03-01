@@ -1,3 +1,5 @@
+import 'reaction.dart';
+
 /// Comment model
 class Comment {
   final String id;
@@ -8,6 +10,7 @@ class Comment {
   final String message;
   final String? parentCommentId;
   final Map<String, int>? reactions;
+  final List<Reaction>? individualReactions;
   final List<Comment>? replies;
   final int reactionsCount;
   final int responsesCount;
@@ -23,6 +26,7 @@ class Comment {
     required this.message,
     this.parentCommentId,
     this.reactions,
+    this.individualReactions,
     this.replies,
     this.reactionsCount = 0,
     this.responsesCount = 0,
@@ -35,8 +39,25 @@ class Comment {
     Map<String, int>? reactionsMap;
     int totalReactions = 0;
     if (json['reactions'] != null) {
-      reactionsMap = Map<String, int>.from(json['reactions'] as Map);
+      // Normalize reaction keys to uppercase to ensure consistency
+      final rawReactions = json['reactions'] as Map;
+      reactionsMap = {};
+      for (final entry in rawReactions.entries) {
+        final normalizedKey = entry.key.toString().toUpperCase();
+        reactionsMap[normalizedKey] = entry.value as int;
+      }
       totalReactions = reactionsMap.values.fold(0, (sum, count) => sum + count);
+    }
+
+    // Parse individual reactions if present
+    List<Reaction>? individualReactionsList;
+    if (json['individualReactions'] != null &&
+        json['individualReactions'] is List) {
+      individualReactionsList = (json['individualReactions'] as List)
+          .where((reaction) => reaction != null)
+          .map(
+              (reaction) => Reaction.fromJson(reaction as Map<String, dynamic>))
+          .toList();
     }
 
     // Parse replies if present
@@ -57,6 +78,7 @@ class Comment {
       message: json['message'] as String? ?? json['content'] as String? ?? '',
       parentCommentId: json['parentCommentId'] as String?,
       reactions: reactionsMap,
+      individualReactions: individualReactionsList,
       replies: repliesList,
       reactionsCount: totalReactions,
       responsesCount:
@@ -81,6 +103,9 @@ class Comment {
         'message': message,
         if (parentCommentId != null) 'parentCommentId': parentCommentId,
         if (reactions != null) 'reactions': reactions,
+        if (individualReactions != null)
+          'individualReactions':
+              individualReactions!.map((r) => r.toJson()).toList(),
         if (replies != null)
           'replies': replies!.map((r) => r.toJson()).toList(),
         'reactionsCount': reactionsCount,

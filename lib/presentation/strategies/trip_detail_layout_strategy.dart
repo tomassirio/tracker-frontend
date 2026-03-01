@@ -51,6 +51,7 @@ class TripDetailLayoutData {
   final Function(TripLocation)? onTimelineUpdateTap;
   final Function(CommentSortOption) onSortChanged;
   final Function(String) onReact;
+  final Function(String, ReactionType) onReactionChipTap;
   final Function(String) onReply;
   final Function(String, bool) onToggleReplies;
   final VoidCallback onSendComment;
@@ -99,6 +100,7 @@ class TripDetailLayoutData {
     this.onTimelineUpdateTap,
     required this.onSortChanged,
     required this.onReact,
+    required this.onReactionChipTap,
     required this.onReply,
     required this.onToggleReplies,
     required this.onSendComment,
@@ -171,9 +173,11 @@ abstract class TripDetailLayoutStrategy {
       commentController: data.commentController,
       scrollController: data.scrollController,
       replyingToCommentId: data.replyingToCommentId,
+      currentUserId: data.currentUserId,
       onToggleCollapse: data.onToggleComments,
       onSortChanged: data.onSortChanged,
       onReact: data.onReact,
+      onReactionChipTap: data.onReactionChipTap,
       onReply: data.onReply,
       onToggleReplies: data.onToggleReplies,
       onSendComment: data.onSendComment,

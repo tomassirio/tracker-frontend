@@ -35,6 +35,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   String? _userId;
   String? _username;
   String? _displayName;
+  String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 1; // Trip Plans is index 1
@@ -57,14 +58,21 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   Future<void> _loadUserInfo() async {
     final username = await _homeRepository.getCurrentUsername();
     final userId = await _homeRepository.getCurrentUserId();
-    final displayName = await _homeRepository.getCurrentDisplayName();
     final isLoggedIn = await _homeRepository.isLoggedIn();
     final isAdmin = await _homeRepository.isAdmin();
+
+    if (isLoggedIn) {
+      await _homeRepository.refreshUserDetails();
+    }
+
+    final displayName = await _homeRepository.getCurrentDisplayName();
+    final avatarUrl = await _homeRepository.getCurrentAvatarUrl();
 
     setState(() {
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -301,6 +309,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onProfile: () {}, // Not used in this screen
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -309,6 +318,7 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,

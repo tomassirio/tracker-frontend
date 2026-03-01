@@ -32,6 +32,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   String? _username;
   String? _userId;
   String? _displayName;
+  String? _avatarUrl;
   final int _selectedSidebarIndex = 3; // Achievements is index 3
 
   @override
@@ -56,14 +57,21 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       final isAdmin = await _authService.isAdmin();
       final userId = await _authService.getCurrentUserId();
       final username = await _authService.getCurrentUsername();
-      final displayName = await _authService.getCurrentDisplayName();
       final isLoggedIn = userId != null && userId.isNotEmpty;
+
+      if (isLoggedIn) {
+        await _authService.refreshUserDetails();
+      }
+
+      final displayName = await _authService.getCurrentDisplayName();
+      final avatarUrl = await _authService.getCurrentAvatarUrl();
 
       setState(() {
         _isAdmin = isAdmin;
         _userId = userId;
         _username = username;
         _displayName = displayName;
+        _avatarUrl = avatarUrl;
         _isLoggedIn = isLoggedIn;
       });
 
@@ -230,6 +238,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onProfile: _navigateToProfile,
         onSettings: _handleSettings,
         onLogout: _handleLogout,
@@ -238,6 +247,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _handleLogout,
         onSettings: _handleSettings,

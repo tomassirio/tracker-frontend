@@ -412,6 +412,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.title),
                       ),
+                      textCapitalization: TextCapitalization.words,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter a plan name';
@@ -431,6 +432,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                         prefixIcon: Icon(Icons.description),
                       ),
                       maxLines: 2,
+                      textCapitalization: TextCapitalization.sentences,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
@@ -501,6 +503,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                           prefixIcon: Icon(Icons.event),
                         ),
                         keyboardType: TextInputType.number,
+                        textCapitalization: TextCapitalization.none,
                         onChanged: (value) {
                           _multiDayTripDays = int.tryParse(value);
                         },

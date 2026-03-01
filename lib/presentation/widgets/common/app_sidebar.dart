@@ -13,6 +13,7 @@ class AppSidebar extends StatelessWidget {
   final String? username;
   final String? userId;
   final String? displayName;
+  final String? avatarUrl;
   final int selectedIndex;
   final VoidCallback? onLogout;
   final VoidCallback? onSettings;
@@ -23,6 +24,7 @@ class AppSidebar extends StatelessWidget {
     this.username,
     this.userId,
     this.displayName,
+    this.avatarUrl,
     required this.selectedIndex,
     this.onLogout,
     this.onSettings,
@@ -127,8 +129,7 @@ class AppSidebar extends StatelessWidget {
     final isLoggedIn = username != null;
 
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
@@ -141,76 +142,104 @@ class AppSidebar extends StatelessWidget {
             accountEmail: isLoggedIn ? Text('@${username ?? ''}') : null,
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(
-                isLoggedIn ? Icons.person : Icons.person_outline,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+                  ? NetworkImage(avatarUrl!)
+                  : null,
+              child: avatarUrl == null || avatarUrl!.isEmpty
+                  ? (isLoggedIn
+                      ? Text(
+                          (displayName ?? username ?? '?')
+                              .substring(0, 1)
+                              .toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        )
+                      : Icon(
+                          Icons.person_outline,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.primary,
+                        ))
+                  : null,
+            ),
+            otherAccountsPictures: isLoggedIn
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.person, color: Colors.white),
+                      onPressed: () => _handleNavigation(context, 4),
+                      tooltip: 'My Profile',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onSettings?.call();
+                      },
+                      tooltip: 'Settings',
+                    ),
+                  ]
+                : null,
+          ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.map),
+                  title: const Text('Trips'),
+                  selected: selectedIndex == 0,
+                  onTap: () => _handleNavigation(context, 0),
+                ),
+                if (isLoggedIn) ...[
+                  ListTile(
+                    leading: const Icon(Icons.calendar_today),
+                    title: const Text('Trip Plans'),
+                    selected: selectedIndex == 1,
+                    onTap: () => _handleNavigation(context, 1),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.people),
+                    title: const Text('Friends'),
+                    selected: selectedIndex == 2,
+                    onTap: () => _handleNavigation(context, 2),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.emoji_events),
+                    title: const Text('Achievements'),
+                    selected: selectedIndex == 3,
+                    onTap: () => _handleNavigation(context, 3),
+                  ),
+                  if (isAdmin) ...[
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(Icons.admin_panel_settings),
+                      title: const Text('Trip Promotion'),
+                      selected: selectedIndex == 5,
+                      onTap: () => _handleNavigation(context, 5),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.people_outline),
+                      title: const Text('User Management'),
+                      selected: selectedIndex == 6,
+                      onTap: () => _handleNavigation(context, 6),
+                    ),
+                  ],
+                ],
+              ],
             ),
           ),
+          const Divider(),
           ListTile(
-            leading: const Icon(Icons.map),
-            title: const Text('Trips'),
-            selected: selectedIndex == 0,
-            onTap: () => _handleNavigation(context, 0),
+            leading: const Icon(Icons.coffee),
+            title: const Text('Buy Me a Coffee'),
+            onTap: () {
+              Navigator.pop(context);
+              _launchBuyMeACoffee(context);
+            },
           ),
-          if (isLoggedIn) ...[
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Trip Plans'),
-              selected: selectedIndex == 1,
-              onTap: () => _handleNavigation(context, 1),
-            ),
-            ListTile(
-              leading: const Icon(Icons.people),
-              title: const Text('Friends'),
-              selected: selectedIndex == 2,
-              onTap: () => _handleNavigation(context, 2),
-            ),
-            ListTile(
-              leading: const Icon(Icons.emoji_events),
-              title: const Text('Achievements'),
-              selected: selectedIndex == 3,
-              onTap: () => _handleNavigation(context, 3),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('My Profile'),
-              selected: selectedIndex == 4,
-              onTap: () => _handleNavigation(context, 4),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                onSettings?.call();
-              },
-            ),
-            if (isAdmin) ...[
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.admin_panel_settings),
-                title: const Text('Trip Promotion'),
-                selected: selectedIndex == 5,
-                onTap: () => _handleNavigation(context, 5),
-              ),
-              ListTile(
-                leading: const Icon(Icons.people_outline),
-                title: const Text('User Management'),
-                selected: selectedIndex == 6,
-                onTap: () => _handleNavigation(context, 6),
-              ),
-            ],
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.coffee),
-              title: const Text('Buy Me a Coffee'),
-              onTap: () {
-                Navigator.pop(context);
-                _launchBuyMeACoffee(context);
-              },
-            ),
+          if (isLoggedIn)
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
@@ -219,17 +248,7 @@ class AppSidebar extends StatelessWidget {
                 onLogout?.call();
               },
             ),
-          ],
-          if (!isLoggedIn) ...[
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.coffee),
-              title: const Text('Buy Me a Coffee'),
-              onTap: () {
-                Navigator.pop(context);
-                _launchBuyMeACoffee(context);
-              },
-            ),
+          if (!isLoggedIn)
             ListTile(
               leading: const Icon(Icons.login),
               title: const Text('Log In'),
@@ -244,7 +263,6 @@ class AppSidebar extends StatelessWidget {
                 );
               },
             ),
-          ],
         ],
       ),
     );

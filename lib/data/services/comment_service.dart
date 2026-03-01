@@ -51,7 +51,8 @@ class CommentService {
 
   /// Remove a reaction from a comment
   /// Returns the comment ID immediately. Full data will be delivered via WebSocket.
-  Future<String> removeReaction(String commentId) async {
-    return await _commentCommandClient.removeReaction(commentId);
+  Future<String> removeReaction(
+      String commentId, AddReactionRequest request) async {
+    return await _commentCommandClient.removeReaction(commentId, request);
   }
 }

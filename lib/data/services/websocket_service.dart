@@ -90,9 +90,16 @@ class WebSocketService {
 
   /// Subscribe to events for a specific trip
   Stream<WebSocketEvent> subscribeToTrip(String tripId) {
+    debugPrint('WebSocketService: subscribeToTrip called for $tripId');
+    debugPrint(
+        'WebSocketService: Controller exists? ${_tripEventControllers.containsKey(tripId)}');
+    debugPrint(
+        'WebSocketService: Already subscribed? ${_subscribedTrips.contains(tripId)}');
+
     if (!_tripEventControllers.containsKey(tripId)) {
       _tripEventControllers[tripId] =
           StreamController<WebSocketEvent>.broadcast();
+      debugPrint('WebSocketService: Created new controller for trip $tripId');
     }
 
     if (!_subscribedTrips.contains(tripId)) {
@@ -100,7 +107,13 @@ class WebSocketService {
       if (isConnected) {
         _client?.subscribe(ApiEndpoints.wsTripTopic(tripId));
         debugPrint('WebSocketService: Subscribed to trip $tripId');
+      } else {
+        debugPrint(
+            'WebSocketService: NOT connected, cannot subscribe to trip $tripId');
       }
+    } else {
+      debugPrint(
+          'WebSocketService: Trip $tripId already in subscribed set, skipping subscribe');
     }
 
     return _tripEventControllers[tripId]!.stream;
@@ -108,17 +121,25 @@ class WebSocketService {
 
   /// Unsubscribe from events for a specific trip
   void unsubscribeFromTrip(String tripId) {
+    debugPrint('WebSocketService: unsubscribeFromTrip called for $tripId');
+    debugPrint(
+        'WebSocketService: Was subscribed? ${_subscribedTrips.contains(tripId)}');
+
     if (_subscribedTrips.contains(tripId)) {
       _subscribedTrips.remove(tripId);
-      if (isConnected) {
-        _client?.unsubscribe(ApiEndpoints.wsTripTopic(tripId));
-        debugPrint('WebSocketService: Unsubscribed from trip $tripId');
-      }
+      // Always call unsubscribe to clean up client-side tracking,
+      // even if not connected (the client will handle it gracefully)
+      _client?.unsubscribe(ApiEndpoints.wsTripTopic(tripId));
+      debugPrint('WebSocketService: Unsubscribed from trip $tripId');
     }
 
     // Close and remove the controller
-    _tripEventControllers[tripId]?.close();
-    _tripEventControllers.remove(tripId);
+    if (_tripEventControllers.containsKey(tripId)) {
+      _tripEventControllers[tripId]?.close();
+      _tripEventControllers.remove(tripId);
+      debugPrint(
+          'WebSocketService: Closed and removed controller for trip $tripId');
+    }
   }
 
   /// Subscribe to multiple trips at once
@@ -158,10 +179,10 @@ class WebSocketService {
   void unsubscribeFromUser(String userId) {
     if (_subscribedUsers.contains(userId)) {
       _subscribedUsers.remove(userId);
-      if (isConnected) {
-        _client?.unsubscribe(ApiEndpoints.wsUserTopic(userId));
-        debugPrint('WebSocketService: Unsubscribed from user $userId');
-      }
+      // Always call unsubscribe to clean up client-side tracking,
+      // even if not connected (the client will handle it gracefully)
+      _client?.unsubscribe(ApiEndpoints.wsUserTopic(userId));
+      debugPrint('WebSocketService: Unsubscribed from user $userId');
     }
 
     // Close and remove the controller
@@ -249,6 +270,8 @@ class WebSocketService {
         return CommentReactionEvent.fromJson(data, isRemoval: false);
       case WebSocketEventType.commentReactionRemoved:
         return CommentReactionEvent.fromJson(data, isRemoval: true);
+      case WebSocketEventType.commentReactionReplaced:
+        return CommentReactionEvent.fromJson(data, isRemoval: false);
 
       // Trip plan events
       case WebSocketEventType.tripPlanCreated:

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 
 /// Minimum allowed update interval in minutes (Android WorkManager limitation)
 const int _minIntervalMinutes = 15;
@@ -100,12 +101,9 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
         );
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Minimum interval is $_minIntervalMinutes minutes'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
+        UiHelpers.showErrorMessage(
+          context,
+          'Minimum interval is $_minIntervalMinutes minutes',
         );
       }
     }
@@ -116,11 +114,9 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     final minutes = int.tryParse(_intervalController.text);
     if (_automaticUpdates &&
         (minutes == null || minutes < _minIntervalMinutes)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Minimum interval is $_minIntervalMinutes minutes'),
-          backgroundColor: Colors.red,
-        ),
+      UiHelpers.showErrorMessage(
+        context,
+        'Minimum interval is $_minIntervalMinutes minutes',
       );
       // Reset to minimum if invalid
       if (minutes != null && minutes < _minIntervalMinutes) {
@@ -206,6 +202,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                     controller: _intervalController,
                     enabled: !widget.isLoading,
                     keyboardType: TextInputType.number,
+                    textCapitalization: TextCapitalization.none,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                     ],

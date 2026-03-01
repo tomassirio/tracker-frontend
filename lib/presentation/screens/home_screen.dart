@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
   String? _userId;
   String? _username;
   String? _displayName;
+  String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
   final int _selectedSidebarIndex = 0;
@@ -159,14 +160,22 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _loadUserInfo() async {
     final username = await _repository.getCurrentUsername();
     final userId = await _repository.getCurrentUserId();
-    final displayName = await _repository.getCurrentDisplayName();
     final isLoggedIn = await _repository.isLoggedIn();
     final isAdmin = await _repository.isAdmin();
+
+    // Refresh displayName and avatarUrl from API (in case they changed)
+    if (isLoggedIn) {
+      await _repository.refreshUserDetails();
+    }
+
+    final displayName = await _repository.getCurrentDisplayName();
+    final avatarUrl = await _repository.getCurrentAvatarUrl();
 
     setState(() {
       _username = username;
       _userId = userId;
       _displayName = displayName;
+      _avatarUrl = avatarUrl;
       _isLoggedIn = isLoggedIn;
       _isAdmin = isAdmin;
     });
@@ -909,7 +918,11 @@ class _HomeScreenState extends State<HomeScreen>
     final promotedTripsList =
         _allTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
 
-    if (filteredTrips.isEmpty && promotedTripsList.isEmpty) {
+    // Exclude promoted trips from discover section
+    final nonPromotedTrips =
+        filteredTrips.where((t) => !_promotedTripIds.contains(t.id)).toList();
+
+    if (nonPromotedTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -948,14 +961,16 @@ class _HomeScreenState extends State<HomeScreen>
             _buildTripGrid(promotedTripsList, showRelationship: true),
             const SizedBox(height: 24),
           ],
-          FeedSectionHeader(
-            title: 'Discover',
-            icon: Icons.public,
-            count: filteredTrips.length,
-            subtitle: 'Explore public trips from the community',
-          ),
-          const SizedBox(height: 12),
-          _buildTripGrid(filteredTrips, showRelationship: true),
+          if (nonPromotedTrips.isNotEmpty) ...[
+            FeedSectionHeader(
+              title: 'Discover',
+              icon: Icons.public,
+              count: nonPromotedTrips.length,
+              subtitle: 'Explore public trips from the community',
+            ),
+            const SizedBox(height: 12),
+            _buildTripGrid(nonPromotedTrips, showRelationship: true),
+          ],
         ],
       ),
     );
@@ -1071,6 +1086,7 @@ class _HomeScreenState extends State<HomeScreen>
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         onProfile: _handleProfile,
         onSettings: _handleSettings,
         onLogout: _logout,
@@ -1079,6 +1095,7 @@ class _HomeScreenState extends State<HomeScreen>
         username: _username,
         userId: _userId,
         displayName: _displayName,
+        avatarUrl: _avatarUrl,
         selectedIndex: _selectedSidebarIndex,
         onLogout: _logout,
         onSettings: _handleSettings,
