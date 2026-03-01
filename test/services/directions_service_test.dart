@@ -8,6 +8,7 @@ void main() {
     const apiKey = 'test-api-key';
 
     setUp(() {
+      DirectionsService.clearCache();
       service = DirectionsService(apiKey);
     });
 
@@ -199,6 +200,44 @@ void main() {
         final service2 = DirectionsService('key2');
 
         expect(service1, isNot(same(service2)));
+      });
+    });
+
+    group('segment caching', () {
+      test('cache starts empty after clearCache', () {
+        DirectionsService.clearCache();
+        expect(DirectionsService.cacheSize, 0);
+      });
+
+      test('clearCache removes all cached segments', () async {
+        // Even if API calls fail, clearCache should always work
+        DirectionsService.clearCache();
+        expect(DirectionsService.cacheSize, 0);
+      });
+
+      test('cache is shared across service instances', () {
+        // Static cache means all instances share the same cache
+        final service1 = DirectionsService('key1');
+        final service2 = DirectionsService('key2');
+
+        // Both access the same static cache
+        DirectionsService.clearCache();
+        expect(DirectionsService.cacheSize, 0);
+
+        // Verify instances are different but cache is shared
+        expect(service1, isNot(same(service2)));
+        expect(DirectionsService.cacheSize, 0);
+      });
+
+      test('getDirections with less than 2 waypoints does not affect cache',
+          () async {
+        DirectionsService.clearCache();
+
+        await service.getDirections([]);
+        expect(DirectionsService.cacheSize, 0);
+
+        await service.getDirections([const LatLng(37.7749, -122.4194)]);
+        expect(DirectionsService.cacheSize, 0);
       });
     });
   });

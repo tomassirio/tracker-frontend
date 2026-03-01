@@ -1,8 +1,10 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:tracker_frontend/data/client/google_routes_api_client.dart';
 import 'package:tracker_frontend/data/services/directions_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
+import 'package:tracker_frontend/presentation/helpers/trip_route_helper.dart';
 
 /// Helper class for managing Google Maps markers and polylines for trips
 class TripMapHelper {
@@ -13,7 +15,9 @@ class TripMapHelper {
 
     // First try actual trip updates/locations
     if (trip.locations != null && trip.locations!.isNotEmpty) {
-      final locations = trip.locations!;
+      // Sort chronologically (oldest first) so Update 1 = first trip update
+      final locations = List<TripLocation>.from(trip.locations!)
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
       final points = <LatLng>[];
 
       for (int i = 0; i < locations.length; i++) {
@@ -147,7 +151,9 @@ class TripMapHelper {
 
     // First try actual trip updates/locations
     if (trip.locations != null && trip.locations!.isNotEmpty) {
-      final locations = trip.locations!;
+      // Sort chronologically (oldest first) so Update 1 = first trip update
+      final locations = List<TripLocation>.from(trip.locations!)
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
       final waypoints = <LatLng>[];
 
       // Create markers
@@ -186,6 +192,11 @@ class TripMapHelper {
 
           final directionsService = DirectionsService(apiKey);
           final routePoints = await directionsService.getDirections(waypoints);
+
+          // Cache the encoded polyline so card miniatures can reuse it
+          // without making additional API calls
+          final encoded = GoogleRoutesApiClient.encodePolyline(routePoints);
+          TripRouteHelper.cachePolyline(trip.id, encoded);
 
           // Create polyline with the route points
           polylines.add(
