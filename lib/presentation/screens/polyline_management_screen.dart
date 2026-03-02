@@ -883,7 +883,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
       return ElevatedButton(
         onPressed: null,
         child: Text(
-          'Too few locations',
+          'Needs 2+ locations',
           style: TextStyle(fontSize: 12, color: Colors.grey[400]),
           textAlign: TextAlign.center,
         ),
@@ -929,12 +929,11 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     }
 
     // Geocoding doesn't require multiple locations - each update can be geocoded independently
-    final hasLocations = trip.locations != null && trip.locations!.isNotEmpty;
-    if (!hasLocations) {
+    if (locationCount == 0) {
       return ElevatedButton(
         onPressed: null,
         child: Text(
-          'No locations',
+          'Needs 1+ location',
           style: TextStyle(fontSize: 12, color: Colors.grey[400]),
           textAlign: TextAlign.center,
         ),
