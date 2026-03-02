@@ -1608,12 +1608,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   polylines: _polylines,
                   onMapCreated: (controller) => _mapController = controller,
                   isOwner: _userId != null && _trip.userId == _userId,
-                  // Disable map gestures when any panel is expanded to prevent
-                  // scroll/drag events from moving the map underneath
-                  gesturesEnabled: _isTripInfoCollapsed &&
-                      _isCommentsCollapsed &&
-                      _isTimelineCollapsed &&
-                      _isTripUpdateCollapsed,
+                  // On mobile: disable map gestures when any panel is expanded
+                  // to prevent scroll-through.
+                  // On desktop: keep gestures enabled — panels block pointer
+                  // events via their own hit-test area and scroll absorbers.
+                  gesturesEnabled: !isMobile ||
+                      (_isTripInfoCollapsed &&
+                          _isCommentsCollapsed &&
+                          _isTimelineCollapsed &&
+                          _isTripUpdateCollapsed),
                 ),
               ),
 
