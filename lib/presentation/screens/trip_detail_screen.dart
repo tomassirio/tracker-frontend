@@ -689,15 +689,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  Future<void> _updateMapData() async {
+  void _updateMapData() {
     try {
-      final mapData = await TripMapHelper.createMapDataWithDirections(_trip);
+      final mapData = TripMapHelper.createMapDataWithDirections(_trip);
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     } catch (e) {
-      // Fallback to straight lines if Directions API fails
+      // Fallback to straight lines if decoding fails
       final mapData = TripMapHelper.createMapData(_trip);
       setState(() {
         _markers = mapData.markers;

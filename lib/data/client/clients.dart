@@ -23,4 +23,4 @@ export 'query/user_query_client.dart';
 // Export Google API Clients
 export 'google_geocoding_api_client.dart';
 export 'google_maps_api_client.dart';
-export 'google_routes_api_client.dart';
+export 'polyline_codec.dart';

@@ -970,11 +970,10 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
   }
 
   /// Load the encoded polyline for the miniature map using the shared
-  /// [TripRouteHelper]. This sorts locations chronologically and leverages
-  /// both the trip-level and segment-level caches so that no redundant
-  /// Google API calls are made.
-  Future<void> _loadRoute() async {
-    final encoded = await TripRouteHelper.fetchEncodedPolyline(widget.trip);
+  /// [TripRouteHelper]. Uses the backend-provided polyline, in-memory cache,
+  /// or encodes raw sorted points as straight-line fallback.
+  void _loadRoute() {
+    final encoded = TripRouteHelper.fetchEncodedPolyline(widget.trip);
     if (mounted && encoded != null) {
       setState(() {
         _encodedPolyline = encoded;
