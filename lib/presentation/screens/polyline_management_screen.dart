@@ -732,7 +732,6 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 isRecomputing,
                 wasRecomputed,
                 hasEnoughLocations,
-                'Polyline',
               ),
             ),
             const SizedBox(width: 8),
@@ -776,7 +775,6 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             isRecomputing,
             wasRecomputed,
             hasEnoughLocations,
-            'Polyline',
           ),
         ),
         const SizedBox(width: 8),
@@ -855,7 +853,6 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     bool isRecomputing,
     bool wasRecomputed,
     bool hasEnoughLocations,
-    String label,
   ) {
     if (isRecomputing) {
       return const ElevatedButton(
@@ -893,8 +890,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
     return ElevatedButton(
       onPressed: () => _recomputePolyline(trip),
-      child: Text(
-        label,
+      child: const Text(
+        'Polyline',
         textAlign: TextAlign.center,
       ),
     );

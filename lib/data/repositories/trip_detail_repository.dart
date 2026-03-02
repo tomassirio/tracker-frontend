@@ -143,8 +143,8 @@ class TripDetailRepository {
 
   /// Loads trip updates for a specific trip via API
   /// City and country are now populated by the backend via reverse geocoding
-  Future<List<TripLocation>> loadTripUpdates(String tripId) async {
-    return await _tripService.getTripUpdates(tripId);
+  Future<List<TripLocation>> loadTripUpdates(String tripId) {
+    return _tripService.getTripUpdates(tripId);
   }
 
   /// Sends a manual trip update with current location and battery
