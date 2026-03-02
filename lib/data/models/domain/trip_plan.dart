@@ -24,6 +24,8 @@ class TripPlan {
   final PlanLocation? startLocation;
   final PlanLocation? endLocation;
   final List<PlanLocation> waypoints;
+  final String? encodedPolyline;
+  final DateTime? polylineUpdatedAt;
   final DateTime createdTimestamp;
 
   TripPlan({
@@ -36,6 +38,8 @@ class TripPlan {
     this.startLocation,
     this.endLocation,
     this.waypoints = const [],
+    this.encodedPolyline,
+    this.polylineUpdatedAt,
     required this.createdTimestamp,
   });
 
@@ -63,6 +67,10 @@ class TripPlan {
                     (loc) => PlanLocation.fromJson(loc as Map<String, dynamic>))
                 .toList()
             : const [],
+        encodedPolyline: json['encodedPolyline'] as String?,
+        polylineUpdatedAt: json['polylineUpdatedAt'] != null
+            ? DateTime.tryParse(json['polylineUpdatedAt'] as String)
+            : null,
         createdTimestamp: DateTime.parse(json['createdTimestamp'] as String),
       );
 
@@ -78,6 +86,9 @@ class TripPlan {
         if (startLocation != null) 'startLocation': startLocation!.toJson(),
         if (endLocation != null) 'endLocation': endLocation!.toJson(),
         'waypoints': waypoints.map((loc) => loc.toJson()).toList(),
+        if (encodedPolyline != null) 'encodedPolyline': encodedPolyline,
+        if (polylineUpdatedAt != null)
+          'polylineUpdatedAt': polylineUpdatedAt!.toIso8601String(),
         'createdTimestamp': createdTimestamp.toIso8601String(),
       };
 }

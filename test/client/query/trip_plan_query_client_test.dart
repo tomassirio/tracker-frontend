@@ -99,9 +99,56 @@ void main() {
         );
 
         expect(
-          () => tripPlanQueryClient.getTripPlanById('plan-123'),
+          () => tripPlanQueryClient.getTripPlanById('plan-invalid'),
           throwsException,
         );
+      });
+
+      test('successful retrieval parses polyline fields', () async {
+        final responseBody = {
+          'id': 'plan-poly',
+          'userId': 'user-123',
+          'name': 'Camino Route Plan',
+          'planType': 'MULTI_DAY',
+          'startDate': '2026-06-01',
+          'endDate': '2026-07-05',
+          'startLocation': {'lat': 43.16, 'lon': -1.24},
+          'endLocation': {'lat': 42.88, 'lon': -8.54},
+          'waypoints': [],
+          'encodedPolyline': 'a~l~Fjk~uOwHJy@P??fHzR',
+          'polylineUpdatedAt': '2026-03-01T14:30:00.000Z',
+          'createdTimestamp': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+
+        final result = await tripPlanQueryClient.getTripPlanById('plan-poly');
+
+        expect(result.id, 'plan-poly');
+        expect(result.encodedPolyline, 'a~l~Fjk~uOwHJy@P??fHzR');
+        expect(result.polylineUpdatedAt, isNotNull);
+      });
+
+      test('successful retrieval handles null polyline fields', () async {
+        final responseBody = {
+          'id': 'plan-no-poly',
+          'userId': 'user-123',
+          'name': 'Plan Without Polyline',
+          'planType': 'SIMPLE',
+          'startDate': '2026-06-01',
+          'endDate': '2026-06-02',
+          'startLocation': {'lat': 43.16, 'lon': -1.24},
+          'endLocation': {'lat': 42.88, 'lon': -8.54},
+          'waypoints': [],
+          'createdTimestamp': DateTime.now().toIso8601String(),
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 200);
+
+        final result =
+            await tripPlanQueryClient.getTripPlanById('plan-no-poly');
+
+        expect(result.id, 'plan-no-poly');
+        expect(result.encodedPolyline, isNull);
+        expect(result.polylineUpdatedAt, isNull);
       });
     });
 

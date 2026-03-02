@@ -1,6 +1,7 @@
 // filepath: /Users/tomassirio/Workspace/tracker_frontend/lib/presentation/helpers/trip_plan_map_helper.dart
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:tracker_frontend/data/client/google_routes_api_client.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/directions_service.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
@@ -161,42 +162,77 @@ class TripPlanMapHelper {
       points.add(endLatLng);
     }
 
-    // Get directions from the API for real road routing
+    // Use backend-provided polyline, fall back to Directions API, then straight lines
     if (points.length >= 2) {
-      try {
-        final apiKey = ApiEndpoints.googleMapsApiKey;
-        final directionsService = DirectionsService(apiKey);
-        final routePoints = await directionsService.getDirections(points);
-
-        // Create polyline with the route points (following roads)
-        polylines.add(
-          Polyline(
-            polylineId: const PolylineId('route'),
-            points: routePoints,
-            color: Colors.blue,
-            width: 5,
-            geodesic: false,
-            visible: true,
-            startCap: Cap.roundCap,
-            endCap: Cap.roundCap,
-            jointType: JointType.round,
-          ),
-        );
-      } catch (e) {
-        // Fallback to dashed straight lines if Directions API fails
-        polylines.add(
-          Polyline(
-            polylineId: const PolylineId('route'),
-            points: points,
-            color: Colors.blue.withOpacity(0.7),
-            width: 3,
-            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-          ),
-        );
+      if (tripPlan.encodedPolyline != null &&
+          tripPlan.encodedPolyline!.isNotEmpty) {
+        // Best case: use backend-computed polyline (zero API calls)
+        try {
+          final routePoints = GoogleRoutesApiClient.decodePolyline(
+            tripPlan.encodedPolyline!,
+          );
+          polylines.add(
+            Polyline(
+              polylineId: const PolylineId('route'),
+              points: routePoints,
+              color: Colors.blue,
+              width: 5,
+              geodesic: false,
+              visible: true,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+            ),
+          );
+        } catch (e) {
+          // If decoding fails, fall through to Directions API
+          await _addDirectionsPolyline(polylines, points);
+        }
+      } else {
+        // Fallback: client-side computation via Directions API
+        await _addDirectionsPolyline(polylines, points);
       }
     }
 
     return TripPlanMapData(markers: markers, polylines: polylines);
+  }
+
+  /// Fetches a road-snapped polyline via Directions API and adds it to the set.
+  /// Falls back to dashed straight lines if the API call fails.
+  static Future<void> _addDirectionsPolyline(
+    Set<Polyline> polylines,
+    List<LatLng> points,
+  ) async {
+    try {
+      final apiKey = ApiEndpoints.googleMapsApiKey;
+      final directionsService = DirectionsService(apiKey);
+      final routePoints = await directionsService.getDirections(points);
+
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('route'),
+          points: routePoints,
+          color: Colors.blue,
+          width: 5,
+          geodesic: false,
+          visible: true,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+          jointType: JointType.round,
+        ),
+      );
+    } catch (e) {
+      // Fallback to dashed straight lines if Directions API fails
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('route'),
+          points: points,
+          color: Colors.blue.withOpacity(0.7),
+          width: 3,
+          patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+        ),
+      );
+    }
   }
 
   /// Gets the initial location for the map

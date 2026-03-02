@@ -37,12 +37,25 @@ class _TripPlanCardState extends State<TripPlanCard> {
     final apiKey = ApiEndpoints.googleMapsApiKey;
     _mapsClient = GoogleMapsApiClient(apiKey);
     _directionsService = DirectionsService(apiKey);
-    _fetchRoute();
+    _loadRoute();
   }
 
-  /// Fetch a road-snapped route through all plan locations
-  /// so the miniature shows the actual walking path, not straight lines.
-  Future<void> _fetchRoute() async {
+  /// Load the encoded polyline for the miniature map.
+  /// Prefers the backend-provided polyline (zero API calls), falling back
+  /// to client-side road-snapped routing via DirectionsService.
+  Future<void> _loadRoute() async {
+    // 1. Backend-provided polyline (best case: zero API calls)
+    if (widget.plan.encodedPolyline != null &&
+        widget.plan.encodedPolyline!.isNotEmpty) {
+      if (mounted) {
+        setState(() {
+          _encodedPolyline = widget.plan.encodedPolyline;
+        });
+      }
+      return;
+    }
+
+    // 2. Fallback: client-side computation via DirectionsService
     final waypoints = <LatLng>[];
 
     if (_hasValidLocation(widget.plan.startLocation)) {

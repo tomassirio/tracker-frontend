@@ -9,7 +9,7 @@
 
 | Component | Status | Reason |
 |-----------|--------|--------|
-| `GoogleRoutesApiClient` | 🟡 **Keep for now** (fallback only) | Still used as fallback when backend polyline is `null`, and by `TripPlanCard`. Can be removed once backend covers all cases including trip plans. |
+| `GoogleRoutesApiClient` | 🟡 **Keep for now** (fallback only) | Still used as fallback when backend polyline is `null`. Can be removed once backend covers all cases (100% of trips and plans). |
 | `DirectionsService` | 🟡 **Keep for now** (fallback only) | Wraps `GoogleRoutesApiClient` with segment caching. Same removal timeline. |
 | `DirectionsServiceWeb` / `directions_service_stub.dart` | 🟡 **Keep for now** | Web-specific directions. Same removal timeline as `DirectionsService`. |
 | `GoogleMapsApiClient` | ✅ **Keep** | Generates Static Maps API URLs for card miniatures. This is a URL builder, not an API caller — the browser/image widget fetches the image. Still needed. |
@@ -30,16 +30,16 @@
 - `DirectionsService` — segment-by-segment routing
 - `TripRouteHelper` — fallback when backend polyline is `null`
 - `TripMapHelper` — fallback when backend polyline is `null`
-- `TripPlanCard` — fetches routes for trip plan miniatures (plans don't have backend polylines yet)
-- `TripPlanMapHelper` — creates map data for trip plan detail screens
+- `TripPlanCard` — fallback when backend polyline is `null` (prefers backend `encodedPolyline`)
+- `TripPlanMapHelper` — fallback when backend polyline is `null` (prefers backend `encodedPolyline`)
 
 **Can we remove it?**
-- **Not yet.** The `encodePolyline()` / `decodePolyline()` static methods are still used everywhere. The API-calling parts (`getWalkingRoute`, `_computeRoutes`) are only needed as fallback + for trip plans.
-- **When backend handles trip plan polylines too**, we could split this into:
+- **Not yet.** The `encodePolyline()` / `decodePolyline()` static methods are still used everywhere. The API-calling parts (`getWalkingRoute`, `_computeRoutes`) are only needed as fallback.
+- **When backend covers 100% of trips and plans**, we could split this into:
   - `polyline_codec.dart` — keep encode/decode utilities
   - Remove the HTTP client / API calling code entirely
 
-**Action:** No change now. Candidate for removal in Phase 4 (after trip plans also get backend polylines).
+**Action:** No change now. Candidate for removal in Phase 4 (once backend covers 100% of polylines).
 
 ---
 
@@ -50,11 +50,11 @@
 **Current consumers:**
 - `TripRouteHelper.fetchEncodedPolyline()` — fallback path
 - `TripMapHelper._addDirectionsPolyline()` — fallback when no backend polyline
-- `TripPlanMapHelper` — trip plan detail screen
-- `TripPlanCard` — trip plan miniatures
+- `TripPlanMapHelper._addDirectionsPolyline()` — fallback when no backend polyline
+- `TripPlanCard._loadRoute()` — fallback when no backend polyline
 
 **Can we remove it?**
-- **Not yet.** Same situation as `GoogleRoutesApiClient`. Needed as fallback and for trip plans.
+- **Not yet.** Same situation as `GoogleRoutesApiClient`. Needed as fallback when `encodedPolyline` is `null`.
 - The segment cache becomes less valuable as backend polylines cover more trips.
 
 **Action:** No change now. Same Phase 4 removal timeline.
@@ -155,9 +155,10 @@
 - `TripMapHelper` decodes backend polyline instead of calling Directions API → **fewer Routes API calls**
 - No files deleted, no env vars removed
 
-### Soon (Phase 3 — Backend polylines for trip plans too)
-- `TripPlanCard` and `TripPlanMapHelper` would also use backend polylines
-- This eliminates the last consumer of `DirectionsService` for routing
+### Now (Phase 3 — Backend polylines for trip plans too) ✅
+- `TripPlanCard` and `TripPlanMapHelper` now use backend polylines when available
+- Falls back to client-side Directions API when `encodedPolyline` is `null`
+- This eliminates the last consumer of `DirectionsService` for routing (when backend covers all plans)
 
 ### Later (Phase 4 — Full cleanup, once backend covers 100% of polylines)
 

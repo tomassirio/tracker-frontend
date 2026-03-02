@@ -433,8 +433,7 @@ class TripMapHelper {
   }
 
   /// Builds a rich InfoWindow for a location update marker
-  static InfoWindow _buildLocationInfoWindow(
-      TripLocation location, int index) {
+  static InfoWindow _buildLocationInfoWindow(TripLocation location, int index) {
     // Title: date/time + battery
     final titleParts = <String>[];
     titleParts.add(_formatMarkerTimestamp(location.timestamp));
