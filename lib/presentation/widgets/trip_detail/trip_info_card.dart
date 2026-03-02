@@ -50,12 +50,16 @@ class TripInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
+    return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      firstCurve: Curves.easeInOut,
+      secondCurve: Curves.easeInOut,
+      sizeCurve: Curves.easeInOut,
       alignment: Alignment.topLeft,
-      clipBehavior: Clip.hardEdge,
-      child: isCollapsed ? _buildCollapsedBubble() : _buildExpandedCard(context),
+      crossFadeState:
+          isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      firstChild: _buildCollapsedBubble(),
+      secondChild: _buildExpandedCard(context),
     );
   }
 

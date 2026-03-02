@@ -27,12 +27,16 @@ class TimelinePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
+    return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      firstCurve: Curves.easeInOut,
+      secondCurve: Curves.easeInOut,
+      sizeCurve: Curves.easeInOut,
       alignment: Alignment.topRight,
-      clipBehavior: Clip.hardEdge,
-      child: isCollapsed ? _buildCollapsedBubble() : _buildExpandedPanel(),
+      crossFadeState:
+          isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      firstChild: _buildCollapsedBubble(),
+      secondChild: _buildExpandedPanel(),
     );
   }
 
@@ -204,7 +208,7 @@ class TimelinePanel extends StatelessWidget {
                   ),
                 ),
                 // Timeline content
-                Expanded(
+                Flexible(
                   child: TripTimeline(
                     updates: updates,
                     isLoading: isLoading,
