@@ -50,10 +50,12 @@ class TripInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isCollapsed) {
-      return _buildCollapsedBubble();
-    }
-    return _buildExpandedCard(context);
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      alignment: Alignment.topLeft,
+      child: isCollapsed ? _buildCollapsedBubble() : _buildExpandedCard(context),
+    );
   }
 
   /// Collapsed state - floating bubble with info icon

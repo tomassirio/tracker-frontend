@@ -27,10 +27,12 @@ class TimelinePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isCollapsed) {
-      return _buildCollapsedBubble();
-    }
-    return _buildExpandedPanel();
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      alignment: Alignment.topRight,
+      child: isCollapsed ? _buildCollapsedBubble() : _buildExpandedPanel(),
+    );
   }
 
   /// Collapsed state - floating bubble with timeline icon and count badge
