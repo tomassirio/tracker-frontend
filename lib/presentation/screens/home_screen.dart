@@ -14,6 +14,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/home/enhanced_trip_card.dart';
 import 'package:tracker_frontend/presentation/widgets/home/feed_section_header.dart';
@@ -1168,23 +1169,9 @@ class _HomeScreenState extends State<HomeScreen>
                                       ),
                                     ],
                                   ),
-                                  child: ClipOval(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Image.network(
-                                        'icons/Icon-192.png',
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Icon(
-                                            Icons.explore,
-                                            size: 64,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          );
-                                        },
-                                      ),
-                                    ),
+                                  child: const Padding(
+                                      padding: EdgeInsets.all(16),
+                                      child: WandererLogo(size: 64),
                                   ),
                                 ),
                                 const SizedBox(height: 24),

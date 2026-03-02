@@ -95,9 +95,12 @@ class _WandererAppBarState extends State<WandererAppBar> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Wanderer',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                const Flexible(
+                  child: Text(
+                    'Wanderer',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
