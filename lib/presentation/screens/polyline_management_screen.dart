@@ -667,6 +667,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     final isRecomputingGeo = _recomputingGeocoding.contains(trip.id);
     final wasRecomputedGeo = _recomputedGeocoding.contains(trip.id);
     final hasPolyline = trip.encodedPolyline != null;
+    // Polyline recomputation requires 2+ locations (for routing between points)
+    // Geocoding recomputation only requires 1+ locations (each can be geocoded independently)
     final hasEnoughLocations =
         trip.locations != null && trip.locations!.length >= 2;
     final locationCount = trip.locations?.length ?? 0;
