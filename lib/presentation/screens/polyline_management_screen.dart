@@ -742,7 +742,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 trip,
                 isRecomputingGeo,
                 wasRecomputedGeo,
-                hasEnoughLocations,
+                locationCount,
               ),
             ),
           ],
@@ -786,7 +786,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             trip,
             isRecomputingGeo,
             wasRecomputedGeo,
-            hasEnoughLocations,
+            locationCount,
           ),
         ),
       ],
@@ -903,7 +903,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     Trip trip,
     bool isRecomputing,
     bool wasRecomputed,
-    bool hasEnoughLocations,
+    int locationCount,
   ) {
     if (isRecomputing) {
       return const ElevatedButton(
