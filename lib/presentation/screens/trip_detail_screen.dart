@@ -202,6 +202,22 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handlePolylineUpdatedEvent(PolylineUpdatedEvent event) {
+    // Validate that we have the required data
+    if (event.tripId.isEmpty) {
+      debugPrint('PolylineUpdatedEvent: Missing tripId, ignoring event');
+      return;
+    }
+    
+    if (event.encodedPolyline.isEmpty) {
+      debugPrint('PolylineUpdatedEvent: Empty encodedPolyline for trip ${event.tripId}, ignoring event');
+      return;
+    }
+
+    // Only update if this event is for the current trip
+    if (event.tripId != _trip.id) {
+      return;
+    }
+
     // Update the trip's encoded polyline and refresh the map
     setState(() {
       _trip = _trip.copyWith(encodedPolyline: event.encodedPolyline);
