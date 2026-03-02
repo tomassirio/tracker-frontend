@@ -1,4 +1,5 @@
 import '../client/clients.dart';
+import '../models/admin_models.dart';
 import '../models/responses/page_response.dart';
 import '../models/trip_models.dart';
 import '../models/user_models.dart';
@@ -114,5 +115,10 @@ class AdminService {
   /// Recompute geocoding (city/country) for all trip updates (admin only)
   Future<void> recomputeGeocoding(String tripId) async {
     await _adminCommandClient.recomputeGeocoding(tripId);
+  }
+
+  /// Get trip maintenance statistics (polyline and geocoding data)
+  Future<TripMaintenanceStats> getTripStats() async {
+    return await _adminQueryClient.getTripStats();
   }
 }

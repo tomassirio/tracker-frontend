@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:tracker_frontend/data/models/admin_models.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/admin_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
@@ -11,18 +12,17 @@ import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 
-/// Admin screen for managing trip polyline and geocoding recomputation.
-/// Allows admins to trigger backend recomputation of encoded polylines
+/// Admin screen for managing trip data maintenance (polyline and geocoding recomputation).
+/// Allows admins to view statistics and trigger backend recomputation of encoded polylines
 /// and geocoding (city/country) for trip updates.
-class PolylineManagementScreen extends StatefulWidget {
-  const PolylineManagementScreen({super.key});
+class TripMaintenanceScreen extends StatefulWidget {
+  const TripMaintenanceScreen({super.key});
 
   @override
-  State<PolylineManagementScreen> createState() =>
-      _PolylineManagementScreenState();
+  State<TripMaintenanceScreen> createState() => _TripMaintenanceScreenState();
 }
 
-class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
+class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
   final AdminService _adminService = AdminService();
   final TripService _tripService = TripService();
   final HomeRepository _homeRepository = HomeRepository();
@@ -30,6 +30,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
   List<Trip> _allTrips = [];
   List<Trip> _filteredTrips = [];
+  TripMaintenanceStats? _stats;
   bool _isLoading = false;
   String? _error;
   String? _userId;
@@ -38,7 +39,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
   String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
-  final int _selectedSidebarIndex = 7; // Polyline management index
+  final int _selectedSidebarIndex = 7; // Trip maintenance index
 
   /// Set of trip IDs currently being recomputed (for loading indicators)
   final Set<String> _recomputingTrips = {};
@@ -96,10 +97,16 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     });
 
     try {
-      final trips = await _adminService.getAllTrips();
+      // Load both trips and stats in parallel
+      final results = await Future.wait([
+        _adminService.getAllTrips(),
+        _adminService.getTripStats(),
+      ]);
+
       setState(() {
-        _allTrips = trips;
-        _filteredTrips = trips;
+        _allTrips = results[0] as List<Trip>;
+        _filteredTrips = results[0] as List<Trip>;
+        _stats = results[1] as TripMaintenanceStats;
         _isLoading = false;
       });
     } catch (e) {
@@ -476,18 +483,26 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
   Widget _buildStatsCard(bool isMobile) {
     final cardPadding = isMobile ? 12.0 : 16.0;
-    final totalTrips = _allTrips.length;
-    final tripsWithPolyline =
+
+    // Use server stats if available, otherwise calculate from loaded trips
+    final totalTrips = _stats?.totalTrips ?? _allTrips.length;
+    final tripsWithPolyline = _stats?.tripsWithPolyline ??
         _allTrips.where((t) => t.encodedPolyline != null).length;
-    final tripsWithLocations = _allTrips
-        .where((t) => t.locations != null && t.locations!.length >= 2)
-        .length;
-    final tripsNeedingPolyline = _allTrips
-        .where((t) =>
-            t.encodedPolyline == null &&
-            t.locations != null &&
-            t.locations!.length >= 2)
-        .length;
+    final tripsWithLocations = _stats?.tripsWithMultipleLocations ??
+        _allTrips
+            .where((t) => t.locations != null && t.locations!.length >= 2)
+            .length;
+    final tripsNeedingPolyline = _stats?.tripsMissingPolyline ??
+        _allTrips
+            .where((t) =>
+                t.encodedPolyline == null &&
+                t.locations != null &&
+                t.locations!.length >= 2)
+            .length;
+
+    final totalUpdates = _stats?.totalUpdates ?? 0;
+    final updatesWithGeocoding = _stats?.updatesWithGeocoding ?? 0;
+    final updatesMissingGeocoding = _stats?.updatesMissingGeocoding ?? 0;
 
     return Card(
       child: Padding(
@@ -500,7 +515,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 const Icon(Icons.analytics, color: Colors.blue),
                 const SizedBox(width: 8),
                 Text(
-                  'Polyline Overview',
+                  'Trip Data Overview',
                   style: TextStyle(
                     fontSize: isMobile ? 18 : 20,
                     fontWeight: FontWeight.bold,
@@ -509,6 +524,16 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            // Polyline stats
+            Text(
+              'Polyline Statistics',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 8),
             Wrap(
               spacing: isMobile ? 12 : 24,
               runSpacing: 12,
@@ -535,6 +560,40 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 16),
+            // Geocoding stats
+            Text(
+              'Geocoding Statistics',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: isMobile ? 12 : 24,
+              runSpacing: 12,
+              children: [
+                _buildStatChip(
+                  'Total Updates',
+                  totalUpdates.toString(),
+                  Colors.grey,
+                ),
+                _buildStatChip(
+                  'With Geocoding',
+                  updatesWithGeocoding.toString(),
+                  Colors.green,
+                ),
+                _buildStatChip(
+                  'Missing Geocoding',
+                  updatesMissingGeocoding.toString(),
+                  updatesMissingGeocoding > 0 ? Colors.orange : Colors.green,
+                ),
+              ],
+            ),
             if (tripsNeedingPolyline > 0) ...[
               const SizedBox(height: 16),
               SizedBox(
@@ -543,7 +602,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                   onPressed: _recomputeAll,
                   icon: const Icon(Icons.refresh),
                   label: Text(
-                    'Recompute All Missing ($tripsNeedingPolyline)',
+                    'Recompute All Missing Polylines ($tripsNeedingPolyline)',
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -615,7 +674,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tap a trip to view details, or recompute its polyline',
+              'Tap a trip to view details, or recompute its polyline/geocoding',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: isMobile ? 12 : 14,
