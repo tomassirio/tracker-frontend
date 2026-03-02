@@ -29,10 +29,7 @@ class TripMapHelper {
           Marker(
             markerId: MarkerId(location.id),
             position: position,
-            infoWindow: InfoWindow(
-              title: 'Update ${i + 1}',
-              snippet: location.message ?? 'Location update',
-            ),
+            infoWindow: _buildLocationInfoWindow(location, i),
             icon: i == locations.length - 1
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueGreen,
@@ -166,10 +163,7 @@ class TripMapHelper {
           Marker(
             markerId: MarkerId(location.id),
             position: position,
-            infoWindow: InfoWindow(
-              title: 'Update ${i + 1}',
-              snippet: location.message ?? 'Location update',
-            ),
+            infoWindow: _buildLocationInfoWindow(location, i),
             icon: i == 0
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueRed, // Start point - red
@@ -436,6 +430,38 @@ class TripMapHelper {
       return 10;
     }
     return 4;
+  }
+
+  /// Builds a rich InfoWindow for a location update marker
+  static InfoWindow _buildLocationInfoWindow(
+      TripLocation location, int index) {
+    // Title: city/country if available, otherwise "Update N"
+    final title = location.city != null
+        ? location.displayLocation
+        : 'Update ${index + 1}';
+
+    // Snippet: timestamp + battery + message, separated by " · "
+    final parts = <String>[];
+    parts.add(_formatMarkerTimestamp(location.timestamp));
+    if (location.battery != null) {
+      parts.add('🔋 ${location.battery}%');
+    }
+    if (location.message != null && location.message!.isNotEmpty) {
+      parts.add(location.message!);
+    }
+
+    return InfoWindow(
+      title: title,
+      snippet: parts.join('  ·  '),
+    );
+  }
+
+  /// Formats a timestamp for display in a marker InfoWindow
+  static String _formatMarkerTimestamp(DateTime timestamp) {
+    final day = '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+    final time =
+        '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+    return '$day  $time';
   }
 }
 
