@@ -97,6 +97,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
 
+  // Desktop web: track whether the mouse is hovering over a panel
+  // so we can disable map gestures only when hovering.
+  bool _isHoveringOverPanel = false;
+
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -1609,14 +1613,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   onMapCreated: (controller) => _mapController = controller,
                   isOwner: _userId != null && _trip.userId == _userId,
                   // On mobile: disable map gestures when any panel is expanded
-                  // to prevent scroll-through.
-                  // On desktop: keep gestures enabled — panels block pointer
-                  // events via their own hit-test area and scroll absorbers.
-                  gesturesEnabled: !isMobile ||
-                      (_isTripInfoCollapsed &&
+                  // to prevent scroll-through on touch devices.
+                  // On desktop: disable map gestures only when the mouse is
+                  // hovering over a panel, so scroll/drag on panels doesn't
+                  // move the map, but the map is freely navigable otherwise.
+                  gesturesEnabled: isMobile
+                      ? (_isTripInfoCollapsed &&
                           _isCommentsCollapsed &&
                           _isTimelineCollapsed &&
-                          _isTripUpdateCollapsed),
+                          _isTripUpdateCollapsed)
+                      : !_isHoveringOverPanel,
                 ),
               ),
 
@@ -1628,7 +1634,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     ? 0
                     : null,
                 width: leftPanelWidth,
-                child: strategy.buildLeftPanel(constraints, layoutData),
+                child: MouseRegion(
+                  onEnter: (_) {
+                    if (!isMobile) setState(() => _isHoveringOverPanel = true);
+                  },
+                  onExit: (_) {
+                    if (!isMobile) setState(() => _isHoveringOverPanel = false);
+                  },
+                  child: strategy.buildLeftPanel(constraints, layoutData),
+                ),
               ),
 
               // Right side: Timeline panel (floating glass card)
@@ -1638,7 +1652,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 bottom: strategy.shouldTimelinePanelStretchToBottom(layoutData)
                     ? 0
                     : null,
-                child: strategy.buildTimelinePanel(constraints, layoutData),
+                child: MouseRegion(
+                  onEnter: (_) {
+                    if (!isMobile) setState(() => _isHoveringOverPanel = true);
+                  },
+                  onExit: (_) {
+                    if (!isMobile) setState(() => _isHoveringOverPanel = false);
+                  },
+                  child: strategy.buildTimelinePanel(constraints, layoutData),
+                ),
               ),
 
               // Floating donation button for promoted trips
