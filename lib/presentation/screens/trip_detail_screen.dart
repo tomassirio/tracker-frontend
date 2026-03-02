@@ -1633,15 +1633,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 bottom: strategy.shouldLeftPanelStretchToBottom(layoutData)
                     ? 0
                     : null,
-                width: leftPanelWidth,
-                child: MouseRegion(
-                  onEnter: (_) {
-                    if (!isMobile) setState(() => _isHoveringOverPanel = true);
-                  },
-                  onExit: (_) {
-                    if (!isMobile) setState(() => _isHoveringOverPanel = false);
-                  },
-                  child: strategy.buildLeftPanel(constraints, layoutData),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  width: leftPanelWidth,
+                  child: MouseRegion(
+                    onEnter: (_) {
+                      if (!isMobile) {
+                        setState(() => _isHoveringOverPanel = true);
+                      }
+                    },
+                    onExit: (_) {
+                      if (!isMobile) {
+                        setState(() => _isHoveringOverPanel = false);
+                      }
+                    },
+                    child: strategy.buildLeftPanel(constraints, layoutData),
+                  ),
                 ),
               ),
 
@@ -1652,14 +1660,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 bottom: strategy.shouldTimelinePanelStretchToBottom(layoutData)
                     ? 0
                     : null,
-                child: MouseRegion(
-                  onEnter: (_) {
-                    if (!isMobile) setState(() => _isHoveringOverPanel = true);
-                  },
-                  onExit: (_) {
-                    if (!isMobile) setState(() => _isHoveringOverPanel = false);
-                  },
-                  child: strategy.buildTimelinePanel(constraints, layoutData),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topRight,
+                  child: MouseRegion(
+                    onEnter: (_) {
+                      if (!isMobile) {
+                        setState(() => _isHoveringOverPanel = true);
+                      }
+                    },
+                    onExit: (_) {
+                      if (!isMobile) {
+                        setState(() => _isHoveringOverPanel = false);
+                      }
+                    },
+                    child:
+                        strategy.buildTimelinePanel(constraints, layoutData),
+                  ),
                 ),
               ),
 

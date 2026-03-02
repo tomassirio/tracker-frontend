@@ -376,17 +376,22 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
           Positioned(
             left: 0,
             bottom: 0,
-            child: SafeArea(
-              child: TripPlanInfoCard(
-                tripPlan: _tripPlan,
-                isCollapsed: _isInfoCollapsed,
-                onToggleCollapse: () {
-                  setState(() {
-                    _isInfoCollapsed = !_isInfoCollapsed;
-                  });
-                },
-                onEdit: () => setState(() => _isEditing = true),
-                onDelete: _deleteTripPlan,
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: Alignment.bottomLeft,
+              child: SafeArea(
+                child: TripPlanInfoCard(
+                  tripPlan: _tripPlan,
+                  isCollapsed: _isInfoCollapsed,
+                  onToggleCollapse: () {
+                    setState(() {
+                      _isInfoCollapsed = !_isInfoCollapsed;
+                    });
+                  },
+                  onEdit: () => setState(() => _isEditing = true),
+                  onDelete: _deleteTripPlan,
+                ),
               ),
             ),
           ),
