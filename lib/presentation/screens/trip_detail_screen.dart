@@ -1665,9 +1665,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
               // Floating donation button for promoted trips
               if (_isPromoted && _donationLink != null)
-                Positioned(
-                  left: 0,
-                  bottom: 0,
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  left: _isCommentsCollapsed
+                      ? 16.0
+                      : leftPanelWidth + 8,
+                  bottom: 16,
                   child: _buildDonationButton(),
                 ),
             ],
