@@ -72,6 +72,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      centerTitle: true,
       title: _isSearchExpanded
           ? SearchBarWidget(
               controller: widget.searchController,
@@ -82,6 +83,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
               },
             )
           : Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 InkWell(
                   onTap: () {
