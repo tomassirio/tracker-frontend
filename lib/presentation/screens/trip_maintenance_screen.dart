@@ -534,32 +534,71 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: isMobile ? 12 : 24,
-              runSpacing: 12,
-              children: [
-                _buildStatChip(
-                  'Total Trips',
-                  totalTrips.toString(),
-                  Colors.grey,
-                ),
-                _buildStatChip(
-                  'With Polyline',
-                  tripsWithPolyline.toString(),
-                  Colors.green,
-                ),
-                _buildStatChip(
-                  'With 2+ Locations',
-                  tripsWithLocations.toString(),
-                  Colors.blue,
-                ),
-                _buildStatChip(
-                  'Missing Polyline',
-                  tripsNeedingPolyline.toString(),
-                  tripsNeedingPolyline > 0 ? Colors.orange : Colors.green,
-                ),
-              ],
-            ),
+            // Use Row for web to fit all 4 chips in one line, Wrap for mobile
+            isMobile
+                ? Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _buildStatChip(
+                        'Total Trips',
+                        totalTrips.toString(),
+                        Colors.grey,
+                      ),
+                      _buildStatChip(
+                        'With Polyline',
+                        tripsWithPolyline.toString(),
+                        Colors.green,
+                      ),
+                      _buildStatChip(
+                        'With 2+ Locations',
+                        tripsWithLocations.toString(),
+                        Colors.blue,
+                      ),
+                      _buildStatChip(
+                        'Missing Polyline',
+                        tripsNeedingPolyline.toString(),
+                        tripsNeedingPolyline > 0 ? Colors.orange : Colors.green,
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatChip(
+                          'Total Trips',
+                          totalTrips.toString(),
+                          Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatChip(
+                          'With Polyline',
+                          tripsWithPolyline.toString(),
+                          Colors.green,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatChip(
+                          'With 2+ Locations',
+                          tripsWithLocations.toString(),
+                          Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatChip(
+                          'Missing Polyline',
+                          tripsNeedingPolyline.toString(),
+                          tripsNeedingPolyline > 0
+                              ? Colors.orange
+                              : Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 16),
@@ -726,6 +765,10 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
     final isRecomputingGeo = _recomputingGeocoding.contains(trip.id);
     final wasRecomputedGeo = _recomputedGeocoding.contains(trip.id);
     final hasPolyline = trip.encodedPolyline != null;
+    // Check if trip has geocoding data (any location with city and country)
+    final hasGeocoding = trip.locations?.any((loc) =>
+            loc.city != null && loc.country != null) ??
+        false;
     // Polyline recomputation requires 2+ locations (for routing between points)
     // Geocoding recomputation only requires 1+ locations (each can be geocoded independently)
     final hasEnoughLocations =
@@ -744,6 +787,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
                 isRecomputingGeo,
                 wasRecomputedGeo,
                 hasPolyline,
+                hasGeocoding,
                 hasEnoughLocations,
                 locationCount,
               )
@@ -754,6 +798,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
                 isRecomputingGeo,
                 wasRecomputedGeo,
                 hasPolyline,
+                hasGeocoding,
                 hasEnoughLocations,
                 locationCount,
               ),
@@ -768,6 +813,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
     bool isRecomputingGeo,
     bool wasRecomputedGeo,
     bool hasPolyline,
+    bool hasGeocoding,
     bool hasEnoughLocations,
     int locationCount,
   ) {
@@ -780,7 +826,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
             _buildPolylineStatusIcon(hasPolyline, wasRecomputed),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildTripInfo(trip, locationCount, hasPolyline),
+              child: _buildTripInfo(trip, locationCount, hasPolyline, hasGeocoding),
             ),
           ],
         ),
@@ -817,6 +863,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
     bool isRecomputingGeo,
     bool wasRecomputedGeo,
     bool hasPolyline,
+    bool hasGeocoding,
     bool hasEnoughLocations,
     int locationCount,
   ) {
@@ -826,7 +873,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
         _buildPolylineStatusIcon(hasPolyline, wasRecomputed),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildTripInfo(trip, locationCount, hasPolyline),
+          child: _buildTripInfo(trip, locationCount, hasPolyline, hasGeocoding),
         ),
         const SizedBox(width: 12),
         SizedBox(
@@ -862,7 +909,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
     return const Icon(Icons.route, color: Colors.grey, size: 24);
   }
 
-  Widget _buildTripInfo(Trip trip, int locationCount, bool hasPolyline) {
+  Widget _buildTripInfo(Trip trip, int locationCount, bool hasPolyline, bool hasGeocoding) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -899,6 +946,24 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   color: hasPolyline ? Colors.green : Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: hasGeocoding
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                hasGeocoding ? 'Has geocoding' : 'No geocoding',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: hasGeocoding ? Colors.green : Colors.grey,
                   fontWeight: FontWeight.w500,
                 ),
               ),
