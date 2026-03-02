@@ -14,7 +14,6 @@ import 'package:tracker_frontend/data/client/query/promotion_query_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/achievement_service.dart';
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
@@ -203,7 +202,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   void _handlePolylineUpdatedEvent(PolylineUpdatedEvent event) {
     // Validate that we have the required data
-    if (event.tripId.isEmpty) {
+    if (event.tripId == null || event.tripId!.isEmpty) {
       debugPrint('PolylineUpdatedEvent: Missing tripId, ignoring event');
       return;
     }
