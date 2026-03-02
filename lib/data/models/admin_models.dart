@@ -1,4 +1,4 @@
-/// Admin-related data models
+// Admin-related data models
 
 /// Statistics for trip maintenance (polyline and geocoding data)
 class TripMaintenanceStats {
