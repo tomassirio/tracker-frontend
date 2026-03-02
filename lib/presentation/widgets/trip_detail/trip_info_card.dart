@@ -54,6 +54,7 @@ class TripInfoCard extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       alignment: Alignment.topLeft,
+      clipBehavior: Clip.hardEdge,
       child: isCollapsed ? _buildCollapsedBubble() : _buildExpandedCard(context),
     );
   }
