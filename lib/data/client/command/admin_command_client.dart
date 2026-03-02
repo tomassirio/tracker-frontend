@@ -66,4 +66,19 @@ class AdminCommandClient {
           'API Error (${response.statusCode}): Failed to recompute polyline');
     }
   }
+
+  /// Recompute geocoding (city/country) for all trip updates
+  /// POST /api/1/admin/trips/{tripId}/recompute-geocoding → 204 No Content
+  Future<void> recomputeGeocoding(String tripId) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.adminRecomputeGeocoding(tripId),
+      body: {},
+      requireAuth: true,
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+          'API Error (${response.statusCode}): Failed to recompute geocoding');
+    }
+  }
 }

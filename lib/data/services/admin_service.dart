@@ -110,4 +110,9 @@ class AdminService {
   Future<void> recomputePolyline(String tripId) async {
     await _adminCommandClient.recomputePolyline(tripId);
   }
+
+  /// Recompute geocoding (city/country) for all trip updates (admin only)
+  Future<void> recomputeGeocoding(String tripId) async {
+    await _adminCommandClient.recomputeGeocoding(tripId);
+  }
 }

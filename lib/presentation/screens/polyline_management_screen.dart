@@ -11,9 +11,9 @@ import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 
-/// Admin screen for managing trip polyline recomputation.
+/// Admin screen for managing trip polyline and geocoding recomputation.
 /// Allows admins to trigger backend recomputation of encoded polylines
-/// for trips with stale, corrupted, or missing route data.
+/// and geocoding (city/country) for trip updates.
 class PolylineManagementScreen extends StatefulWidget {
   const PolylineManagementScreen({super.key});
 
@@ -45,6 +45,12 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
   /// Set of trip IDs that have been successfully recomputed in this session
   final Set<String> _recomputedTrips = {};
+
+  /// Set of trip IDs currently having geocoding recomputed
+  final Set<String> _recomputingGeocoding = {};
+
+  /// Set of trip IDs that have had geocoding successfully recomputed in this session
+  final Set<String> _recomputedGeocoding = {};
 
   @override
   void initState() {
@@ -192,6 +198,81 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
           UiHelpers.showErrorMessage(
             context,
             'Failed to recompute polyline: $e',
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _recomputeGeocoding(Trip trip) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recompute Geocoding'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Trip: ${trip.name}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text('By: ${trip.username}'),
+            const SizedBox(height: 12),
+            Text(
+              'This will recompute city and country for all '
+              'trip updates using reverse geocoding on the backend.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Locations: ${trip.locations?.length ?? 0}',
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Recompute'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _recomputingGeocoding.add(trip.id);
+      });
+
+      try {
+        await _adminService.recomputeGeocoding(trip.id);
+
+        if (mounted) {
+          setState(() {
+            _recomputingGeocoding.remove(trip.id);
+            _recomputedGeocoding.add(trip.id);
+          });
+          UiHelpers.showSuccessMessage(
+            context,
+            'Geocoding recomputed for "${trip.name}"',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _recomputingGeocoding.remove(trip.id);
+          });
+          UiHelpers.showErrorMessage(
+            context,
+            'Failed to recompute geocoding: $e',
           );
         }
       }
@@ -583,6 +664,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
   Widget _buildTripItem(Trip trip, bool isMobile) {
     final isRecomputing = _recomputingTrips.contains(trip.id);
     final wasRecomputed = _recomputedTrips.contains(trip.id);
+    final isRecomputingGeo = _recomputingGeocoding.contains(trip.id);
+    final wasRecomputedGeo = _recomputedGeocoding.contains(trip.id);
     final hasPolyline = trip.encodedPolyline != null;
     final hasEnoughLocations =
         trip.locations != null && trip.locations!.length >= 2;
@@ -597,6 +680,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 trip,
                 isRecomputing,
                 wasRecomputed,
+                isRecomputingGeo,
+                wasRecomputedGeo,
                 hasPolyline,
                 hasEnoughLocations,
                 locationCount,
@@ -605,6 +690,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 trip,
                 isRecomputing,
                 wasRecomputed,
+                isRecomputingGeo,
+                wasRecomputedGeo,
                 hasPolyline,
                 hasEnoughLocations,
                 locationCount,
@@ -617,6 +704,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     Trip trip,
     bool isRecomputing,
     bool wasRecomputed,
+    bool isRecomputingGeo,
+    bool wasRecomputedGeo,
     bool hasPolyline,
     bool hasEnoughLocations,
     int locationCount,
@@ -635,14 +724,27 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: _buildRecomputeButton(
-            trip,
-            isRecomputing,
-            wasRecomputed,
-            hasEnoughLocations,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildRecomputeButton(
+                trip,
+                isRecomputing,
+                wasRecomputed,
+                hasEnoughLocations,
+                'Polyline',
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildRecomputeGeocodingButton(
+                trip,
+                isRecomputingGeo,
+                wasRecomputedGeo,
+                hasEnoughLocations,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -652,6 +754,8 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     Trip trip,
     bool isRecomputing,
     bool wasRecomputed,
+    bool isRecomputingGeo,
+    bool wasRecomputedGeo,
     bool hasPolyline,
     bool hasEnoughLocations,
     int locationCount,
@@ -671,6 +775,17 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             trip,
             isRecomputing,
             wasRecomputed,
+            hasEnoughLocations,
+            'Polyline',
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 140,
+          child: _buildRecomputeGeocodingButton(
+            trip,
+            isRecomputingGeo,
+            wasRecomputedGeo,
             hasEnoughLocations,
           ),
         ),
@@ -740,6 +855,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     bool isRecomputing,
     bool wasRecomputed,
     bool hasEnoughLocations,
+    String label,
   ) {
     if (isRecomputing) {
       return const ElevatedButton(
@@ -756,7 +872,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
       return ElevatedButton.icon(
         onPressed: () => _recomputePolyline(trip),
         icon: const Icon(Icons.check, size: 16),
-        label: const Text('Done'),
+        label: Text(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
@@ -777,8 +893,57 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
     return ElevatedButton(
       onPressed: () => _recomputePolyline(trip),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildRecomputeGeocodingButton(
+    Trip trip,
+    bool isRecomputing,
+    bool wasRecomputed,
+    bool hasEnoughLocations,
+  ) {
+    if (isRecomputing) {
+      return const ElevatedButton(
+        onPressed: null,
+        child: SizedBox(
+          height: 16,
+          width: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (wasRecomputed) {
+      return ElevatedButton.icon(
+        onPressed: () => _recomputeGeocoding(trip),
+        icon: const Icon(Icons.check, size: 16),
+        label: const Text('Geocoding'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+        ),
+      );
+    }
+
+    if (!hasEnoughLocations) {
+      return ElevatedButton(
+        onPressed: null,
+        child: Text(
+          'Too few locations',
+          style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return ElevatedButton(
+      onPressed: () => _recomputeGeocoding(trip),
       child: const Text(
-        'Recompute',
+        'Geocoding',
         textAlign: TextAlign.center,
       ),
     );
