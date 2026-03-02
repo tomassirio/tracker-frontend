@@ -872,7 +872,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
       return ElevatedButton.icon(
         onPressed: () => _recomputePolyline(trip),
         icon: const Icon(Icons.check, size: 16),
-        label: Text(label),
+        label: const Text('Done'),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
@@ -921,7 +921,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
       return ElevatedButton.icon(
         onPressed: () => _recomputeGeocoding(trip),
         icon: const Icon(Icons.check, size: 16),
-        label: const Text('Geocoding'),
+        label: const Text('Done'),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
