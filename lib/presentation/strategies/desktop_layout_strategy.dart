@@ -2,6 +2,40 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 
+/// Blocks pointer scroll (mouse wheel) events from propagating through
+/// to the Google Map underneath on desktop web. Also ensures click-drag
+/// events that land on the panel are consumed by the panel's own scrollables
+/// rather than leaking to the map.
+class _MapEventBlocker extends StatelessWidget {
+  final Widget child;
+
+  const _MapEventBlocker({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerSignal: (PointerSignalEvent event) {
+        if (event is PointerScrollEvent) {
+          // Claim the scroll event via the resolver so the map never receives it.
+          GestureBinding.instance.pointerSignalResolver.register(
+            event,
+            (PointerSignalEvent e) {
+              // No-op: the panel's internal scrollable will handle the actual
+              // scrolling through its own Listener registered earlier in the
+              // hit-test order. We just need to ensure *something* claims it
+              // so it doesn't fall through to the map.
+            },
+          );
+        }
+      },
+      // opaque so pointer-down / drag events are caught by this subtree
+      // (and its scrollable children) instead of passing to the map.
+      behavior: HitTestBehavior.opaque,
+      child: child,
+    );
+  }
+}
+
 /// Desktop layout strategy for trip detail screen
 /// - Multiple panels can be open simultaneously
 /// - Panels expand to fill available space
@@ -12,23 +46,6 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
   static const double _panelGap = 32.0;
   static const double _minExpandedWidth = 300.0;
   static const double _maxExpandedWidth = 500.0;
-
-  /// Wraps a panel widget to prevent mouse wheel scroll and click-drag
-  /// events from propagating through to the map underneath on web browsers.
-  Widget _wrapWithPointerAbsorber(Widget child) {
-    return Listener(
-      onPointerSignal: (PointerSignalEvent event) {
-        // Consume mouse wheel events so they don't reach the map
-      },
-      child: GestureDetector(
-        // Absorb drag gestures so click-drag doesn't pan the map
-        onVerticalDragUpdate: (_) {},
-        onHorizontalDragUpdate: (_) {},
-        behavior: HitTestBehavior.translucent,
-        child: child,
-      ),
-    );
-  }
 
   @override
   double calculateLeftPanelWidth(
@@ -55,8 +72,8 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
     final tripInfoCard = createTripInfoCard(data);
     final commentsSection = createCommentsSection(data);
 
-    return _wrapWithPointerAbsorber(
-      Column(
+    return _MapEventBlocker(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: data.isTripInfoCollapsed && data.isCommentsCollapsed
             ? MainAxisSize.min
@@ -80,11 +97,11 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
         data.showTripUpdatePanel ? createTripUpdatePanel(data) : null;
 
     if (tripUpdatePanel == null) {
-      return _wrapWithPointerAbsorber(timelinePanel);
+      return _MapEventBlocker(child: timelinePanel);
     }
 
-    return _wrapWithPointerAbsorber(
-      Column(
+    return _MapEventBlocker(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize:
             data.isTimelineCollapsed ? MainAxisSize.min : MainAxisSize.max,
