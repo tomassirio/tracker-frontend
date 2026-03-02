@@ -435,24 +435,25 @@ class TripMapHelper {
   /// Builds a rich InfoWindow for a location update marker
   static InfoWindow _buildLocationInfoWindow(
       TripLocation location, int index) {
-    // Title: city/country if available, otherwise "Update N"
-    final title = location.city != null
-        ? location.displayLocation
-        : 'Update ${index + 1}';
-
-    // Snippet: timestamp + battery + message, separated by " · "
-    final parts = <String>[];
-    parts.add(_formatMarkerTimestamp(location.timestamp));
+    // Title: date/time + battery
+    final titleParts = <String>[];
+    titleParts.add(_formatMarkerTimestamp(location.timestamp));
     if (location.battery != null) {
-      parts.add('🔋 ${location.battery}%');
+      titleParts.add('🔋 ${location.battery}%');
     }
+    final title = titleParts.join('  ·  ');
+
+    // Snippet: location + message
+    final snippetParts = <String>[];
+    snippetParts.add(location.displayLocation);
     if (location.message != null && location.message!.isNotEmpty) {
-      parts.add(location.message!);
+      snippetParts.add(location.message!);
     }
+    final snippet = snippetParts.join('\n');
 
     return InfoWindow(
       title: title,
-      snippet: parts.join('  ·  '),
+      snippet: snippet,
     );
   }
 
