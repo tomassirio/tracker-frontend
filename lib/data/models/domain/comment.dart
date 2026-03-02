@@ -55,7 +55,8 @@ class Comment {
         json['individualReactions'] is List) {
       individualReactionsList = (json['individualReactions'] as List)
           .where((reaction) => reaction != null)
-          .map((reaction) => Reaction.fromJson(reaction as Map<String, dynamic>))
+          .map(
+              (reaction) => Reaction.fromJson(reaction as Map<String, dynamic>))
           .toList();
     }
 

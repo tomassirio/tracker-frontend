@@ -53,10 +53,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     super.dispose();
   }
 
-  /// Updates map data using Directions API for road routing
-  Future<void> _updateMapData() async {
+  /// Updates map data using backend polyline or straight-line fallback
+  void _updateMapData() {
     try {
-      final mapData = await TripPlanMapHelper.createMapDataWithDirections(
+      final mapData = TripPlanMapHelper.createMapDataWithDirections(
         _tripPlan,
         onWaypointTap: _showWaypointOptions,
       );
@@ -65,7 +65,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         _polylines = mapData.polylines;
       });
     } catch (e) {
-      // Fallback to straight lines if Directions API fails
+      // Fallback to straight lines if decoding fails
       final mapData = TripPlanMapHelper.createMapData(
         _tripPlan,
         onWaypointTap: _showWaypointOptions,
@@ -162,7 +162,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
           _tripPlan = updatedPlan;
           _isLoading = false;
         });
-        await _updateMapData();
+        _updateMapData();
         if (mounted) {
           UiHelpers.showSuccessMessage(
             context,

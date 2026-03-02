@@ -152,7 +152,8 @@ void main() {
         mockCommentCommandClient.mockCommentId = 'comment-1';
 
         final request = AddReactionRequest(reactionType: ReactionType.heart);
-        final result = await commentService.removeReaction('comment-1', request);
+        final result =
+            await commentService.removeReaction('comment-1', request);
 
         expect(result, 'comment-1');
         expect(mockCommentCommandClient.removeReactionCalled, true);

@@ -10,14 +10,16 @@ class WandererLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Image.asset(
-        'assets/images/wanderer-logo.png',
+    return ClipRect(
+      child: SizedBox(
         width: size,
         height: size,
-        fit: BoxFit.contain,
+        child: Image.asset(
+          'assets/images/wanderer-logo.png',
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

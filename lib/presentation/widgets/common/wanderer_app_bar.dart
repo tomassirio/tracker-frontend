@@ -72,6 +72,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      centerTitle: true,
       title: _isSearchExpanded
           ? SearchBarWidget(
               controller: widget.searchController,
@@ -82,6 +83,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
               },
             )
           : Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 InkWell(
                   onTap: () {
@@ -95,9 +97,12 @@ class _WandererAppBarState extends State<WandererAppBar> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Wanderer',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                const Flexible(
+                  child: Text(
+                    'Wanderer',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -137,9 +142,10 @@ class _WandererAppBarState extends State<WandererAppBar> {
             child: PopupMenuButton<String>(
               icon: CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                backgroundImage: widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
-                    ? NetworkImage(widget.avatarUrl!)
-                    : null,
+                backgroundImage:
+                    widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
+                        ? NetworkImage(widget.avatarUrl!)
+                        : null,
                 child: widget.avatarUrl == null || widget.avatarUrl!.isEmpty
                     ? Text(
                         _avatarInitial,
@@ -179,11 +185,12 @@ class _WandererAppBarState extends State<WandererAppBar> {
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.primary,
-                              backgroundImage:
-                                  widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
-                                      ? NetworkImage(widget.avatarUrl!)
-                                      : null,
-                              child: widget.avatarUrl == null || widget.avatarUrl!.isEmpty
+                              backgroundImage: widget.avatarUrl != null &&
+                                      widget.avatarUrl!.isNotEmpty
+                                  ? NetworkImage(widget.avatarUrl!)
+                                  : null,
+                              child: widget.avatarUrl == null ||
+                                      widget.avatarUrl!.isEmpty
                                   ? Text(
                                       _avatarInitial,
                                       style: const TextStyle(

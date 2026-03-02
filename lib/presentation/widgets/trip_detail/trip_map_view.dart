@@ -128,7 +128,7 @@ class _TripMapViewState extends State<TripMapView> {
           myLocationButtonEnabled: widget.isOwner,
           myLocationEnabled: widget.isOwner,
           mapToolbarEnabled: false,
-          zoomControlsEnabled: widget.gesturesEnabled,
+          zoomControlsEnabled: true,
           scrollGesturesEnabled: widget.gesturesEnabled,
           zoomGesturesEnabled: widget.gesturesEnabled,
           tiltGesturesEnabled: widget.gesturesEnabled,

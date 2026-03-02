@@ -14,6 +14,7 @@ import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
 import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
+import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/presentation/widgets/home/enhanced_trip_card.dart';
 import 'package:tracker_frontend/presentation/widgets/home/feed_section_header.dart';
@@ -778,7 +779,12 @@ class _HomeScreenState extends State<HomeScreen>
     return RefreshIndicator(
       onRefresh: _loadTrips,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: 80 + MediaQuery.of(context).padding.bottom,
+        ),
         children: [
           if (activeTrips.isNotEmpty) ...[
             FeedSectionHeader(
@@ -870,7 +876,12 @@ class _HomeScreenState extends State<HomeScreen>
     return RefreshIndicator(
       onRefresh: _loadTrips,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: 80 + MediaQuery.of(context).padding.bottom,
+        ),
         children: [
           if (liveTrips.isNotEmpty) ...[
             FeedSectionHeader(
@@ -917,11 +928,10 @@ class _HomeScreenState extends State<HomeScreen>
     final filteredTrips = _getFilteredTrips(_discoverTrips);
     final promotedTripsList =
         _allTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
-    
+
     // Exclude promoted trips from discover section
-    final nonPromotedTrips = filteredTrips
-        .where((t) => !_promotedTripIds.contains(t.id))
-        .toList();
+    final nonPromotedTrips =
+        filteredTrips.where((t) => !_promotedTripIds.contains(t.id)).toList();
 
     if (nonPromotedTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(
@@ -950,7 +960,12 @@ class _HomeScreenState extends State<HomeScreen>
         await _loadPromotedTrips();
       },
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: 80 + MediaQuery.of(context).padding.bottom,
+        ),
         children: [
           if (promotedTripsList.isNotEmpty) ...[
             const FeedSectionHeader(
@@ -1169,23 +1184,9 @@ class _HomeScreenState extends State<HomeScreen>
                                       ),
                                     ],
                                   ),
-                                  child: ClipOval(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Image.network(
-                                        'icons/Icon-192.png',
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Icon(
-                                            Icons.explore,
-                                            size: 64,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          );
-                                        },
-                                      ),
-                                    ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: WandererLogo(size: 64),
                                   ),
                                 ),
                                 const SizedBox(height: 24),
@@ -1310,7 +1311,7 @@ class _HomeScreenState extends State<HomeScreen>
                           Positioned(
                             left: 16,
                             right: 16,
-                            bottom: 16,
+                            bottom: 16 + MediaQuery.of(context).padding.bottom,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.surface,
@@ -1330,36 +1331,76 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(28),
-                                child: NavigationBar(
-                                  selectedIndex: _tabController.index,
-                                  onDestinationSelected: (index) {
-                                    setState(() {
-                                      _tabController.animateTo(index);
-                                    });
-                                  },
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
+                                child: SizedBox(
                                   height: 64,
-                                  labelBehavior:
-                                      NavigationDestinationLabelBehavior
-                                          .alwaysShow,
-                                  destinations: const [
-                                    NavigationDestination(
-                                      icon: Icon(Icons.person_outline),
-                                      selectedIcon: Icon(Icons.person),
-                                      label: 'My Trips',
-                                    ),
-                                    NavigationDestination(
-                                      icon: Icon(Icons.dynamic_feed_outlined),
-                                      selectedIcon: Icon(Icons.dynamic_feed),
-                                      label: 'Feed',
-                                    ),
-                                    NavigationDestination(
-                                      icon: Icon(Icons.explore_outlined),
-                                      selectedIcon: Icon(Icons.explore),
-                                      label: 'Discover',
-                                    ),
-                                  ],
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: List.generate(3, (index) {
+                                      final isSelected =
+                                          _tabController.index == index;
+                                      final icons = [
+                                        Icons.person_outline,
+                                        Icons.dynamic_feed_outlined,
+                                        Icons.explore_outlined,
+                                      ];
+                                      final selectedIcons = [
+                                        Icons.person,
+                                        Icons.dynamic_feed,
+                                        Icons.explore,
+                                      ];
+                                      final labels = [
+                                        'My Trips',
+                                        'Feed',
+                                        'Discover',
+                                      ];
+                                      return Expanded(
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              _tabController.animateTo(index);
+                                            });
+                                          },
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                isSelected
+                                                    ? selectedIcons[index]
+                                                    : icons[index],
+                                                color: isSelected
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .primary
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                size: 24,
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                labels[index],
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: isSelected
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurfaceVariant,
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w600
+                                                      : FontWeight.normal,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1367,7 +1408,7 @@ class _HomeScreenState extends State<HomeScreen>
                         if (_username != null)
                           Positioned(
                             right: 16,
-                            bottom: 92,
+                            bottom: 92 + MediaQuery.of(context).padding.bottom,
                             child: FloatingActionButton.extended(
                               onPressed: _navigateToCreateTrip,
                               icon: const Icon(Icons.add),

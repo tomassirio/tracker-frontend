@@ -38,7 +38,7 @@ void main() {
 
       // Verify the success icon is shown
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
-      
+
       // Clean up - wait for auto-dismiss
       await tester.pumpAndSettle();
     });
@@ -77,7 +77,7 @@ void main() {
 
       // Verify the error icon is shown
       expect(find.byIcon(Icons.error), findsOneWidget);
-      
+
       // Clean up - wait for auto-dismiss
       await tester.pumpAndSettle();
     });
@@ -116,7 +116,7 @@ void main() {
 
       // Verify the info icon is shown
       expect(find.byIcon(Icons.info), findsOneWidget);
-      
+
       // Clean up - wait for auto-dismiss
       await tester.pumpAndSettle();
     });
@@ -155,7 +155,7 @@ void main() {
 
       // Verify the warning icon is shown
       expect(find.byIcon(Icons.warning), findsOneWidget);
-      
+
       // Clean up - wait for auto-dismiss
       await tester.pumpAndSettle();
     });
@@ -187,7 +187,8 @@ void main() {
       // Show notification
       await tester.tap(find.text('Show'));
       await tester.pump(); // Trigger overlay insertion
-      await tester.pump(const Duration(milliseconds: 50)); // Advance to show notification
+      await tester.pump(
+          const Duration(milliseconds: 50)); // Advance to show notification
 
       // Verify notification is visible
       expect(find.text('Auto dismiss'), findsOneWidget);

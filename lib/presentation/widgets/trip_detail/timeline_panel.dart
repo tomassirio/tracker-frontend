@@ -27,10 +27,17 @@ class TimelinePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isCollapsed) {
-      return _buildCollapsedBubble();
-    }
-    return _buildExpandedPanel();
+    return AnimatedCrossFade(
+      duration: const Duration(milliseconds: 300),
+      firstCurve: Curves.easeInOut,
+      secondCurve: Curves.easeInOut,
+      sizeCurve: Curves.easeInOut,
+      alignment: Alignment.topRight,
+      crossFadeState:
+          isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      firstChild: _buildCollapsedBubble(),
+      secondChild: _buildExpandedPanel(),
+    );
   }
 
   /// Collapsed state - floating bubble with timeline icon and count badge
@@ -201,7 +208,7 @@ class TimelinePanel extends StatelessWidget {
                   ),
                 ),
                 // Timeline content
-                Expanded(
+                Flexible(
                   child: TripTimeline(
                     updates: updates,
                     isLoading: isLoading,

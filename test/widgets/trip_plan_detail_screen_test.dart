@@ -117,6 +117,96 @@ void main() {
         expect(tripPlan.startLocation, isNull);
         expect(tripPlan.endLocation, isNull);
         expect(tripPlan.waypoints, isEmpty);
+        expect(tripPlan.encodedPolyline, isNull);
+        expect(tripPlan.polylineUpdatedAt, isNull);
+      });
+
+      test('creates TripPlan with polyline fields', () {
+        final tripPlan = TripPlan(
+          id: 'plan-123',
+          userId: 'user-456',
+          name: 'Polyline Plan',
+          planType: 'MULTI_DAY',
+          encodedPolyline: 'a~l~Fjk~uOwHJy@P',
+          polylineUpdatedAt: DateTime(2026, 3, 1, 14, 30),
+          createdTimestamp: DateTime(2026, 3, 1),
+        );
+
+        expect(tripPlan.encodedPolyline, 'a~l~Fjk~uOwHJy@P');
+        expect(tripPlan.polylineUpdatedAt, DateTime(2026, 3, 1, 14, 30));
+      });
+
+      test('fromJson parses encodedPolyline and polylineUpdatedAt', () {
+        final json = {
+          'id': 'plan-123',
+          'userId': 'user-456',
+          'name': 'Camino Route Plan',
+          'planType': 'MULTI_DAY',
+          'startDate': '2026-06-01',
+          'endDate': '2026-07-05',
+          'startLocation': {'lat': 43.16, 'lon': -1.24},
+          'endLocation': {'lat': 42.88, 'lon': -8.54},
+          'waypoints': [],
+          'encodedPolyline': 'a~l~Fjk~uOwHJy@P??fHzR',
+          'polylineUpdatedAt': '2026-03-01T14:30:00.000Z',
+          'createdTimestamp': '2026-03-01T10:00:00.000Z',
+        };
+
+        final tripPlan = TripPlan.fromJson(json);
+
+        expect(tripPlan.encodedPolyline, 'a~l~Fjk~uOwHJy@P??fHzR');
+        expect(
+          tripPlan.polylineUpdatedAt,
+          DateTime.utc(2026, 3, 1, 14, 30),
+        );
+      });
+
+      test('fromJson handles missing polyline fields gracefully', () {
+        final json = {
+          'id': 'plan-123',
+          'userId': 'user-456',
+          'name': 'No Polyline Plan',
+          'planType': 'SIMPLE',
+          'waypoints': [],
+          'createdTimestamp': '2026-03-01T10:00:00.000Z',
+        };
+
+        final tripPlan = TripPlan.fromJson(json);
+
+        expect(tripPlan.encodedPolyline, isNull);
+        expect(tripPlan.polylineUpdatedAt, isNull);
+      });
+
+      test('toJson includes polyline fields when present', () {
+        final tripPlan = TripPlan(
+          id: 'plan-123',
+          userId: 'user-456',
+          name: 'Polyline Plan',
+          planType: 'MULTI_DAY',
+          encodedPolyline: 'a~l~Fjk~uOwHJy@P',
+          polylineUpdatedAt: DateTime(2026, 3, 1, 14, 30),
+          createdTimestamp: DateTime(2026, 3, 1),
+        );
+
+        final json = tripPlan.toJson();
+
+        expect(json['encodedPolyline'], 'a~l~Fjk~uOwHJy@P');
+        expect(json.containsKey('polylineUpdatedAt'), true);
+      });
+
+      test('toJson excludes polyline fields when null', () {
+        final tripPlan = TripPlan(
+          id: 'plan-123',
+          userId: 'user-456',
+          name: 'No Polyline Plan',
+          planType: 'SIMPLE',
+          createdTimestamp: DateTime(2026, 3, 1),
+        );
+
+        final json = tripPlan.toJson();
+
+        expect(json.containsKey('encodedPolyline'), false);
+        expect(json.containsKey('polylineUpdatedAt'), false);
       });
     });
 

@@ -105,4 +105,9 @@ class AdminService {
   Future<void> deleteUser(String userId) async {
     await _adminCommandClient.deleteUser(userId);
   }
+
+  /// Recompute the encoded polyline for a trip (admin only)
+  Future<void> recomputePolyline(String tripId) async {
+    await _adminCommandClient.recomputePolyline(tripId);
+  }
 }

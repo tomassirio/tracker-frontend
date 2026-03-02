@@ -203,18 +203,20 @@ class CommentCard extends StatelessWidget {
   Widget _buildReactionChip(String reactionType, int count) {
     final emoji = _getReactionEmoji(reactionType);
     final type = _getReactionType(reactionType);
-    
+
     // Check if current user has this reaction
     final userHasReaction = currentUserId != null &&
         comment.individualReactions != null &&
         comment.individualReactions!.any((r) =>
             r.userId == currentUserId &&
-            r.reactionType.toJson().toUpperCase() == reactionType.toUpperCase());
+            r.reactionType.toJson().toUpperCase() ==
+                reactionType.toUpperCase());
 
     // Get list of usernames who reacted with this emoji
     final reactedUsernames = comment.individualReactions
             ?.where((r) =>
-                r.reactionType.toJson().toUpperCase() == reactionType.toUpperCase())
+                r.reactionType.toJson().toUpperCase() ==
+                reactionType.toUpperCase())
             .map((r) => r.username.isNotEmpty ? r.username : 'Unknown')
             .toList() ??
         [];
@@ -253,7 +255,8 @@ class CommentCard extends StatelessWidget {
                 count.toString(),
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: userHasReaction ? FontWeight.bold : FontWeight.w600,
+                  fontWeight:
+                      userHasReaction ? FontWeight.bold : FontWeight.w600,
                   color: userHasReaction
                       ? WandererTheme.primaryOrange
                       : Colors.grey[700],

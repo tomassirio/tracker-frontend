@@ -60,10 +60,17 @@ class CommentsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isCollapsed) {
-      return _buildCollapsedBubble();
-    }
-    return _buildExpandedSection(context);
+    return AnimatedCrossFade(
+      duration: const Duration(milliseconds: 300),
+      firstCurve: Curves.easeInOut,
+      secondCurve: Curves.easeInOut,
+      sizeCurve: Curves.easeInOut,
+      alignment: Alignment.topLeft,
+      crossFadeState:
+          isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      firstChild: _buildCollapsedBubble(),
+      secondChild: _buildExpandedSection(context),
+    );
   }
 
   /// Collapsed state - floating bubble with comment icon and count badge
@@ -321,8 +328,7 @@ class CommentsSection extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const AuthScreen(),
+                              builder: (context) => const AuthScreen(),
                             ),
                           );
                         },

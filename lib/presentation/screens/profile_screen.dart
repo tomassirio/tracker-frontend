@@ -12,8 +12,7 @@ import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import '../../core/constants/enums.dart';
 import '../../data/client/google_maps_api_client.dart';
-import '../../data/client/google_routes_api_client.dart';
-import '../../data/services/directions_service.dart';
+import '../helpers/trip_route_helper.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
@@ -961,52 +960,24 @@ class ProfileTripCard extends StatefulWidget {
 class _ProfileTripCardState extends State<ProfileTripCard> {
   String? _encodedPolyline;
   late final GoogleMapsApiClient _mapsClient;
-  late final DirectionsService _directionsService;
 
   @override
   void initState() {
     super.initState();
     final apiKey = ApiEndpoints.googleMapsApiKey;
     _mapsClient = GoogleMapsApiClient(apiKey);
-    _directionsService = DirectionsService(apiKey);
-    _fetchRoute();
+    _loadRoute();
   }
 
-  /// Fetch a road-snapped route through all recorded trip locations
-  /// so the miniature shows the actual walking path, not straight lines.
-  Future<void> _fetchRoute() async {
-    if (widget.trip.locations == null || widget.trip.locations!.length < 2) {
-      return;
-    }
-
-    try {
-      final allPoints = widget.trip.locations!
-          .map((loc) => LatLng(loc.latitude, loc.longitude))
-          .toList();
-
-      final routePoints = await _directionsService.getDirections(allPoints);
-      final encoded = GoogleRoutesApiClient.encodePolyline(routePoints);
-
-      if (mounted) {
-        setState(() {
-          _encodedPolyline = encoded;
-        });
-      }
-    } catch (e) {
-      // Fallback: encode the raw points as straight-line segments
-      debugPrint(
-          'Failed to fetch route for profile trip card, using straight lines: $e');
-      try {
-        final allPoints = widget.trip.locations!
-            .map((loc) => LatLng(loc.latitude, loc.longitude))
-            .toList();
-        final encoded = GoogleRoutesApiClient.encodePolyline(allPoints);
-        if (mounted) {
-          setState(() {
-            _encodedPolyline = encoded;
-          });
-        }
-      } catch (_) {}
+  /// Load the encoded polyline for the miniature map using the shared
+  /// [TripRouteHelper]. Uses the backend-provided polyline, in-memory cache,
+  /// or encodes raw sorted points as straight-line fallback.
+  void _loadRoute() {
+    final encoded = TripRouteHelper.fetchEncodedPolyline(widget.trip);
+    if (mounted && encoded != null) {
+      setState(() {
+        _encodedPolyline = encoded;
+      });
     }
   }
 
@@ -1016,8 +987,9 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
       return '';
     }
 
-    final firstLoc = widget.trip.locations!.first;
-    final lastLoc = widget.trip.locations!.last;
+    final sorted = TripRouteHelper.getSortedLocations(widget.trip);
+    final firstLoc = sorted.first;
+    final lastLoc = sorted.last;
 
     if (widget.trip.locations!.length == 1) {
       // Single location

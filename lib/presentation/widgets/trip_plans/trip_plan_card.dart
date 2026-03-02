@@ -3,8 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/data/client/google_maps_api_client.dart';
-import 'package:tracker_frontend/data/client/google_routes_api_client.dart';
-import 'package:tracker_frontend/data/services/directions_service.dart';
+import 'package:tracker_frontend/data/client/polyline_codec.dart';
 
 /// Card widget for displaying a trip plan with map preview.
 /// Matches the modern EnhancedTripCard design.
@@ -29,20 +28,29 @@ class TripPlanCard extends StatefulWidget {
 class _TripPlanCardState extends State<TripPlanCard> {
   String? _encodedPolyline;
   late final GoogleMapsApiClient _mapsClient;
-  late final DirectionsService _directionsService;
 
   @override
   void initState() {
     super.initState();
     final apiKey = ApiEndpoints.googleMapsApiKey;
     _mapsClient = GoogleMapsApiClient(apiKey);
-    _directionsService = DirectionsService(apiKey);
-    _fetchRoute();
+    _loadRoute();
   }
 
-  /// Fetch a road-snapped route through all plan locations
-  /// so the miniature shows the actual walking path, not straight lines.
-  Future<void> _fetchRoute() async {
+  /// Load the encoded polyline for the miniature map.
+  /// Prefers the backend-provided polyline (zero API calls), falling back
+  /// to encoding the raw plan points as straight lines.
+  void _loadRoute() {
+    // 1. Backend-provided polyline (best case: zero API calls)
+    if (widget.plan.encodedPolyline != null &&
+        widget.plan.encodedPolyline!.isNotEmpty) {
+      setState(() {
+        _encodedPolyline = widget.plan.encodedPolyline;
+      });
+      return;
+    }
+
+    // 2. Fallback: encode raw plan points as straight lines
     final waypoints = <LatLng>[];
 
     if (_hasValidLocation(widget.plan.startLocation)) {
@@ -64,26 +72,11 @@ class _TripPlanCardState extends State<TripPlanCard> {
     if (waypoints.length < 2) return;
 
     try {
-      final routePoints = await _directionsService.getDirections(waypoints);
-      final encoded = GoogleRoutesApiClient.encodePolyline(routePoints);
-
-      if (mounted) {
-        setState(() {
-          _encodedPolyline = encoded;
-        });
-      }
-    } catch (e) {
-      debugPrint(
-          'Failed to fetch route for trip plan card, using straight lines: $e');
-      try {
-        final encoded = GoogleRoutesApiClient.encodePolyline(waypoints);
-        if (mounted) {
-          setState(() {
-            _encodedPolyline = encoded;
-          });
-        }
-      } catch (_) {}
-    }
+      final encoded = PolylineCodec.encode(waypoints);
+      setState(() {
+        _encodedPolyline = encoded;
+      });
+    } catch (_) {}
   }
 
   String _formatDate(DateTime date) {
@@ -136,8 +129,7 @@ class _TripPlanCardState extends State<TripPlanCard> {
     // Multiple points: show route with A (first) and B (last) markers
     // If we have a road-snapped polyline, use it; otherwise encode the
     // raw points so the map still renders a path through all waypoints.
-    final polyline =
-        _encodedPolyline ?? GoogleRoutesApiClient.encodePolyline(allPoints);
+    final polyline = _encodedPolyline ?? PolylineCodec.encode(allPoints);
 
     return _mapsClient.generateRouteMapUrl(
       startPoint: allPoints.first,

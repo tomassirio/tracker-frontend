@@ -83,6 +83,99 @@ void main() {
         expect(json['visibility'], 'PUBLIC');
         expect(json['status'], 'IN_PROGRESS');
       });
+
+      test('fromJson parses encodedPolyline and polylineUpdatedAt', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'name': 'My Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+          'encodedPolyline': 'a~l~Fjk~uOwHJy@P',
+          'polylineUpdatedAt': '2024-01-02T10:30:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.encodedPolyline, 'a~l~Fjk~uOwHJy@P');
+        expect(trip.polylineUpdatedAt, DateTime.utc(2024, 1, 2, 10, 30));
+      });
+
+      test('fromJson handles missing encodedPolyline gracefully', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'name': 'My Trip',
+          'visibility': 'PUBLIC',
+          'status': 'CREATED',
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-01T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.encodedPolyline, isNull);
+        expect(trip.polylineUpdatedAt, isNull);
+      });
+
+      test('toJson includes encodedPolyline when present', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'username',
+          name: 'My Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+          encodedPolyline: 'a~l~Fjk~uOwHJy@P',
+          polylineUpdatedAt: DateTime(2024, 1, 2, 10, 30),
+        );
+
+        final json = trip.toJson();
+
+        expect(json['encodedPolyline'], 'a~l~Fjk~uOwHJy@P');
+        expect(json.containsKey('polylineUpdatedAt'), true);
+      });
+
+      test('toJson excludes encodedPolyline when null', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'username',
+          name: 'My Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final json = trip.toJson();
+
+        expect(json.containsKey('encodedPolyline'), false);
+        expect(json.containsKey('polylineUpdatedAt'), false);
+      });
+
+      test('copyWith preserves encodedPolyline', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'username',
+          name: 'My Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+          encodedPolyline: 'a~l~Fjk~uOwHJy@P',
+        );
+
+        final updated = trip.copyWith(name: 'Updated Trip');
+
+        expect(updated.name, 'Updated Trip');
+        expect(updated.encodedPolyline, 'a~l~Fjk~uOwHJy@P');
+      });
     });
 
     group('ChangeVisibilityRequest', () {

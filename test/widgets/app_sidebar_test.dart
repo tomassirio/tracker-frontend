@@ -171,11 +171,11 @@ void main() {
       expect(find.text('Trip Plans'), findsOneWidget);
       expect(find.text('Friends'), findsOneWidget);
       expect(find.text('Achievements'), findsOneWidget);
-      
+
       // Profile and Settings are now icon buttons in the header
       expect(find.byIcon(Icons.person), findsOneWidget);
       expect(find.byIcon(Icons.settings), findsOneWidget);
-      
+
       expect(find.text('Buy Me a Coffee'), findsOneWidget);
       expect(find.text('Logout'), findsOneWidget);
 
@@ -215,7 +215,7 @@ void main() {
       expect(find.text('Trip Plans'), findsNothing);
       expect(find.text('Friends'), findsNothing);
       expect(find.text('Achievements'), findsNothing);
-      
+
       // Profile and Settings icon buttons should not be visible for guests
       // Note: Icons.person appears in the guest avatar, so we check for IconButton specifically
       final profileButtons = find.descendant(
@@ -228,7 +228,7 @@ void main() {
       );
       expect(profileButtons, findsNothing);
       expect(settingsButtons, findsNothing);
-      
+
       expect(find.text('Logout'), findsNothing);
     });
 

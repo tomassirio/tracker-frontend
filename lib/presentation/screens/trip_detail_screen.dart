@@ -97,6 +97,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
 
+  // Desktop web: track whether the mouse is hovering over a panel
+  // so we can disable map gestures only when hovering.
+  bool _isHoveringOverPanel = false;
+
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -139,7 +143,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     // Subscribe to events for this specific trip
     final tripStream = _webSocketService.subscribeToTrip(_trip.id);
     _wsSubscription = tripStream.listen(_handleWebSocketEvent);
-    debugPrint('TripDetailScreen: WebSocket initialized and listening for trip ${_trip.id}');
+    debugPrint(
+        'TripDetailScreen: WebSocket initialized and listening for trip ${_trip.id}');
   }
 
   void _handleWebSocketEvent(WebSocketEvent event) {
@@ -228,7 +233,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         // It's a reply
         final parentId = event.parentCommentId!;
         bool isNewReply = false;
-        
+
         if (_replies.containsKey(parentId)) {
           // Check if reply already exists (avoid duplicates from optimistic updates)
           final existingIndex =
@@ -246,7 +251,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _replies[parentId] = [newComment];
           isNewReply = true;
         }
-        
+
         // Update the parent comment's responsesCount if this is a new reply
         // (not an optimistic update replacement)
         if (isNewReply) {
@@ -290,16 +295,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleCommentReaction(CommentReactionEvent event) {
-    debugPrint('TripDetailScreen: Handling comment reaction event for comment ${event.commentId}');
-    debugPrint('TripDetailScreen: Event type=${event.type}, reactionType=${event.reactionType}, userId=${event.userId}, isRemoval=${event.isRemoval}');
-    
+    debugPrint(
+        'TripDetailScreen: Handling comment reaction event for comment ${event.commentId}');
+    debugPrint(
+        'TripDetailScreen: Event type=${event.type}, reactionType=${event.reactionType}, userId=${event.userId}, isRemoval=${event.isRemoval}');
+
     // Normalize reaction type strings to ensure consistent map keys
     // Backend might send "SMILEY" or "smiley", but we need consistency with ReactionType.toJson()
-    final normalizedReactionType = ReactionType.fromJson(event.reactionType).toJson();
+    final normalizedReactionType =
+        ReactionType.fromJson(event.reactionType).toJson();
     final normalizedPreviousReactionType = event.previousReactionType != null
         ? ReactionType.fromJson(event.previousReactionType!).toJson()
         : null;
-    
+
     // Update local state directly from WebSocket event instead of making a GET request
     setState(() {
       // Find and update the comment in top-level comments
@@ -313,18 +321,21 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         if (normalizedPreviousReactionType != null) {
           // REPLACED event: remove old reaction and add new reaction
           // Check if user already has the new reaction (duplicate event detection)
-          final hasNewReaction = updatedIndividualReactions
-              .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+          final hasNewReaction = updatedIndividualReactions.any((r) =>
+              r.userId == event.userId &&
+              r.reactionType.toJson() == normalizedReactionType);
           if (hasNewReaction) {
-            debugPrint('TripDetailScreen: Ignoring duplicate REPLACED event for comment ${event.commentId}');
+            debugPrint(
+                'TripDetailScreen: Ignoring duplicate REPLACED event for comment ${event.commentId}');
             return; // Skip duplicate event
           }
-          
+
           // Remove user's old reaction from individualReactions
           updatedIndividualReactions
               .removeWhere((r) => r.userId == event.userId);
           // Decrement old reaction count
-          final oldCount = updatedReactions[normalizedPreviousReactionType] ?? 0;
+          final oldCount =
+              updatedReactions[normalizedPreviousReactionType] ?? 0;
           if (oldCount > 1) {
             updatedReactions[normalizedPreviousReactionType] = oldCount - 1;
           } else {
@@ -343,15 +354,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         } else if (event.isRemoval) {
           // REMOVED event: remove the individual reaction
           // Check if user actually has this reaction to remove (duplicate event detection)
-          final hasReaction = updatedIndividualReactions
-              .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+          final hasReaction = updatedIndividualReactions.any((r) =>
+              r.userId == event.userId &&
+              r.reactionType.toJson() == normalizedReactionType);
           if (!hasReaction) {
-            debugPrint('TripDetailScreen: Ignoring duplicate REMOVED event for comment ${event.commentId}');
+            debugPrint(
+                'TripDetailScreen: Ignoring duplicate REMOVED event for comment ${event.commentId}');
             return; // Skip duplicate event
           }
-          
-          updatedIndividualReactions
-              .removeWhere((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+
+          updatedIndividualReactions.removeWhere((r) =>
+              r.userId == event.userId &&
+              r.reactionType.toJson() == normalizedReactionType);
           // Decrement reaction count
           final currentCount = updatedReactions[normalizedReactionType] ?? 0;
           if (currentCount > 1) {
@@ -362,13 +376,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         } else {
           // ADDED event: add the individual reaction
           // Check if user already has this reaction (duplicate event detection)
-          final hasReaction = updatedIndividualReactions
-              .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+          final hasReaction = updatedIndividualReactions.any((r) =>
+              r.userId == event.userId &&
+              r.reactionType.toJson() == normalizedReactionType);
           if (hasReaction) {
-            debugPrint('TripDetailScreen: Ignoring duplicate ADDED event for comment ${event.commentId}');
+            debugPrint(
+                'TripDetailScreen: Ignoring duplicate ADDED event for comment ${event.commentId}');
             return; // Skip duplicate event
           }
-          
+
           updatedIndividualReactions.add(Reaction(
             userId: event.userId,
             username: '', // Will be populated from full data refresh if needed
@@ -418,16 +434,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           if (normalizedPreviousReactionType != null) {
             // REPLACED event: remove old reaction and add new reaction
             // Check if user already has the new reaction (duplicate event detection)
-            final hasNewReaction = updatedIndividualReactions
-                .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            final hasNewReaction = updatedIndividualReactions.any((r) =>
+                r.userId == event.userId &&
+                r.reactionType.toJson() == normalizedReactionType);
             if (hasNewReaction) {
-              debugPrint('TripDetailScreen: Ignoring duplicate REPLACED event for reply ${event.commentId}');
+              debugPrint(
+                  'TripDetailScreen: Ignoring duplicate REPLACED event for reply ${event.commentId}');
               return; // Skip duplicate event
             }
-            
+
             updatedIndividualReactions
                 .removeWhere((r) => r.userId == event.userId);
-            final oldCount = updatedReactions[normalizedPreviousReactionType] ?? 0;
+            final oldCount =
+                updatedReactions[normalizedPreviousReactionType] ?? 0;
             if (oldCount > 1) {
               updatedReactions[normalizedPreviousReactionType] = oldCount - 1;
             } else {
@@ -444,15 +463,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           } else if (event.isRemoval) {
             // REMOVED event
             // Check if user actually has this reaction to remove (duplicate event detection)
-            final hasReaction = updatedIndividualReactions
-                .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            final hasReaction = updatedIndividualReactions.any((r) =>
+                r.userId == event.userId &&
+                r.reactionType.toJson() == normalizedReactionType);
             if (!hasReaction) {
-              debugPrint('TripDetailScreen: Ignoring duplicate REMOVED event for reply ${event.commentId}');
+              debugPrint(
+                  'TripDetailScreen: Ignoring duplicate REMOVED event for reply ${event.commentId}');
               return; // Skip duplicate event
             }
-            
-            updatedIndividualReactions
-                .removeWhere((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+
+            updatedIndividualReactions.removeWhere((r) =>
+                r.userId == event.userId &&
+                r.reactionType.toJson() == normalizedReactionType);
             final currentCount = updatedReactions[normalizedReactionType] ?? 0;
             if (currentCount > 1) {
               updatedReactions[normalizedReactionType] = currentCount - 1;
@@ -462,13 +484,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           } else {
             // ADDED event
             // Check if user already has this reaction (duplicate event detection)
-            final hasReaction = updatedIndividualReactions
-                .any((r) => r.userId == event.userId && r.reactionType.toJson() == normalizedReactionType);
+            final hasReaction = updatedIndividualReactions.any((r) =>
+                r.userId == event.userId &&
+                r.reactionType.toJson() == normalizedReactionType);
             if (hasReaction) {
-              debugPrint('TripDetailScreen: Ignoring duplicate ADDED event for reply ${event.commentId}');
+              debugPrint(
+                  'TripDetailScreen: Ignoring duplicate ADDED event for reply ${event.commentId}');
               return; // Skip duplicate event
             }
-            
+
             updatedIndividualReactions.add(Reaction(
               userId: event.userId,
               username: '',
@@ -665,15 +689,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  Future<void> _updateMapData() async {
+  void _updateMapData() {
     try {
-      final mapData = await TripMapHelper.createMapDataWithDirections(_trip);
+      final mapData = TripMapHelper.createMapDataWithDirections(_trip);
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     } catch (e) {
-      // Fallback to straight lines if Directions API fails
+      // Fallback to straight lines if decoding fails
       final mapData = TripMapHelper.createMapData(_trip);
       setState(() {
         _markers = mapData.markers;
@@ -776,7 +800,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Check if comment already exists (shouldn't happen, but be safe)
           if (!_replies[parentId]!.any((c) => c.id == commentId)) {
             _replies[parentId] = [..._replies[parentId]!, optimisticReply];
-            
+
             // Update the parent comment's responsesCount only when actually adding a new reply
             final parentIndex = _comments.indexWhere((c) => c.id == parentId);
             if (parentIndex != -1) {
@@ -799,7 +823,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               );
             }
           }
-          
+
           // Ensure the replies section is expanded so the new reply is visible
           _expandedComments[parentId] = true;
           _commentController.clear();
@@ -896,8 +920,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     return userReaction.userId.isNotEmpty ? userReaction.reactionType : null;
   }
 
-  Future<void> _handleReactionClick(
-      String commentId, ReactionType type) async {
+  Future<void> _handleReactionClick(String commentId, ReactionType type) async {
     final currentReaction = _getUserReaction(commentId);
 
     // Determine the target reaction state for optimistic update
@@ -968,27 +991,28 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   void _applyOptimisticReactionUpdate(
       String commentId, ReactionType? currentReaction, ReactionType? newType) {
     setState(() {
-      _updateReactionInComments(commentId, currentReaction, newType, isOptimistic: true);
+      _updateReactionInComments(commentId, currentReaction, newType,
+          isOptimistic: true);
     });
   }
 
-  void _revertOptimisticReactionUpdate(
-      String commentId, ReactionType? previousReaction, ReactionType? attemptedType) {
+  void _revertOptimisticReactionUpdate(String commentId,
+      ReactionType? previousReaction, ReactionType? attemptedType) {
     setState(() {
       // Revert by applying the reverse operation
-      _updateReactionInComments(commentId, attemptedType, previousReaction, isOptimistic: true);
+      _updateReactionInComments(commentId, attemptedType, previousReaction,
+          isOptimistic: true);
     });
   }
 
   void _updateReactionInComments(
-      String commentId, 
-      ReactionType? oldReaction, 
-      ReactionType? newReaction,
+      String commentId, ReactionType? oldReaction, ReactionType? newReaction,
       {bool isOptimistic = false}) {
     // Find and update the comment in top-level comments
     final commentIndex = _comments.indexWhere((c) => c.id == commentId);
     if (commentIndex != -1) {
-      _updateCommentReaction(_comments, commentIndex, oldReaction, newReaction, isOptimistic);
+      _updateCommentReaction(
+          _comments, commentIndex, oldReaction, newReaction, isOptimistic);
       return;
     }
 
@@ -997,18 +1021,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final replies = _replies[parentId]!;
       final replyIndex = replies.indexWhere((c) => c.id == commentId);
       if (replyIndex != -1) {
-        _updateReplyReaction(parentId, replyIndex, oldReaction, newReaction, isOptimistic);
+        _updateReplyReaction(
+            parentId, replyIndex, oldReaction, newReaction, isOptimistic);
         return;
       }
     }
   }
 
-  void _updateCommentReaction(
-      List<Comment> comments,
-      int commentIndex,
-      ReactionType? oldReaction,
-      ReactionType? newReaction,
-      bool isOptimistic) {
+  void _updateCommentReaction(List<Comment> comments, int commentIndex,
+      ReactionType? oldReaction, ReactionType? newReaction, bool isOptimistic) {
     final comment = comments[commentIndex];
     final updatedReactions = Map<String, int>.from(comment.reactions ?? {});
     final updatedIndividualReactions =
@@ -1060,12 +1081,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     );
   }
 
-  void _updateReplyReaction(
-      String parentId,
-      int replyIndex,
-      ReactionType? oldReaction,
-      ReactionType? newReaction,
-      bool isOptimistic) {
+  void _updateReplyReaction(String parentId, int replyIndex,
+      ReactionType? oldReaction, ReactionType? newReaction, bool isOptimistic) {
     final reply = _replies[parentId]![replyIndex];
     final updatedReactions = Map<String, int>.from(reply.reactions ?? {});
     final updatedIndividualReactions =
@@ -1595,12 +1612,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   polylines: _polylines,
                   onMapCreated: (controller) => _mapController = controller,
                   isOwner: _userId != null && _trip.userId == _userId,
-                  // Disable map gestures when any panel is expanded to prevent
-                  // scroll-through on mobile web
-                  gesturesEnabled: _isTripInfoCollapsed &&
-                      _isCommentsCollapsed &&
-                      _isTimelineCollapsed &&
-                      _isTripUpdateCollapsed,
+                  // On mobile: disable map gestures when any panel is expanded
+                  // to prevent scroll-through on touch devices.
+                  // On desktop: disable map gestures only when the mouse is
+                  // hovering over a panel, so scroll/drag on panels doesn't
+                  // move the map, but the map is freely navigable otherwise.
+                  gesturesEnabled: isMobile
+                      ? (_isTripInfoCollapsed &&
+                          _isCommentsCollapsed &&
+                          _isTimelineCollapsed &&
+                          _isTripUpdateCollapsed)
+                      : !_isHoveringOverPanel,
                 ),
               ),
 
@@ -1611,8 +1633,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 bottom: strategy.shouldLeftPanelStretchToBottom(layoutData)
                     ? 0
                     : null,
-                width: leftPanelWidth,
-                child: strategy.buildLeftPanel(constraints, layoutData),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  width: leftPanelWidth,
+                  child: MouseRegion(
+                    onEnter: (_) {
+                      if (!isMobile) {
+                        setState(() => _isHoveringOverPanel = true);
+                      }
+                    },
+                    onExit: (_) {
+                      if (!isMobile) {
+                        setState(() => _isHoveringOverPanel = false);
+                      }
+                    },
+                    child: strategy.buildLeftPanel(constraints, layoutData),
+                  ),
+                ),
               ),
 
               // Right side: Timeline panel (floating glass card)
@@ -1622,13 +1660,27 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 bottom: strategy.shouldTimelinePanelStretchToBottom(layoutData)
                     ? 0
                     : null,
-                child: strategy.buildTimelinePanel(constraints, layoutData),
+                child: MouseRegion(
+                  onEnter: (_) {
+                    if (!isMobile) {
+                      setState(() => _isHoveringOverPanel = true);
+                    }
+                  },
+                  onExit: (_) {
+                    if (!isMobile) {
+                      setState(() => _isHoveringOverPanel = false);
+                    }
+                  },
+                  child: strategy.buildTimelinePanel(constraints, layoutData),
+                ),
               ),
 
               // Floating donation button for promoted trips
               if (_isPromoted && _donationLink != null)
-                Positioned(
-                  left: 16,
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  left: _isCommentsCollapsed ? 16.0 : leftPanelWidth + 8,
                   bottom: 16,
                   child: _buildDonationButton(),
                 ),
@@ -1758,10 +1810,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onStatusChange: _changeTripStatus,
       onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
-      onFollowTripOwner:
-          _isLoggedIn && _trip.userId != _userId ? _handleFollowTripOwner : null,
-      onSendFriendRequestToTripOwner:
-          _isLoggedIn && _trip.userId != _userId ? _handleSendFriendRequestToTripOwner : null,
+      onFollowTripOwner: _isLoggedIn && _trip.userId != _userId
+          ? _handleFollowTripOwner
+          : null,
+      onSendFriendRequestToTripOwner: _isLoggedIn && _trip.userId != _userId
+          ? _handleSendFriendRequestToTripOwner
+          : null,
       onTestBackgroundUpdate:
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
     );

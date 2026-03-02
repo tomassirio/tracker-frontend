@@ -1,8 +1,8 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/directions_service.dart';
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
+import 'package:tracker_frontend/data/client/polyline_codec.dart';
+import 'package:tracker_frontend/presentation/helpers/trip_route_helper.dart';
 
 /// Helper class for managing Google Maps markers and polylines for trips
 class TripMapHelper {
@@ -13,7 +13,9 @@ class TripMapHelper {
 
     // First try actual trip updates/locations
     if (trip.locations != null && trip.locations!.isNotEmpty) {
-      final locations = trip.locations!;
+      // Sort chronologically (oldest first) so Update 1 = first trip update
+      final locations = List<TripLocation>.from(trip.locations!)
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
       final points = <LatLng>[];
 
       for (int i = 0; i < locations.length; i++) {
@@ -25,10 +27,7 @@ class TripMapHelper {
           Marker(
             markerId: MarkerId(location.id),
             position: position,
-            infoWindow: InfoWindow(
-              title: 'Update ${i + 1}',
-              snippet: location.message ?? 'Location update',
-            ),
+            infoWindow: _buildLocationInfoWindow(location, i),
             icon: i == locations.length - 1
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueGreen,
@@ -140,14 +139,16 @@ class TripMapHelper {
     return MapData(markers: markers, polylines: polylines);
   }
 
-  /// Creates route polyline using Google Directions API
-  static Future<MapData> createMapDataWithDirections(Trip trip) async {
+  /// Creates route polyline using backend-provided encoded polyline or straight lines
+  static MapData createMapDataWithDirections(Trip trip) {
     final markers = <Marker>{};
     final polylines = <Polyline>{};
 
     // First try actual trip updates/locations
     if (trip.locations != null && trip.locations!.isNotEmpty) {
-      final locations = trip.locations!;
+      // Sort chronologically (oldest first) so Update 1 = first trip update
+      final locations = List<TripLocation>.from(trip.locations!)
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
       final waypoints = <LatLng>[];
 
       // Create markers
@@ -160,10 +161,7 @@ class TripMapHelper {
           Marker(
             markerId: MarkerId(location.id),
             position: position,
-            infoWindow: InfoWindow(
-              title: 'Update ${i + 1}',
-              snippet: location.message ?? 'Location update',
-            ),
+            infoWindow: _buildLocationInfoWindow(location, i),
             icon: i == 0
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueRed, // Start point - red
@@ -179,42 +177,40 @@ class TripMapHelper {
         );
       }
 
-      // Get route from Directions API (or straight lines on web)
+      // Get route: prefer backend-computed polyline, fallback to straight lines
       if (waypoints.length > 1) {
-        try {
-          final apiKey = ApiEndpoints.googleMapsApiKey;
+        // Try backend-provided encoded polyline first (zero API calls)
+        if (trip.encodedPolyline != null && trip.encodedPolyline!.isNotEmpty) {
+          try {
+            final routePoints = PolylineCodec.decode(
+              trip.encodedPolyline!,
+            );
+            TripRouteHelper.cachePolyline(trip.id, trip.encodedPolyline!);
 
-          final directionsService = DirectionsService(apiKey);
-          final routePoints = await directionsService.getDirections(waypoints);
-
-          // Create polyline with the route points
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('route'),
-              points: routePoints,
-              color: Colors.blue,
-              width: 5,
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
-            ),
-          );
-        } catch (e) {
-          // Fallback to straight lines if Directions API fails
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('route'),
-              points: waypoints,
-              color: Colors.red,
-              width: 4,
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-            ),
-          );
+            polylines.add(
+              Polyline(
+                polylineId: const PolylineId('route'),
+                points: routePoints,
+                color: Colors.blue,
+                width: 5,
+                geodesic: false,
+                visible: true,
+                startCap: Cap.roundCap,
+                endCap: Cap.roundCap,
+                jointType: JointType.round,
+              ),
+            );
+          } catch (e) {
+            // Backend polyline decode failed — fall through to straight lines
+            debugPrint(
+              'TripMapHelper: Failed to decode backend polyline, '
+              'falling back to straight lines: $e',
+            );
+            _addStraightLinePolyline(polylines, waypoints);
+          }
+        } else {
+          // No backend polyline — straight-line fallback
+          _addStraightLinePolyline(polylines, waypoints);
         }
       }
 
@@ -228,10 +224,30 @@ class TripMapHelper {
     return MapData(markers: markers, polylines: polylines);
   }
 
-  /// Creates planned route map data with directions API
-  static Future<MapData> _createPlannedRouteMapDataWithDirections(
+  /// Adds a straight-line polyline connecting the waypoints.
+  /// Used as a fallback when no backend polyline is available.
+  static void _addStraightLinePolyline(
+    Set<Polyline> polylines,
+    List<LatLng> waypoints,
+  ) {
+    polylines.add(
+      Polyline(
+        polylineId: const PolylineId('route'),
+        points: waypoints,
+        color: Colors.red,
+        width: 4,
+        geodesic: false,
+        visible: true,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+      ),
+    );
+  }
+
+  /// Creates planned route map data with straight-line polylines
+  static MapData _createPlannedRouteMapDataWithDirections(
     Trip trip,
-  ) async {
+  ) {
     final markers = <Marker>{};
     final polylines = <Polyline>{};
     final points = <LatLng>[];
@@ -296,37 +312,20 @@ class TripMapHelper {
       );
     }
 
-    // Get directions for planned route (purple line)
+    // Create polyline for planned route (purple line)
     if (points.length >= 2) {
-      try {
-        final apiKey = ApiEndpoints.googleMapsApiKey;
-        final directionsService = DirectionsService(apiKey);
-        final routePoints = await directionsService.getDirections(points);
-
-        polylines.add(
-          Polyline(
-            polylineId: const PolylineId('planned_route'),
-            points: routePoints,
-            color: Colors.purple,
-            width: 4,
-            geodesic: false,
-            visible: true,
-            startCap: Cap.roundCap,
-            endCap: Cap.roundCap,
-          ),
-        );
-      } catch (e) {
-        // Fallback to dashed straight lines
-        polylines.add(
-          Polyline(
-            polylineId: const PolylineId('planned_route'),
-            points: points,
-            color: Colors.purple.withOpacity(0.7),
-            width: 3,
-            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-          ),
-        );
-      }
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('planned_route'),
+          points: points,
+          color: Colors.purple,
+          width: 4,
+          geodesic: false,
+          visible: true,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+        ),
+      );
     }
 
     return MapData(markers: markers, polylines: polylines);
@@ -378,6 +377,38 @@ class TripMapHelper {
       return 10;
     }
     return 4;
+  }
+
+  /// Builds a rich InfoWindow for a location update marker
+  static InfoWindow _buildLocationInfoWindow(TripLocation location, int index) {
+    // Title: date/time + battery
+    final titleParts = <String>[];
+    titleParts.add(_formatMarkerTimestamp(location.timestamp));
+    if (location.battery != null) {
+      titleParts.add('🔋 ${location.battery}%');
+    }
+    final title = titleParts.join('  ·  ');
+
+    // Snippet: location + message
+    final snippetParts = <String>[];
+    snippetParts.add(location.displayLocation);
+    if (location.message != null && location.message!.isNotEmpty) {
+      snippetParts.add(location.message!);
+    }
+    final snippet = snippetParts.join('\n');
+
+    return InfoWindow(
+      title: title,
+      snippet: snippet,
+    );
+  }
+
+  /// Formats a timestamp for display in a marker InfoWindow
+  static String _formatMarkerTimestamp(DateTime timestamp) {
+    final day = '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+    final time =
+        '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+    return '$day  $time';
   }
 }
 

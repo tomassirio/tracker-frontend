@@ -283,9 +283,10 @@ void main() {
       await tester.pumpAndSettle(); // Wait for notification to appear
 
       expect(find.text('Minimum interval is 15 minutes'), findsOneWidget);
-      
+
       // Clean up - advance past auto-dismiss duration and exit animation
-      await tester.pump(const Duration(seconds: 4)); // 3s auto-dismiss + 300ms exit animation
+      await tester.pump(
+          const Duration(seconds: 4)); // 3s auto-dismiss + 300ms exit animation
       await tester.pumpAndSettle();
     });
 
