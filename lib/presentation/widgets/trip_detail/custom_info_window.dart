@@ -110,7 +110,7 @@ class CustomInfoWindow extends StatelessWidget {
             ),
           ),
           if (hasWeather) ...[
-            const SizedBox(width: 10),
+            const Spacer(),
             if (condition != null)
               Icon(
                 WeatherHelpers.getWeatherIcon(condition),
@@ -130,14 +130,11 @@ class CustomInfoWindow extends StatelessWidget {
             ],
             if (condition != null) ...[
               const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  WeatherHelpers.getWeatherLabel(condition),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                WeatherHelpers.getWeatherLabel(condition),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
                 ),
               ),
             ],

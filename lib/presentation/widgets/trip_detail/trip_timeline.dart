@@ -187,12 +187,14 @@ class TripTimeline extends StatelessWidget {
                                     : WandererTheme.textSecondary,
                               ),
                             ),
-                            if (update.temperatureCelsius != null ||
-                                update.weatherCondition != null) ...[
-                              const SizedBox(width: 6),
-                              _buildWeatherBadge(update),
-                            ],
-                            const Spacer(),
+                            Expanded(
+                              child: (update.temperatureCelsius != null ||
+                                      update.weatherCondition != null)
+                                  ? Center(
+                                      child: _buildWeatherBadge(update),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
                             if (update.battery != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(

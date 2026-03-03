@@ -23,25 +23,18 @@ void main() {
           Icons.cloud_queue,
         );
         expect(
+          WeatherHelpers.getWeatherIcon(WeatherCondition.mostlyCloudy),
+          Icons.cloud,
+        );
+        expect(
           WeatherHelpers.getWeatherIcon(WeatherCondition.cloudy),
           Icons.cloud,
         );
       });
 
-      test('returns fog icon for fog and haze', () {
-        expect(
-          WeatherHelpers.getWeatherIcon(WeatherCondition.fog),
-          Icons.foggy,
-        );
-        expect(
-          WeatherHelpers.getWeatherIcon(WeatherCondition.haze),
-          Icons.foggy,
-        );
-      });
-
       test('returns rain icons for rain conditions', () {
         expect(
-          WeatherHelpers.getWeatherIcon(WeatherCondition.drizzle),
+          WeatherHelpers.getWeatherIcon(WeatherCondition.lightRainShowers),
           Icons.grain,
         );
         expect(
@@ -71,6 +64,10 @@ void main() {
           WeatherHelpers.getWeatherIcon(WeatherCondition.heavySnow),
           Icons.ac_unit,
         );
+        expect(
+          WeatherHelpers.getWeatherIcon(WeatherCondition.snowstorm),
+          Icons.ac_unit,
+        );
       });
 
       test('returns correct icons for special conditions', () {
@@ -79,8 +76,24 @@ void main() {
           Icons.thunderstorm,
         );
         expect(
+          WeatherHelpers.getWeatherIcon(WeatherCondition.heavyThunderstorm),
+          Icons.thunderstorm,
+        );
+        expect(
           WeatherHelpers.getWeatherIcon(WeatherCondition.windy),
           Icons.air,
+        );
+        expect(
+          WeatherHelpers.getWeatherIcon(WeatherCondition.blowingSnow),
+          Icons.air,
+        );
+        expect(
+          WeatherHelpers.getWeatherIcon(WeatherCondition.rainAndSnow),
+          Icons.cloudy_snowing,
+        );
+        expect(
+          WeatherHelpers.getWeatherIcon(WeatherCondition.hail),
+          Icons.cloudy_snowing,
         );
         expect(
           WeatherHelpers.getWeatherIcon(WeatherCondition.unknown),
