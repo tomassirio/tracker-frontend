@@ -206,9 +206,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       debugPrint('PolylineUpdatedEvent: Missing tripId, ignoring event');
       return;
     }
-    
+
     if (event.encodedPolyline.isEmpty) {
-      debugPrint('PolylineUpdatedEvent: Empty encodedPolyline for trip ${event.tripId}, ignoring event');
+      debugPrint(
+          'PolylineUpdatedEvent: Empty encodedPolyline for trip ${event.tripId}, ignoring event');
       return;
     }
 
