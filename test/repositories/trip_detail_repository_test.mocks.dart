@@ -60,6 +60,17 @@ class _FakeAuthResponse_2 extends _i1.SmartFake implements _i4.AuthResponse {
         );
 }
 
+class _FakeRegisterPendingResponse_3 extends _i1.SmartFake
+    implements _i4.RegisterPendingResponse {
+  _FakeRegisterPendingResponse_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [CommentService].
 ///
 /// See the documentation for Mockito's code generation for more information.
@@ -504,20 +515,22 @@ class MockAuthService extends _i1.Mock implements _i10.AuthService {
   }
 
   @override
-  _i6.Future<_i4.AuthResponse> register(_i4.RegisterRequest? request) =>
+  _i6.Future<_i4.RegisterPendingResponse> register(
+          _i4.RegisterRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #register,
           [request],
         ),
-        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_2(
+        returnValue: _i6.Future<_i4.RegisterPendingResponse>.value(
+            _FakeRegisterPendingResponse_3(
           this,
           Invocation.method(
             #register,
             [request],
           ),
         )),
-      ) as _i6.Future<_i4.AuthResponse>);
+      ) as _i6.Future<_i4.RegisterPendingResponse>);
 
   @override
   _i6.Future<_i4.AuthResponse> login(_i4.LoginRequest? request) =>
