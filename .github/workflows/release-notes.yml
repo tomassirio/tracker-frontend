@@ -1,0 +1,156 @@
+name: Generate Release Notes
+
+on:
+  workflow_call:
+    inputs:
+      release-version:
+        description: 'The version being released (e.g., 1.1.0)'
+        required: true
+        type: string
+      checkout-ref:
+        description: 'Git ref to checkout (branch, tag, or commit)'
+        required: true
+        type: string
+      artifact-name:
+        description: 'Name of the build artifact to attach to the release'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout-ref }}
+          fetch-depth: 0
+
+      - name: Download build artifact
+        if: inputs.artifact-name != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: release-assets
+
+      - name: Generate release notes
+        run: |
+          BASE_VERSION="${{ inputs.release-version }}"
+
+          # Get the previous tag (exclude current tag)
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v "^v${BASE_VERSION}$" | head -1 || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            COMMIT_RANGE="${PREV_TAG}..v${BASE_VERSION}"
+
+            # Collect commits excluding CI-generated ones
+            COMMITS=$(git log --pretty=format:"%s" ${COMMIT_RANGE} \
+              | grep -v "^ci: " \
+              | grep -v "^Merge " || true)
+
+            if [ -z "$COMMITS" ]; then
+              # All commits were CI commits, show a simple note
+              echo "## Release ${BASE_VERSION}" > release-notes.md
+              echo "" >> release-notes.md
+              echo "Maintenance release with internal improvements." >> release-notes.md
+            else
+              echo "## Release ${BASE_VERSION}" > release-notes.md
+              echo "" >> release-notes.md
+              echo "### Changes since ${PREV_TAG}" >> release-notes.md
+              echo "" >> release-notes.md
+
+              # Categorize commits by conventional commit type
+              FEATURES=$(echo "$COMMITS" | grep -i "^feat" | sed 's/^feat[^:]*: //' || true)
+              FIXES=$(echo "$COMMITS" | grep -i "^fix" | sed 's/^fix[^:]*: //' || true)
+              DOCS=$(echo "$COMMITS" | grep -i "^docs" | sed 's/^docs[^:]*: //' || true)
+              REFACTORS=$(echo "$COMMITS" | grep -i "^refactor" | sed 's/^refactor[^:]*: //' || true)
+              TESTS=$(echo "$COMMITS" | grep -i "^test" | sed 's/^test[^:]*: //' || true)
+              CHORES=$(echo "$COMMITS" | grep -i "^chore" | sed 's/^chore[^:]*: //' || true)
+              STYLES=$(echo "$COMMITS" | grep -i "^style" | sed 's/^style[^:]*: //' || true)
+              OTHER=$(echo "$COMMITS" | grep -iv "^\(feat\|fix\|docs\|refactor\|test\|chore\|style\)" || true)
+
+              if [ -n "$FEATURES" ]; then
+                echo "#### ✨ Features" >> release-notes.md
+                echo "$FEATURES" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$FIXES" ]; then
+                echo "#### 🐛 Bug Fixes" >> release-notes.md
+                echo "$FIXES" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$REFACTORS" ]; then
+                echo "#### ♻️ Refactoring" >> release-notes.md
+                echo "$REFACTORS" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$DOCS" ]; then
+                echo "#### 📝 Documentation" >> release-notes.md
+                echo "$DOCS" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$TESTS" ]; then
+                echo "#### 🧪 Tests" >> release-notes.md
+                echo "$TESTS" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$STYLES" ]; then
+                echo "#### 🎨 Styling" >> release-notes.md
+                echo "$STYLES" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$CHORES" ]; then
+                echo "#### 🔧 Chores" >> release-notes.md
+                echo "$CHORES" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+
+              if [ -n "$OTHER" ]; then
+                echo "#### 📦 Other Changes" >> release-notes.md
+                echo "$OTHER" | while IFS= read -r line; do [ -n "$line" ] && echo "- $line" >> release-notes.md; done
+                echo "" >> release-notes.md
+              fi
+            fi
+
+            # Add contributors
+            CONTRIBUTORS=$(git log --pretty=format:"%an" ${COMMIT_RANGE} | sort -u | grep -v "GitHub Actions" || true)
+            if [ -n "$CONTRIBUTORS" ]; then
+              echo "### 👥 Contributors" >> release-notes.md
+              echo "" >> release-notes.md
+              echo "$CONTRIBUTORS" | while IFS= read -r name; do [ -n "$name" ] && echo "- $name" >> release-notes.md; done
+              echo "" >> release-notes.md
+            fi
+
+            echo "---" >> release-notes.md
+            echo "**Full Changelog**: [${PREV_TAG}...v${BASE_VERSION}](https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${BASE_VERSION})" >> release-notes.md
+          else
+            echo "## Release ${BASE_VERSION}" > release-notes.md
+            echo "" >> release-notes.md
+            echo "🎉 Initial release" >> release-notes.md
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_VERSION="${{ inputs.release-version }}"
+          ASSETS=""
+          if [ -d "release-assets" ]; then
+            for file in release-assets/*; do
+              [ -f "$file" ] && ASSETS="$ASSETS $file"
+            done
+          fi
+          gh release create "v${BASE_VERSION}" \
+            --title "Release ${BASE_VERSION}" \
+            --notes-file release-notes.md \
+            $ASSETS
+

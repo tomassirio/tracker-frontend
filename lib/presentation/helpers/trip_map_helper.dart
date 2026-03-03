@@ -7,7 +7,10 @@ import 'package:tracker_frontend/presentation/helpers/trip_route_helper.dart';
 /// Helper class for managing Google Maps markers and polylines for trips
 class TripMapHelper {
   /// Creates markers and polylines from trip locations or planned route
-  static MapData createMapData(Trip trip) {
+  static MapData createMapData(
+    Trip trip, {
+    void Function(TripLocation)? onMarkerTap,
+  }) {
     final markers = <Marker>{};
     final polylines = <Polyline>{};
 
@@ -27,7 +30,10 @@ class TripMapHelper {
           Marker(
             markerId: MarkerId(location.id),
             position: position,
-            infoWindow: _buildLocationInfoWindow(location, i),
+            infoWindow: onMarkerTap != null
+                ? InfoWindow.noText
+                : _buildLocationInfoWindow(location, i),
+            onTap: onMarkerTap != null ? () => onMarkerTap(location) : null,
             icon: i == locations.length - 1
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueGreen,
@@ -140,7 +146,10 @@ class TripMapHelper {
   }
 
   /// Creates route polyline using backend-provided encoded polyline or straight lines
-  static MapData createMapDataWithDirections(Trip trip) {
+  static MapData createMapDataWithDirections(
+    Trip trip, {
+    void Function(TripLocation)? onMarkerTap,
+  }) {
     final markers = <Marker>{};
     final polylines = <Polyline>{};
 
@@ -161,7 +170,10 @@ class TripMapHelper {
           Marker(
             markerId: MarkerId(location.id),
             position: position,
-            infoWindow: _buildLocationInfoWindow(location, i),
+            infoWindow: onMarkerTap != null
+                ? InfoWindow.noText
+                : _buildLocationInfoWindow(location, i),
+            onTap: onMarkerTap != null ? () => onMarkerTap(location) : null,
             icon: i == 0
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueRed, // Start point - red

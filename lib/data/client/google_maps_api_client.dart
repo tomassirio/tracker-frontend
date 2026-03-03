@@ -1,5 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'polyline_codec.dart';
+
 /// Client for Google Maps Static API
 /// Handles generation of static map image URLs
 class GoogleMapsApiClient {
@@ -17,6 +19,9 @@ class GoogleMapsApiClient {
 
   /// Size for square thumbnail maps (1:1 aspect ratio)
   static String get defaultSquareSize => '${defaultMapWidth}x$defaultMapWidth';
+
+  /// Maximum URL length for Static Maps API (unsigned URLs).
+  static const int maxUrlLength = 8192;
 
   GoogleMapsApiClient(this._apiKey);
 
@@ -66,7 +71,76 @@ class GoogleMapsApiClient {
     // API Key
     params.add('key=$_apiKey');
 
-    return '$baseUrl?${params.join('&')}';
+    var url = '$baseUrl?${params.join('&')}';
+
+    // If URL exceeds the limit and we have an encoded polyline path,
+    // simplify the polyline by downsampling points to fit.
+    if (url.length > maxUrlLength && path?.encodedPolyline != null) {
+      final otherParams = params.where((p) => !p.startsWith('path=')).toList();
+      final simplified = _simplifyPathForUrl(path!, baseUrl, otherParams);
+      if (simplified != null) {
+        final rebuiltParams = [...otherParams, simplified.toUrlParameter()];
+        url = '$baseUrl?${rebuiltParams.join('&')}';
+      }
+    }
+
+    return url;
+  }
+
+  /// Simplifies an encoded polyline so the resulting URL stays under
+  /// [maxUrlLength]. Decodes the polyline, samples evenly-spaced points
+  /// (always keeping the first and last), then re-encodes.
+  static MapPath? _simplifyPathForUrl(
+    MapPath original,
+    String baseUrl,
+    List<String> otherParams,
+  ) {
+    try {
+      final points = PolylineCodec.decode(original.encodedPolyline!);
+      if (points.length <= 2) return null;
+
+      // Binary search for the max number of sample points that still fits
+      int lo = 2;
+      int hi = points.length;
+      MapPath? best;
+
+      while (lo <= hi) {
+        final mid = (lo + hi) ~/ 2;
+        final sampled = _samplePoints(points, mid);
+        final candidate = MapPath.encoded(
+          encodedPolyline: PolylineCodec.encode(sampled),
+          color: original.color ?? '0x0088ffff',
+          weight: original.weight ?? 4,
+        );
+        final testParams = [...otherParams, candidate.toUrlParameter()];
+        final testUrl = '$baseUrl?${testParams.join('&')}';
+
+        if (testUrl.length <= maxUrlLength) {
+          best = candidate;
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+
+      return best;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Sample [count] evenly-spaced points, always including first and last.
+  static List<LatLng> _samplePoints(List<LatLng> points, int count) {
+    if (count >= points.length) return points;
+    if (count <= 2) return [points.first, points.last];
+
+    final result = <LatLng>[points.first];
+    final step = (points.length - 1) / (count - 1);
+    for (int i = 1; i < count - 1; i++) {
+      result.add(points[(i * step).round()]);
+    }
+    result.add(points.last);
+    return result;
   }
 
   /// Generate a static map URL centered between two points showing a route
@@ -175,7 +249,9 @@ class MapPath {
 
     String pathParam;
     if (encodedPolyline != null) {
-      params.add('enc:$encodedPolyline');
+      // URL-encode the polyline so characters like |, \, ^, ~, @ are not
+      // misinterpreted as URL delimiters or Static Maps pipe separators.
+      params.add('enc:${Uri.encodeComponent(encodedPolyline!)}');
       pathParam = params.join('|');
     } else if (points != null && points!.isNotEmpty) {
       pathParam = params.join('|');

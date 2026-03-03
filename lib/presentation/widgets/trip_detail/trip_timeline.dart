@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
 
 /// Widget displaying the timeline of trip updates
 class TripTimeline extends StatelessWidget {
@@ -194,25 +195,28 @@ class TripTimeline extends StatelessWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _getBatteryColor(update.battery!)
-                                      .withOpacity(0.1),
+                                  color: BatteryHelpers.getBatteryColor(
+                                    update.battery!,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      _getBatteryIcon(update.battery!),
+                                      BatteryHelpers.getBatteryIcon(
+                                          update.battery!),
                                       size: 12,
-                                      color: _getBatteryColor(update.battery!),
+                                      color: BatteryHelpers.getBatteryColor(
+                                          update.battery!),
                                     ),
                                     const SizedBox(width: 2),
                                     Text(
                                       '${update.battery}%',
                                       style: TextStyle(
                                         fontSize: 10,
-                                        color:
-                                            _getBatteryColor(update.battery!),
+                                        color: BatteryHelpers.getBatteryColor(
+                                            update.battery!),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -316,20 +320,5 @@ class TripTimeline extends StatelessWidget {
     } else {
       return '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
     }
-  }
-
-  IconData _getBatteryIcon(int battery) {
-    if (battery >= 90) return Icons.battery_full;
-    if (battery >= 70) return Icons.battery_6_bar;
-    if (battery >= 50) return Icons.battery_5_bar;
-    if (battery >= 30) return Icons.battery_3_bar;
-    if (battery >= 20) return Icons.battery_2_bar;
-    return Icons.battery_1_bar;
-  }
-
-  Color _getBatteryColor(int battery) {
-    if (battery >= 50) return Colors.green;
-    if (battery >= 20) return Colors.orange;
-    return Colors.red;
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/achievement_models.dart';
@@ -447,7 +448,9 @@ class TripInfoCard extends StatelessWidget {
                           spacing: 6,
                           runSpacing: 4,
                           children: tripAchievements
-                              .map((ua) => _buildAchievementBadge(ua))
+                              .map(
+                                (ua) => _buildAchievementBadge(context, ua),
+                              )
                               .toList(),
                         ),
                       ],
@@ -486,8 +489,11 @@ class TripInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAchievementBadge(UserAchievement userAchievement) {
-    return Container(
+  Widget _buildAchievementBadge(
+    BuildContext context,
+    UserAchievement userAchievement,
+  ) {
+    final badge = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.amber.shade50,
@@ -512,6 +518,87 @@ class TripInfoCard extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w500,
               color: Colors.amber.shade900,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final description = userAchievement.achievement.description;
+
+    if (kIsWeb) {
+      return Tooltip(
+        message: description,
+        preferBelow: true,
+        verticalOffset: 16,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade800,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+        ),
+        child: GestureDetector(
+          onTap: () => _showAchievementDescription(context, userAchievement),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: badge,
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => _showAchievementDescription(context, userAchievement),
+      child: badge,
+    );
+  }
+
+  void _showAchievementDescription(
+    BuildContext context,
+    UserAchievement userAchievement,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.emoji_events,
+              color: Colors.amber.shade700,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                userAchievement.achievement.name,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.amber.shade900,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          userAchievement.achievement.description,
+          style: TextStyle(
+            fontSize: 14,
+            color: WandererTheme.textSecondary,
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'OK',
+              style: TextStyle(color: Colors.amber.shade700),
             ),
           ),
         ],

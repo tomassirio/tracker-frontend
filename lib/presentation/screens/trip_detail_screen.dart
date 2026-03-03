@@ -99,6 +99,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   // so we can disable map gestures only when hovering.
   bool _isHoveringOverPanel = false;
 
+  // Custom info window: currently selected map marker location
+  TripLocation? _selectedMapLocation;
+
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -206,9 +209,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       debugPrint('PolylineUpdatedEvent: Missing tripId, ignoring event');
       return;
     }
-    
+
     if (event.encodedPolyline.isEmpty) {
-      debugPrint('PolylineUpdatedEvent: Empty encodedPolyline for trip ${event.tripId}, ignoring event');
+      debugPrint(
+          'PolylineUpdatedEvent: Empty encodedPolyline for trip ${event.tripId}, ignoring event');
       return;
     }
 
@@ -715,19 +719,37 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   void _updateMapData() {
     try {
-      final mapData = TripMapHelper.createMapDataWithDirections(_trip);
+      final mapData = TripMapHelper.createMapDataWithDirections(
+        _trip,
+        onMarkerTap: _onMapMarkerTapped,
+      );
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     } catch (e) {
       // Fallback to straight lines if decoding fails
-      final mapData = TripMapHelper.createMapData(_trip);
+      final mapData = TripMapHelper.createMapData(
+        _trip,
+        onMarkerTap: _onMapMarkerTapped,
+      );
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     }
+  }
+
+  void _onMapMarkerTapped(TripLocation location) {
+    setState(() {
+      _selectedMapLocation = location;
+    });
+  }
+
+  void _onInfoWindowClosed() {
+    setState(() {
+      _selectedMapLocation = null;
+    });
   }
 
   Future<void> _loadComments() async {
@@ -1647,6 +1669,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           _isTimelineCollapsed &&
                           _isTripUpdateCollapsed)
                       : !_isHoveringOverPanel,
+                  selectedLocation: _selectedMapLocation,
+                  onInfoWindowClosed: _onInfoWindowClosed,
+                  onMapTap: _onInfoWindowClosed,
                 ),
               ),
 
@@ -1701,13 +1726,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
               // Floating donation button for promoted trips
               if (_isPromoted && _donationLink != null)
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  left: _isCommentsCollapsed ? 16.0 : leftPanelWidth + 8,
-                  bottom: 16,
-                  child: _buildDonationButton(),
-                ),
+                isMobile
+                    ? Positioned(
+                        left: 16,
+                        bottom: 16,
+                        child: _buildDonationButton(),
+                      )
+                    : AnimatedPositioned(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        left: _isCommentsCollapsed ? 16.0 : leftPanelWidth + 8,
+                        bottom: 16,
+                        child: _buildDonationButton(),
+                      ),
             ],
           );
         },
