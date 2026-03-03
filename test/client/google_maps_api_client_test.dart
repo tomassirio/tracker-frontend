@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/client/google_maps_api_client.dart';
+import 'package:tracker_frontend/data/client/polyline_codec.dart';
 
 void main() {
   group('GoogleMapsApiClient', () {
@@ -70,7 +71,9 @@ void main() {
 
         expect(
           url,
-          contains('path=color:0x0088ffff|weight:4|enc:_p~iF~ps|U_ulLnnqC'),
+          contains(
+            'path=color:0x0088ffff|weight:4|enc:${Uri.encodeComponent('_p~iF~ps|U_ulLnnqC')}',
+          ),
         );
       });
 
@@ -145,7 +148,9 @@ void main() {
 
         expect(
           url,
-          contains('path=color:0x0088ffff|weight:4|enc:$encodedPolyline'),
+          contains(
+            'path=color:0x0088ffff|weight:4|enc:${Uri.encodeComponent(encodedPolyline)}',
+          ),
         );
       });
 
@@ -246,7 +251,10 @@ void main() {
 
         final param = path.toUrlParameter();
 
-        expect(param, 'path=color:0x0088ffff|weight:4|enc:_p~iF~ps|U_ulLnnqC');
+        expect(
+          param,
+          'path=color:0x0088ffff|weight:4|enc:${Uri.encodeComponent('_p~iF~ps|U_ulLnnqC')}',
+        );
       });
 
       test('uses default color and weight', () {
@@ -254,7 +262,10 @@ void main() {
 
         final param = path.toUrlParameter();
 
-        expect(param, 'path=color:0x0088ffff|weight:4|enc:_p~iF~ps|U_ulLnnqC');
+        expect(
+          param,
+          'path=color:0x0088ffff|weight:4|enc:${Uri.encodeComponent('_p~iF~ps|U_ulLnnqC')}',
+        );
       });
     });
 
@@ -310,6 +321,69 @@ void main() {
 
         expect(param, contains('37.7749,-122.4194'));
       });
+    });
+
+    group('URL encoding', () {
+      test('URL-encodes special characters in polyline', () {
+        // Polyline containing pipe (|), tilde (~), caret (^), at (@)
+        const polyline = 'qw}|H{af^p@Qr@n@';
+        final path = MapPath.encoded(encodedPolyline: polyline);
+
+        final param = path.toUrlParameter();
+
+        expect(param, contains('enc:'));
+        expect(param, contains(Uri.encodeComponent(polyline)));
+        // Pipe inside the polyline must be encoded, not raw
+        expect(
+          param.substring(param.indexOf('enc:')),
+          isNot(contains('|')),
+        );
+      });
+    });
+  });
+
+  group('URL length handling', () {
+    late GoogleMapsApiClient client;
+    const apiKey = 'test-api-key';
+
+    setUp(() {
+      client = GoogleMapsApiClient(apiKey);
+    });
+
+    test('simplifies polyline when URL exceeds max length', () {
+      // Generate a very long polyline simulating a 2000+ km trip
+      final points = List.generate(
+        5000,
+        (i) => LatLng(37.0 + i * 0.001, -122.0 + i * 0.001),
+      );
+      final longPolyline = PolylineCodec.encode(points);
+
+      final url = client.generateRouteMapUrl(
+        startPoint: points.first,
+        endPoint: points.last,
+        encodedPolyline: longPolyline,
+      );
+
+      // URL must be within the Google Static Maps limit
+      expect(url.length, lessThanOrEqualTo(GoogleMapsApiClient.maxUrlLength));
+      // Should still contain all essential parts
+      expect(url, contains('path='));
+      expect(url, contains('markers='));
+      expect(url, contains('key=$apiKey'));
+    });
+
+    test('preserves short polylines unchanged', () {
+      const shortPolyline = '_p~iF~ps|U_ulLnnqC';
+
+      final url = client.generateRouteMapUrl(
+        startPoint: const LatLng(37.7749, -122.4194),
+        endPoint: const LatLng(37.7849, -122.4094),
+        encodedPolyline: shortPolyline,
+      );
+
+      // Short polyline should be present (URL-encoded) without simplification
+      expect(url, contains(Uri.encodeComponent(shortPolyline)));
+      expect(url.length, lessThanOrEqualTo(GoogleMapsApiClient.maxUrlLength));
     });
   });
 }
