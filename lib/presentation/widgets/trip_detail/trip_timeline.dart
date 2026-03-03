@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/weather_helpers.dart';
 
 /// Widget displaying the timeline of trip updates
 class TripTimeline extends StatelessWidget {
@@ -173,20 +174,26 @@ class TripTimeline extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header: timestamp and battery
+                        // Header: timestamp, weather, and battery
                         Row(
                           children: [
-                            Expanded(
-                              child: Text(
-                                _formatTimestamp(update.timestamp),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isFirst
-                                      ? WandererTheme.primaryOrange
-                                      : WandererTheme.textSecondary,
-                                ),
+                            Text(
+                              _formatTimestamp(update.timestamp),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isFirst
+                                    ? WandererTheme.primaryOrange
+                                    : WandererTheme.textSecondary,
                               ),
+                            ),
+                            Expanded(
+                              child: (update.temperatureCelsius != null ||
+                                      update.weatherCondition != null)
+                                  ? Center(
+                                      child: _buildWeatherBadge(update),
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
                             if (update.battery != null)
                               Container(
@@ -302,6 +309,36 @@ class TripTimeline extends StatelessWidget {
           ); // closes Row
         },
       ),
+    );
+  }
+
+  Widget _buildWeatherBadge(TripLocation update) {
+    final condition = update.weatherCondition;
+    final temp = update.temperatureCelsius;
+    final weatherColor =
+        condition != null ? WeatherHelpers.getWeatherColor(condition) : null;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (condition != null)
+          Icon(
+            WeatherHelpers.getWeatherIcon(condition),
+            size: 11,
+            color: weatherColor,
+          ),
+        if (temp != null) ...[
+          const SizedBox(width: 2),
+          Text(
+            WeatherHelpers.formatTemperature(temp),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: weatherColor ?? WandererTheme.textSecondary,
+            ),
+          ),
+        ],
+      ],
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 
@@ -246,6 +247,142 @@ void main() {
       expect(location.reactions!.length, 1);
       expect(location.reactions![0].userId, 'u1');
       expect(location.reactionCount, 1);
+    });
+
+    test('should create TripLocation with weather fields', () {
+      final timestamp = DateTime.now();
+      final location = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: timestamp,
+        city: 'Santiago de Compostela',
+        country: 'Spain',
+        temperatureCelsius: 18.5,
+        weatherCondition: WeatherCondition.partlyCloudy,
+      );
+
+      expect(location.temperatureCelsius, 18.5);
+      expect(location.weatherCondition, WeatherCondition.partlyCloudy);
+    });
+
+    test('should parse weather fields from JSON', () {
+      final json = {
+        'id': 'test-id',
+        'location': {'lat': 42.8805, 'lon': -8.5457},
+        'message': 'Arrived at Santiago!',
+        'timestamp': '2026-03-03T12:34:56.789Z',
+        'battery': 85,
+        'city': 'Santiago de Compostela',
+        'country': 'Spain',
+        'temperatureCelsius': 18.5,
+        'weatherCondition': 'PARTLY_CLOUDY',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.temperatureCelsius, 18.5);
+      expect(location.weatherCondition, WeatherCondition.partlyCloudy);
+    });
+
+    test('should handle null weather fields in JSON', () {
+      final json = {
+        'id': 'test-id',
+        'latitude': 0.0,
+        'longitude': 0.0,
+        'timestamp': '2026-03-03T12:34:56.789Z',
+        'battery': 50,
+        'temperatureCelsius': null,
+        'weatherCondition': null,
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.temperatureCelsius, isNull);
+      expect(location.weatherCondition, isNull);
+    });
+
+    test('should handle missing weather fields in JSON (historical data)', () {
+      final json = {
+        'id': 'test-id',
+        'latitude': 40.7128,
+        'longitude': -74.0060,
+        'timestamp': '2024-01-01T12:00:00Z',
+        'battery': 75,
+        'city': 'New York',
+        'country': 'United States',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.temperatureCelsius, isNull);
+      expect(location.weatherCondition, isNull);
+    });
+
+    test('should include weather fields in toJson', () {
+      final timestamp = DateTime.parse('2026-03-03T12:00:00Z');
+      final location = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: timestamp,
+        temperatureCelsius: 18.5,
+        weatherCondition: WeatherCondition.partlyCloudy,
+      );
+
+      final json = location.toJson();
+
+      expect(json['temperatureCelsius'], 18.5);
+      expect(json['weatherCondition'], 'PARTLY_CLOUDY');
+    });
+
+    test('should omit weather fields from toJson when null', () {
+      final timestamp = DateTime.parse('2026-03-03T12:00:00Z');
+      final location = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: timestamp,
+      );
+
+      final json = location.toJson();
+
+      expect(json.containsKey('temperatureCelsius'), isFalse);
+      expect(json.containsKey('weatherCondition'), isFalse);
+    });
+
+    test('should copy with weather fields', () {
+      final original = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: DateTime.now(),
+      );
+
+      final updated = original.copyWith(
+        temperatureCelsius: 22.0,
+        weatherCondition: WeatherCondition.clear,
+      );
+
+      expect(updated.temperatureCelsius, 22.0);
+      expect(updated.weatherCondition, WeatherCondition.clear);
+      expect(updated.id, original.id);
+    });
+
+    test('should handle UNKNOWN weather condition gracefully', () {
+      final json = {
+        'id': 'test-id',
+        'latitude': 42.8805,
+        'longitude': -8.5457,
+        'timestamp': '2026-03-03T12:00:00Z',
+        'temperatureCelsius': 15.0,
+        'weatherCondition': 'SOME_NEW_CONDITION',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.weatherCondition, WeatherCondition.unknown);
+      expect(location.temperatureCelsius, 15.0);
     });
   });
 }

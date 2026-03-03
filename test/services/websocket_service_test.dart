@@ -171,6 +171,42 @@ void main() {
       expect(event.city, 'New York');
       expect(event.country, 'USA');
     });
+
+    test('fromJson parses weather fields', () {
+      final json = {
+        'type': 'TRIP_UPDATED',
+        'tripId': 'test-trip',
+        'payload': {
+          'latitude': 42.8805,
+          'longitude': -8.5457,
+          'batteryLevel': 85,
+          'message': 'Arrived at Santiago!',
+          'city': 'Santiago de Compostela',
+          'country': 'Spain',
+          'temperatureCelsius': 18.5,
+          'weatherCondition': 'PARTLY_CLOUDY',
+        },
+      };
+      final event = TripUpdatedEvent.fromJson(json);
+      expect(event.temperatureCelsius, 18.5);
+      expect(event.weatherCondition, 'PARTLY_CLOUDY');
+    });
+
+    test('fromJson handles missing weather fields (NON_NULL omission)', () {
+      final json = {
+        'type': 'TRIP_UPDATED',
+        'tripId': 'test-trip',
+        'payload': {
+          'latitude': 0.0,
+          'longitude': 0.0,
+          'batteryLevel': 50,
+          'message': 'Middle of the ocean',
+        },
+      };
+      final event = TripUpdatedEvent.fromJson(json);
+      expect(event.temperatureCelsius, isNull);
+      expect(event.weatherCondition, isNull);
+    });
   });
 
   group('CommentAddedEvent', () {

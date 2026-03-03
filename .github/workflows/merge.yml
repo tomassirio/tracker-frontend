@@ -262,7 +262,7 @@ jobs:
         run: |
           BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
           
-          # Split version into major.minor.patch and increment patch
+          # Split version into major.minor.patch and increment patch (revision)
           IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
           NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
           

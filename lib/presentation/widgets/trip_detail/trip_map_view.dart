@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/domain/trip_location.dart';
@@ -82,12 +83,23 @@ class _TripMapViewState extends State<TripMapView> {
       );
       if (mounted && widget.selectedLocation == loc) {
         setState(() {
-          // getScreenCoordinate returns physical pixels; convert to logical.
-          final ratio = MediaQuery.of(context).devicePixelRatio;
-          _markerScreenPosition = Offset(
-            screenCoord.x / ratio,
-            screenCoord.y / ratio,
-          );
+          // On native platforms, getScreenCoordinate returns physical pixels
+          // so we must convert to logical pixels using devicePixelRatio.
+          // On web, it already returns CSS (logical) pixels, so no conversion
+          // is needed — dividing again would place the bubble incorrectly
+          // (especially visible on mobile web with high DPR).
+          if (kIsWeb) {
+            _markerScreenPosition = Offset(
+              screenCoord.x.toDouble(),
+              screenCoord.y.toDouble(),
+            );
+          } else {
+            final ratio = MediaQuery.of(context).devicePixelRatio;
+            _markerScreenPosition = Offset(
+              screenCoord.x / ratio,
+              screenCoord.y / ratio,
+            );
+          }
         });
       }
     } catch (_) {

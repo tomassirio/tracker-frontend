@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/domain/trip_location.dart';
 import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/weather_helpers.dart';
 
 class CustomInfoWindow extends StatelessWidget {
   final TripLocation location;
@@ -90,15 +91,55 @@ class CustomInfoWindow extends StatelessWidget {
   }
 
   Widget _buildTimestampRow() {
+    final condition = location.weatherCondition;
+    final temp = location.temperatureCelsius;
+    final hasWeather = condition != null || temp != null;
+    final weatherColor =
+        condition != null ? WeatherHelpers.getWeatherColor(condition) : null;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Text(
-        _formatTimestamp(location.timestamp),
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Colors.grey.shade800,
-        ),
+      child: Row(
+        children: [
+          Text(
+            _formatTimestamp(location.timestamp),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          if (hasWeather) ...[
+            const Spacer(),
+            if (condition != null)
+              Icon(
+                WeatherHelpers.getWeatherIcon(condition),
+                size: 14,
+                color: weatherColor,
+              ),
+            if (temp != null) ...[
+              const SizedBox(width: 3),
+              Text(
+                WeatherHelpers.formatTemperature(temp),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: weatherColor ?? Colors.grey.shade700,
+                ),
+              ),
+            ],
+            if (condition != null) ...[
+              const SizedBox(width: 4),
+              Text(
+                WeatherHelpers.getWeatherLabel(condition),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ],
+        ],
       ),
     );
   }

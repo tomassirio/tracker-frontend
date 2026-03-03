@@ -1,3 +1,4 @@
+import '../../../core/constants/enums.dart';
 import 'reaction.dart';
 
 /// Trip location/update model
@@ -12,6 +13,8 @@ class TripLocation {
   final List<Reaction>? reactions;
   final String? city;
   final String? country;
+  final double? temperatureCelsius;
+  final WeatherCondition? weatherCondition;
 
   TripLocation({
     required this.id,
@@ -24,6 +27,8 @@ class TripLocation {
     this.reactions,
     this.city,
     this.country,
+    this.temperatureCelsius,
+    this.weatherCondition,
   });
 
   factory TripLocation.fromJson(Map<String, dynamic> json) {
@@ -62,6 +67,10 @@ class TripLocation {
       reactions: reactionsList,
       city: json['city'] as String?,
       country: json['country'] as String?,
+      temperatureCelsius: (json['temperatureCelsius'] as num?)?.toDouble(),
+      weatherCondition: json['weatherCondition'] != null
+          ? WeatherCondition.fromJson(json['weatherCondition'] as String)
+          : null,
     );
   }
 
@@ -77,6 +86,10 @@ class TripLocation {
           'reactions': reactions!.map((r) => r.toJson()).toList(),
         if (city != null) 'city': city,
         if (country != null) 'country': country,
+        if (temperatureCelsius != null)
+          'temperatureCelsius': temperatureCelsius,
+        if (weatherCondition != null)
+          'weatherCondition': weatherCondition!.toJson(),
       };
 
   /// Create a copy with updated place information
@@ -91,6 +104,8 @@ class TripLocation {
     List<Reaction>? reactions,
     String? city,
     String? country,
+    double? temperatureCelsius,
+    WeatherCondition? weatherCondition,
   }) {
     return TripLocation(
       id: id ?? this.id,
@@ -103,6 +118,8 @@ class TripLocation {
       reactions: reactions ?? this.reactions,
       city: city ?? this.city,
       country: country ?? this.country,
+      temperatureCelsius: temperatureCelsius ?? this.temperatureCelsius,
+      weatherCondition: weatherCondition ?? this.weatherCondition,
     );
   }
 

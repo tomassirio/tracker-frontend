@@ -36,6 +36,227 @@ enum Visibility {
   }
 }
 
+/// Weather conditions from backend weather API (Google Weather API)
+enum WeatherCondition {
+  clear,
+  mostlyClear,
+  partlyCloudy,
+  mostlyCloudy,
+  cloudy,
+  windy,
+  windAndRain,
+  lightRainShowers,
+  chanceOfShowers,
+  scatteredShowers,
+  rainShowers,
+  heavyRainShowers,
+  lightToModerateRain,
+  moderateToHeavyRain,
+  rain,
+  lightRain,
+  heavyRain,
+  rainPeriodicallyHeavy,
+  lightSnowShowers,
+  chanceOfSnowShowers,
+  scatteredSnowShowers,
+  snowShowers,
+  heavySnowShowers,
+  lightToModerateSnow,
+  moderateToHeavySnow,
+  snow,
+  lightSnow,
+  heavySnow,
+  snowstorm,
+  snowPeriodicallyHeavy,
+  heavySnowStorm,
+  blowingSnow,
+  rainAndSnow,
+  hail,
+  hailShowers,
+  thunderstorm,
+  thundershower,
+  lightThunderstormRain,
+  scatteredThunderstorms,
+  heavyThunderstorm,
+  unknown;
+
+  /// Convert weather condition to string for API
+  String toJson() {
+    switch (this) {
+      case WeatherCondition.clear:
+        return 'CLEAR';
+      case WeatherCondition.mostlyClear:
+        return 'MOSTLY_CLEAR';
+      case WeatherCondition.partlyCloudy:
+        return 'PARTLY_CLOUDY';
+      case WeatherCondition.mostlyCloudy:
+        return 'MOSTLY_CLOUDY';
+      case WeatherCondition.cloudy:
+        return 'CLOUDY';
+      case WeatherCondition.windy:
+        return 'WINDY';
+      case WeatherCondition.windAndRain:
+        return 'WIND_AND_RAIN';
+      case WeatherCondition.lightRainShowers:
+        return 'LIGHT_RAIN_SHOWERS';
+      case WeatherCondition.chanceOfShowers:
+        return 'CHANCE_OF_SHOWERS';
+      case WeatherCondition.scatteredShowers:
+        return 'SCATTERED_SHOWERS';
+      case WeatherCondition.rainShowers:
+        return 'RAIN_SHOWERS';
+      case WeatherCondition.heavyRainShowers:
+        return 'HEAVY_RAIN_SHOWERS';
+      case WeatherCondition.lightToModerateRain:
+        return 'LIGHT_TO_MODERATE_RAIN';
+      case WeatherCondition.moderateToHeavyRain:
+        return 'MODERATE_TO_HEAVY_RAIN';
+      case WeatherCondition.rain:
+        return 'RAIN';
+      case WeatherCondition.lightRain:
+        return 'LIGHT_RAIN';
+      case WeatherCondition.heavyRain:
+        return 'HEAVY_RAIN';
+      case WeatherCondition.rainPeriodicallyHeavy:
+        return 'RAIN_PERIODICALLY_HEAVY';
+      case WeatherCondition.lightSnowShowers:
+        return 'LIGHT_SNOW_SHOWERS';
+      case WeatherCondition.chanceOfSnowShowers:
+        return 'CHANCE_OF_SNOW_SHOWERS';
+      case WeatherCondition.scatteredSnowShowers:
+        return 'SCATTERED_SNOW_SHOWERS';
+      case WeatherCondition.snowShowers:
+        return 'SNOW_SHOWERS';
+      case WeatherCondition.heavySnowShowers:
+        return 'HEAVY_SNOW_SHOWERS';
+      case WeatherCondition.lightToModerateSnow:
+        return 'LIGHT_TO_MODERATE_SNOW';
+      case WeatherCondition.moderateToHeavySnow:
+        return 'MODERATE_TO_HEAVY_SNOW';
+      case WeatherCondition.snow:
+        return 'SNOW';
+      case WeatherCondition.lightSnow:
+        return 'LIGHT_SNOW';
+      case WeatherCondition.heavySnow:
+        return 'HEAVY_SNOW';
+      case WeatherCondition.snowstorm:
+        return 'SNOWSTORM';
+      case WeatherCondition.snowPeriodicallyHeavy:
+        return 'SNOW_PERIODICALLY_HEAVY';
+      case WeatherCondition.heavySnowStorm:
+        return 'HEAVY_SNOW_STORM';
+      case WeatherCondition.blowingSnow:
+        return 'BLOWING_SNOW';
+      case WeatherCondition.rainAndSnow:
+        return 'RAIN_AND_SNOW';
+      case WeatherCondition.hail:
+        return 'HAIL';
+      case WeatherCondition.hailShowers:
+        return 'HAIL_SHOWERS';
+      case WeatherCondition.thunderstorm:
+        return 'THUNDERSTORM';
+      case WeatherCondition.thundershower:
+        return 'THUNDERSHOWER';
+      case WeatherCondition.lightThunderstormRain:
+        return 'LIGHT_THUNDERSTORM_RAIN';
+      case WeatherCondition.scatteredThunderstorms:
+        return 'SCATTERED_THUNDERSTORMS';
+      case WeatherCondition.heavyThunderstorm:
+        return 'HEAVY_THUNDERSTORM';
+      case WeatherCondition.unknown:
+        return 'UNKNOWN';
+    }
+  }
+
+  /// Parse weather condition from API response
+  static WeatherCondition fromJson(String value) {
+    switch (value.toUpperCase()) {
+      case 'CLEAR':
+        return WeatherCondition.clear;
+      case 'MOSTLY_CLEAR':
+        return WeatherCondition.mostlyClear;
+      case 'PARTLY_CLOUDY':
+        return WeatherCondition.partlyCloudy;
+      case 'MOSTLY_CLOUDY':
+        return WeatherCondition.mostlyCloudy;
+      case 'CLOUDY':
+        return WeatherCondition.cloudy;
+      case 'WINDY':
+        return WeatherCondition.windy;
+      case 'WIND_AND_RAIN':
+        return WeatherCondition.windAndRain;
+      case 'LIGHT_RAIN_SHOWERS':
+        return WeatherCondition.lightRainShowers;
+      case 'CHANCE_OF_SHOWERS':
+        return WeatherCondition.chanceOfShowers;
+      case 'SCATTERED_SHOWERS':
+        return WeatherCondition.scatteredShowers;
+      case 'RAIN_SHOWERS':
+        return WeatherCondition.rainShowers;
+      case 'HEAVY_RAIN_SHOWERS':
+        return WeatherCondition.heavyRainShowers;
+      case 'LIGHT_TO_MODERATE_RAIN':
+        return WeatherCondition.lightToModerateRain;
+      case 'MODERATE_TO_HEAVY_RAIN':
+        return WeatherCondition.moderateToHeavyRain;
+      case 'RAIN':
+        return WeatherCondition.rain;
+      case 'LIGHT_RAIN':
+        return WeatherCondition.lightRain;
+      case 'HEAVY_RAIN':
+        return WeatherCondition.heavyRain;
+      case 'RAIN_PERIODICALLY_HEAVY':
+        return WeatherCondition.rainPeriodicallyHeavy;
+      case 'LIGHT_SNOW_SHOWERS':
+        return WeatherCondition.lightSnowShowers;
+      case 'CHANCE_OF_SNOW_SHOWERS':
+        return WeatherCondition.chanceOfSnowShowers;
+      case 'SCATTERED_SNOW_SHOWERS':
+        return WeatherCondition.scatteredSnowShowers;
+      case 'SNOW_SHOWERS':
+        return WeatherCondition.snowShowers;
+      case 'HEAVY_SNOW_SHOWERS':
+        return WeatherCondition.heavySnowShowers;
+      case 'LIGHT_TO_MODERATE_SNOW':
+        return WeatherCondition.lightToModerateSnow;
+      case 'MODERATE_TO_HEAVY_SNOW':
+        return WeatherCondition.moderateToHeavySnow;
+      case 'SNOW':
+        return WeatherCondition.snow;
+      case 'LIGHT_SNOW':
+        return WeatherCondition.lightSnow;
+      case 'HEAVY_SNOW':
+        return WeatherCondition.heavySnow;
+      case 'SNOWSTORM':
+        return WeatherCondition.snowstorm;
+      case 'SNOW_PERIODICALLY_HEAVY':
+        return WeatherCondition.snowPeriodicallyHeavy;
+      case 'HEAVY_SNOW_STORM':
+        return WeatherCondition.heavySnowStorm;
+      case 'BLOWING_SNOW':
+        return WeatherCondition.blowingSnow;
+      case 'RAIN_AND_SNOW':
+        return WeatherCondition.rainAndSnow;
+      case 'HAIL':
+        return WeatherCondition.hail;
+      case 'HAIL_SHOWERS':
+        return WeatherCondition.hailShowers;
+      case 'THUNDERSTORM':
+        return WeatherCondition.thunderstorm;
+      case 'THUNDERSHOWER':
+        return WeatherCondition.thundershower;
+      case 'LIGHT_THUNDERSTORM_RAIN':
+        return WeatherCondition.lightThunderstormRain;
+      case 'SCATTERED_THUNDERSTORMS':
+        return WeatherCondition.scatteredThunderstorms;
+      case 'HEAVY_THUNDERSTORM':
+        return WeatherCondition.heavyThunderstorm;
+      default:
+        return WeatherCondition.unknown;
+    }
+  }
+}
+
 /// Status for trips
 enum TripStatus {
   /// Trip is being created
