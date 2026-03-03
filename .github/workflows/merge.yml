@@ -8,8 +8,9 @@ on:
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
-    # Skip if commit was made by GitHub Actions (prevents infinite loop)
-    if: "!contains(github.event.head_commit.message, 'ci: Prepare for next development iteration') && !contains(github.event.head_commit.message, 'ci: Release version') && !contains(github.event.head_commit.message, 'ci: Update README badges')"
+    # Skip if commit was made by CI (prevents infinite loop)
+    if: >-
+      !startsWith(github.event.head_commit.message, 'ci: ')
     outputs:
       release-version: ${{ steps.set-release-version.outputs.version }}
       base-version: ${{ steps.set-release-version.outputs.base-version }}
@@ -17,6 +18,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Debug push event
+        run: |
+          echo "Head commit message: ${{ github.event.head_commit.message }}"
+          echo "Head commit author: ${{ github.event.head_commit.author.email }}"
+          echo "Actor: ${{ github.actor }}"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -37,12 +44,18 @@ jobs:
           BUILD_NUMBER=$(echo "$CURRENT_VERSION" | grep -oP '\+\K[0-9]+' || echo "1")
           RELEASE_VERSION="${BASE_VERSION}+${BUILD_NUMBER}"
           
+          echo "📋 Current version in pubspec.yaml: ${CURRENT_VERSION}"
+          echo "📋 Base version: ${BASE_VERSION}"
+          echo "📋 Release version: ${RELEASE_VERSION}"
+          
           # Check if tag already exists - skip release if so
           if git rev-parse "v${BASE_VERSION}" >/dev/null 2>&1; then
-            echo "Tag v${BASE_VERSION} already exists, skipping release"
+            echo "⚠️ Tag v${BASE_VERSION} already exists, skipping release"
             echo "skip=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+          
+          echo "✅ Tag v${BASE_VERSION} does not exist, proceeding with release"
           
           sed -i "s/^version: .*/version: ${RELEASE_VERSION}/" pubspec.yaml
           
