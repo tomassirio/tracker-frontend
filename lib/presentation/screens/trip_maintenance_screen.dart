@@ -534,71 +534,48 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Use Row for web to fit all 4 chips in one line, Wrap for mobile
-            isMobile
-                ? Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _buildStatChip(
-                        'Total Trips',
-                        totalTrips.toString(),
-                        Colors.grey,
-                      ),
-                      _buildStatChip(
-                        'With Polyline',
-                        tripsWithPolyline.toString(),
-                        Colors.green,
-                      ),
-                      _buildStatChip(
-                        'With 2+ Locations',
-                        tripsWithLocations.toString(),
-                        Colors.blue,
-                      ),
-                      _buildStatChip(
-                        'Missing Polyline',
-                        tripsNeedingPolyline.toString(),
-                        tripsNeedingPolyline > 0 ? Colors.orange : Colors.green,
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatChip(
-                          'Total Trips',
-                          totalTrips.toString(),
-                          Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatChip(
-                          'With Polyline',
-                          tripsWithPolyline.toString(),
-                          Colors.green,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatChip(
-                          'With 2+ Locations',
-                          tripsWithLocations.toString(),
-                          Colors.blue,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatChip(
-                          'Missing Polyline',
-                          tripsNeedingPolyline.toString(),
-                          tripsNeedingPolyline > 0
-                              ? Colors.orange
-                              : Colors.green,
-                        ),
-                      ),
-                    ],
+            // Row layout to fit all 4 chips in one line (all screen sizes)
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatChip(
+                    'Total Trips',
+                    totalTrips.toString(),
+                    Colors.grey,
+                    isMobile,
                   ),
+                ),
+                SizedBox(width: isMobile ? 6 : 12),
+                Expanded(
+                  child: _buildStatChip(
+                    'With Polyline',
+                    tripsWithPolyline.toString(),
+                    Colors.green,
+                    isMobile,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 6 : 12),
+                Expanded(
+                  child: _buildStatChip(
+                    'With 2+ Locations',
+                    tripsWithLocations.toString(),
+                    Colors.blue,
+                    isMobile,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 6 : 12),
+                Expanded(
+                  child: _buildStatChip(
+                    'Missing Polyline',
+                    tripsNeedingPolyline.toString(),
+                    tripsNeedingPolyline > 0
+                        ? Colors.orange
+                        : Colors.green,
+                    isMobile,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 16),
@@ -620,16 +597,19 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
                   'Total Updates',
                   totalUpdates.toString(),
                   Colors.grey,
+                  isMobile,
                 ),
                 _buildStatChip(
                   'With Geocoding',
                   updatesWithGeocoding.toString(),
                   Colors.green,
+                  isMobile,
                 ),
                 _buildStatChip(
                   'Missing Geocoding',
                   updatesMissingGeocoding.toString(),
                   updatesMissingGeocoding > 0 ? Colors.orange : Colors.green,
+                  isMobile,
                 ),
               ],
             ),
@@ -656,9 +636,12 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
     );
   }
 
-  Widget _buildStatChip(String label, String value, Color color) {
+  Widget _buildStatChip(String label, String value, Color color, bool isMobile) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 6 : 12,
+        vertical: isMobile ? 6 : 8,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
@@ -669,17 +652,20 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
           Text(
             value,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: isMobile ? 16 : 20,
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: isMobile ? 9 : 11,
               color: color.withValues(alpha: 0.8),
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
