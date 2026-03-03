@@ -557,7 +557,7 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
                 SizedBox(width: isMobile ? 6 : 12),
                 Expanded(
                   child: _buildStatChip(
-                    'With 2+ Locations',
+                    '2+ Locations',
                     tripsWithLocations.toString(),
                     Colors.blue,
                     isMobile,
