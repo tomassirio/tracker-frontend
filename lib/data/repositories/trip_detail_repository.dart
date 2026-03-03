@@ -1,4 +1,3 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/domain/location_update_result.dart';
@@ -6,7 +5,6 @@ import 'package:tracker_frontend/data/services/comment_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
 import 'package:tracker_frontend/data/services/trip_update_service.dart';
 import 'package:tracker_frontend/data/services/auth_service.dart';
-import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 
 /// Repository for managing trip detail data and operations
@@ -15,19 +13,16 @@ class TripDetailRepository {
   final CommentService _commentService;
   final AuthService _authService;
   final TripUpdateService _tripUpdateService;
-  final GoogleGeocodingApiClient? _geocodingClient;
 
   TripDetailRepository({
     TripService? tripService,
     CommentService? commentService,
     AuthService? authService,
     TripUpdateService? tripUpdateService,
-    GoogleGeocodingApiClient? geocodingClient,
   })  : _tripService = tripService ?? TripService(),
         _commentService = commentService ?? CommentService(),
         _authService = authService ?? AuthService(),
-        _tripUpdateService = tripUpdateService ?? TripUpdateService(),
-        _geocodingClient = geocodingClient;
+        _tripUpdateService = tripUpdateService ?? TripUpdateService();
 
   /// Loads top-level comments for a trip via API
   Future<List<Comment>> loadComments(String tripId) async {
@@ -147,48 +142,9 @@ class TripDetailRepository {
   }
 
   /// Loads trip updates for a specific trip via API
-  /// Optionally enriches updates with place information (city, country) via geocoding
-  Future<List<TripLocation>> loadTripUpdates(
-    String tripId, {
-    bool enrichWithPlaces = true,
-  }) async {
-    final updates = await _tripService.getTripUpdates(tripId);
-
-    // If geocoding client is not available or enrichment is disabled, return updates as-is
-    if (_geocodingClient == null || !enrichWithPlaces || updates.isEmpty) {
-      return updates;
-    }
-
-    // Enrich updates with place information (city, country)
-    final enrichedUpdates = <TripLocation>[];
-
-    for (final update in updates) {
-      // Skip if already has place info
-      if (update.city != null && update.country != null) {
-        enrichedUpdates.add(update);
-        continue;
-      }
-
-      // Reverse geocode to get place info
-      try {
-        final placeInfo = await _geocodingClient.reverseGeocode(
-          LatLng(update.latitude, update.longitude),
-        );
-
-        if (placeInfo != null) {
-          enrichedUpdates.add(
-            update.copyWith(city: placeInfo.city, country: placeInfo.country),
-          );
-        } else {
-          enrichedUpdates.add(update);
-        }
-      } catch (e) {
-        // If geocoding fails, just add the update without place info
-        enrichedUpdates.add(update);
-      }
-    }
-
-    return enrichedUpdates;
+  /// City and country are now populated by the backend via reverse geocoding
+  Future<List<TripLocation>> loadTripUpdates(String tripId) {
+    return _tripService.getTripUpdates(tripId);
   }
 
   /// Sends a manual trip update with current location and battery

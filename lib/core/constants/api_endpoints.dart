@@ -115,6 +115,9 @@ class ApiEndpoints {
   // Admin Trip Management endpoints (ADMIN only, commandBaseUrl)
   static String adminRecomputePolyline(String tripId) =>
       '/admin/trips/$tripId/recompute-polyline';
+  static String adminRecomputeGeocoding(String tripId) =>
+      '/admin/trips/$tripId/recompute-geocoding';
+  static const String adminTripStats = '/admin/trips/stats';
 
   // Self-deletion endpoint (use commandBaseUrl, any authenticated user)
   static const String usersDeleteMe = '/users/me';

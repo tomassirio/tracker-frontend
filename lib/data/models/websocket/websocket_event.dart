@@ -12,6 +12,7 @@ enum WebSocketEventType {
 
   // Trip update events
   tripUpdateCreated,
+  polylineUpdated,
 
   // Comment events
   commentAdded,
@@ -78,6 +79,8 @@ class WebSocketEvent {
       // Trip update events
       case 'TRIP_UPDATE_CREATED':
         return WebSocketEventType.tripUpdateCreated;
+      case 'POLYLINE_UPDATED':
+        return WebSocketEventType.polylineUpdated;
 
       // Comment events
       case 'COMMENT_ADDED':
@@ -212,6 +215,34 @@ class TripUpdatedEvent extends WebSocketEvent {
       message: payload['message'] as String?,
       city: payload['city'] as String?,
       country: payload['country'] as String?,
+      payload: payload,
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String)
+          : null,
+    );
+  }
+}
+
+/// Event for polyline updates (async after route computation)
+class PolylineUpdatedEvent extends WebSocketEvent {
+  final String encodedPolyline;
+
+  PolylineUpdatedEvent({
+    required String tripId,
+    required this.encodedPolyline,
+    required super.payload,
+    super.timestamp,
+  }) : super(
+          type: WebSocketEventType.polylineUpdated,
+          tripId: tripId,
+        );
+
+  factory PolylineUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    final payload = json['payload'] as Map<String, dynamic>? ?? json;
+
+    return PolylineUpdatedEvent(
+      tripId: json['tripId'] as String? ?? payload['tripId'] as String? ?? '',
+      encodedPolyline: payload['encodedPolyline'] as String? ?? '',
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)

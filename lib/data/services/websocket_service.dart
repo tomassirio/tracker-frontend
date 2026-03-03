@@ -257,6 +257,8 @@ class WebSocketService {
       // Trip update events
       case WebSocketEventType.tripUpdateCreated:
         return TripUpdateCreatedEvent.fromJson(data);
+      case WebSocketEventType.polylineUpdated:
+        return PolylineUpdatedEvent.fromJson(data);
 
       // Comment events
       case WebSocketEventType.commentAdded:

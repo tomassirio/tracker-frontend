@@ -13,9 +13,9 @@
 | `DirectionsService` | 🟡 **Keep for now** (fallback only) | Wraps `GoogleRoutesApiClient` with segment caching. Same removal timeline. |
 | `DirectionsServiceWeb` / `directions_service_stub.dart` | 🟡 **Keep for now** | Web-specific directions. Same removal timeline as `DirectionsService`. |
 | `GoogleMapsApiClient` | ✅ **Keep** | Generates Static Maps API URLs for card miniatures. This is a URL builder, not an API caller — the browser/image widget fetches the image. Still needed. |
-| `GoogleGeocodingApiClient` | ✅ **Keep** | Reverse-geocoding for place enrichment (city/country names on trip updates). Unrelated to polylines. |
+| `GoogleGeocodingApiClient` | 🔴 **REMOVED** | Reverse-geocoding moved to backend. Trip updates now include `city` and `country` fields populated server-side. |
 | `google_maps_flutter` package | ✅ **Keep** | The interactive map widget on trip detail, trip plan detail, and create-trip-plan screens. |
-| `GOOGLE_MAPS_API_KEY` env var | ✅ **Keep** | Still needed for: Google Maps tiles (interactive + static), geocoding. Cannot be removed. |
+| `GOOGLE_MAPS_API_KEY` env var | ✅ **Keep** | Still needed for: Google Maps tiles (interactive + static). Geocoding is now handled by backend. |
 | `web/index.html` Maps JS SDK | ✅ **Keep** | Required by `google_maps_flutter_web` for the interactive map widget on web. |
 
 ---
@@ -88,17 +88,20 @@
 
 ### 5. `GoogleGeocodingApiClient` (`lib/data/client/google_geocoding_api_client.dart`)
 
-**What it does:** Reverse-geocodes coordinates to get city/country names for trip location enrichment.
+**Status:** 🔴 **REMOVED** (March 2026)
 
-**Current consumers:**
-- `TripDetailRepository` — enriches trip locations with place names
-- `TripDetailScreen` — initializes the geocoding client
+**What it did:** Reverse-geocoded coordinates to get city/country names for trip location enrichment.
 
-**Can we remove it?**
-- **No.** This is completely unrelated to polyline routing. It provides the city/country labels on trip updates.
-- *However*, this could also move to the backend in the future (enrich on trip-update creation, store city/country in the DB).
+**Previous consumers:**
+- `TripDetailRepository` — enriched trip locations with place names
+- `TripDetailScreen` — initialized the geocoding client
 
-**Action:** Keep. Separate concern from polylines.
+**Why removed:**
+- **Backend now handles geocoding.** Trip updates now include `city` and `country` fields populated automatically at write time via reverse geocoding on the backend.
+- The `TripLocation` model already supported these fields; they are now populated server-side.
+- A new admin endpoint (`POST /api/1/admin/trips/{tripId}/recompute-geocoding`) was added to backfill existing trip updates.
+
+**Action:** Removed in geocoding migration. No longer needed in frontend.
 
 ---
 
@@ -124,14 +127,14 @@
 1. **Google Maps JavaScript SDK** (`web/index.html`) — required by `google_maps_flutter_web`
 2. **Android Maps SDK** (`AndroidManifest.xml`) — required by `google_maps_flutter` on Android
 3. **Static Maps API** — card miniature images (`GoogleMapsApiClient` URL builder)
-4. **Geocoding API** — reverse geocoding (`GoogleGeocodingApiClient`)
-5. **Routes API** — computing walking directions (`GoogleRoutesApiClient`) ← **this is the only one being replaced**
+4. ~~**Geocoding API** — reverse geocoding (`GoogleGeocodingApiClient`)~~ ← **REMOVED: now handled by backend**
+5. ~~**Routes API** — computing walking directions (`GoogleRoutesApiClient`)~~ ← **replaced by backend polylines**
 
 **Can we remove it?**
-- **No.** Even with backend polylines handling all routing, we still need the API key for items 1-4.
-- The key's **required API permissions** could be reduced on the Google Cloud Console side: you could disable the Routes API on the frontend's key and only enable it on the backend's key.
+- **No.** Even with backend handling polylines and geocoding, we still need the API key for items 1-3.
+- The key's **required API permissions** can be reduced on the Google Cloud Console side: disable both the Routes API and Geocoding API on the frontend's key.
 
-**Action:** Keep the env var. Optionally restrict the key's API permissions in Google Cloud Console.
+**Action:** Keep the env var. Restrict the key's API permissions in Google Cloud Console to only: Maps JavaScript API, Maps Static API.
 
 ---
 
@@ -176,13 +179,28 @@
 
 **Files that stay forever:**
 - `lib/data/client/google_maps_api_client.dart` — Static Maps URL builder
-- `lib/data/client/google_geocoding_api_client.dart` — Reverse geocoding
-- `GOOGLE_MAPS_API_KEY` env var everywhere — Still needed for maps + geocoding
+- ~~`lib/data/client/google_geocoding_api_client.dart` — Reverse geocoding~~ ← **REMOVED: backend handles this now**
+- `GOOGLE_MAPS_API_KEY` env var everywhere — Still needed for maps (interactive + static)
 - `google_maps_flutter` package — Interactive maps
 
+### Geocoding Migration (March 2026) ✅
+
+**Removed:**
+- `lib/data/client/google_geocoding_api_client.dart` — Deleted entirely
+- `test/client/google_geocoding_api_client_test.dart` + `.mocks.dart` — Deleted
+- Geocoding logic in `TripDetailRepository.loadTripUpdates()` — Simplified to just fetch from API
+
+**Added:**
+- Backend now populates `city` and `country` fields on trip updates automatically
+- Admin endpoint: `POST /api/1/admin/trips/{tripId}/recompute-geocoding` — Backfills existing trip updates
+- WebSocket event: `POLYLINE_UPDATED` — Real-time polyline updates after route computation
+- `TripUpdatedEvent` extended with `city` and `country` fields for real-time updates
+
+**Result:** Zero frontend geocoding API calls. All location enrichment happens server-side.
+
 ### Optional: Restrict Frontend API Key Permissions
-Once the backend handles all Routes API calls, you can go to the **Google Cloud Console** and remove the "Routes API" permission from the frontend's API key. This:
+Once the backend handles all Routes API calls and geocoding, you can go to the **Google Cloud Console** and remove the "Routes API" and "Geocoding API" permissions from the frontend's API key. This:
 - Reduces the attack surface if the frontend key is ever leaked
 - Makes it clear which key is responsible for which API
-- The frontend key would only need: Maps JavaScript API, Maps Static API, Geocoding API
+- The frontend key would only need: Maps JavaScript API, Maps Static API (geocoding and routing now on backend)
 

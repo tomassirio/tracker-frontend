@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:tracker_frontend/data/models/admin_models.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/services/admin_service.dart';
 import 'package:tracker_frontend/data/services/trip_service.dart';
@@ -11,18 +12,17 @@ import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
 import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
 
-/// Admin screen for managing trip polyline recomputation.
-/// Allows admins to trigger backend recomputation of encoded polylines
-/// for trips with stale, corrupted, or missing route data.
-class PolylineManagementScreen extends StatefulWidget {
-  const PolylineManagementScreen({super.key});
+/// Admin screen for managing trip data maintenance (polyline and geocoding recomputation).
+/// Allows admins to view statistics and trigger backend recomputation of encoded polylines
+/// and geocoding (city/country) for trip updates.
+class TripMaintenanceScreen extends StatefulWidget {
+  const TripMaintenanceScreen({super.key});
 
   @override
-  State<PolylineManagementScreen> createState() =>
-      _PolylineManagementScreenState();
+  State<TripMaintenanceScreen> createState() => _TripMaintenanceScreenState();
 }
 
-class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
+class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
   final AdminService _adminService = AdminService();
   final TripService _tripService = TripService();
   final HomeRepository _homeRepository = HomeRepository();
@@ -30,6 +30,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
   List<Trip> _allTrips = [];
   List<Trip> _filteredTrips = [];
+  TripMaintenanceStats? _stats;
   bool _isLoading = false;
   String? _error;
   String? _userId;
@@ -38,13 +39,19 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
   String? _avatarUrl;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
-  final int _selectedSidebarIndex = 7; // Polyline management index
+  final int _selectedSidebarIndex = 7; // Trip maintenance index
 
   /// Set of trip IDs currently being recomputed (for loading indicators)
   final Set<String> _recomputingTrips = {};
 
   /// Set of trip IDs that have been successfully recomputed in this session
   final Set<String> _recomputedTrips = {};
+
+  /// Set of trip IDs currently having geocoding recomputed
+  final Set<String> _recomputingGeocoding = {};
+
+  /// Set of trip IDs that have had geocoding successfully recomputed in this session
+  final Set<String> _recomputedGeocoding = {};
 
   @override
   void initState() {
@@ -90,10 +97,16 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     });
 
     try {
-      final trips = await _adminService.getAllTrips();
+      // Load both trips and stats in parallel
+      final results = await Future.wait([
+        _adminService.getAllTrips(),
+        _adminService.getTripStats(),
+      ]);
+
       setState(() {
-        _allTrips = trips;
-        _filteredTrips = trips;
+        _allTrips = results[0] as List<Trip>;
+        _filteredTrips = results[0] as List<Trip>;
+        _stats = results[1] as TripMaintenanceStats;
         _isLoading = false;
       });
     } catch (e) {
@@ -192,6 +205,81 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
           UiHelpers.showErrorMessage(
             context,
             'Failed to recompute polyline: $e',
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _recomputeGeocoding(Trip trip) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recompute Geocoding'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Trip: ${trip.name}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text('By: ${trip.username}'),
+            const SizedBox(height: 12),
+            Text(
+              'This will recompute city and country for all '
+              'trip updates using reverse geocoding on the backend.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Locations: ${trip.locations?.length ?? 0}',
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Recompute'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _recomputingGeocoding.add(trip.id);
+      });
+
+      try {
+        await _adminService.recomputeGeocoding(trip.id);
+
+        if (mounted) {
+          setState(() {
+            _recomputingGeocoding.remove(trip.id);
+            _recomputedGeocoding.add(trip.id);
+          });
+          UiHelpers.showSuccessMessage(
+            context,
+            'Geocoding recomputed for "${trip.name}"',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _recomputingGeocoding.remove(trip.id);
+          });
+          UiHelpers.showErrorMessage(
+            context,
+            'Failed to recompute geocoding: $e',
           );
         }
       }
@@ -395,18 +483,26 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
 
   Widget _buildStatsCard(bool isMobile) {
     final cardPadding = isMobile ? 12.0 : 16.0;
-    final totalTrips = _allTrips.length;
-    final tripsWithPolyline =
+
+    // Use server stats if available, otherwise calculate from loaded trips
+    final totalTrips = _stats?.totalTrips ?? _allTrips.length;
+    final tripsWithPolyline = _stats?.tripsWithPolyline ??
         _allTrips.where((t) => t.encodedPolyline != null).length;
-    final tripsWithLocations = _allTrips
-        .where((t) => t.locations != null && t.locations!.length >= 2)
-        .length;
-    final tripsNeedingPolyline = _allTrips
-        .where((t) =>
-            t.encodedPolyline == null &&
-            t.locations != null &&
-            t.locations!.length >= 2)
-        .length;
+    final tripsWithLocations = _stats?.tripsWithMultipleLocations ??
+        _allTrips
+            .where((t) => t.locations != null && t.locations!.length >= 2)
+            .length;
+    final tripsNeedingPolyline = _stats?.tripsMissingPolyline ??
+        _allTrips
+            .where((t) =>
+                t.encodedPolyline == null &&
+                t.locations != null &&
+                t.locations!.length >= 2)
+            .length;
+
+    final totalUpdates = _stats?.totalUpdates ?? 0;
+    final updatesWithGeocoding = _stats?.updatesWithGeocoding ?? 0;
+    final updatesMissingGeocoding = _stats?.updatesMissingGeocoding ?? 0;
 
     return Card(
       child: Padding(
@@ -419,7 +515,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 const Icon(Icons.analytics, color: Colors.blue),
                 const SizedBox(width: 8),
                 Text(
-                  'Polyline Overview',
+                  'Trip Data Overview',
                   style: TextStyle(
                     fontSize: isMobile ? 18 : 20,
                     fontWeight: FontWeight.bold,
@@ -428,29 +524,92 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            // Polyline stats
+            Text(
+              'Polyline Statistics',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Row layout to fit all 4 chips in one line (all screen sizes)
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatChip(
+                    'Total Trips',
+                    totalTrips.toString(),
+                    Colors.grey,
+                    isMobile,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 6 : 12),
+                Expanded(
+                  child: _buildStatChip(
+                    'With Polyline',
+                    tripsWithPolyline.toString(),
+                    Colors.green,
+                    isMobile,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 6 : 12),
+                Expanded(
+                  child: _buildStatChip(
+                    '2+ Locations',
+                    tripsWithLocations.toString(),
+                    Colors.blue,
+                    isMobile,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 6 : 12),
+                Expanded(
+                  child: _buildStatChip(
+                    'Missing Polyline',
+                    tripsNeedingPolyline.toString(),
+                    tripsNeedingPolyline > 0
+                        ? Colors.orange
+                        : Colors.green,
+                    isMobile,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 16),
+            // Geocoding stats
+            Text(
+              'Geocoding Statistics',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 8),
             Wrap(
               spacing: isMobile ? 12 : 24,
               runSpacing: 12,
               children: [
                 _buildStatChip(
-                  'Total Trips',
-                  totalTrips.toString(),
+                  'Total Updates',
+                  totalUpdates.toString(),
                   Colors.grey,
+                  isMobile,
                 ),
                 _buildStatChip(
-                  'With Polyline',
-                  tripsWithPolyline.toString(),
+                  'With Geocoding',
+                  updatesWithGeocoding.toString(),
                   Colors.green,
+                  isMobile,
                 ),
                 _buildStatChip(
-                  'With 2+ Locations',
-                  tripsWithLocations.toString(),
-                  Colors.blue,
-                ),
-                _buildStatChip(
-                  'Missing Polyline',
-                  tripsNeedingPolyline.toString(),
-                  tripsNeedingPolyline > 0 ? Colors.orange : Colors.green,
+                  'Missing Geocoding',
+                  updatesMissingGeocoding.toString(),
+                  updatesMissingGeocoding > 0 ? Colors.orange : Colors.green,
+                  isMobile,
                 ),
               ],
             ),
@@ -462,7 +621,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                   onPressed: _recomputeAll,
                   icon: const Icon(Icons.refresh),
                   label: Text(
-                    'Recompute All Missing ($tripsNeedingPolyline)',
+                    'Recompute All Missing Polylines ($tripsNeedingPolyline)',
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -477,9 +636,12 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     );
   }
 
-  Widget _buildStatChip(String label, String value, Color color) {
+  Widget _buildStatChip(String label, String value, Color color, bool isMobile) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 6 : 12,
+        vertical: isMobile ? 6 : 8,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
@@ -490,17 +652,20 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
           Text(
             value,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: isMobile ? 16 : 20,
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: isMobile ? 9 : 11,
               color: color.withValues(alpha: 0.8),
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -534,7 +699,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tap a trip to view details, or recompute its polyline',
+              'Tap a trip to view details, or recompute its polyline/geocoding',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: isMobile ? 12 : 14,
@@ -583,7 +748,15 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
   Widget _buildTripItem(Trip trip, bool isMobile) {
     final isRecomputing = _recomputingTrips.contains(trip.id);
     final wasRecomputed = _recomputedTrips.contains(trip.id);
+    final isRecomputingGeo = _recomputingGeocoding.contains(trip.id);
+    final wasRecomputedGeo = _recomputedGeocoding.contains(trip.id);
     final hasPolyline = trip.encodedPolyline != null;
+    // Check if trip has geocoding data (any location with city and country)
+    final hasGeocoding = trip.locations?.any((loc) =>
+            loc.city != null && loc.country != null) ??
+        false;
+    // Polyline recomputation requires 2+ locations (for routing between points)
+    // Geocoding recomputation only requires 1+ locations (each can be geocoded independently)
     final hasEnoughLocations =
         trip.locations != null && trip.locations!.length >= 2;
     final locationCount = trip.locations?.length ?? 0;
@@ -597,7 +770,10 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 trip,
                 isRecomputing,
                 wasRecomputed,
+                isRecomputingGeo,
+                wasRecomputedGeo,
                 hasPolyline,
+                hasGeocoding,
                 hasEnoughLocations,
                 locationCount,
               )
@@ -605,7 +781,10 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 trip,
                 isRecomputing,
                 wasRecomputed,
+                isRecomputingGeo,
+                wasRecomputedGeo,
                 hasPolyline,
+                hasGeocoding,
                 hasEnoughLocations,
                 locationCount,
               ),
@@ -617,7 +796,10 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     Trip trip,
     bool isRecomputing,
     bool wasRecomputed,
+    bool isRecomputingGeo,
+    bool wasRecomputedGeo,
     bool hasPolyline,
+    bool hasGeocoding,
     bool hasEnoughLocations,
     int locationCount,
   ) {
@@ -630,19 +812,31 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             _buildPolylineStatusIcon(hasPolyline, wasRecomputed),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildTripInfo(trip, locationCount, hasPolyline),
+              child: _buildTripInfo(trip, locationCount, hasPolyline, hasGeocoding),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: _buildRecomputeButton(
-            trip,
-            isRecomputing,
-            wasRecomputed,
-            hasEnoughLocations,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildRecomputeButton(
+                trip,
+                isRecomputing,
+                wasRecomputed,
+                hasEnoughLocations,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildRecomputeGeocodingButton(
+                trip,
+                isRecomputingGeo,
+                wasRecomputedGeo,
+                locationCount,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -652,7 +846,10 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     Trip trip,
     bool isRecomputing,
     bool wasRecomputed,
+    bool isRecomputingGeo,
+    bool wasRecomputedGeo,
     bool hasPolyline,
+    bool hasGeocoding,
     bool hasEnoughLocations,
     int locationCount,
   ) {
@@ -662,7 +859,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
         _buildPolylineStatusIcon(hasPolyline, wasRecomputed),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildTripInfo(trip, locationCount, hasPolyline),
+          child: _buildTripInfo(trip, locationCount, hasPolyline, hasGeocoding),
         ),
         const SizedBox(width: 12),
         SizedBox(
@@ -672,6 +869,16 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
             isRecomputing,
             wasRecomputed,
             hasEnoughLocations,
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 140,
+          child: _buildRecomputeGeocodingButton(
+            trip,
+            isRecomputingGeo,
+            wasRecomputedGeo,
+            locationCount,
           ),
         ),
       ],
@@ -688,7 +895,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     return const Icon(Icons.route, color: Colors.grey, size: 24);
   }
 
-  Widget _buildTripInfo(Trip trip, int locationCount, bool hasPolyline) {
+  Widget _buildTripInfo(Trip trip, int locationCount, bool hasPolyline, bool hasGeocoding) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -725,6 +932,24 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   color: hasPolyline ? Colors.green : Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: hasGeocoding
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                hasGeocoding ? 'Has geocoding' : 'No geocoding',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: hasGeocoding ? Colors.green : Colors.grey,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -768,7 +993,7 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
       return ElevatedButton(
         onPressed: null,
         child: Text(
-          'Too few locations',
+          'Needs 2+ locations',
           style: TextStyle(fontSize: 12, color: Colors.grey[400]),
           textAlign: TextAlign.center,
         ),
@@ -778,7 +1003,57 @@ class _PolylineManagementScreenState extends State<PolylineManagementScreen> {
     return ElevatedButton(
       onPressed: () => _recomputePolyline(trip),
       child: const Text(
-        'Recompute',
+        'Polyline',
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildRecomputeGeocodingButton(
+    Trip trip,
+    bool isRecomputing,
+    bool wasRecomputed,
+    int locationCount,
+  ) {
+    if (isRecomputing) {
+      return const ElevatedButton(
+        onPressed: null,
+        child: SizedBox(
+          height: 16,
+          width: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (wasRecomputed) {
+      return ElevatedButton.icon(
+        onPressed: () => _recomputeGeocoding(trip),
+        icon: const Icon(Icons.check, size: 16),
+        label: const Text('Done'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+        ),
+      );
+    }
+
+    // Geocoding doesn't require multiple locations - each update can be geocoded independently
+    if (locationCount == 0) {
+      return ElevatedButton(
+        onPressed: null,
+        child: Text(
+          'Needs 1+ location',
+          style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return ElevatedButton(
+      onPressed: () => _recomputeGeocoding(trip),
+      child: const Text(
+        'Geocoding',
         textAlign: TextAlign.center,
       ),
     );

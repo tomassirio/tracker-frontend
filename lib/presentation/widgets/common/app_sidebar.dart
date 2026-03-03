@@ -5,7 +5,7 @@ import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dar
 import 'package:tracker_frontend/presentation/screens/admin_users_screen.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 import 'package:tracker_frontend/presentation/screens/home_screen.dart';
-import 'package:tracker_frontend/presentation/screens/polyline_management_screen.dart';
+import 'package:tracker_frontend/presentation/screens/trip_maintenance_screen.dart';
 import 'package:tracker_frontend/presentation/screens/trip_promotion_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -102,11 +102,11 @@ class AppSidebar extends StatelessWidget {
         );
         break;
       case 7:
-        // Navigate to Polyline Management (admin only)
+        // Navigate to Trip Data Maintenance (admin only)
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PolylineManagementScreen(),
+            builder: (context) => const TripMaintenanceScreen(),
           ),
         );
         break;
@@ -236,8 +236,8 @@ class AppSidebar extends StatelessWidget {
                       onTap: () => _handleNavigation(context, 6),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.route),
-                      title: const Text('Polyline Management'),
+                      leading: const Icon(Icons.build_outlined),
+                      title: const Text('Trip Data Maintenance'),
                       selected: selectedIndex == 7,
                       onTap: () => _handleNavigation(context, 7),
                     ),

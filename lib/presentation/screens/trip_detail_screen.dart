@@ -11,11 +11,9 @@ import 'package:tracker_frontend/data/models/achievement_models.dart';
 import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
 import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
 import 'package:tracker_frontend/data/client/query/promotion_query_client.dart';
-import 'package:tracker_frontend/data/client/google_geocoding_api_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/achievement_service.dart';
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
@@ -119,11 +117,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   void initState() {
     super.initState();
 
-    // Initialize repository with geocoding client for place enrichment
-    final apiKey = ApiEndpoints.googleMapsApiKey;
-    final geocodingClient =
-        apiKey.isNotEmpty ? GoogleGeocodingApiClient(apiKey) : null;
-    _repository = TripDetailRepository(geocodingClient: geocodingClient);
+    // Initialize repository
+    _repository = TripDetailRepository();
 
     _trip = widget.trip;
     _updateMapData();
@@ -156,6 +151,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         break;
       case WebSocketEventType.tripUpdated:
         _handleTripUpdatedEvent(event as TripUpdatedEvent);
+        break;
+      case WebSocketEventType.polylineUpdated:
+        _handlePolylineUpdatedEvent(event as PolylineUpdatedEvent);
         break;
       case WebSocketEventType.commentAdded:
         _handleCommentAdded(event as CommentAddedEvent);
@@ -200,6 +198,32 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       // Update the map to show the new location
       _updateMapData();
     }
+  }
+
+  void _handlePolylineUpdatedEvent(PolylineUpdatedEvent event) {
+    // Validate that we have the required data
+    if (event.tripId == null || event.tripId!.isEmpty) {
+      debugPrint('PolylineUpdatedEvent: Missing tripId, ignoring event');
+      return;
+    }
+    
+    if (event.encodedPolyline.isEmpty) {
+      debugPrint('PolylineUpdatedEvent: Empty encodedPolyline for trip ${event.tripId}, ignoring event');
+      return;
+    }
+
+    // Only update if this event is for the current trip
+    if (event.tripId != _trip.id) {
+      return;
+    }
+
+    // Update the trip's encoded polyline and refresh the map
+    setState(() {
+      _trip = _trip.copyWith(encodedPolyline: event.encodedPolyline);
+    });
+
+    // Update the map to show the new polyline
+    _updateMapData();
   }
 
   void _handleTripSettingsUpdated(TripSettingsUpdatedEvent event) {
