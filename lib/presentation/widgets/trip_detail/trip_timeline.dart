@@ -174,21 +174,25 @@ class TripTimeline extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header: timestamp and battery
+                        // Header: timestamp, weather, and battery
                         Row(
                           children: [
-                            Expanded(
-                              child: Text(
-                                _formatTimestamp(update.timestamp),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isFirst
-                                      ? WandererTheme.primaryOrange
-                                      : WandererTheme.textSecondary,
-                                ),
+                            Text(
+                              _formatTimestamp(update.timestamp),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isFirst
+                                    ? WandererTheme.primaryOrange
+                                    : WandererTheme.textSecondary,
                               ),
                             ),
+                            if (update.temperatureCelsius != null ||
+                                update.weatherCondition != null) ...[
+                              const SizedBox(width: 6),
+                              _buildWeatherBadge(update),
+                            ],
+                            const Spacer(),
                             if (update.battery != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -251,12 +255,6 @@ class TripTimeline extends StatelessWidget {
                             ),
                           ],
                         ),
-                        // Weather info if available
-                        if (update.temperatureCelsius != null ||
-                            update.weatherCondition != null) ...[
-                          const SizedBox(height: 6),
-                          _buildWeatherRow(update),
-                        ],
                         // Message if present
                         if (update.message != null &&
                             update.message!.isNotEmpty) ...[
@@ -312,38 +310,29 @@ class TripTimeline extends StatelessWidget {
     );
   }
 
-  Widget _buildWeatherRow(TripLocation update) {
+  Widget _buildWeatherBadge(TripLocation update) {
     final condition = update.weatherCondition;
     final temp = update.temperatureCelsius;
     final weatherColor =
         condition != null ? WeatherHelpers.getWeatherColor(condition) : null;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if (condition != null) ...[
+        if (condition != null)
           Icon(
             WeatherHelpers.getWeatherIcon(condition),
-            size: 14,
+            size: 11,
             color: weatherColor,
           ),
-          const SizedBox(width: 4),
-        ],
-        if (temp != null)
+        if (temp != null) ...[
+          const SizedBox(width: 2),
           Text(
             WeatherHelpers.formatTemperature(temp),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: weatherColor ?? WandererTheme.textSecondary,
-            ),
-          ),
-        if (condition != null) ...[
-          const SizedBox(width: 4),
-          Text(
-            WeatherHelpers.getWeatherLabel(condition),
-            style: TextStyle(
-              fontSize: 11,
-              color: WandererTheme.textSecondary,
             ),
           ),
         ],

@@ -40,7 +40,6 @@ class CustomInfoWindow extends StatelessWidget {
             const SizedBox(height: 8),
             _buildTimestampRow(),
             const SizedBox(height: 6),
-            _buildWeatherRow(),
             _buildMessageBatteryRow(),
           ],
         ),
@@ -92,61 +91,56 @@ class CustomInfoWindow extends StatelessWidget {
   }
 
   Widget _buildTimestampRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Text(
-        _formatTimestamp(location.timestamp),
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Colors.grey.shade800,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeatherRow() {
     final condition = location.weatherCondition;
     final temp = location.temperatureCelsius;
-
-    // Don't show anything if no weather data
-    if (condition == null && temp == null) {
-      return const SizedBox.shrink();
-    }
-
+    final hasWeather = condition != null || temp != null;
     final weatherColor =
         condition != null ? WeatherHelpers.getWeatherColor(condition) : null;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(
         children: [
-          if (condition != null) ...[
-            Icon(
-              WeatherHelpers.getWeatherIcon(condition),
-              size: 15,
-              color: weatherColor,
+          Text(
+            _formatTimestamp(location.timestamp),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
             ),
-            const SizedBox(width: 4),
-          ],
-          if (temp != null)
-            Text(
-              WeatherHelpers.formatTemperature(temp),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: weatherColor ?? Colors.grey.shade700,
+          ),
+          if (hasWeather) ...[
+            const SizedBox(width: 10),
+            if (condition != null)
+              Icon(
+                WeatherHelpers.getWeatherIcon(condition),
+                size: 14,
+                color: weatherColor,
               ),
-            ),
-          if (condition != null) ...[
-            const SizedBox(width: 6),
-            Text(
-              WeatherHelpers.getWeatherLabel(condition),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
+            if (temp != null) ...[
+              const SizedBox(width: 3),
+              Text(
+                WeatherHelpers.formatTemperature(temp),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: weatherColor ?? Colors.grey.shade700,
+                ),
               ),
-            ),
+            ],
+            if (condition != null) ...[
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  WeatherHelpers.getWeatherLabel(condition),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ],
         ],
       ),
