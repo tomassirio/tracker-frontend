@@ -99,6 +99,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   // so we can disable map gestures only when hovering.
   bool _isHoveringOverPanel = false;
 
+  // Custom info window: currently selected map marker location
+  TripLocation? _selectedMapLocation;
+
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -716,19 +719,37 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   void _updateMapData() {
     try {
-      final mapData = TripMapHelper.createMapDataWithDirections(_trip);
+      final mapData = TripMapHelper.createMapDataWithDirections(
+        _trip,
+        onMarkerTap: _onMapMarkerTapped,
+      );
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     } catch (e) {
       // Fallback to straight lines if decoding fails
-      final mapData = TripMapHelper.createMapData(_trip);
+      final mapData = TripMapHelper.createMapData(
+        _trip,
+        onMarkerTap: _onMapMarkerTapped,
+      );
       setState(() {
         _markers = mapData.markers;
         _polylines = mapData.polylines;
       });
     }
+  }
+
+  void _onMapMarkerTapped(TripLocation location) {
+    setState(() {
+      _selectedMapLocation = location;
+    });
+  }
+
+  void _onInfoWindowClosed() {
+    setState(() {
+      _selectedMapLocation = null;
+    });
   }
 
   Future<void> _loadComments() async {
@@ -1648,6 +1669,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           _isTimelineCollapsed &&
                           _isTripUpdateCollapsed)
                       : !_isHoveringOverPanel,
+                  selectedLocation: _selectedMapLocation,
+                  onInfoWindowClosed: _onInfoWindowClosed,
                 ),
               ),
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:tracker_frontend/data/models/domain/trip_location.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/custom_info_window.dart';
 
 /// Widget displaying the Google Maps view for a trip
 class TripMapView extends StatefulWidget {
@@ -19,6 +21,12 @@ class TripMapView extends StatefulWidget {
   /// from propagating to the map on mobile web.
   final bool gesturesEnabled;
 
+  /// The currently selected location to show in the custom info window.
+  final TripLocation? selectedLocation;
+
+  /// Callback to close the custom info window.
+  final VoidCallback? onInfoWindowClosed;
+
   const TripMapView({
     super.key,
     required this.initialLocation,
@@ -28,6 +36,8 @@ class TripMapView extends StatefulWidget {
     required this.onMapCreated,
     this.isOwner = false,
     this.gesturesEnabled = true,
+    this.selectedLocation,
+    this.onInfoWindowClosed,
   });
 
   @override
@@ -154,6 +164,20 @@ class _TripMapViewState extends State<TripMapView> {
                     style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                   ),
                 ],
+              ),
+            ),
+          ),
+        // Custom info window overlay
+        if (widget.selectedLocation != null &&
+            widget.onInfoWindowClosed != null)
+          Positioned(
+            top: 16,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: CustomInfoWindow(
+                location: widget.selectedLocation!,
+                onClose: widget.onInfoWindowClosed!,
               ),
             ),
           ),
