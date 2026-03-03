@@ -40,9 +40,9 @@ class _FakeAuthResponse_0 extends _i1.SmartFake implements _i2.AuthResponse {
         );
 }
 
-class _FakePageResponse_1<T> extends _i1.SmartFake
-    implements _i3.PageResponse<T> {
-  _FakePageResponse_1(
+class _FakeRegisterPendingResponse_1 extends _i1.SmartFake
+    implements _i2.RegisterPendingResponse {
+  _FakeRegisterPendingResponse_1(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -51,8 +51,19 @@ class _FakePageResponse_1<T> extends _i1.SmartFake
         );
 }
 
-class _FakeUserProfile_2 extends _i1.SmartFake implements _i4.UserProfile {
-  _FakeUserProfile_2(
+class _FakePageResponse_2<T> extends _i1.SmartFake
+    implements _i3.PageResponse<T> {
+  _FakePageResponse_2(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeUserProfile_3 extends _i1.SmartFake implements _i4.UserProfile {
+  _FakeUserProfile_3(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -86,16 +97,34 @@ class MockAuthClient extends _i1.Mock implements _i5.AuthClient {
       ) as _i6.Future<_i2.AuthResponse>);
 
   @override
-  _i6.Future<_i2.AuthResponse> register(_i2.RegisterRequest? request) =>
+  _i6.Future<_i2.RegisterPendingResponse> register(
+          _i2.RegisterRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #register,
           [request],
         ),
-        returnValue: _i6.Future<_i2.AuthResponse>.value(_FakeAuthResponse_0(
+        returnValue: _i6.Future<_i2.RegisterPendingResponse>.value(
+            _FakeRegisterPendingResponse_1(
           this,
           Invocation.method(
             #register,
+            [request],
+          ),
+        )),
+      ) as _i6.Future<_i2.RegisterPendingResponse>);
+
+  @override
+  _i6.Future<_i2.AuthResponse> verifyEmail(_i2.VerifyEmailRequest? request) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #verifyEmail,
+          [request],
+        ),
+        returnValue: _i6.Future<_i2.AuthResponse>.value(_FakeAuthResponse_0(
+          this,
+          Invocation.method(
+            #verifyEmail,
             [request],
           ),
         )),
@@ -188,7 +217,7 @@ class MockUserQueryClient extends _i1.Mock implements _i7.UserQueryClient {
           },
         ),
         returnValue: _i6.Future<_i3.PageResponse<_i4.UserProfile>>.value(
-            _FakePageResponse_1<_i4.UserProfile>(
+            _FakePageResponse_2<_i4.UserProfile>(
           this,
           Invocation.method(
             #getAllUsers,
@@ -210,7 +239,7 @@ class MockUserQueryClient extends _i1.Mock implements _i7.UserQueryClient {
           #getUserById,
           [userId],
         ),
-        returnValue: _i6.Future<_i4.UserProfile>.value(_FakeUserProfile_2(
+        returnValue: _i6.Future<_i4.UserProfile>.value(_FakeUserProfile_3(
           this,
           Invocation.method(
             #getUserById,
@@ -226,7 +255,7 @@ class MockUserQueryClient extends _i1.Mock implements _i7.UserQueryClient {
           #getUserByUsername,
           [username],
         ),
-        returnValue: _i6.Future<_i4.UserProfile>.value(_FakeUserProfile_2(
+        returnValue: _i6.Future<_i4.UserProfile>.value(_FakeUserProfile_3(
           this,
           Invocation.method(
             #getUserByUsername,
@@ -241,7 +270,7 @@ class MockUserQueryClient extends _i1.Mock implements _i7.UserQueryClient {
           #getCurrentUser,
           [],
         ),
-        returnValue: _i6.Future<_i4.UserProfile>.value(_FakeUserProfile_2(
+        returnValue: _i6.Future<_i4.UserProfile>.value(_FakeUserProfile_3(
           this,
           Invocation.method(
             #getCurrentUser,

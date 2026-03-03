@@ -24,6 +24,7 @@ class ApiEndpoints {
 
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/register';
+  static const String authVerifyEmail = '/verify-email';
   static const String authLogin = '/login';
   static const String authLogout = '/logout';
   static const String authRefresh = '/refresh';

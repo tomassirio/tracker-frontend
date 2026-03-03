@@ -22,11 +22,26 @@ class AuthClient {
   }
 
   /// Register new user
-  /// Returns access & refresh tokens
+  /// Returns 202 Accepted with a pending message; user must verify email
   /// No authentication required
-  Future<AuthResponse> register(RegisterRequest request) async {
+  Future<RegisterPendingResponse> register(RegisterRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.authRegister,
+      body: request.toJson(),
+      requireAuth: false,
+    );
+    return _apiClient.handleResponse(
+      response,
+      RegisterPendingResponse.fromJson,
+    );
+  }
+
+  /// Verify email with token received by email
+  /// Returns access & refresh tokens on success
+  /// No authentication required
+  Future<AuthResponse> verifyEmail(VerifyEmailRequest request) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.authVerifyEmail,
       body: request.toJson(),
       requireAuth: false,
     );
