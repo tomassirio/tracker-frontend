@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/data/models/user_models.dart';
 import 'package:tracker_frontend/data/models/comment_models.dart';
@@ -14,7 +15,6 @@ import 'package:tracker_frontend/data/client/query/promotion_query_client.dart';
 import 'package:tracker_frontend/data/services/websocket_service.dart';
 import 'package:tracker_frontend/data/services/user_service.dart';
 import 'package:tracker_frontend/data/services/achievement_service.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
@@ -192,6 +192,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         message: event.message,
         city: event.city,
         country: event.country,
+        temperatureCelsius: event.temperatureCelsius,
+        weatherCondition: event.weatherCondition != null
+            ? WeatherCondition.fromJson(event.weatherCondition!)
+            : null,
       );
 
       setState(() {

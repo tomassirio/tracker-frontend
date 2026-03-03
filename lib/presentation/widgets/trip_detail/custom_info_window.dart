@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/domain/trip_location.dart';
 import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/weather_helpers.dart';
 
 class CustomInfoWindow extends StatelessWidget {
   final TripLocation location;
@@ -39,6 +40,7 @@ class CustomInfoWindow extends StatelessWidget {
             const SizedBox(height: 8),
             _buildTimestampRow(),
             const SizedBox(height: 6),
+            _buildWeatherRow(),
             _buildMessageBatteryRow(),
           ],
         ),
@@ -99,6 +101,54 @@ class CustomInfoWindow extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: Colors.grey.shade800,
         ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherRow() {
+    final condition = location.weatherCondition;
+    final temp = location.temperatureCelsius;
+
+    // Don't show anything if no weather data
+    if (condition == null && temp == null) {
+      return const SizedBox.shrink();
+    }
+
+    final weatherColor =
+        condition != null ? WeatherHelpers.getWeatherColor(condition) : null;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 6),
+      child: Row(
+        children: [
+          if (condition != null) ...[
+            Icon(
+              WeatherHelpers.getWeatherIcon(condition),
+              size: 15,
+              color: weatherColor,
+            ),
+            const SizedBox(width: 4),
+          ],
+          if (temp != null)
+            Text(
+              WeatherHelpers.formatTemperature(temp),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: weatherColor ?? Colors.grey.shade700,
+              ),
+            ),
+          if (condition != null) ...[
+            const SizedBox(width: 6),
+            Text(
+              WeatherHelpers.getWeatherLabel(condition),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

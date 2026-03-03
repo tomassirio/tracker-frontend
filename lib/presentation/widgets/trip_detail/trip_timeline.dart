@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker_frontend/data/models/trip_models.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
+import 'package:tracker_frontend/presentation/helpers/weather_helpers.dart';
 
 /// Widget displaying the timeline of trip updates
 class TripTimeline extends StatelessWidget {
@@ -250,6 +251,12 @@ class TripTimeline extends StatelessWidget {
                             ),
                           ],
                         ),
+                        // Weather info if available
+                        if (update.temperatureCelsius != null ||
+                            update.weatherCondition != null) ...[
+                          const SizedBox(height: 6),
+                          _buildWeatherRow(update),
+                        ],
                         // Message if present
                         if (update.message != null &&
                             update.message!.isNotEmpty) ...[
@@ -302,6 +309,45 @@ class TripTimeline extends StatelessWidget {
           ); // closes Row
         },
       ),
+    );
+  }
+
+  Widget _buildWeatherRow(TripLocation update) {
+    final condition = update.weatherCondition;
+    final temp = update.temperatureCelsius;
+    final weatherColor =
+        condition != null ? WeatherHelpers.getWeatherColor(condition) : null;
+
+    return Row(
+      children: [
+        if (condition != null) ...[
+          Icon(
+            WeatherHelpers.getWeatherIcon(condition),
+            size: 14,
+            color: weatherColor,
+          ),
+          const SizedBox(width: 4),
+        ],
+        if (temp != null)
+          Text(
+            WeatherHelpers.formatTemperature(temp),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: weatherColor ?? WandererTheme.textSecondary,
+            ),
+          ),
+        if (condition != null) ...[
+          const SizedBox(width: 4),
+          Text(
+            WeatherHelpers.getWeatherLabel(condition),
+            style: TextStyle(
+              fontSize: 11,
+              color: WandererTheme.textSecondary,
+            ),
+          ),
+        ],
+      ],
     );
   }
 
