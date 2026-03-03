@@ -27,6 +27,9 @@ class TripMapView extends StatefulWidget {
   /// Callback to close the custom info window.
   final VoidCallback? onInfoWindowClosed;
 
+  /// Callback when the map background is tapped (not a marker).
+  final VoidCallback? onMapTap;
+
   const TripMapView({
     super.key,
     required this.initialLocation,
@@ -38,6 +41,7 @@ class TripMapView extends StatefulWidget {
     this.gesturesEnabled = true,
     this.selectedLocation,
     this.onInfoWindowClosed,
+    this.onMapTap,
   });
 
   @override
@@ -48,6 +52,48 @@ class _TripMapViewState extends State<TripMapView> {
   bool _hasError = false;
   String? _errorMessage;
   bool _isMapReady = false;
+  GoogleMapController? _controller;
+
+  /// Screen position of the selected marker (relative to the map widget).
+  Offset? _markerScreenPosition;
+
+  @override
+  void didUpdateWidget(covariant TripMapView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When a new location is selected, compute its screen position.
+    if (widget.selectedLocation != null &&
+        widget.selectedLocation != oldWidget.selectedLocation) {
+      _updateMarkerScreenPosition();
+    }
+    // When selection is cleared, clear the cached position.
+    if (widget.selectedLocation == null) {
+      _markerScreenPosition = null;
+    }
+  }
+
+  Future<void> _updateMarkerScreenPosition() async {
+    final controller = _controller;
+    final loc = widget.selectedLocation;
+    if (controller == null || loc == null) return;
+
+    try {
+      final screenCoord = await controller.getScreenCoordinate(
+        LatLng(loc.latitude, loc.longitude),
+      );
+      if (mounted && widget.selectedLocation == loc) {
+        setState(() {
+          // getScreenCoordinate returns physical pixels; convert to logical.
+          final ratio = MediaQuery.of(context).devicePixelRatio;
+          _markerScreenPosition = Offset(
+            screenCoord.x / ratio,
+            screenCoord.y / ratio,
+          );
+        });
+      }
+    } catch (_) {
+      // Silently fail — bubble won't be positioned.
+    }
+  }
 
   @override
   void initState() {
@@ -122,6 +168,7 @@ class _TripMapViewState extends State<TripMapView> {
           markers: widget.markers,
           polylines: widget.polylines,
           onMapCreated: (controller) {
+            _controller = controller;
             try {
               setState(() {
                 _isMapReady = true;
@@ -133,6 +180,16 @@ class _TripMapViewState extends State<TripMapView> {
                 _errorMessage = 'Map initialization failed: ${e.toString()}';
               });
               debugPrint('Map creation error: $e');
+            }
+          },
+          onTap: (_) {
+            // Dismiss info window when tapping on the map background.
+            widget.onMapTap?.call();
+          },
+          onCameraMove: (_) {
+            // Update bubble position when the camera moves so it tracks.
+            if (widget.selectedLocation != null) {
+              _updateMarkerScreenPosition();
             }
           },
           myLocationButtonEnabled: widget.isOwner,
@@ -167,21 +224,53 @@ class _TripMapViewState extends State<TripMapView> {
               ),
             ),
           ),
-        // Custom info window overlay
+        // Custom info window bubble positioned above the marker
         if (widget.selectedLocation != null &&
-            widget.onInfoWindowClosed != null)
+            widget.onInfoWindowClosed != null &&
+            _markerScreenPosition != null)
           Positioned(
-            top: 16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: CustomInfoWindow(
-                location: widget.selectedLocation!,
-                onClose: widget.onInfoWindowClosed!,
+            // Place the bubble so its bottom-center is above the marker pin.
+            // Offset upward by ~48px to clear the marker icon.
+            left: _markerScreenPosition!.dx - 130,
+            top: _markerScreenPosition!.dy - 48,
+            child: Transform.translate(
+              offset: const Offset(0, -100),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomInfoWindow(
+                    location: widget.selectedLocation!,
+                    onClose: widget.onInfoWindowClosed!,
+                  ),
+                  // Small triangle/arrow pointing down
+                  CustomPaint(
+                    size: const Size(16, 8),
+                    painter: _TrianglePainter(),
+                  ),
+                ],
               ),
             ),
           ),
       ],
     );
   }
+}
+
+/// Paints a small downward-pointing triangle used as the bubble arrow.
+class _TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..lineTo(size.width, 0)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

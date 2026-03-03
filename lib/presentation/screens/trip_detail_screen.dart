@@ -1671,6 +1671,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       : !_isHoveringOverPanel,
                   selectedLocation: _selectedMapLocation,
                   onInfoWindowClosed: _onInfoWindowClosed,
+                  onMapTap: _onInfoWindowClosed,
                 ),
               ),
 
