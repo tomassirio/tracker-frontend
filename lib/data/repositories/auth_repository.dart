@@ -16,10 +16,20 @@ class AuthRepository {
   }
 
   /// Registers a new user
-  Future<void> register(String username, String email, String password) async {
-    await _authService.register(
+  /// Returns a pending response; the user must verify their email before logging in
+  Future<RegisterPendingResponse> register(
+    String username,
+    String email,
+    String password,
+  ) async {
+    return await _authService.register(
       RegisterRequest(username: username, email: email, password: password),
     );
+  }
+
+  /// Verifies email with token received by email and logs the user in
+  Future<void> verifyEmail(String token) async {
+    await _authService.verifyEmail(VerifyEmailRequest(token: token));
   }
 
   /// Requests a password reset email

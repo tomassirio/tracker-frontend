@@ -84,30 +84,23 @@ void main() {
     });
 
     group('register', () {
-      test('successful registration returns AuthResponse', () async {
+      test(
+          'successful registration returns RegisterPendingResponse (202)',
+          () async {
         final request = RegisterRequest(
           username: 'newuser',
           email: 'newuser@example.com',
           password: 'password123',
         );
         final responseBody = {
-          'access_token': 'new-access-token',
-          'refresh_token': 'new-refresh-token',
-          'token_type': 'Bearer',
-          'expires_in': 3600,
-          'user_id': 'user-456',
-          'username': 'newuser',
+          'message':
+              'Registration pending. Please check your email to verify your account.',
         };
-        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
         final result = await authClient.register(request);
 
-        expect(result.accessToken, 'new-access-token');
-        expect(result.refreshToken, 'new-refresh-token');
-        expect(result.tokenType, 'Bearer');
-        expect(result.expiresIn, 3600);
-        expect(result.userId, 'user-456');
-        expect(result.username, 'newuser');
+        expect(result.message, contains('check your email'));
         expect(mockHttpClient.lastMethod, 'POST');
         expect(
           mockHttpClient.lastUri?.path,
@@ -123,8 +116,8 @@ void main() {
           password: 'password123',
         );
         mockHttpClient.response = http.Response(
-          '{"access_token":"token","refresh_token":"refresh","token_type":"Bearer","expires_in":3600}',
-          201,
+          '{"message":"Registration pending. Please check your email to verify your account."}',
+          202,
         );
 
         await authClient.register(request);
@@ -144,6 +137,55 @@ void main() {
         );
 
         expect(() => authClient.register(request), throwsException);
+      });
+    });
+
+    group('verifyEmail', () {
+      test('successful email verification returns AuthResponse (201)',
+          () async {
+        final request = VerifyEmailRequest(token: 'valid-token');
+        final responseBody = {
+          'accessToken': 'new-access-token',
+          'refreshToken': 'new-refresh-token',
+          'tokenType': 'Bearer',
+          'expiresIn': 3600,
+        };
+        mockHttpClient.response = http.Response(jsonEncode(responseBody), 201);
+
+        final result = await authClient.verifyEmail(request);
+
+        expect(result.accessToken, 'new-access-token');
+        expect(result.refreshToken, 'new-refresh-token');
+        expect(result.tokenType, 'Bearer');
+        expect(result.expiresIn, 3600);
+        expect(mockHttpClient.lastMethod, 'POST');
+        expect(
+          mockHttpClient.lastUri?.path,
+          endsWith(ApiEndpoints.authVerifyEmail),
+        );
+        expect(mockHttpClient.lastBody, jsonEncode(request.toJson()));
+      });
+
+      test('verifyEmail does not require authentication', () async {
+        final request = VerifyEmailRequest(token: 'valid-token');
+        mockHttpClient.response = http.Response(
+          '{"accessToken":"token","refreshToken":"refresh","tokenType":"Bearer","expiresIn":3600}',
+          201,
+        );
+
+        await authClient.verifyEmail(request);
+
+        expect(mockHttpClient.lastHeaders?['Authorization'], isNull);
+      });
+
+      test('verifyEmail throws exception on invalid token', () async {
+        final request = VerifyEmailRequest(token: 'bad-token');
+        mockHttpClient.response = http.Response(
+          'Invalid or expired email verification token',
+          400,
+        );
+
+        expect(() => authClient.verifyEmail(request), throwsException);
       });
     });
 

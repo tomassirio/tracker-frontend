@@ -1,12 +1,12 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:tracker_frontend/core/routing/app_router.dart';
 import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/core/services/background_update_manager.dart';
 import 'package:tracker_frontend/core/services/navigation_service.dart';
 import 'package:tracker_frontend/core/services/notification_service.dart';
-import 'package:tracker_frontend/presentation/screens/initial_screen.dart';
-import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
 
 /// Global route observer for detecting when screens become visible again
 final RouteObserver<ModalRoute<void>> routeObserver =
@@ -14,6 +14,9 @@ final RouteObserver<ModalRoute<void>> routeObserver =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Use clean URLs on web (e.g. /login instead of /#/login)
+  usePathUrlStrategy();
 
   // Initialize Android-only services
   if (!kIsWeb && Platform.isAndroid) {
@@ -29,6 +32,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static final AppRouter _router = AppRouter();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,10 +42,7 @@ class MyApp extends StatelessWidget {
       theme: WandererTheme.lightTheme(),
       navigatorKey: NavigationService().navigatorKey,
       navigatorObservers: [routeObserver],
-      home: const InitialScreen(),
-      routes: {
-        '/auth': (context) => const AuthScreen(),
-      },
+      onGenerateRoute: _router.onGenerateRoute,
     );
   }
 }

@@ -176,7 +176,7 @@ class MockAuthService extends AuthService {
   }
 
   @override
-  Future<AuthResponse> register(RegisterRequest request) async {
+  Future<RegisterPendingResponse> register(RegisterRequest request) async {
     registerCalled = true;
     lastRegisterRequest = request;
 
@@ -184,11 +184,9 @@ class MockAuthService extends AuthService {
       throw Exception('Registration failed');
     }
 
-    return AuthResponse(
-      accessToken: 'test-token',
-      refreshToken: 'test-refresh',
-      tokenType: 'Bearer',
-      expiresIn: 3600,
+    return RegisterPendingResponse(
+      message:
+          'Registration pending. Please check your email to verify your account.',
     );
   }
 

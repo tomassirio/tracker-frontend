@@ -30,12 +30,51 @@ void main() {
     });
 
     group('register', () {
-      test('registers user and saves tokens with user info', () async {
+      test('registers user and returns pending response', () async {
         final request = RegisterRequest(
           username: 'testuser',
           email: 'test@example.com',
           password: 'password123',
         );
+
+        final pendingResponse = RegisterPendingResponse(
+          message:
+              'Registration pending. Please check your email to verify your account.',
+        );
+
+        when(
+          mockAuthClient.register(request),
+        ).thenAnswer((_) async => pendingResponse);
+
+        final result = await authService.register(request);
+
+        expect(result.message, contains('check your email'));
+        verify(mockAuthClient.register(request)).called(1);
+        verifyNever(mockTokenStorage.saveTokens(
+          accessToken: anyNamed('accessToken'),
+          refreshToken: anyNamed('refreshToken'),
+          tokenType: anyNamed('tokenType'),
+          expiresIn: anyNamed('expiresIn'),
+        ));
+      });
+
+      test('passes through registration errors', () async {
+        final request = RegisterRequest(
+          username: 'testuser',
+          email: 'test@example.com',
+          password: 'password123',
+        );
+        when(
+          mockAuthClient.register(request),
+        ).thenThrow(Exception('Registration failed'));
+
+        expect(() => authService.register(request), throwsException);
+      });
+    });
+
+    group('verifyEmail', () {
+      test('verifies email, saves tokens and fetches user profile', () async {
+        final request = VerifyEmailRequest(token: 'valid-token');
 
         final authResponse = AuthResponse(
           accessToken: 'access-token',
@@ -55,7 +94,7 @@ void main() {
         );
 
         when(
-          mockAuthClient.register(request),
+          mockAuthClient.verifyEmail(request),
         ).thenAnswer((_) async => authResponse);
         when(
           mockUserQueryClient.getCurrentUser(),
@@ -71,24 +110,22 @@ void main() {
           ),
         ).thenAnswer((_) async => {});
 
-        final result = await authService.register(request);
+        final result = await authService.verifyEmail(request);
 
         expect(result.accessToken, 'access-token');
-        verify(mockAuthClient.register(request)).called(1);
+        verify(mockAuthClient.verifyEmail(request)).called(1);
         verify(mockUserQueryClient.getCurrentUser()).called(1);
       });
 
-      test('passes through registration errors', () async {
-        final request = RegisterRequest(
-          username: 'testuser',
-          email: 'test@example.com',
-          password: 'password123',
-        );
+      test('verifyEmail passes through errors', () async {
+        final request = VerifyEmailRequest(token: 'invalid-token');
         when(
-          mockAuthClient.register(request),
-        ).thenThrow(Exception('Registration failed'));
+          mockAuthClient.verifyEmail(request),
+        ).thenThrow(
+          Exception('Invalid or expired email verification token'),
+        );
 
-        expect(() => authService.register(request), throwsException);
+        expect(() => authService.verifyEmail(request), throwsException);
       });
     });
 

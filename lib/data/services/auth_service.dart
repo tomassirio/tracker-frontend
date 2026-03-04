@@ -17,8 +17,15 @@ class AuthService {
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   /// Register a new user
-  Future<AuthResponse> register(RegisterRequest request) async {
-    final authResponse = await _authClient.register(request);
+  /// Returns a pending response; user must verify email before logging in
+  Future<RegisterPendingResponse> register(RegisterRequest request) async {
+    return await _authClient.register(request);
+  }
+
+  /// Verify email address with token received by email
+  /// Returns AuthResponse with tokens and logs the user in
+  Future<AuthResponse> verifyEmail(VerifyEmailRequest request) async {
+    final authResponse = await _authClient.verifyEmail(request);
 
     // Save tokens first
     await _tokenStorage.saveTokens(
