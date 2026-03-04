@@ -155,8 +155,7 @@ jobs:
                 --base master \
                 --head "${BRANCH_NAME}" \
                 --title "ci: Update README badges for v${BASE_VERSION}" \
-                --body "Automated badge update after release v${BASE_VERSION}." \
-                --label "ci")
+                --body "Automated badge update after release v${BASE_VERSION}.")
               gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
                 echo "⚠️ Could not auto-merge badge update PR. Please merge manually: ${PR_URL}"
             fi
@@ -289,8 +288,7 @@ jobs:
               --base master \
               --head "${BRANCH_NAME}" \
               --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
-              --body "Automated version bump after release v${BASE_VERSION}." \
-              --label "ci")
+              --body "Automated version bump after release v${BASE_VERSION}.")
             gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
               echo "⚠️ Could not auto-merge version bump PR. Please merge manually: ${PR_URL}"
           else
@@ -346,8 +344,7 @@ jobs:
               --base master \
               --head "${BRANCH_NAME}" \
               --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
-              --body "Automated version bump — tag v${BASE_VERSION} already exists but version was not incremented." \
-              --label "ci")
+              --body "Automated version bump — tag v${BASE_VERSION} already exists but version was not incremented.")
             gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
               echo "⚠️ Could not auto-merge version bump PR. Please merge manually: ${PR_URL}"
           else
