@@ -92,16 +92,16 @@ jobs:
     needs: prepare-release
     if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
+    outputs:
+      coverage: ${{ steps.extract-coverage.outputs.coverage }}
+      coverage-color: ${{ steps.extract-coverage.outputs.coverage-color }}
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: v${{ needs.prepare-release.outputs.base-version }}
-          token: ${{ secrets.PAT_TOKEN }}
-          persist-credentials: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -113,12 +113,9 @@ jobs:
       - name: Run tests with coverage
         run: make test
 
-      - name: Extract coverage and update README badges
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      - name: Extract coverage
+        id: extract-coverage
         run: |
-          BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
-          
           if [ -f "coverage/lcov.info" ]; then
             sudo apt-get update && sudo apt-get install -y lcov
             COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep -oP 'lines......: \K[0-9.]+' | head -1 || echo "0")
@@ -132,34 +129,9 @@ jobs:
             COVERAGE="N/A"
             COVERAGE_COLOR="lightgrey"
           fi
-          
-          if [ -f "README.md" ]; then
-            # Fetch the latest README from master via the API
-            git config user.name "GitHub Actions"
-            git config user.email "github-actions@github.com"
-            git fetch origin master
-            git checkout master
-            git pull origin master --rebase
-            
-            sed -i "s/version-[0-9.]*-blue/version-${BASE_VERSION}-blue/" README.md
-            sed -i "s|coverage-[^)]*|coverage-${COVERAGE}%25-${COVERAGE_COLOR}|" README.md
-            
-            if ! git diff --quiet README.md; then
-              BRANCH_NAME="ci/update-badges-v${BASE_VERSION}"
-              git checkout -b "${BRANCH_NAME}"
-              git add README.md
-              git commit -m "ci: Update README badges for v${BASE_VERSION}"
-              git push origin "${BRANCH_NAME}"
 
-              PR_URL=$(gh pr create \
-                --base master \
-                --head "${BRANCH_NAME}" \
-                --title "ci: Update README badges for v${BASE_VERSION}" \
-                --body "Automated badge update after release v${BASE_VERSION}.")
-              gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
-                echo "⚠️ Could not auto-merge badge update PR. Please merge manually: ${PR_URL}"
-            fi
-          fi
+          echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+          echo "coverage-color=${COVERAGE_COLOR}" >> $GITHUB_OUTPUT
 
   build-web-app:
     needs: prepare-release
@@ -246,7 +218,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -254,6 +225,7 @@ jobs:
           ref: master
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
+          persist-credentials: true
 
       - name: Configure Git
         run: |
@@ -263,36 +235,31 @@ jobs:
       - name: Pull latest master
         run: git pull origin master --rebase
 
-      - name: Set next development version
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      - name: Update README badges and bump version
         run: |
           BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          COVERAGE="${{ needs.test-and-coverage.outputs.coverage }}"
+          COVERAGE_COLOR="${{ needs.test-and-coverage.outputs.coverage-color }}"
 
-          # Split version into major.minor.patch and increment patch (revision)
+          # Update README badges
+          if [ -f "README.md" ] && [ -n "$COVERAGE" ]; then
+            sed -i "s/version-[0-9.]*-blue/version-${BASE_VERSION}-blue/" README.md
+            sed -i "s|coverage-[^)]*|coverage-${COVERAGE}%25-${COVERAGE_COLOR}|" README.md
+          fi
+
+          # Bump to next development version
           IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
           NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
-
-          # Update pubspec.yaml and commit only if changed
           sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
 
-          if ! git diff --quiet pubspec.yaml; then
-            BRANCH_NAME="ci/bump-version-${NEXT_VERSION}"
-            git checkout -b "${BRANCH_NAME}"
-            git add pubspec.yaml
-            git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
-            git push origin "${BRANCH_NAME}"
-
-            # Create PR and auto-merge it
-            PR_URL=$(gh pr create \
-              --base master \
-              --head "${BRANCH_NAME}" \
-              --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
-              --body "Automated version bump after release v${BASE_VERSION}.")
-            gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
-              echo "⚠️ Could not auto-merge version bump PR. Please merge manually: ${PR_URL}"
+          # Commit everything together
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "ci: Finalize release v${BASE_VERSION} — badges + next dev version (${NEXT_VERSION})"
+            REMOTE_URL="https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git"
+            git push "${REMOTE_URL}" master || echo "⚠️ Could not push finalize commit to master."
           else
-            echo "Version already set to ${NEXT_VERSION}"
+            echo "Nothing to commit"
           fi
 
   # Handles the case where the release was skipped (tag already exists)
@@ -303,7 +270,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -311,6 +277,7 @@ jobs:
           ref: master
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
+          persist-credentials: true
 
       - name: Configure Git
         run: |
@@ -318,8 +285,6 @@ jobs:
           git config user.email "github-actions@github.com"
 
       - name: Bump version if still on released version
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
           CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
@@ -333,20 +298,10 @@ jobs:
             echo "📋 Current version ${CURRENT_VERSION} still matches released ${BASE_VERSION}, bumping to ${NEXT_VERSION}"
             sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
 
-            BRANCH_NAME="ci/bump-version-${NEXT_VERSION}"
-            git checkout -b "${BRANCH_NAME}"
             git add pubspec.yaml
             git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
-            git push origin "${BRANCH_NAME}"
-
-            # Create PR and auto-merge it
-            PR_URL=$(gh pr create \
-              --base master \
-              --head "${BRANCH_NAME}" \
-              --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
-              --body "Automated version bump — tag v${BASE_VERSION} already exists but version was not incremented.")
-            gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
-              echo "⚠️ Could not auto-merge version bump PR. Please merge manually: ${PR_URL}"
+            REMOTE_URL="https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git"
+            git push "${REMOTE_URL}" master || echo "⚠️ Could not push version bump to master."
           else
             echo "✅ Version ${CURRENT_VERSION} already differs from ${BASE_VERSION}, no bump needed"
           fi
