@@ -32,6 +32,17 @@ String getConfigValue(String key, String defaultValue) {
   return defaultValue;
 }
 
+/// Gets the base app URL for the web platform using window.location
+String getAppBaseUrl() {
+  try {
+    final protocol = _locationProtocol.toDart;
+    final host = _locationHost.toDart;
+    return '$protocol//$host';
+  } catch (e) {
+    return 'https://wanderer.tomassir.io';
+  }
+}
+
 /// Gets the WebSocket URL for web platform
 /// First checks window.appConfig.wsBaseUrl, then uses window.location
 String getWebSocketUrl(String relativePath) {

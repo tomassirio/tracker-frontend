@@ -258,7 +258,26 @@ void main() {
       });
     });
 
-    group('Achievement Query endpoints', () {
+    group('App base URL', () {
+      test('appBaseUrl returns production URL as default', () {
+        // On non-web platforms without APP_BASE_URL dart-define set,
+        // the stub returns the default production URL
+        expect(ApiEndpoints.appBaseUrl, 'https://wanderer.tomassir.io');
+      });
+    });
+      test('tripDeepLink generates correct URL with default base URL', () {
+        final link = ApiEndpoints.tripDeepLink('trip123');
+        expect(link, endsWith('/trip/trip123'));
+        expect(link, contains('trip123'));
+      });
+
+      test('tripDeepLink uses different IDs correctly', () {
+        final link1 = ApiEndpoints.tripDeepLink('abc-def-ghi');
+        final link2 = ApiEndpoints.tripDeepLink('123');
+        expect(link1, endsWith('/trip/abc-def-ghi'));
+        expect(link2, endsWith('/trip/123'));
+      });
+    });
       test('achievements path is correct', () {
         expect(ApiEndpoints.achievements, '/achievements');
       });

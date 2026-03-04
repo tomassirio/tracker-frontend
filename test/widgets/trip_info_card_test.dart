@@ -162,7 +162,68 @@ void main() {
       expect(find.text('First Century'), findsOneWidget);
     });
 
-    testWidgets('tapping achievement badge shows description dialog', (
+    testWidgets('displays share/QR button next to status chip', (
+      WidgetTester tester,
+    ) async {
+      final trip = Trip(
+        id: 'trip-1',
+        userId: 'user-123',
+        name: 'Test Trip',
+        username: 'testuser',
+        visibility: Visibility.public,
+        status: TripStatus.inProgress,
+        commentsCount: 5,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripInfoCard(
+              trip: trip,
+              isCollapsed: false,
+              onToggleCollapse: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.qr_code), findsOneWidget);
+    });
+
+    testWidgets('tapping share button opens TripShareDialog', (
+      WidgetTester tester,
+    ) async {
+      final trip = Trip(
+        id: 'trip-1',
+        userId: 'user-123',
+        name: 'Test Trip',
+        username: 'testuser',
+        visibility: Visibility.public,
+        status: TripStatus.inProgress,
+        commentsCount: 5,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripInfoCard(
+              trip: trip,
+              isCollapsed: false,
+              onToggleCollapse: () {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.qr_code));
+      await tester.pump();
+
+      expect(find.text('Share Trip'), findsOneWidget);
+    });
       WidgetTester tester,
     ) async {
       final trip = Trip(
