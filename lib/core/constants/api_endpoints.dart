@@ -27,7 +27,7 @@ class ApiEndpoints {
   static String get appBaseUrl => getAppBaseUrl();
 
   // Trip deep link URL
-  static String tripDeepLink(String tripId) => '${appBaseUrl}/trip/$tripId';
+  static String tripDeepLink(String tripId) => '$appBaseUrl/trip/$tripId';
 
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/register';
