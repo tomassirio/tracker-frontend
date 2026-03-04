@@ -265,6 +265,8 @@ void main() {
         expect(ApiEndpoints.appBaseUrl, 'https://wanderer.tomassir.io');
       });
     });
+
+    group('Trip deep link endpoint', () {
       test('tripDeepLink generates correct URL with default base URL', () {
         final link = ApiEndpoints.tripDeepLink('trip123');
         expect(link, endsWith('/trip/trip123'));
@@ -278,6 +280,8 @@ void main() {
         expect(link2, endsWith('/trip/123'));
       });
     });
+
+    group('Achievement Query endpoints', () {
       test('achievements path is correct', () {
         expect(ApiEndpoints.achievements, '/achievements');
       });

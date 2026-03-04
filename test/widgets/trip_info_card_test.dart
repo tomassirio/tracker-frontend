@@ -224,6 +224,8 @@ void main() {
 
       expect(find.text('Share Trip'), findsOneWidget);
     });
+
+    testWidgets('tapping achievement badge shows description dialog', (
       WidgetTester tester,
     ) async {
       final trip = Trip(
