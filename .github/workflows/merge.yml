@@ -218,6 +218,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -236,6 +237,8 @@ jobs:
         run: git pull origin master --rebase
 
       - name: Update README badges and bump version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
           COVERAGE="${{ needs.test-and-coverage.outputs.coverage }}"
@@ -252,12 +255,19 @@ jobs:
           NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
           sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
 
-          # Commit everything together
+          # Create a branch, push, open a PR, and auto-merge
+          BRANCH="ci/finalize-release-v${BASE_VERSION}"
+          git checkout -b "$BRANCH"
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "ci: Finalize release v${BASE_VERSION} — badges + next dev version (${NEXT_VERSION})"
-            REMOTE_URL="https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git"
-            git push "${REMOTE_URL}" master || echo "⚠️ Could not push finalize commit to master."
+            git push origin "$BRANCH"
+            gh pr create \
+              --base master \
+              --head "$BRANCH" \
+              --title "ci: Finalize release v${BASE_VERSION}" \
+              --body "Automated post-release update: badges + next dev version (${NEXT_VERSION})"
+            gh pr merge "$BRANCH" --merge --auto
           else
             echo "Nothing to commit"
           fi
@@ -270,6 +280,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -285,6 +296,8 @@ jobs:
           git config user.email "github-actions@github.com"
 
       - name: Bump version if still on released version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
           CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
@@ -298,10 +311,17 @@ jobs:
             echo "📋 Current version ${CURRENT_VERSION} still matches released ${BASE_VERSION}, bumping to ${NEXT_VERSION}"
             sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
 
+            BRANCH="ci/bump-version-${NEXT_VERSION}"
+            git checkout -b "$BRANCH"
             git add pubspec.yaml
             git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
-            REMOTE_URL="https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git"
-            git push "${REMOTE_URL}" master || echo "⚠️ Could not push version bump to master."
+            git push origin "$BRANCH"
+            gh pr create \
+              --base master \
+              --head "$BRANCH" \
+              --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
+              --body "Automated version bump — tag v${BASE_VERSION} already exists but version was not incremented."
+            gh pr merge "$BRANCH" --merge --auto
           else
             echo "✅ Version ${CURRENT_VERSION} already differs from ${BASE_VERSION}, no bump needed"
           fi
