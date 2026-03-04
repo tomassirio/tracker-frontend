@@ -5,7 +5,9 @@ import 'package:tracker_frontend/presentation/widgets/auth/auth_form.dart';
 
 /// Authentication screen for login and registration
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  final bool startInSignup;
+
+  const AuthScreen({super.key, this.startInSignup = false});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -22,7 +24,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _confirmPasswordController = TextEditingController();
 
   // State
-  bool _isLogin = true;
+  late bool _isLogin = !widget.startInSignup;
   bool _isLoading = false;
   String? _errorMessage;
   bool _registrationPending = false;

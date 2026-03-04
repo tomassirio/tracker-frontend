@@ -7,6 +7,8 @@ import 'package:tracker_frontend/core/services/navigation_service.dart';
 import 'package:tracker_frontend/core/services/notification_service.dart';
 import 'package:tracker_frontend/presentation/screens/initial_screen.dart';
 import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
+import 'package:tracker_frontend/presentation/screens/trip_deep_link_screen.dart';
+import 'package:tracker_frontend/presentation/screens/user_deep_link_screen.dart';
 import 'package:tracker_frontend/presentation/screens/verify_email_screen.dart';
 
 /// Global route observer for detecting when screens become visible again
@@ -41,7 +43,33 @@ class MyApp extends StatelessWidget {
       home: const InitialScreen(),
       routes: {
         '/auth': (context) => const AuthScreen(),
+        '/login': (context) => const AuthScreen(),
+        '/signup': (context) => const AuthScreen(startInSignup: true),
         '/verify-email': (context) => const VerifyEmailScreen(),
+      },
+      onGenerateRoute: (settings) {
+        final uri = Uri.parse(settings.name ?? '');
+        final pathSegments = uri.pathSegments;
+
+        // /trip/:tripId
+        if (pathSegments.length == 2 && pathSegments[0] == 'trip') {
+          final tripId = pathSegments[1];
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => TripDeepLinkScreen(tripId: tripId),
+          );
+        }
+
+        // /user/:username
+        if (pathSegments.length == 2 && pathSegments[0] == 'user') {
+          final username = pathSegments[1];
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => UserDeepLinkScreen(username: username),
+          );
+        }
+
+        return null;
       },
     );
   }

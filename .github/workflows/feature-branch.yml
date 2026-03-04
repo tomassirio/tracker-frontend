@@ -5,6 +5,7 @@ on:
     branches:
       - '**'
       - '!master'
+      - '!ci/**'
 
 jobs:
   build-and-test:
