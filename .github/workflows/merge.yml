@@ -94,6 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -144,15 +145,20 @@ jobs:
             sed -i "s|coverage-[^)]*|coverage-${COVERAGE}%25-${COVERAGE_COLOR}|" README.md
             
             if ! git diff --quiet README.md; then
-              # Use the GitHub API to create the commit, bypassing branch protection
-              README_CONTENT=$(base64 -w 0 README.md)
-              README_SHA=$(gh api repos/${{ github.repository }}/contents/README.md --jq '.sha')
-              gh api repos/${{ github.repository }}/contents/README.md \
-                -X PUT \
-                -f message="ci: Update README badges" \
-                -f content="$README_CONTENT" \
-                -f sha="$README_SHA" \
-                -f branch="master" || echo "⚠️ Could not update README badges (branch protection). Skipping."
+              BRANCH_NAME="ci/update-badges-v${BASE_VERSION}"
+              git checkout -b "${BRANCH_NAME}"
+              git add README.md
+              git commit -m "ci: Update README badges for v${BASE_VERSION}"
+              git push origin "${BRANCH_NAME}"
+
+              PR_URL=$(gh pr create \
+                --base master \
+                --head "${BRANCH_NAME}" \
+                --title "ci: Update README badges for v${BASE_VERSION}" \
+                --body "Automated badge update after release v${BASE_VERSION}." \
+                --label "ci")
+              gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
+                echo "⚠️ Could not auto-merge badge update PR. Please merge manually: ${PR_URL}"
             fi
           fi
 
@@ -241,6 +247,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -262,24 +269,30 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           BASE_VERSION="${{ needs.prepare-release.outputs.base-version }}"
-          
+
           # Split version into major.minor.patch and increment patch (revision)
           IFS='.' read -r MAJOR MINOR PATCH <<< "${BASE_VERSION}"
           NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
-          
+
           # Update pubspec.yaml and commit only if changed
           sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
-          
+
           if ! git diff --quiet pubspec.yaml; then
-            # Use the GitHub API to create the commit, bypassing branch protection
-            PUBSPEC_CONTENT=$(base64 -w 0 pubspec.yaml)
-            PUBSPEC_SHA=$(gh api repos/${{ github.repository }}/contents/pubspec.yaml --jq '.sha')
-            gh api repos/${{ github.repository }}/contents/pubspec.yaml \
-              -X PUT \
-              -f message="ci: Prepare for next development iteration (${NEXT_VERSION})" \
-              -f content="$PUBSPEC_CONTENT" \
-              -f sha="$PUBSPEC_SHA" \
-              -f branch="master" || echo "⚠️ Could not push next dev version (branch protection). Manual version bump may be needed."
+            BRANCH_NAME="ci/bump-version-${NEXT_VERSION}"
+            git checkout -b "${BRANCH_NAME}"
+            git add pubspec.yaml
+            git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
+            git push origin "${BRANCH_NAME}"
+
+            # Create PR and auto-merge it
+            PR_URL=$(gh pr create \
+              --base master \
+              --head "${BRANCH_NAME}" \
+              --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
+              --body "Automated version bump after release v${BASE_VERSION}." \
+              --label "ci")
+            gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
+              echo "⚠️ Could not auto-merge version bump PR. Please merge manually: ${PR_URL}"
           else
             echo "Version already set to ${NEXT_VERSION}"
           fi
@@ -292,6 +305,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -317,19 +331,25 @@ jobs:
           NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-SNAPSHOT"
 
           # Only bump if current version still points to the released version
-          # (i.e. hasn't been bumped yet)
           if echo "$CURRENT_VERSION" | grep -q "^${BASE_VERSION}"; then
             echo "📋 Current version ${CURRENT_VERSION} still matches released ${BASE_VERSION}, bumping to ${NEXT_VERSION}"
             sed -i "s/^version: .*/version: ${NEXT_VERSION}/" pubspec.yaml
 
-            PUBSPEC_CONTENT=$(base64 -w 0 pubspec.yaml)
-            PUBSPEC_SHA=$(gh api repos/${{ github.repository }}/contents/pubspec.yaml --jq '.sha')
-            gh api repos/${{ github.repository }}/contents/pubspec.yaml \
-              -X PUT \
-              -f message="ci: Prepare for next development iteration (${NEXT_VERSION})" \
-              -f content="$PUBSPEC_CONTENT" \
-              -f sha="$PUBSPEC_SHA" \
-              -f branch="master" || echo "⚠️ Could not push next dev version (branch protection). Manual version bump may be needed."
+            BRANCH_NAME="ci/bump-version-${NEXT_VERSION}"
+            git checkout -b "${BRANCH_NAME}"
+            git add pubspec.yaml
+            git commit -m "ci: Prepare for next development iteration (${NEXT_VERSION})"
+            git push origin "${BRANCH_NAME}"
+
+            # Create PR and auto-merge it
+            PR_URL=$(gh pr create \
+              --base master \
+              --head "${BRANCH_NAME}" \
+              --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
+              --body "Automated version bump — tag v${BASE_VERSION} already exists but version was not incremented." \
+              --label "ci")
+            gh pr merge "${PR_URL}" --merge --auto --delete-branch || \
+              echo "⚠️ Could not auto-merge version bump PR. Please merge manually: ${PR_URL}"
           else
             echo "✅ Version ${CURRENT_VERSION} already differs from ${BASE_VERSION}, no bump needed"
           fi
