@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/repositories/auth_repository.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/auth_form.dart';
+import 'package:wanderer_frontend/data/repositories/auth_repository.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/auth_form.dart';
 
 /// Authentication screen for login and registration
 class AuthScreen extends StatefulWidget {

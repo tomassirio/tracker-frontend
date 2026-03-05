@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/requests/create_trip_plan_backend_request.dart';
+import 'package:wanderer_frontend/data/models/requests/create_trip_plan_backend_request.dart';
 
 void main() {
   group('GeoLocation', () {

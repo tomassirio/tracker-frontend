@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for sending trip updates (location + battery + optional message)
 /// Displays as a floating bubble that expands to show message input

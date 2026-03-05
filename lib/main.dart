@@ -2,11 +2,11 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:tracker_frontend/core/routing/app_router.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
-import 'package:tracker_frontend/core/services/background_update_manager.dart';
-import 'package:tracker_frontend/core/services/navigation_service.dart';
-import 'package:tracker_frontend/core/services/notification_service.dart';
+import 'package:wanderer_frontend/core/routing/app_router.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/core/services/background_update_manager.dart';
+import 'package:wanderer_frontend/core/services/navigation_service.dart';
+import 'package:wanderer_frontend/core/services/notification_service.dart';
 
 /// Global route observer for detecting when screens become visible again
 final RouteObserver<ModalRoute<void>> routeObserver =

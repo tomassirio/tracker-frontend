@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/data/client/google_maps_api_client.dart';
-import 'package:tracker_frontend/data/client/polyline_codec.dart';
+import 'package:wanderer_frontend/data/client/google_maps_api_client.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
 
 void main() {
   group('GoogleMapsApiClient', () {

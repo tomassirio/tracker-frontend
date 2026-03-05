@@ -1,15 +1,15 @@
-# tracker_frontend
+# wanderer_frontend
 
 ![Version](https://img.shields.io/badge/version-1.1.8-blue)
 ![Coverage](https://img.shields.io/badge/coverage-27%25-red)
 ![Flutter](https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-Tracker's Frontend/Mobile - A Flutter application for tracking trips and adventures.
+Wanderer's Frontend/Mobile - A Flutter application for tracking trips and adventures.
 
 ## Overview
 
-This is a Flutter-based mobile application that provides a comprehensive API client for the Tracker backend service. The application allows users to plan trips, track their adventures in real-time, share updates with followers, and engage with a community of travelers.
+This is a Flutter-based mobile application that provides a comprehensive API client for the Wanderer backend service. The application allows users to plan trips, track their adventures in real-time, share updates with followers, and engage with a community of travelers.
 
 ## Features
 
@@ -54,8 +54,8 @@ For detailed API design documentation, see [API_DESIGN.md](API_DESIGN.md).
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/tomassirio/tracker-frontend.git
-cd tracker-frontend
+git clone https://github.com/tomassirio/wanderer-frontend.git
+cd wanderer-frontend
 ```
 
 2. Install dependencies:
@@ -151,7 +151,7 @@ adb install build/app/outputs/flutter-apk/app-release.apk
 
 ## API Documentation
 
-The application integrates with the Tracker backend API. All API endpoints are defined in `lib/core/constants/api_endpoints.dart`.
+The application integrates with the Wanderer backend API. All API endpoints are defined in `lib/core/constants/api_endpoints.dart`.
 
 ### Available Services
 
@@ -167,8 +167,8 @@ For complete API documentation, see [API_DESIGN.md](API_DESIGN.md).
 ## Usage Example
 
 ```dart
-import 'package:tracker_frontend/data/services/services.dart';
-import 'package:tracker_frontend/data/models/models.dart';
+import 'package:wanderer_frontend/data/services/services.dart';
+import 'package:wanderer_frontend/data/models/models.dart';
 
 // Create service instances
 final authService = AuthService();
@@ -196,10 +196,10 @@ The application can be containerized and deployed using Docker. The web version 
 
 ```bash
 # Build the image
-docker build -f docker/Dockerfile -t tracker-frontend:latest .
+docker build -f docker/Dockerfile -t wanderer-frontend:latest .
 # Build the image
 # Run the container with Google Maps API key
-docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=your_api_key_here tracker-frontend:latest
+docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=your_api_key_here wanderer-frontend:latest
 
 ### Using docker-compose
 
@@ -237,22 +237,22 @@ chart/
 
 ```bash
 # Deploy to production
-helm install tracker-frontend ./chart \
+helm install wanderer-frontend ./chart \
   --namespace wanderer \
   --create-namespace \
   --set image.tag="v1.0.3" \
   --set application.googleMapsApiKey="YOUR_API_KEY" \
-  --set application.commandBaseUrl="http://tracker-command:8081/api/1" \
-  --set application.queryBaseUrl="http://tracker-query:8082/api/1" \
-  --set application.authBaseUrl="http://tracker-auth:8083/api/1"
+  --set application.commandBaseUrl="http://wanderer-command:8081/api/1" \
+  --set application.queryBaseUrl="http://wanderer-query:8082/api/1" \
+  --set application.authBaseUrl="http://wanderer-auth:8083/api/1"
 
 # Upgrade existing deployment
-helm upgrade tracker-frontend ./chart \
+helm upgrade wanderer-frontend ./chart \
   --namespace wanderer \
   --set image.tag="v1.0.4"
 
 # Uninstall
-helm uninstall tracker-frontend --namespace wanderer
+helm uninstall wanderer-frontend --namespace wanderer
 ```
 
 ### Configuration
@@ -320,13 +320,13 @@ GitHub Actions → Run workflow → Select environment → Deploy
 
 ```bash
 # Check deployment status
-kubectl get deployments,statefulsets -n wanderer -l app=tracker-frontend
+kubectl get deployments,statefulsets -n wanderer -l app=wanderer-frontend
 
 # Check pods
-kubectl get pods -n wanderer -l app=tracker-frontend
+kubectl get pods -n wanderer -l app=wanderer-frontend
 
 # Check logs
-kubectl logs -l app=tracker-frontend -n wanderer --tail=100
+kubectl logs -l app=wanderer-frontend -n wanderer --tail=100
 
 # Describe pod for troubleshooting
 kubectl describe pod <pod-name> -n wanderer
@@ -344,4 +344,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is part of the Tracker application suite.
+This project is part of the Wanderer application suite.

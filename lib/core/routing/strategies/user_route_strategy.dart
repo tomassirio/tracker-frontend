@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/routing/route_strategy.dart';
-import 'package:tracker_frontend/presentation/screens/user_deep_link_screen.dart';
+import 'package:wanderer_frontend/core/routing/route_strategy.dart';
+import 'package:wanderer_frontend/presentation/screens/user_deep_link_screen.dart';
 
 /// Handles `/user/:username` → UserDeepLinkScreen which resolves
 /// the username and then navigates to ProfileScreen.
@@ -18,4 +18,3 @@ class UserRouteStrategy implements RouteStrategy {
     );
   }
 }
-

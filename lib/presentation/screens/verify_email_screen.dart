@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/repositories/auth_repository.dart';
+import 'package:wanderer_frontend/data/repositories/auth_repository.dart';
 
 /// Screen that handles the email verification flow.
 ///

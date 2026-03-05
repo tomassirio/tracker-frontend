@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/trip_plan_service.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/helpers/trip_plan_map_helper.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plan_info_card.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/helpers/trip_plan_map_helper.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plan_info_card.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Screen for viewing and editing a trip plan
 class TripPlanDetailScreen extends StatefulWidget {

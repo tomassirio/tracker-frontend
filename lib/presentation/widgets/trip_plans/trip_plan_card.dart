@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
-import 'package:tracker_frontend/data/client/google_maps_api_client.dart';
-import 'package:tracker_frontend/data/client/polyline_codec.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
+import 'package:wanderer_frontend/data/client/google_maps_api_client.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
 
 /// Card widget for displaying a trip plan with map preview.
 /// Matches the modern EnhancedTripCard design.

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
 
 /// Creates a fake JWT token with the given roles in its payload.
 String _createFakeJwt({List<String> roles = const []}) {

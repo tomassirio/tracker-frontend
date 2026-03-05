@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
 /// Dialog that shows a QR code and sharing link for a trip
 class TripShareDialog extends StatefulWidget {

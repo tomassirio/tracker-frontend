@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/services/admin_service.dart';
-import 'package:tracker_frontend/data/client/clients.dart';
+import 'package:wanderer_frontend/data/services/admin_service.dart';
+import 'package:wanderer_frontend/data/client/clients.dart';
 
 void main() {
   group('AdminService', () {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
 
 /// Widget displaying a reply card
 class ReplyCard extends StatelessWidget {

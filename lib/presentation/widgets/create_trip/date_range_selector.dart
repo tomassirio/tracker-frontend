@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/date_picker_card.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/date_picker_card.dart';
 
 /// Date range selector with start and end date pickers
 class DateRangeSelector extends StatelessWidget {

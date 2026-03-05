@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_timeline.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_timeline.dart';
 import 'package:flutter/material.dart';
 
 void main() {

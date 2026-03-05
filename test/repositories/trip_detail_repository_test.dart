@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/repositories/trip_detail_repository.dart';
-import 'package:tracker_frontend/data/services/comment_service.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/repositories/trip_detail_repository.dart';
+import 'package:wanderer_frontend/data/services/comment_service.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/data/services/auth_service.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 
 import 'trip_detail_repository_test.mocks.dart';
 

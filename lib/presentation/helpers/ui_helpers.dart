@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/widgets/common/floating_notification.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/floating_notification.dart';
 
 /// Helper class for UI-related utilities
 class UiHelpers {

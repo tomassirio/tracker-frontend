@@ -1,12 +1,12 @@
-# Tracker Frontend Helm Chart
+# Wanderer Frontend Helm Chart
 
-Helm chart for deploying the Tracker Frontend with nginx reverse proxy to internal backend services.
+Helm chart for deploying the Wanderer Frontend with nginx reverse proxy to internal backend services.
 
 ## Quick Deploy
 
 ### Development
 ```bash
-helm upgrade --install tracker-frontend-dev ./chart \
+helm upgrade --install wanderer-frontend-dev ./chart \
   --namespace wanderer-dev \
   --set nameSuffix=-dev \
   --set application.googleMapsApiKey="YOUR_API_KEY"
@@ -14,7 +14,7 @@ helm upgrade --install tracker-frontend-dev ./chart \
 
 ### Production
 ```bash
-helm upgrade --install tracker-frontend ./chart \
+helm upgrade --install wanderer-frontend ./chart \
   --namespace wanderer \
   --set application.googleMapsApiKey="YOUR_API_KEY"
 ```
@@ -24,7 +24,7 @@ helm upgrade --install tracker-frontend ./chart \
 The frontend uses **nginx as a reverse proxy** to connect to internal Kubernetes services:
 
 - Browser requests `/api/query/trips/public` 
-- Nginx proxies to `http://tracker-query-dev.wanderer-dev.svc.cluster.local:32002/api/1/trips/public`
+- Nginx proxies to `http://wanderer-query-dev.wanderer-dev.svc.cluster.local:32002/api/1/trips/public`
 - Backend services use **internal service names** (no ingress needed for backend-to-frontend communication)
 
 This approach:

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
-import 'package:tracker_frontend/presentation/screens/admin_users_screen.dart';
-import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
-import 'package:tracker_frontend/presentation/screens/home_screen.dart';
-import 'package:tracker_frontend/presentation/screens/trip_maintenance_screen.dart';
-import 'package:tracker_frontend/presentation/screens/trip_promotion_screen.dart';
+import 'package:wanderer_frontend/presentation/helpers/page_transitions.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:wanderer_frontend/presentation/screens/admin_users_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/auth_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_maintenance_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_promotion_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Sidebar navigation for the app

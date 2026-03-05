@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for controlling trip status (start/pause/resume/finish)
 /// Only shown on mobile (not web) and only for trip owners

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/data/services/comment_service.dart';
-import 'package:tracker_frontend/data/client/clients.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/data/services/comment_service.dart';
+import 'package:wanderer_frontend/data/client/clients.dart';
 
 void main() {
   group('CommentService', () {

@@ -76,7 +76,7 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          helm upgrade --install tracker-frontend ./chart \
+          helm upgrade --install wanderer-frontend ./chart \
             --namespace ${{ inputs.namespace }} \
             --create-namespace \
             --set nameSuffix="${{ steps.config.outputs.name-suffix }}" \
@@ -97,7 +97,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          APP_LABEL="tracker-frontend${{ steps.config.outputs.name-suffix }}"
+          APP_LABEL="wanderer-frontend${{ steps.config.outputs.name-suffix }}"
           
           echo "=== Deployment Status ==="
           kubectl get statefulset,pod,service,ingress -n ${{ inputs.namespace }} -l app=$APP_LABEL
@@ -108,6 +108,6 @@ jobs:
       - name: Show logs on failure
         if: failure()
         run: |
-          APP_LABEL="tracker-frontend${{ steps.config.outputs.name-suffix }}"
+          APP_LABEL="wanderer-frontend${{ steps.config.outputs.name-suffix }}"
           kubectl logs -l app=$APP_LABEL -n ${{ inputs.namespace }} --tail=100 || true
 

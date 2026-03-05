@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_detail_screen.dart';
 
 /// Wrapper screen that resolves a trip ID from a deep link URL
 /// and navigates to the full TripDetailScreen once loaded.

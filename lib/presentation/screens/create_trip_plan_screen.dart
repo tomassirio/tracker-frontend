@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/data/models/requests/create_trip_plan_backend_request.dart';
-import 'package:tracker_frontend/data/services/trip_plan_service.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/data/models/requests/create_trip_plan_backend_request.dart';
+import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
 /// Screen for creating a new trip plan with map integration
 class CreateTripPlanScreen extends StatefulWidget {

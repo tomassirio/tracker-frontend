@@ -4,9 +4,9 @@ import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:geolocator_android/geolocator_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:tracker_frontend/core/services/notification_service.dart';
-import 'package:tracker_frontend/data/services/trip_update_service.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/core/services/notification_service.dart';
+import 'package:wanderer_frontend/data/services/trip_update_service.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
 
 /// Unique task name for trip updates
 const String tripUpdateTaskName = 'tripAutoUpdate';

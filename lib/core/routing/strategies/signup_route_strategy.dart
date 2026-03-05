@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/routing/route_strategy.dart';
-import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
+import 'package:wanderer_frontend/core/routing/route_strategy.dart';
+import 'package:wanderer_frontend/presentation/screens/auth_screen.dart';
 
 /// Handles `/signup` → AuthScreen (signup / registration mode).
 class SignupRouteStrategy implements RouteStrategy {
@@ -15,4 +15,3 @@ class SignupRouteStrategy implements RouteStrategy {
     );
   }
 }
-

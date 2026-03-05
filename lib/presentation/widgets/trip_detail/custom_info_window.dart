@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/domain/trip_location.dart';
-import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
-import 'package:tracker_frontend/presentation/helpers/weather_helpers.dart';
+import 'package:wanderer_frontend/data/models/domain/trip_location.dart';
+import 'package:wanderer_frontend/presentation/helpers/battery_helpers.dart';
+import 'package:wanderer_frontend/presentation/helpers/weather_helpers.dart';
 
 class CustomInfoWindow extends StatelessWidget {
   final TripLocation location;

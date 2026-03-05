@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 
 /// Shared weather icon and label helpers used by timeline, info window, etc.
 class WeatherHelpers {

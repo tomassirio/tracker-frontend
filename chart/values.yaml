@@ -3,7 +3,7 @@ nameSuffix: ""
 
 replicaCount: 1
 image:
-  repository: ghcr.io/tomassirio/tracker-frontend
+  repository: ghcr.io/tomassirio/wanderer-frontend
   pullPolicy: IfNotPresent
   tag: "1.0.3"
 service:

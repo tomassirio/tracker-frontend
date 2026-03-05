@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/domain/location_update_result.dart';
+import 'package:wanderer_frontend/data/models/domain/location_update_result.dart';
 
 void main() {
   group('LocationFailureReason', () {

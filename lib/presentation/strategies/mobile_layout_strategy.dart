@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
+import 'package:wanderer_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 
 /// Mobile layout strategy for trip detail screen
 /// - Only one panel can be open at a time

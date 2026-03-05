@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/services/user_service.dart';
-import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
+import 'package:wanderer_frontend/data/services/user_service.dart';
+import 'package:wanderer_frontend/presentation/screens/profile_screen.dart';
 
 /// Wrapper screen that resolves a username from a deep link URL
 /// and navigates to the full ProfileScreen once the user ID is resolved.

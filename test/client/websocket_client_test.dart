@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import 'package:tracker_frontend/data/client/websocket_client.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/data/client/websocket_client.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
 
 @GenerateMocks([TokenStorage])
 import 'websocket_client_test.mocks.dart';

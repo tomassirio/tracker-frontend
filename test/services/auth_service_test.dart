@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tracker_frontend/data/models/auth_models.dart';
-import 'package:tracker_frontend/data/models/user_models.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
-import 'package:tracker_frontend/data/client/auth/auth_client.dart';
-import 'package:tracker_frontend/data/client/query/user_query_client.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/data/models/auth_models.dart';
+import 'package:wanderer_frontend/data/models/user_models.dart';
+import 'package:wanderer_frontend/data/services/auth_service.dart';
+import 'package:wanderer_frontend/data/client/auth/auth_client.dart';
+import 'package:wanderer_frontend/data/client/query/user_query_client.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
 
 import 'auth_service_test.mocks.dart';
 

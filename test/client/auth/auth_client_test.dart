@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
-import 'package:tracker_frontend/data/client/api_client.dart';
-import 'package:tracker_frontend/data/client/auth/auth_client.dart';
-import 'package:tracker_frontend/data/models/auth_models.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
+import 'package:wanderer_frontend/data/client/api_client.dart';
+import 'package:wanderer_frontend/data/client/auth/auth_client.dart';
+import 'package:wanderer_frontend/data/models/auth_models.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
 
 void main() {
   group('AuthClient', () {
@@ -84,8 +84,7 @@ void main() {
     });
 
     group('register', () {
-      test(
-          'successful registration returns RegisterPendingResponse (202)',
+      test('successful registration returns RegisterPendingResponse (202)',
           () async {
         final request = RegisterRequest(
           username: 'newuser',

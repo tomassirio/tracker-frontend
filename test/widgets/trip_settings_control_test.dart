@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
 
 void main() {
   group('TripSettingsControl Widget', () {

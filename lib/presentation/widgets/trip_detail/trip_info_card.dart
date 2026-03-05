@@ -1,14 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/models/achievement_models.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_share_dialog.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/models/achievement_models.dart';
+import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_share_dialog.dart';
 
 /// Widget displaying trip information card with glassmorphism design
 /// Supports collapsible state that shows as a floating bubble

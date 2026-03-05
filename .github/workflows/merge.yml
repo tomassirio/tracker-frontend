@@ -154,13 +154,13 @@ jobs:
         run: make build
 
       - name: Create release archive
-        run: tar -czf tracker-frontend-web.tar.gz -C build/web .
+        run: tar -czf wanderer-frontend-web.tar.gz -C build/web .
 
       - name: Upload web build artifact
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: tracker-frontend-web.tar.gz
+          path: wanderer-frontend-web.tar.gz
           retention-days: 1
 
   create-release:

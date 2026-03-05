@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/create_trip_button.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/date_range_selector.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/trip_description_field.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/trip_title_field.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/visibility_selector.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/create_trip_button.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/date_range_selector.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/trip_description_field.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/trip_title_field.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/visibility_selector.dart';
 
 /// Main form widget for creating a trip
 class CreateTripForm extends StatelessWidget {

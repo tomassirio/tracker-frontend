@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/domain/trip.dart';
-import 'package:tracker_frontend/data/models/domain/trip_location.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/helpers/trip_route_helper.dart';
+import 'package:wanderer_frontend/data/models/domain/trip.dart';
+import 'package:wanderer_frontend/data/models/domain/trip_location.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/helpers/trip_route_helper.dart';
 
 void main() {
   setUp(() {

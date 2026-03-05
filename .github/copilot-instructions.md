@@ -1,8 +1,8 @@
-# Tracker Frontend - Copilot Coding Agent Instructions
+# Wanderer Frontend - Copilot Coding Agent Instructions
 
 ## Repository Overview
 
-**tracker-frontend** is a Flutter mobile/web app for tracking trips and adventures. Clean architecture with data, presentation, and core layers.
+**wanderer-frontend** is a Flutter mobile/web app for tracking trips and adventures. Clean architecture with data, presentation, and core layers.
 
 **Key Stats:**
 - Flutter 3.27.1, Dart ^3.5.0
@@ -64,8 +64,8 @@ flutter run -d chrome              # Run in Chrome for testing
 ### Docker Commands
 
 ```bash
-docker build -f docker/Dockerfile -t tracker-frontend:latest .  # 5-10 min
-docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=key tracker-frontend:latest
+docker build -f docker/Dockerfile -t wanderer-frontend:latest .  # 5-10 min
+docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=key wanderer-frontend:latest
 cd docker && docker-compose up    # Needs .env file
 ```
 
@@ -79,7 +79,7 @@ cd docker && docker-compose up    # Needs .env file
 ### Directory Layout
 
 ```
-tracker-frontend/
+wanderer-frontend/
 ├── lib/
 │   ├── core/
 │   │   ├── config/          # Configuration (API endpoint resolution)

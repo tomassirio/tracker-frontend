@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/services/trip_update_service.dart';
-import 'package:tracker_frontend/data/models/requests/trip_update_request.dart';
-import 'package:tracker_frontend/data/client/command/trip_update_command_client.dart';
+import 'package:wanderer_frontend/data/services/trip_update_service.dart';
+import 'package:wanderer_frontend/data/models/requests/trip_update_request.dart';
+import 'package:wanderer_frontend/data/client/command/trip_update_command_client.dart';
 
 void main() {
   group('TripUpdateService', () {

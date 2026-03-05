@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/wanderer_logo.dart';
 
 /// Header widget with logo and title for auth screen
 class AuthHeader extends StatelessWidget {

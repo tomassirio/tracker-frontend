@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/data/repositories/create_trip_repository.dart';
-import 'package:tracker_frontend/data/services/trip_plan_service.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/widgets/create_trip/create_trip_form.dart';
-import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/data/repositories/create_trip_repository.dart';
+import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/widgets/create_trip/create_trip_form.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_detail_screen.dart';
 
 /// Screen for creating a new trip
 class CreateTripScreen extends StatefulWidget {

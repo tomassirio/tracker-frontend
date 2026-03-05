@@ -1,10 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_input.dart';
-import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/comment_card.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/comment_input.dart';
+import 'package:wanderer_frontend/presentation/screens/auth_screen.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 enum CommentSortOption { latest, oldest, mostReplies, mostReactions }
 

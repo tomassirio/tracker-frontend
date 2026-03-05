@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 
 /// Visibility selector widget with segmented buttons
 class VisibilitySelector extends StatelessWidget {

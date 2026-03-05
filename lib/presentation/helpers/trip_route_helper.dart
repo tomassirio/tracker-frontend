@@ -1,7 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/data/client/polyline_codec.dart';
-import 'package:tracker_frontend/data/models/domain/trip.dart';
-import 'package:tracker_frontend/data/models/domain/trip_location.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
+import 'package:wanderer_frontend/data/models/domain/trip.dart';
+import 'package:wanderer_frontend/data/models/domain/trip_location.dart';
 
 /// Shared helper for fetching and caching encoded polylines for trip cards.
 ///

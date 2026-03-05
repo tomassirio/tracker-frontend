@@ -1,8 +1,8 @@
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/models/user_models.dart';
-import 'package:tracker_frontend/data/services/user_service.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/models/user_models.dart';
+import 'package:wanderer_frontend/data/services/user_service.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/data/services/auth_service.dart';
 
 /// Repository for managing user profile data and operations
 class ProfileRepository {
