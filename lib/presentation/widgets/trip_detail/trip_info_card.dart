@@ -159,7 +159,7 @@ class TripInfoCard extends StatelessWidget {
                       decoration: WandererTheme.statusChipDecoration(
                           trip.status.toJson()),
                       child: Text(
-                        trip.status.toJson().toUpperCase(),
+                        trip.status.displayLabel,
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,

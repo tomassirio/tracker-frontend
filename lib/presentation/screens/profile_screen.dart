@@ -1067,11 +1067,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        widget.trip.status
-                            .toString()
-                            .split('.')
-                            .last
-                            .toUpperCase(),
+                        widget.trip.status.displayLabel,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
