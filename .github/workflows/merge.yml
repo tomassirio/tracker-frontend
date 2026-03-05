@@ -163,6 +163,56 @@ jobs:
           path: wanderer-frontend-web.tar.gz
           retention-days: 1
 
+  build-apk:
+    needs:
+      - prepare-release
+      - create-release
+    if: needs.prepare-release.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    environment: apk-release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --dart-define=COMMAND_BASE_URL=https://${{ vars.PUBLIC_DOMAIN }}/api/command \
+            --dart-define=QUERY_BASE_URL=https://${{ vars.PUBLIC_DOMAIN }}/api/query \
+            --dart-define=AUTH_BASE_URL=https://${{ vars.PUBLIC_DOMAIN }}/api/auth \
+            --dart-define=WS_BASE_URL=wss://${{ vars.PUBLIC_DOMAIN }} \
+            --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+
+      - name: Upload APK to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          APK_NAME="wanderer-frontend-${VERSION}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "${APK_NAME}"
+          gh release upload "v${VERSION}" "${APK_NAME}" --clobber
+          echo "✅ Uploaded ${APK_NAME} to release v${VERSION}"
+
   create-release:
     needs:
       - prepare-release
@@ -175,7 +225,7 @@ jobs:
     with:
       release-version: ${{ needs.prepare-release.outputs.base-version }}
       checkout-ref: v${{ needs.prepare-release.outputs.base-version }}
-      artifact-name: web-build
+      artifact-names: web-build
 
 
   build-release-docker-images:
