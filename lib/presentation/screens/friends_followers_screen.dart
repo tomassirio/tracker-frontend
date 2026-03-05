@@ -12,6 +12,7 @@ import 'package:wanderer_frontend/presentation/widgets/common/wanderer_app_bar.d
 import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
+import 'settings_screen.dart';
 
 /// Screen for managing friends and followers
 class FriendsFollowersScreen extends StatefulWidget {
@@ -225,7 +226,10 @@ class _FriendsFollowersScreenState extends State<FriendsFollowersScreen>
   }
 
   void _handleSettings() {
-    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   Future<void> _handleLogout() async {

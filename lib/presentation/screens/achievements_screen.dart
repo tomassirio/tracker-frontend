@@ -3,12 +3,12 @@ import 'package:wanderer_frontend/data/models/achievement_models.dart';
 import 'package:wanderer_frontend/data/services/achievement_service.dart';
 import 'package:wanderer_frontend/data/services/auth_service.dart';
 import 'package:wanderer_frontend/presentation/helpers/dialog_helper.dart';
-import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
+import 'settings_screen.dart';
 
 /// Screen displaying all achievements and user's unlocked achievements
 class AchievementsScreen extends StatefulWidget {
@@ -121,7 +121,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   }
 
   void _handleSettings() {
-    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   Future<void> _handleLogout() async {

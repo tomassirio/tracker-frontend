@@ -29,6 +29,7 @@ import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:wanderer_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
+import 'settings_screen.dart';
 
 /// Trip detail screen showing trip info, map, and comments
 class TripDetailScreen extends StatefulWidget {
@@ -1478,7 +1479,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _handleSettings() {
-    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   void _handleProfile() {

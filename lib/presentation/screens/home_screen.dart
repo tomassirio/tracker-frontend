@@ -21,6 +21,7 @@ import 'package:wanderer_frontend/presentation/widgets/home/feed_section_header.
 import 'package:wanderer_frontend/presentation/widgets/home/relationship_badge.dart';
 import 'package:wanderer_frontend/main.dart' show routeObserver;
 import 'create_trip_screen.dart';
+import 'settings_screen.dart';
 import 'trip_detail_screen.dart';
 import 'auth_screen.dart';
 
@@ -385,7 +386,10 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _handleSettings() {
-    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   Future<void> _navigateToAuth() async {

@@ -12,6 +12,7 @@ import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plans_con
 import 'auth_screen.dart';
 import 'create_trip_plan_screen.dart';
 import 'home_screen.dart';
+import 'settings_screen.dart';
 import 'trip_detail_screen.dart';
 import 'trip_plan_detail_screen.dart';
 
@@ -133,7 +134,10 @@ class _TripPlansScreenState extends State<TripPlansScreen> {
   }
 
   void _handleSettings() {
-    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   Future<void> _navigateToAuth() async {
