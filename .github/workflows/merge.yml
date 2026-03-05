@@ -352,7 +352,7 @@ jobs:
               --head "$BRANCH" \
               --title "ci: Finalize release v${BASE_VERSION}" \
               --body "Automated post-release update: badges + next dev version (${NEXT_VERSION})"
-            gh pr merge "$BRANCH" --merge --auto
+            gh pr merge "$BRANCH" --merge --auto || gh pr merge "$BRANCH" --merge
           else
             echo "Nothing to commit"
           fi
@@ -406,7 +406,7 @@ jobs:
               --head "$BRANCH" \
               --title "ci: Prepare for next development iteration (${NEXT_VERSION})" \
               --body "Automated version bump — tag v${BASE_VERSION} already exists but version was not incremented."
-            gh pr merge "$BRANCH" --merge --auto
+            gh pr merge "$BRANCH" --merge --auto || gh pr merge "$BRANCH" --merge
           else
             echo "✅ Version ${CURRENT_VERSION} already differs from ${BASE_VERSION}, no bump needed"
           fi
