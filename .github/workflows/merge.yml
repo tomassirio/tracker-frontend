@@ -169,7 +169,7 @@ jobs:
       - create-release
     if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
-    environment: apk-release
+    environment: prod
     permissions:
       contents: write
     steps:
@@ -219,7 +219,7 @@ jobs:
       - deploy-to-production
     if: needs.prepare-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
-    environment: cloudflare-purge
+    environment: prod
     steps:
       - name: Purge Cloudflare cache
         run: |
