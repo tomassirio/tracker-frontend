@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:tracker_frontend/data/client/command/trip_update_command_client.dart';
-import 'package:tracker_frontend/data/models/domain/location_update_result.dart';
-import 'package:tracker_frontend/data/models/requests/trip_update_request.dart';
+import 'package:wanderer_frontend/data/client/command/trip_update_command_client.dart';
+import 'package:wanderer_frontend/data/models/domain/location_update_result.dart';
+import 'package:wanderer_frontend/data/models/requests/trip_update_request.dart';
 
 /// Service for sending trip updates (location, battery, message)
 /// Handles both automatic and manual updates

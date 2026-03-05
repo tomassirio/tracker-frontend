@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/core/constants/enums.dart' show Visibility;
+import 'package:wanderer_frontend/core/constants/enums.dart' show Visibility;
 
 /// Badge widget that displays trip visibility status
 class VisibilityBadge extends StatelessWidget {

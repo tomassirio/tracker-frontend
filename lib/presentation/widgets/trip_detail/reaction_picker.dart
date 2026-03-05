@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
 
 /// Modal bottom sheet for selecting reactions
 class ReactionPicker extends StatelessWidget {

@@ -1,8 +1,8 @@
-// filepath: /Users/tomassirio/Workspace/tracker_frontend/lib/presentation/helpers/trip_plan_map_helper.dart
+// filepath: /Users/tomassirio/Workspace/wanderer_frontend/lib/presentation/helpers/trip_plan_map_helper.dart
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/client/polyline_codec.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
 
 /// Helper class for managing Google Maps markers and polylines for trip plans
 class TripPlanMapHelper {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for input field to add comments with glassmorphism styling
 class CommentInput extends StatelessWidget {

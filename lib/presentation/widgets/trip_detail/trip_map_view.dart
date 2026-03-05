@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tracker_frontend/data/models/domain/trip_location.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/custom_info_window.dart';
+import 'package:wanderer_frontend/data/models/domain/trip_location.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/custom_info_window.dart';
 
 /// Widget displaying the Google Maps view for a trip
 class TripMapView extends StatefulWidget {

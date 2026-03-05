@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 
 void main() {
   group('Enums', () {

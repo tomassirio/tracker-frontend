@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:tracker_frontend/data/client/websocket_client.dart';
-import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
+import 'package:wanderer_frontend/data/client/websocket_client.dart';
+import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
 
 /// Singleton service for managing WebSocket connections and subscriptions
 class WebSocketService {

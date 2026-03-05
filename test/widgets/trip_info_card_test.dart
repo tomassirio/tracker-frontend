@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/models/achievement_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/models/achievement_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 
 void main() {
   group('TripInfoCard Widget', () {

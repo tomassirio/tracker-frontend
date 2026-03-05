@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_timeline.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_timeline.dart';
 
 /// Widget displaying the collapsible timeline panel with glassmorphism design
 /// This panel floats as a detached card for the "anti-gravity" effect

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  tracker-frontend:
+  wanderer-frontend:
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -15,9 +15,9 @@ services:
       - QUERY_BASE_URL=${QUERY_BASE_URL:-http://localhost:8082/api/1}
       - AUTH_BASE_URL=${AUTH_BASE_URL:-http://localhost:8083/api/1/auth}
     networks:
-      - tracker-network
+      - wanderer-network
 
 networks:
-  tracker-network:
+  wanderer-network:
     driver: bridge
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/routing/route_strategy.dart';
-import 'package:tracker_frontend/presentation/screens/verify_email_screen.dart';
+import 'package:wanderer_frontend/core/routing/route_strategy.dart';
+import 'package:wanderer_frontend/presentation/screens/verify_email_screen.dart';
 
 /// Handles `/verify-email` → VerifyEmailScreen.
 class VerifyEmailRouteStrategy implements RouteStrategy {
@@ -15,4 +15,3 @@ class VerifyEmailRouteStrategy implements RouteStrategy {
     );
   }
 }
-

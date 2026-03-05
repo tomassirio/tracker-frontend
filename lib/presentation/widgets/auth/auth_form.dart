@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/auth_header.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/auth_mode_toggle.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/auth_submit_button.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/email_field.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/error_message.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/password_field.dart';
-import 'package:tracker_frontend/presentation/widgets/auth/username_field.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/auth_header.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/auth_mode_toggle.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/auth_submit_button.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/email_field.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/error_message.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/password_field.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/username_field.dart';
 
 /// Main authentication form widget
 class AuthForm extends StatelessWidget {

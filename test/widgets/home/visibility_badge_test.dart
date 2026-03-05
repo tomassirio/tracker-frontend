@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/core/constants/enums.dart' show Visibility;
-import 'package:tracker_frontend/presentation/widgets/home/visibility_badge.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart' show Visibility;
+import 'package:wanderer_frontend/presentation/widgets/home/visibility_badge.dart';
 
 void main() {
   group('VisibilityBadge Widget', () {

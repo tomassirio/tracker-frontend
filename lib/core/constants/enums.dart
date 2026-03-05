@@ -271,6 +271,20 @@ enum TripStatus {
   /// Trip has finished
   finished;
 
+  /// Human-readable label for display
+  String get displayLabel {
+    switch (this) {
+      case TripStatus.created:
+        return 'Created';
+      case TripStatus.inProgress:
+        return 'In Progress';
+      case TripStatus.paused:
+        return 'Paused';
+      case TripStatus.finished:
+        return 'Finished';
+    }
+  }
+
   /// Convert status to string for API
   String toJson() {
     switch (this) {

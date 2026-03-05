@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/screens/home_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
 
 /// Initial screen that checks auth state and shows appropriate content
 class InitialScreen extends StatefulWidget {

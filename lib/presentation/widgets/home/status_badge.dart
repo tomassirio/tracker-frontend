@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/constants/enums.dart' show TripStatus;
+import 'package:wanderer_frontend/core/constants/enums.dart' show TripStatus;
 
 /// Badge widget that displays trip status with live indicator
 class StatusBadge extends StatefulWidget {

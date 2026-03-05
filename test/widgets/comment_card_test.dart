@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/comment_card.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/comment_card.dart';
 
 void main() {
   group('CommentCard Widget', () {

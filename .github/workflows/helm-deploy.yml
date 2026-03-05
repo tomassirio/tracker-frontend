@@ -55,6 +55,21 @@ jobs:
           kubectl get nodes
           echo "✓ Connected to Kubernetes cluster"
 
+      - name: Extract app version from pubspec
+        id: version
+        run: |
+          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
+          APP_VERSION=$(echo "$PUBSPEC_VERSION" | sed 's/-SNAPSHOT//' | sed 's/+.*//')
+          echo "app-version=${APP_VERSION}" >> $GITHUB_OUTPUT
+          echo "📋 App version from pubspec: ${APP_VERSION}"
+
+      - name: Update Chart.yaml version and appVersion
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.version.outputs.app-version }}/" chart/Chart.yaml
+          sed -i "s/^appVersion: .*/appVersion: \"${{ steps.version.outputs.app-version }}\"/" chart/Chart.yaml
+          echo "✅ Updated Chart.yaml version and appVersion to ${{ steps.version.outputs.app-version }}"
+          cat chart/Chart.yaml
+
       - name: Set environment variables
         id: config
         run: |
@@ -76,7 +91,7 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          helm upgrade --install tracker-frontend ./chart \
+          helm upgrade --install wanderer-frontend ./chart \
             --namespace ${{ inputs.namespace }} \
             --create-namespace \
             --set nameSuffix="${{ steps.config.outputs.name-suffix }}" \
@@ -97,7 +112,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          APP_LABEL="tracker-frontend${{ steps.config.outputs.name-suffix }}"
+          APP_LABEL="wanderer-frontend${{ steps.config.outputs.name-suffix }}"
           
           echo "=== Deployment Status ==="
           kubectl get statefulset,pod,service,ingress -n ${{ inputs.namespace }} -l app=$APP_LABEL
@@ -108,6 +123,6 @@ jobs:
       - name: Show logs on failure
         if: failure()
         run: |
-          APP_LABEL="tracker-frontend${{ steps.config.outputs.name-suffix }}"
+          APP_LABEL="wanderer-frontend${{ steps.config.outputs.name-suffix }}"
           kubectl logs -l app=$APP_LABEL -n ${{ inputs.namespace }} --tail=100 || true
 

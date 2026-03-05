@@ -154,14 +154,99 @@ jobs:
         run: make build
 
       - name: Create release archive
-        run: tar -czf tracker-frontend-web.tar.gz -C build/web .
+        run: tar -czf wanderer-frontend-web.tar.gz -C build/web .
 
       - name: Upload web build artifact
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: tracker-frontend-web.tar.gz
+          path: wanderer-frontend-web.tar.gz
           retention-days: 1
+
+  build-apk:
+    needs:
+      - prepare-release
+      - create-release
+    if: needs.prepare-release.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    environment: apk-release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare-release.outputs.base-version }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --dart-define=COMMAND_BASE_URL=https://${{ vars.PUBLIC_DOMAIN }}/api/command \
+            --dart-define=QUERY_BASE_URL=https://${{ vars.PUBLIC_DOMAIN }}/api/query \
+            --dart-define=AUTH_BASE_URL=https://${{ vars.PUBLIC_DOMAIN }}/api/auth \
+            --dart-define=WS_BASE_URL=wss://${{ vars.PUBLIC_DOMAIN }} \
+            --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+
+      - name: Upload APK to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.prepare-release.outputs.base-version }}"
+          APK_NAME="wanderer-frontend-${VERSION}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "${APK_NAME}"
+          gh release upload "v${VERSION}" "${APK_NAME}" --clobber
+          echo "✅ Uploaded ${APK_NAME} to release v${VERSION}"
+
+  purge-cloudflare-cache:
+    needs:
+      - prepare-release
+      - deploy-to-production
+    if: needs.prepare-release.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    environment: cloudflare-purge
+    steps:
+      - name: Purge Cloudflare cache
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST "https://api.cloudflare.com/client/v4/zones/${{ vars.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"purge_everything": true}')
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "📋 Response (HTTP ${HTTP_CODE}):"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+          
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "❌ Cache purge failed with HTTP ${HTTP_CODE}"
+            exit 1
+          fi
+          
+          SUCCESS=$(echo "$BODY" | jq -r '.success')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "❌ Cache purge returned success=false"
+            exit 1
+          fi
+          
+          echo "✅ Cloudflare cache purged successfully"
 
   create-release:
     needs:
@@ -175,7 +260,7 @@ jobs:
     with:
       release-version: ${{ needs.prepare-release.outputs.base-version }}
       checkout-ref: v${{ needs.prepare-release.outputs.base-version }}
-      artifact-name: web-build
+      artifact-names: web-build
 
 
   build-release-docker-images:

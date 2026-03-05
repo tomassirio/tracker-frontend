@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/data/models/achievement_models.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/comments_section.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_update_panel.dart';
-import 'package:tracker_frontend/presentation/strategies/mobile_layout_strategy.dart';
-import 'package:tracker_frontend/presentation/strategies/desktop_layout_strategy.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/data/models/achievement_models.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/comments_section.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_update_panel.dart';
+import 'package:wanderer_frontend/presentation/strategies/mobile_layout_strategy.dart';
+import 'package:wanderer_frontend/presentation/strategies/desktop_layout_strategy.dart';
 
 /// Data class containing all state and callbacks needed by layout strategies
 class TripDetailLayoutData {

@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/models/user_models.dart';
-import 'package:tracker_frontend/data/repositories/profile_repository.dart';
-import 'package:tracker_frontend/data/services/user_service.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/models/user_models.dart';
+import 'package:wanderer_frontend/data/repositories/profile_repository.dart';
+import 'package:wanderer_frontend/data/services/user_service.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/data/services/auth_service.dart';
 
 void main() {
   group('ProfileRepository', () {

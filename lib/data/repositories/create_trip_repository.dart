@@ -1,6 +1,6 @@
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
 
 /// Repository for managing trip creation operations
 class CreateTripRepository {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
 /// AppBar actions for changing trip status
 class TripStatusMenu extends StatelessWidget {

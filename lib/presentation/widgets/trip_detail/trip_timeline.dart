@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
-import 'package:tracker_frontend/presentation/helpers/battery_helpers.dart';
-import 'package:tracker_frontend/presentation/helpers/weather_helpers.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/presentation/helpers/battery_helpers.dart';
+import 'package:wanderer_frontend/presentation/helpers/weather_helpers.dart';
 
 /// Widget displaying the timeline of trip updates
 class TripTimeline extends StatelessWidget {

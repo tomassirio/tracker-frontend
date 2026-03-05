@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
-import 'package:tracker_frontend/presentation/widgets/home/trip_card.dart';
-import 'package:tracker_frontend/presentation/widgets/home/empty_trips_view.dart';
-import 'package:tracker_frontend/presentation/widgets/home/error_view.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/presentation/widgets/home/trip_card.dart';
+import 'package:wanderer_frontend/presentation/widgets/home/empty_trips_view.dart';
+import 'package:wanderer_frontend/presentation/widgets/home/error_view.dart';
 
 class HomeContent extends StatelessWidget {
   final bool isLoading;
@@ -198,7 +198,7 @@ class HomeContent extends StatelessWidget {
           const SizedBox(height: 16),
           // Welcome text
           const Text(
-            'Welcome to Tracker',
+            'Welcome to Wanderer',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,

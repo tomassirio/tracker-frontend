@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
-import 'package:tracker_frontend/presentation/screens/auth_screen.dart';
-import 'package:tracker_frontend/presentation/screens/profile_screen.dart';
-import 'package:tracker_frontend/presentation/screens/friends_followers_screen.dart';
-import 'package:tracker_frontend/presentation/screens/trip_plans_screen.dart';
-import 'package:tracker_frontend/presentation/screens/achievements_screen.dart';
-import 'package:tracker_frontend/presentation/helpers/page_transitions.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/presentation/screens/auth_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/profile_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/friends_followers_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_plans_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/achievements_screen.dart';
+import 'package:wanderer_frontend/presentation/helpers/page_transitions.dart';
 
 /// Helper class for handling navigation to auth-protected screens.
 ///

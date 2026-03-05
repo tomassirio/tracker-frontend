@@ -9,4 +9,3 @@ abstract class RouteStrategy {
   /// Builds a [MaterialPageRoute] for the given [uri] and [settings].
   MaterialPageRoute build(Uri uri, RouteSettings settings);
 }
-

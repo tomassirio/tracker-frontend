@@ -1,8 +1,8 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/client/polyline_codec.dart';
-import 'package:tracker_frontend/presentation/helpers/trip_route_helper.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
+import 'package:wanderer_frontend/presentation/helpers/trip_route_helper.dart';
 
 /// Helper class for managing Google Maps markers and polylines for trips
 class TripMapHelper {

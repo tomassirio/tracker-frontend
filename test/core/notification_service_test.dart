@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/core/services/notification_service.dart';
+import 'package:wanderer_frontend/core/services/notification_service.dart';
 
 void main() {
   group('NotificationService', () {

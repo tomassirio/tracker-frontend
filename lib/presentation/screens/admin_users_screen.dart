@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/responses/page_response.dart';
-import 'package:tracker_frontend/data/models/user_models.dart';
-import 'package:tracker_frontend/data/services/admin_service.dart';
-import 'package:tracker_frontend/data/repositories/home_repository.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/screens/home_screen.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
-import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
+import 'package:wanderer_frontend/data/models/responses/page_response.dart';
+import 'package:wanderer_frontend/data/models/user_models.dart';
+import 'package:wanderer_frontend/data/services/admin_service.dart';
+import 'package:wanderer_frontend/data/repositories/home_repository.dart';
+import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/wanderer_app_bar.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 
 /// Admin User Management screen for viewing all users with pagination
 class AdminUsersScreen extends StatefulWidget {

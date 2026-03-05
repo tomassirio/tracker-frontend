@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plan_card.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_plans/empty_trip_plans_view.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plans_error_view.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_plans/login_required_view.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plan_card.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/empty_trip_plans_view.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plans_error_view.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/login_required_view.dart';
 
 /// Main content widget for trip plans screen
 class TripPlansContent extends StatelessWidget {

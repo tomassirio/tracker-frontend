@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:tracker_frontend/core/constants/enums.dart';
-import 'package:tracker_frontend/data/models/admin_models.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/admin_service.dart';
-import 'package:tracker_frontend/data/services/trip_service.dart';
-import 'package:tracker_frontend/data/repositories/home_repository.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
-import 'package:tracker_frontend/presentation/screens/home_screen.dart';
-import 'package:tracker_frontend/presentation/screens/trip_detail_screen.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_app_bar.dart';
-import 'package:tracker_frontend/presentation/widgets/common/app_sidebar.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/data/models/admin_models.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/services/admin_service.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
+import 'package:wanderer_frontend/data/repositories/home_repository.dart';
+import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_detail_screen.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/wanderer_app_bar.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 
 /// Admin screen for managing trip data maintenance (polyline and geocoding recomputation).
 /// Allows admins to view statistics and trigger backend recomputation of encoded polylines

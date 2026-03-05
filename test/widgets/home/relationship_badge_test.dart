@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/presentation/widgets/home/relationship_badge.dart';
+import 'package:wanderer_frontend/presentation/widgets/home/relationship_badge.dart';
 
 void main() {
   group('RelationshipBadge Widget', () {

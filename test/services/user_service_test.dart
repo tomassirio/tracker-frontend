@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tracker_frontend/data/models/user_models.dart';
-import 'package:tracker_frontend/data/services/user_service.dart';
-import 'package:tracker_frontend/data/client/query/user_query_client.dart';
-import 'package:tracker_frontend/data/client/command/user_command_client.dart';
+import 'package:wanderer_frontend/data/models/user_models.dart';
+import 'package:wanderer_frontend/data/services/user_service.dart';
+import 'package:wanderer_frontend/data/client/query/user_query_client.dart';
+import 'package:wanderer_frontend/data/client/command/user_command_client.dart';
 
 import 'user_service_test.mocks.dart';
 

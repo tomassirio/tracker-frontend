@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/presentation/widgets/common/wanderer_logo.dart';
-import 'package:tracker_frontend/presentation/widgets/common/search_bar_widget.dart';
-import 'package:tracker_frontend/presentation/helpers/ui_helpers.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/wanderer_logo.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/search_bar_widget.dart';
+import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
 /// Reusable AppBar for the Wanderer application
 class WandererAppBar extends StatefulWidget implements PreferredSizeWidget {

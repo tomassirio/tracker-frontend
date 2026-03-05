@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:tracker_frontend/core/constants/api_endpoints.dart';
-import 'package:tracker_frontend/data/client/api_client.dart';
-import 'package:tracker_frontend/data/client/query/trip_plan_query_client.dart';
-import 'package:tracker_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
+import 'package:wanderer_frontend/data/client/api_client.dart';
+import 'package:wanderer_frontend/data/client/query/trip_plan_query_client.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

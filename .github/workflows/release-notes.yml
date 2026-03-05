@@ -11,8 +11,8 @@ on:
         description: 'Git ref to checkout (branch, tag, or commit)'
         required: true
         type: string
-      artifact-name:
-        description: 'Name of the build artifact to attach to the release'
+      artifact-names:
+        description: 'Space-separated list of build artifact names to attach to the release'
         required: false
         type: string
         default: ''
@@ -29,12 +29,12 @@ jobs:
           ref: ${{ inputs.checkout-ref }}
           fetch-depth: 0
 
-      - name: Download build artifact
-        if: inputs.artifact-name != ''
+      - name: Download build artifacts
+        if: inputs.artifact-names != ''
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.artifact-name }}
           path: release-assets
+          merge-multiple: true
 
       - name: Generate release notes
         run: |

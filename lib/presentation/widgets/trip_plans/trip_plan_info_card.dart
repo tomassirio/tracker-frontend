@@ -1,8 +1,8 @@
-// filepath: /Users/tomassirio/Workspace/tracker_frontend/lib/presentation/widgets/trip_plans/trip_plan_info_card.dart
+// filepath: /Users/tomassirio/Workspace/wanderer_frontend/lib/presentation/widgets/trip_plans/trip_plan_info_card.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget displaying trip plan information card with glassmorphism design
 /// Supports collapsible state that shows as a floating bubble

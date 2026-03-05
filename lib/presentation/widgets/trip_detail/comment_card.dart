@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tracker_frontend/data/models/comment_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_detail/reply_card.dart';
-import 'package:tracker_frontend/presentation/helpers/auth_navigation_helper.dart';
-import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/data/models/comment_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/reply_card.dart';
+import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget displaying a comment card with glassmorphism styling
 class CommentCard extends StatelessWidget {

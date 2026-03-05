@@ -1,4 +1,4 @@
-package com.tomassirio.wanderer.tracker_frontend
+package com.tomassirio.wanderer.wanderer_frontend
 
 import io.flutter.embedding.android.FlutterActivity
 

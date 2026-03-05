@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/auth_models.dart';
-import 'package:tracker_frontend/data/repositories/auth_repository.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
+import 'package:wanderer_frontend/data/models/auth_models.dart';
+import 'package:wanderer_frontend/data/repositories/auth_repository.dart';
+import 'package:wanderer_frontend/data/services/auth_service.dart';
 
 void main() {
   group('AuthRepository', () {

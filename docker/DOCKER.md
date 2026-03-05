@@ -14,12 +14,12 @@ Images from the GitHub Container Registry automatically work on both platforms.
 
 For local platform (default):
 ```bash
-docker build -f docker/Dockerfile -t tracker-frontend:latest .
+docker build -f docker/Dockerfile -t wanderer-frontend:latest .
 ```
 
 For multi-platform builds (requires Docker Buildx):
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -f docker/Dockerfile -t tracker-frontend:latest .
+docker buildx build --platform linux/amd64,linux/arm64 -f docker/Dockerfile -t wanderer-frontend:latest .
 ```
 
 ### Using docker-compose:
@@ -35,12 +35,12 @@ docker-compose build
 
 Run on port 51538 with Google Maps API key:
 ```bash
-docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=your_api_key_here tracker-frontend:latest
+docker run -p 51538:51538 -e GOOGLE_MAPS_API_KEY=your_api_key_here wanderer-frontend:latest
 ```
 
 Run without Google Maps (if not needed):
 ```bash
-docker run -p 51538:51538 tracker-frontend:latest
+docker run -p 51538:51538 wanderer-frontend:latest
 ```
 
 ### Using docker-compose:

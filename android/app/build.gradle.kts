@@ -28,7 +28,7 @@ if (googleMapsApiKey.isBlank()) {
 }
 
 android {
-    namespace = "com.tomassirio.wanderer.tracker_frontend"
+    namespace = "com.tomassirio.wanderer.wanderer_frontend"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -44,7 +44,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.tomassirio.wanderer.tracker_frontend"
+        applicationId = "com.tomassirio.wanderer.wanderer_frontend"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

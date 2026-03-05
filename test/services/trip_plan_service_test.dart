@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/data/services/trip_plan_service.dart';
-import 'package:tracker_frontend/data/client/command/trip_plan_command_client.dart';
-import 'package:tracker_frontend/data/client/query/trip_plan_query_client.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
+import 'package:wanderer_frontend/data/client/command/trip_plan_command_client.dart';
+import 'package:wanderer_frontend/data/client/query/trip_plan_query_client.dart';
 
 void main() {
   group('TripPlanService', () {

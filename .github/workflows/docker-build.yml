@@ -75,7 +75,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/tracker-frontend
+          images: ghcr.io/${{ github.repository_owner }}/wanderer-frontend
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=${{ inputs.image-tag }},enable=${{ inputs.image-tag != '' }}

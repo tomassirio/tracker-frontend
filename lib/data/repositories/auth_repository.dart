@@ -1,5 +1,5 @@
-import 'package:tracker_frontend/data/models/auth_models.dart';
-import 'package:tracker_frontend/data/services/auth_service.dart';
+import 'package:wanderer_frontend/data/models/auth_models.dart';
+import 'package:wanderer_frontend/data/services/auth_service.dart';
 
 /// Repository for managing authentication operations
 class AuthRepository {

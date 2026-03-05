@@ -3,9 +3,9 @@ nameSuffix: ""
 
 replicaCount: 1
 image:
-  repository: ghcr.io/tomassirio/tracker-frontend
+  repository: ghcr.io/tomassirio/wanderer-frontend
   pullPolicy: IfNotPresent
-  tag: "1.0.3"
+  tag: "1.2.0"
 service:
   type: ClusterIP  # Changed back to ClusterIP since we'll use Ingress
   port: 51538  # Production port (dev uses 41538)

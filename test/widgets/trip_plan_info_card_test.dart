@@ -1,8 +1,8 @@
-// filepath: /Users/tomassirio/Workspace/tracker_frontend/test/widgets/trip_plan_info_card_test.dart
+// filepath: /Users/tomassirio/Workspace/wanderer_frontend/test/widgets/trip_plan_info_card_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/trip_models.dart';
-import 'package:tracker_frontend/presentation/widgets/trip_plans/trip_plan_info_card.dart';
+import 'package:wanderer_frontend/data/models/trip_models.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plan_info_card.dart';
 
 void main() {
   group('TripPlanInfoCard Widget', () {

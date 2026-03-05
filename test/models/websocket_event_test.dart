@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/websocket/websocket_event.dart';
+import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
 
 void main() {
   group('WebSocketEvent - Friend & Follower Events', () {

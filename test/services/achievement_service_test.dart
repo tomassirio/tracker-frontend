@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tracker_frontend/data/models/achievement_models.dart';
-import 'package:tracker_frontend/data/services/achievement_service.dart';
-import 'package:tracker_frontend/data/client/query/achievement_query_client.dart';
+import 'package:wanderer_frontend/data/models/achievement_models.dart';
+import 'package:wanderer_frontend/data/services/achievement_service.dart';
+import 'package:wanderer_frontend/data/client/query/achievement_query_client.dart';
 
 void main() {
   group('AchievementService', () {
