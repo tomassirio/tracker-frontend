@@ -194,6 +194,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Inject Google Maps API key for Android
+        run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+
       - name: Build APK
         run: |
           flutter build apk --release \
