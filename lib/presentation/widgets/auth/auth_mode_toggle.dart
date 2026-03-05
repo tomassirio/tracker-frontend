@@ -17,10 +17,14 @@ class AuthModeToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          isLogin ? "Don't have an account? " : 'Already have an account? ',
-          style: TextStyle(color: Colors.grey[600]),
+        Flexible(
+          child: Text(
+            isLogin ? "Don't have an account? " : 'Already have an account? ',
+            style: TextStyle(color: Colors.grey[600]),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         TextButton(
           onPressed: isLoading ? null : onToggle,

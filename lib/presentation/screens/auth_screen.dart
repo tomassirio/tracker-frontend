@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/data/repositories/auth_repository.dart';
-import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/widgets/auth/auth_form.dart';
+import 'package:wanderer_frontend/presentation/widgets/auth/forgot_password_form.dart';
 
 /// Authentication screen for login and registration
 class AuthScreen extends StatefulWidget {
   final bool startInSignup;
+  final String? initialUsername;
 
-  const AuthScreen({super.key, this.startInSignup = false});
+  const AuthScreen(
+      {super.key, this.startInSignup = false, this.initialUsername});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -28,6 +31,31 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _registrationPending = false;
+  bool _isForgotPassword = false;
+  bool _passwordResetSent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefillUsername();
+  }
+
+  void _prefillUsername() {
+    // First check widget parameter
+    if (widget.initialUsername != null && widget.initialUsername!.isNotEmpty) {
+      _usernameController.text = widget.initialUsername!;
+      return;
+    }
+
+    // On web, also check URL query parameters
+    if (kIsWeb) {
+      final uri = Uri.base;
+      final username = uri.queryParameters['username'];
+      if (username != null && username.isNotEmpty) {
+        _usernameController.text = username;
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -80,35 +108,62 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _forgotPassword() async {
+  void _forgotPassword() {
+    setState(() {
+      _isForgotPassword = true;
+      _errorMessage = null;
+      _passwordResetSent = false;
+    });
+  }
+
+  Future<void> _submitForgotPassword() async {
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      UiHelpers.showErrorMessage(context, 'Please enter your email address');
+      setState(() {
+        _errorMessage = 'Please enter your email address';
+      });
       return;
     }
 
-    setState(() => _isLoading = true);
+    if (!email.contains('@') || !email.contains('.')) {
+      setState(() {
+        _errorMessage = 'Please enter a valid email address';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
       await _repository.requestPasswordReset(email);
 
       if (mounted) {
-        UiHelpers.showSuccessMessage(
-          context,
-          'Password reset email sent! Check your inbox.',
-        );
+        setState(() {
+          _passwordResetSent = true;
+          _isLoading = false;
+        });
       }
     } catch (e) {
       if (mounted) {
-        UiHelpers.showErrorMessage(
-          context,
-          'Error: ${e.toString().replaceAll('Exception: ', '')}',
-        );
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+          _isLoading = false;
+        });
       }
-    } finally {
-      setState(() => _isLoading = false);
     }
+  }
+
+  void _backToLogin() {
+    setState(() {
+      _isForgotPassword = false;
+      _passwordResetSent = false;
+      _errorMessage = null;
+      _emailController.clear();
+    });
   }
 
   void _toggleMode() {
@@ -151,19 +206,29 @@ class _AuthScreenState extends State<AuthScreen> {
                 constraints: const BoxConstraints(maxWidth: 450),
                 child: _registrationPending
                     ? _buildRegistrationPendingView()
-                    : AuthForm(
-                        formKey: _formKey,
-                        isLogin: _isLogin,
-                        isLoading: _isLoading,
-                        errorMessage: _errorMessage,
-                        usernameController: _usernameController,
-                        emailController: _emailController,
-                        passwordController: _passwordController,
-                        confirmPasswordController: _confirmPasswordController,
-                        onSubmit: _submit,
-                        onToggleMode: _toggleMode,
-                        onForgotPassword: _forgotPassword,
-                      ),
+                    : _isForgotPassword
+                        ? ForgotPasswordForm(
+                            emailController: _emailController,
+                            isLoading: _isLoading,
+                            errorMessage: _errorMessage,
+                            passwordResetSent: _passwordResetSent,
+                            onSubmit: _submitForgotPassword,
+                            onBackToLogin: _backToLogin,
+                          )
+                        : AuthForm(
+                            formKey: _formKey,
+                            isLogin: _isLogin,
+                            isLoading: _isLoading,
+                            errorMessage: _errorMessage,
+                            usernameController: _usernameController,
+                            emailController: _emailController,
+                            passwordController: _passwordController,
+                            confirmPasswordController:
+                                _confirmPasswordController,
+                            onSubmit: _submit,
+                            onToggleMode: _toggleMode,
+                            onForgotPassword: _forgotPassword,
+                          ),
               ),
             ),
           ),

@@ -106,8 +106,7 @@ class ApiEndpoints {
       '/comments/$commentId/reactions';
 
   // Trip Promotion Command endpoints (use commandBaseUrl, ADMIN only)
-  static String tripPromote(String tripId) =>
-      '/admin/trips/$tripId/promote';
+  static String tripPromote(String tripId) => '/admin/trips/$tripId/promote';
 
   // Trip Promotion Query endpoints (use queryBaseUrl, PUBLIC)
   static const String promotedTrips = '/promoted-trips';
