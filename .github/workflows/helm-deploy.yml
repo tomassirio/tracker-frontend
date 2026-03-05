@@ -63,10 +63,11 @@ jobs:
           echo "app-version=${APP_VERSION}" >> $GITHUB_OUTPUT
           echo "📋 App version from pubspec: ${APP_VERSION}"
 
-      - name: Update Chart.yaml appVersion
+      - name: Update Chart.yaml version and appVersion
         run: |
+          sed -i "s/^version: .*/version: ${{ steps.version.outputs.app-version }}/" chart/Chart.yaml
           sed -i "s/^appVersion: .*/appVersion: \"${{ steps.version.outputs.app-version }}\"/" chart/Chart.yaml
-          echo "✅ Updated Chart.yaml appVersion to ${{ steps.version.outputs.app-version }}"
+          echo "✅ Updated Chart.yaml version and appVersion to ${{ steps.version.outputs.app-version }}"
           cat chart/Chart.yaml
 
       - name: Set environment variables
