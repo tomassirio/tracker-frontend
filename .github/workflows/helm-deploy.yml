@@ -55,6 +55,20 @@ jobs:
           kubectl get nodes
           echo "✓ Connected to Kubernetes cluster"
 
+      - name: Extract app version from pubspec
+        id: version
+        run: |
+          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//')
+          APP_VERSION=$(echo "$PUBSPEC_VERSION" | sed 's/-SNAPSHOT//' | sed 's/+.*//')
+          echo "app-version=${APP_VERSION}" >> $GITHUB_OUTPUT
+          echo "📋 App version from pubspec: ${APP_VERSION}"
+
+      - name: Update Chart.yaml appVersion
+        run: |
+          sed -i "s/^appVersion: .*/appVersion: \"${{ steps.version.outputs.app-version }}\"/" chart/Chart.yaml
+          echo "✅ Updated Chart.yaml appVersion to ${{ steps.version.outputs.app-version }}"
+          cat chart/Chart.yaml
+
       - name: Set environment variables
         id: config
         run: |
