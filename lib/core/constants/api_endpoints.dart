@@ -22,6 +22,13 @@ class ApiEndpoints {
   // Google Maps API key - read from window.appConfig
   static String get googleMapsApiKey => getConfigValue('googleMapsApiKey', '');
 
+  // App base URL - used for deep links, QR codes, and sharing
+  // Web: derived from window.location; Mobile: from APP_BASE_URL dart-define
+  static String get appBaseUrl => getAppBaseUrl();
+
+  // Trip deep link URL
+  static String tripDeepLink(String tripId) => '$appBaseUrl/trip/$tripId';
+
   // Auth endpoints (use authBaseUrl)
   static const String authRegister = '/register';
   static const String authVerifyEmail = '/verify-email';

@@ -8,6 +8,7 @@ import 'package:tracker_frontend/core/theme/wanderer_theme.dart';
 import 'package:tracker_frontend/core/constants/enums.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
 import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
+import 'package:tracker_frontend/presentation/widgets/trip_detail/trip_share_dialog.dart';
 
 /// Widget displaying trip information card with glassmorphism design
 /// Supports collapsible state that shows as a floating bubble
@@ -165,6 +166,30 @@ class TripInfoCard extends StatelessWidget {
                           color: WandererTheme.statusTextColor(
                               trip.status.toJson()),
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Share / QR code button
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.qr_code,
+                          size: 16,
+                          color: WandererTheme.primaryOrange,
+                        ),
+                        onPressed: () => TripShareDialog.show(
+                          context,
+                          tripId: trip.id,
+                          tripName: trip.name,
+                        ),
+                        tooltip: 'Share trip',
+                        padding: EdgeInsets.zero,
                       ),
                     ),
                     const SizedBox(width: 8),

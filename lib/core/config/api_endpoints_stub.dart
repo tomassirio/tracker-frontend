@@ -34,6 +34,16 @@ String getConfigValue(String key, String defaultValue) {
   }
 }
 
+/// Gets the base app URL for non-web platforms
+/// Returns the APP_BASE_URL dart-define or defaults to the production URL
+const String _appBaseUrl = String.fromEnvironment('APP_BASE_URL');
+
+String getAppBaseUrl() {
+  return _appBaseUrl.isNotEmpty
+      ? _appBaseUrl
+      : 'https://wanderer.tomassir.io';
+}
+
 /// Gets the WebSocket URL for non-web platforms
 /// For relative paths, constructs full URL using localhost as default
 String getWebSocketUrl(String relativePath) {
