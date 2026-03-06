@@ -1,12 +1,13 @@
 /// Request model for changing password (when logged in)
 class PasswordChangeRequest {
-  final String oldPassword;
+  final String currentPassword;
   final String newPassword;
 
-  PasswordChangeRequest({required this.oldPassword, required this.newPassword});
+  PasswordChangeRequest(
+      {required this.currentPassword, required this.newPassword});
 
   Map<String, dynamic> toJson() => {
-        'old_password': oldPassword,
-        'new_password': newPassword,
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
       };
 }

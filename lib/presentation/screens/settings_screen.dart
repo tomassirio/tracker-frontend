@@ -28,7 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // --- Account Actions ---
 
   Future<void> _handleChangePassword() async {
-    final oldPasswordController = TextEditingController();
+    final currentPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
 
@@ -42,7 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: oldPasswordController,
+                  controller: currentPasswordController,
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Current Password',
@@ -86,15 +86,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    final oldPassword = oldPasswordController.text.trim();
+    final currentPassword = currentPasswordController.text.trim();
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    oldPasswordController.dispose();
+    currentPasswordController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
 
-    if (oldPassword.isEmpty || newPassword.isEmpty) {
+    if (currentPassword.isEmpty || newPassword.isEmpty) {
       UiHelpers.showErrorMessage(context, 'All fields are required');
       return;
     }
@@ -117,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await _authService.changePassword(
         PasswordChangeRequest(
-          oldPassword: oldPassword,
+          currentPassword: currentPassword,
           newPassword: newPassword,
         ),
       );
