@@ -7,6 +7,7 @@ import 'package:wanderer_frontend/data/services/user_service.dart';
 import 'package:wanderer_frontend/data/models/requests/password_change_request.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/privacy_policy_screen.dart';
 
 /// Settings screen with categorized options for the user.
 class SettingsScreen extends StatefulWidget {
@@ -395,9 +396,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Privacy Policy',
                   subtitle: 'Review our privacy practices',
                   onTap: () {
-                    UiHelpers.showInfoMessage(
+                    Navigator.push(
                       context,
-                      'Privacy Policy coming soon',
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicyScreen(),
+                      ),
                     );
                   },
                 ),
