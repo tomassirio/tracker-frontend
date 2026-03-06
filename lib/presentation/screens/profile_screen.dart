@@ -16,6 +16,7 @@ import '../helpers/trip_route_helper.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'auth_screen.dart';
 import 'home_screen.dart';
+import 'settings_screen.dart';
 import 'trip_detail_screen.dart';
 import 'friends_followers_screen.dart';
 
@@ -306,7 +307,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleSettings() {
-    UiHelpers.showSuccessMessage(context, 'User Settings coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   Future<void> _navigateToAuth() async {

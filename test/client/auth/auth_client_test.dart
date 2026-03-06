@@ -359,7 +359,7 @@ void main() {
     group('changePassword', () {
       test('successful password change completes without error', () async {
         final request = PasswordChangeRequest(
-          oldPassword: 'oldPassword123',
+          currentPassword: 'oldPassword123',
           newPassword: 'newPassword456',
         );
         mockTokenStorage.accessToken = 'test-token';
@@ -382,7 +382,7 @@ void main() {
 
       test('changePassword requires authentication', () async {
         final request = PasswordChangeRequest(
-          oldPassword: 'oldPassword123',
+          currentPassword: 'oldPassword123',
           newPassword: 'newPassword456',
         );
         mockTokenStorage.accessToken = 'test-token';
@@ -396,7 +396,7 @@ void main() {
 
       test('changePassword throws exception on wrong old password', () async {
         final request = PasswordChangeRequest(
-          oldPassword: 'wrongPassword',
+          currentPassword: 'wrongPassword',
           newPassword: 'newPassword456',
         );
         mockTokenStorage.accessToken = 'test-token';
@@ -411,7 +411,7 @@ void main() {
 
       test('changePassword throws exception on weak new password', () async {
         final request = PasswordChangeRequest(
-          oldPassword: 'oldPassword123',
+          currentPassword: 'oldPassword123',
           newPassword: '123',
         );
         mockTokenStorage.accessToken = 'test-token';

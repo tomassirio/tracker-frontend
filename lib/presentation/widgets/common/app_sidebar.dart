@@ -7,6 +7,7 @@ import 'package:wanderer_frontend/presentation/screens/auth_screen.dart';
 import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
 import 'package:wanderer_frontend/presentation/screens/trip_maintenance_screen.dart';
 import 'package:wanderer_frontend/presentation/screens/trip_promotion_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Sidebar navigation for the app
@@ -185,7 +186,12 @@ class AppSidebar extends StatelessWidget {
                       icon: const Icon(Icons.settings, color: Colors.white),
                       onPressed: () {
                         Navigator.pop(context);
-                        onSettings?.call();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsScreen(),
+                          ),
+                        );
                       },
                       tooltip: 'Settings',
                     ),
