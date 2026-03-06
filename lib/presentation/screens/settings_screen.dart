@@ -8,6 +8,7 @@ import 'package:wanderer_frontend/data/models/requests/password_change_request.d
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
 import 'package:wanderer_frontend/presentation/screens/privacy_policy_screen.dart';
+import 'package:wanderer_frontend/presentation/screens/terms_and_conditions_screen.dart';
 
 /// Settings screen with categorized options for the user.
 class SettingsScreen extends StatefulWidget {
@@ -384,9 +385,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Terms of Service',
                   subtitle: 'Read our terms and conditions',
                   onTap: () {
-                    UiHelpers.showInfoMessage(
+                    Navigator.push(
                       context,
-                      'Terms of Service coming soon',
+                      MaterialPageRoute(
+                        builder: (context) => const TermsAndConditionsScreen(),
+                      ),
                     );
                   },
                 ),

@@ -15,4 +15,3 @@ class PrivacyPolicyRouteStrategy implements RouteStrategy {
     );
   }
 }
-

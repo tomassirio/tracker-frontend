@@ -3,6 +3,7 @@ import 'package:wanderer_frontend/core/routing/route_strategy.dart';
 import 'package:wanderer_frontend/core/routing/strategies/login_route_strategy.dart';
 import 'package:wanderer_frontend/core/routing/strategies/privacy_policy_route_strategy.dart';
 import 'package:wanderer_frontend/core/routing/strategies/signup_route_strategy.dart';
+import 'package:wanderer_frontend/core/routing/strategies/terms_and_conditions_route_strategy.dart';
 import 'package:wanderer_frontend/core/routing/strategies/trip_route_strategy.dart';
 import 'package:wanderer_frontend/core/routing/strategies/user_route_strategy.dart';
 import 'package:wanderer_frontend/core/routing/strategies/verify_email_route_strategy.dart';
@@ -19,6 +20,7 @@ class AppRouter {
     SignupRouteStrategy(),
     VerifyEmailRouteStrategy(),
     PrivacyPolicyRouteStrategy(),
+    TermsAndConditionsRouteStrategy(),
     TripRouteStrategy(),
     UserRouteStrategy(),
   ];
