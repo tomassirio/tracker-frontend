@@ -1,32 +1,12 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:url_launcher/url_launcher.dart';
 
-/// Screen that displays the Privacy Policy.
-///
-/// On web, opens the privacy policy HTML in a new browser tab.
-/// On mobile, displays the HTML content in a scrollable text view.
+/// Screen that displays the Privacy Policy from the bundled asset.
 class PrivacyPolicyScreen extends StatefulWidget {
   const PrivacyPolicyScreen({super.key});
 
   @override
   State<PrivacyPolicyScreen> createState() => _PrivacyPolicyScreenState();
-
-  /// Opens the privacy policy.
-  ///
-  /// On web, launches the HTML in a new tab and returns true.
-  /// On mobile, returns false so the caller can navigate to this screen.
-  static Future<bool> openOnWeb() async {
-    if (kIsWeb) {
-      final uri = Uri.parse('privacy_policy.html');
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
-        return true;
-      }
-    }
-    return false;
-  }
 }
 
 class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
@@ -41,19 +21,6 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   }
 
   Future<void> _loadContent() async {
-    // On web, try to open in a new tab
-    if (kIsWeb) {
-      final uri = Uri.parse('privacy_policy.html');
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
-        if (mounted) {
-          Navigator.pop(context);
-        }
-        return;
-      }
-    }
-
-    // On mobile, load the asset and display as text
     try {
       final content =
           await rootBundle.loadString('assets/legal/privacy_policy.html');
