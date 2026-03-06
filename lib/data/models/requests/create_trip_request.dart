@@ -5,6 +5,7 @@ class CreateTripRequest {
   final String name;
   final String? description;
   final Visibility visibility;
+  final TripModality? tripModality;
   final DateTime? startDate;
   final DateTime? endDate;
 
@@ -12,6 +13,7 @@ class CreateTripRequest {
     required this.name,
     this.description,
     this.visibility = Visibility.private,
+    this.tripModality,
     this.startDate,
     this.endDate,
   });
@@ -20,6 +22,7 @@ class CreateTripRequest {
         'name': name,
         if (description != null) 'description': description,
         'visibility': visibility.toJson(),
+        if (tripModality != null) 'tripModality': tripModality!.toJson(),
         if (startDate != null) 'startDate': startDate!.toIso8601String(),
         if (endDate != null) 'endDate': endDate!.toIso8601String(),
       };

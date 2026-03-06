@@ -735,6 +735,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         return Colors.orange;
       case TripStatus.finished:
         return Colors.grey;
+      case TripStatus.resting:
+        return Colors.indigo;
     }
   }
 
@@ -748,6 +750,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         return 'Paused';
       case TripStatus.finished:
         return 'Finished';
+      case TripStatus.resting:
+        return 'Resting';
     }
   }
 }

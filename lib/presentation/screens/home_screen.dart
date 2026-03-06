@@ -708,6 +708,8 @@ class _HomeScreenState extends State<HomeScreen>
         return 'Completed';
       case TripStatus.created:
         return 'Draft';
+      case TripStatus.resting:
+        return 'Resting';
     }
   }
 

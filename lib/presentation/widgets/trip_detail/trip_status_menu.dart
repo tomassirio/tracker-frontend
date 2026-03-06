@@ -41,6 +41,19 @@ class TripStatusMenu extends StatelessWidget {
           ),
         ),
         PopupMenuItem(
+          value: TripStatus.resting,
+          child: Row(
+            children: [
+              Icon(
+                UiHelpers.getStatusIcon(TripStatus.resting),
+                color: Colors.indigo,
+              ),
+              const SizedBox(width: 8),
+              const Text('Rest for Night'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
           value: TripStatus.finished,
           child: Row(
             children: [

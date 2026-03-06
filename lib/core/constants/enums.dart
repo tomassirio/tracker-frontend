@@ -269,7 +269,10 @@ enum TripStatus {
   paused,
 
   /// Trip has finished
-  finished;
+  finished,
+
+  /// Pilgrim has finished the day's stage and is resting overnight
+  resting;
 
   /// Human-readable label for display
   String get displayLabel {
@@ -282,6 +285,8 @@ enum TripStatus {
         return 'Paused';
       case TripStatus.finished:
         return 'Finished';
+      case TripStatus.resting:
+        return 'Resting';
     }
   }
 
@@ -296,6 +301,8 @@ enum TripStatus {
         return 'PAUSED';
       case TripStatus.finished:
         return 'FINISHED';
+      case TripStatus.resting:
+        return 'RESTING';
     }
   }
 
@@ -310,8 +317,51 @@ enum TripStatus {
         return TripStatus.paused;
       case 'FINISHED':
         return TripStatus.finished;
+      case 'RESTING':
+        return TripStatus.resting;
       default:
         throw ArgumentError('Invalid trip status value: $value');
+    }
+  }
+}
+
+/// Modality for a trip
+enum TripModality {
+  /// A single-day trip
+  simple,
+
+  /// A multi-day trip
+  multiDay;
+
+  /// Human-readable label for display
+  String get displayLabel {
+    switch (this) {
+      case TripModality.simple:
+        return 'Simple';
+      case TripModality.multiDay:
+        return 'Multi-Day';
+    }
+  }
+
+  /// Convert modality to string for API
+  String toJson() {
+    switch (this) {
+      case TripModality.simple:
+        return 'SIMPLE';
+      case TripModality.multiDay:
+        return 'MULTI_DAY';
+    }
+  }
+
+  /// Parse modality from API response
+  static TripModality fromJson(String value) {
+    switch (value.toUpperCase()) {
+      case 'SIMPLE':
+        return TripModality.simple;
+      case 'MULTI_DAY':
+        return TripModality.multiDay;
+      default:
+        throw ArgumentError('Invalid trip modality value: $value');
     }
   }
 }

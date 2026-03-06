@@ -1239,6 +1239,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           case TripStatus.finished:
             message = 'Trip finished!';
             break;
+          case TripStatus.resting:
+            message = 'Resting for the night';
+            break;
           case TripStatus.created:
             message = 'Trip status updated';
             break;
@@ -1254,7 +1257,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _handleSettingsChange(
-      bool automaticUpdates, int? updateRefresh) async {
+      bool automaticUpdates, int? updateRefresh, TripModality? tripModality) async {
     // Only trip owner can change settings
     if (_userId == null || _trip.userId != _userId) {
       if (mounted) {
@@ -1271,6 +1274,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         _trip.id,
         automaticUpdates,
         updateRefresh,
+        tripModality: tripModality,
       );
 
       // Update local state optimistically - WebSocket will confirm the change
@@ -1278,6 +1282,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         _trip = _trip.copyWith(
           automaticUpdates: automaticUpdates,
           updateRefresh: updateRefresh,
+          tripModality: tripModality ?? _trip.tripModality,
         );
         _isChangingSettings = false;
       });

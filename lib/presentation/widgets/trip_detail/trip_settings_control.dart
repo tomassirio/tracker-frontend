@@ -13,9 +13,11 @@ const int _minIntervalMinutes = 15;
 class TripSettingsControl extends StatefulWidget {
   final bool automaticUpdates;
   final int? updateRefresh; // in seconds
+  final TripModality? tripModality;
   final bool isOwner;
   final bool isLoading;
-  final Function(bool automaticUpdates, int? updateRefresh) onSettingsChange;
+  final Function(bool automaticUpdates, int? updateRefresh,
+      TripModality? tripModality) onSettingsChange;
 
   /// Current trip status - settings only shown when trip is in progress
   final TripStatus tripStatus;
@@ -34,6 +36,7 @@ class TripSettingsControl extends StatefulWidget {
     super.key,
     required this.automaticUpdates,
     this.updateRefresh,
+    this.tripModality,
     required this.isOwner,
     required this.isLoading,
     required this.onSettingsChange,
@@ -50,11 +53,13 @@ class TripSettingsControl extends StatefulWidget {
 class _TripSettingsControlState extends State<TripSettingsControl> {
   late bool _automaticUpdates;
   late TextEditingController _intervalController;
+  TripModality? _tripModality;
 
   @override
   void initState() {
     super.initState();
     _automaticUpdates = widget.automaticUpdates;
+    _tripModality = widget.tripModality;
     // Convert seconds to minutes for display, enforce minimum
     final minutes = widget.updateRefresh != null
         ? (widget.updateRefresh! / 60).round().clamp(_minIntervalMinutes, 9999)
@@ -69,6 +74,9 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.automaticUpdates != widget.automaticUpdates) {
       _automaticUpdates = widget.automaticUpdates;
+    }
+    if (oldWidget.tripModality != widget.tripModality) {
+      _tripModality = widget.tripModality;
     }
     if (oldWidget.updateRefresh != widget.updateRefresh) {
       // Convert seconds to minutes for display, enforce minimum
@@ -128,7 +136,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     }
     // Convert minutes to seconds for the backend
     final seconds = minutes != null ? minutes * 60 : null;
-    widget.onSettingsChange(_automaticUpdates, seconds);
+    widget.onSettingsChange(_automaticUpdates, seconds, _tripModality);
   }
 
   @override
@@ -163,6 +171,47 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Trip Modality selector
+          Row(
+            children: [
+              const Icon(
+                Icons.route,
+                size: 16,
+                color: WandererTheme.textSecondary,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Trip Type',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: WandererTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildModalityButton(
+                  label: 'Simple',
+                  modality: TripModality.simple,
+                  // Disable SIMPLE if already MULTI_DAY (one-way constraint)
+                  disabled: widget.tripModality == TripModality.multiDay,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildModalityButton(
+                  label: 'Multi-Day',
+                  modality: TripModality.multiDay,
+                  disabled: false,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               const Icon(
@@ -335,6 +384,41 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildModalityButton({
+    required String label,
+    required TripModality modality,
+    required bool disabled,
+  }) {
+    final isSelected = _tripModality == modality;
+    return OutlinedButton(
+      onPressed: (widget.isLoading || disabled)
+          ? null
+          : () {
+              setState(() {
+                _tripModality = modality;
+              });
+            },
+      style: OutlinedButton.styleFrom(
+        backgroundColor: isSelected ? WandererTheme.primaryOrange : null,
+        foregroundColor: isSelected ? Colors.white : null,
+        side: BorderSide(
+          color: isSelected
+              ? WandererTheme.primaryOrange
+              : WandererTheme.glassBorderColor,
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        minimumSize: const Size(0, 32),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

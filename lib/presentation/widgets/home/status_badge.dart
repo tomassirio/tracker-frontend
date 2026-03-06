@@ -125,6 +125,8 @@ class _StatusBadgeState extends State<StatusBadge>
         return Icons.pause;
       case TripStatus.finished:
         return Icons.check_circle_outline;
+      case TripStatus.resting:
+        return Icons.hotel;
     }
   }
 
@@ -138,6 +140,8 @@ class _StatusBadgeState extends State<StatusBadge>
         return 'Paused';
       case TripStatus.finished:
         return 'Completed';
+      case TripStatus.resting:
+        return 'Resting';
     }
   }
 
@@ -151,6 +155,8 @@ class _StatusBadgeState extends State<StatusBadge>
         return Colors.orange.withOpacity(0.3);
       case TripStatus.finished:
         return Colors.blue.withOpacity(0.3);
+      case TripStatus.resting:
+        return Colors.indigo.withOpacity(0.3);
     }
   }
 
@@ -164,6 +170,8 @@ class _StatusBadgeState extends State<StatusBadge>
         return Colors.orange.shade700;
       case TripStatus.finished:
         return Colors.blue.shade700;
+      case TripStatus.resting:
+        return Colors.indigo.shade700;
     }
   }
 }
