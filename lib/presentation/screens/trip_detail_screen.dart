@@ -114,11 +114,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// Check if trip update panel should be shown
   /// Only on Android, for trip owner, when trip is in progress
+  /// Also shown when resting for multi-day trips (to access "Begin Day" button)
   bool get _showTripUpdatePanel =>
       _isAndroid &&
       _userId != null &&
       _trip.userId == _userId &&
-      _trip.status == TripStatus.inProgress;
+      (_trip.status == TripStatus.inProgress ||
+          (_trip.status == TripStatus.resting &&
+              _trip.tripModality == TripModality.multiDay));
 
   /// Check if the "Finish Day / Begin Day N" button should be shown
   /// Only for MULTI_DAY trips on Android, for the trip owner, when IN_PROGRESS or RESTING
@@ -1286,8 +1289,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  Future<void> _handleSettingsChange(
-      bool automaticUpdates, int? updateRefresh, TripModality? tripModality) async {
+  Future<void> _handleSettingsChange(bool automaticUpdates, int? updateRefresh,
+      TripModality? tripModality) async {
     // Only trip owner can change settings
     if (_userId == null || _trip.userId != _userId) {
       if (mounted) {

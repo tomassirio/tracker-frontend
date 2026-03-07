@@ -63,7 +63,8 @@ class TripDetailLayoutData {
   final Function(bool automaticUpdates, int? updateRefresh,
       TripModality? tripModality)? onSettingsChange;
   final Future<void> Function(String? message) onSendTripUpdate;
-  final VoidCallback? onDayButtonTap; // "Finish Day / Begin Day N" for MULTI_DAY
+  final VoidCallback?
+      onDayButtonTap; // "Finish Day / Begin Day N" for MULTI_DAY
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
   final VoidCallback? onTestBackgroundUpdate;
@@ -214,52 +215,10 @@ abstract class TripDetailLayoutStrategy {
       isLoading: data.isSendingUpdate,
       onToggleCollapse: data.onToggleTripUpdate,
       onSendUpdate: data.onSendTripUpdate,
-    );
-  }
-
-  /// Helper to create the "Finish Day / Begin Day N" purple pill button
-  /// for MULTI_DAY trips. Shown to the left of the send-update bubble.
-  @protected
-  Widget createDayButton(TripDetailLayoutData data) {
-    final isResting = data.trip.status == TripStatus.resting;
-    final label = isResting
-        ? 'Begin Day ${data.currentDay + 1}'
-        : 'Finish Day ${data.currentDay}';
-    final icon = isResting ? Icons.wb_sunny_outlined : Icons.hotel;
-
-    return Padding(
-      // Right padding is 0 so the send-update bubble (which has its own 16px margin)
-      // sits flush against the day button without double-spacing.
-      padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
-      child: Material(
-        color: Colors.deepPurple,
-        borderRadius: BorderRadius.circular(28),
-        elevation: 4,
-        shadowColor: Colors.deepPurple.withOpacity(0.4),
-        child: InkWell(
-          onTap: data.onDayButtonTap,
-          borderRadius: BorderRadius.circular(28),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: Colors.white, size: 18),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      showDayButton: data.showDayButton,
+      currentDay: data.currentDay,
+      isResting: data.trip.status == TripStatus.resting,
+      onDayButtonTap: data.onDayButtonTap,
     );
   }
 }
