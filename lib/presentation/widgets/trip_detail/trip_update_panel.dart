@@ -21,8 +21,11 @@ class TripUpdatePanel extends StatefulWidget {
   /// Whether the trip is in resting state (affects day button label)
   final bool isResting;
 
-  /// Callback when the day button is tapped
-  final VoidCallback? onDayButtonTap;
+  /// Callback when the day button is tapped.
+  /// Receives the current message text (if any) so the caller can send a
+  /// trip update alongside the status change.  Returns `true` when the
+  /// action was completed (so the panel clears the message field).
+  final Future<bool> Function(String? message)? onDayButtonTap;
 
   const TripUpdatePanel({
     super.key,
@@ -320,6 +323,20 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     );
   }
 
+  /// Handle day button tap — passes current message text to the callback
+  /// and clears the input field on success.
+  Future<void> _handleDayButtonTap() async {
+    if (widget.onDayButtonTap == null) return;
+
+    final trimmed = _messageController.text.trim();
+    final message = trimmed.isEmpty ? null : trimmed;
+
+    final completed = await widget.onDayButtonTap!(message);
+    if (completed && mounted) {
+      _messageController.clear();
+    }
+  }
+
   /// Build the "Finish Day N" / "Begin Day N+1" button for multi-day trips
   Widget _buildDayButton() {
     final label = widget.isResting
@@ -328,7 +345,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     final icon = widget.isResting ? Icons.wb_sunny_outlined : Icons.nightlight_round;
 
     return ElevatedButton.icon(
-      onPressed: widget.onDayButtonTap,
+      onPressed: _handleDayButtonTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,

@@ -75,7 +75,7 @@ void main() {
               showDayButton: true,
               isResting: false,
               currentDay: 2,
-              onDayButtonTap: () {},
+              onDayButtonTap: (_) async => true,
             ),
           ),
         ),
@@ -101,7 +101,7 @@ void main() {
               showDayButton: true,
               isResting: true,
               currentDay: 2,
-              onDayButtonTap: () {},
+              onDayButtonTap: (_) async => true,
             ),
           ),
         ),
@@ -115,8 +115,9 @@ void main() {
           findsOneWidget);
     });
 
-    testWidgets('calls onDayButtonTap when day button is tapped',
+    testWidgets('calls onDayButtonTap with message when day button is tapped',
         (WidgetTester tester) async {
+      String? receivedMessage;
       bool dayButtonTapped = false;
 
       await tester.pumpWidget(
@@ -130,8 +131,10 @@ void main() {
               showDayButton: true,
               isResting: false,
               currentDay: 1,
-              onDayButtonTap: () {
+              onDayButtonTap: (message) async {
                 dayButtonTapped = true;
+                receivedMessage = message;
+                return true;
               },
             ),
           ),
@@ -139,9 +142,79 @@ void main() {
       );
 
       await tester.tap(find.text('Finish Day 1'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(dayButtonTapped, isTrue);
+      expect(receivedMessage, isNull); // No text entered
+    });
+
+    testWidgets('passes message text and clears field on successful day tap',
+        (WidgetTester tester) async {
+      String? receivedMessage;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripUpdatePanel(
+              isCollapsed: false,
+              isLoading: false,
+              onToggleCollapse: () {},
+              onSendUpdate: (_) async {},
+              showDayButton: true,
+              isResting: false,
+              currentDay: 1,
+              onDayButtonTap: (message) async {
+                receivedMessage = message;
+                return true;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Enter text in the message field
+      await tester.enterText(
+          find.byType(TextField), 'Goodnight from the trail!');
+      await tester.pump();
+
+      await tester.tap(find.text('Finish Day 1'));
+      await tester.pumpAndSettle();
+
+      expect(receivedMessage, 'Goodnight from the trail!');
+      // Field should be cleared after successful action
+      expect(find.text('Goodnight from the trail!'), findsNothing);
+    });
+
+    testWidgets('keeps message text when day button callback returns false',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripUpdatePanel(
+              isCollapsed: false,
+              isLoading: false,
+              onToggleCollapse: () {},
+              onSendUpdate: (_) async {},
+              showDayButton: true,
+              isResting: false,
+              currentDay: 1,
+              onDayButtonTap: (message) async {
+                return false; // cancelled
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Enter text in the message field
+      await tester.enterText(find.byType(TextField), 'Not sent');
+      await tester.pump();
+
+      await tester.tap(find.text('Finish Day 1'));
+      await tester.pumpAndSettle();
+
+      // Field should still have the text
+      expect(find.text('Not sent'), findsOneWidget);
     });
 
     testWidgets('does not show day button when showDayButton is false',

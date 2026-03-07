@@ -1273,20 +1273,74 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   /// Handle "Finish Day N" / "Begin Day N+1" button tap for MULTI_DAY trips.
-  /// Day counter is local state — not persisted across app restarts (no backend support yet).
-  Future<void> _handleDayButtonTap() async {
+  /// When finishing a day, shows a confirmation dialog first, then sends a
+  /// trip update (with optional message) before transitioning to resting.
+  /// Returns `true` when the action was completed (message field can be cleared).
+  Future<bool> _handleDayButtonTap(String? message) async {
     if (_trip.status == TripStatus.inProgress) {
-      // Finish current day → rest for the night
+      // --- Finish Day: confirmation → send update → change status ---
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Finish Day $_currentDay'),
+          content: Text(
+            'Are you sure you want to finish Day $_currentDay? '
+            'Your current location will be sent as a day-end update.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              key: const Key('confirm_finish_day_button'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Finish Day'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true || !mounted) return false;
+
+      // Send a trip update with the message text before changing status
+      try {
+        final permissionReady = await _ensureLocationPermission();
+        if (!permissionReady) return false;
+
+        final result =
+            await _repository.sendTripUpdate(_trip.id, message: message);
+        if (mounted && !result.isSuccess) {
+          UiHelpers.showErrorMessage(context, result.userMessage);
+          return false;
+        }
+      } catch (e) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Error sending update: $e');
+        }
+        return false;
+      }
+
       await _changeTripStatus(TripStatus.resting);
+
+      // Refresh timeline to show the new update
+      if (mounted) {
+        await _loadTripUpdates();
+      }
+      return true;
     } else if (_trip.status == TripStatus.resting) {
-      // Begin the next day; only increment the counter if the status change succeeds.
-      // _changeTripStatus updates _trip.status synchronously via setState before
-      // returning, so the check below correctly reflects the actual outcome.
+      // --- Begin Day: no confirmation needed ---
       await _changeTripStatus(TripStatus.inProgress);
       if (mounted && _trip.status == TripStatus.inProgress) {
         setState(() => _currentDay++);
       }
+      return true;
     }
+    return false;
   }
 
   Future<void> _handleSettingsChange(bool automaticUpdates, int? updateRefresh,

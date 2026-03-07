@@ -63,7 +63,7 @@ class TripDetailLayoutData {
   final Function(bool automaticUpdates, int? updateRefresh,
       TripModality? tripModality)? onSettingsChange;
   final Future<void> Function(String? message) onSendTripUpdate;
-  final VoidCallback?
+  final Future<bool> Function(String? message)?
       onDayButtonTap; // "Finish Day / Begin Day N" for MULTI_DAY
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
