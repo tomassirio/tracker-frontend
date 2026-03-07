@@ -657,7 +657,7 @@ class _TripCardState extends State<TripCard> {
       case TripStatus.finished:
         return const Color(0xFF007BFF); // Blue
       case TripStatus.resting:
-        return const Color(0xFF5C6BC0); // Indigo
+        return WandererTheme.statusResting; // Indigo
     }
   }
 

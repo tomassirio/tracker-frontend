@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/client/api_client.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/user_models.dart';
@@ -1029,7 +1030,7 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
       case TripStatus.finished:
         return Colors.green;
       case TripStatus.resting:
-        return const Color(0xFF5C6BC0);
+        return WandererTheme.statusResting;
     }
   }
 

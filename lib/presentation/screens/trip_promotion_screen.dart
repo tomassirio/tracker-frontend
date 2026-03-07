@@ -832,7 +832,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
       case TripStatus.finished:
         return Colors.grey;
       case TripStatus.resting:
-        return const Color(0xFF5C6BC0);
+        return WandererTheme.statusResting;
     }
   }
 

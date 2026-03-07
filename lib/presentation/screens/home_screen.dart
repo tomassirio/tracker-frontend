@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart'
     show TripStatus, Visibility;
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/client/api_client.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
@@ -712,7 +713,7 @@ class _HomeScreenState extends State<HomeScreen>
       case TripStatus.created:
         return Colors.grey;
       case TripStatus.resting:
-        return const Color(0xFF5C6BC0);
+        return WandererTheme.statusResting;
     }
   }
 

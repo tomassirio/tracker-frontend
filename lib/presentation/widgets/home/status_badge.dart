@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/core/constants/enums.dart' show TripStatus;
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Badge widget that displays trip status with live indicator
 class StatusBadge extends StatefulWidget {
@@ -156,7 +157,7 @@ class _StatusBadgeState extends State<StatusBadge>
       case TripStatus.finished:
         return Colors.blue.withOpacity(0.3);
       case TripStatus.resting:
-        return const Color(0xFF5C6BC0).withOpacity(0.3);
+        return WandererTheme.statusResting.withOpacity(0.3);
     }
   }
 
@@ -171,7 +172,7 @@ class _StatusBadgeState extends State<StatusBadge>
       case TripStatus.finished:
         return Colors.blue.shade700;
       case TripStatus.resting:
-        return const Color(0xFF5C6BC0);
+        return WandererTheme.statusResting;
     }
   }
 }
