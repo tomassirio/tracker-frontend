@@ -12,10 +12,12 @@ class CreateTripForm extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
   final Visibility selectedVisibility;
+  final TripModality? selectedModality;
   final DateTime? startDate;
   final DateTime? endDate;
   final bool isLoading;
   final ValueChanged<Visibility> onVisibilityChanged;
+  final ValueChanged<TripModality?> onModalityChanged;
   final VoidCallback onSelectStartDate;
   final VoidCallback onSelectEndDate;
   final VoidCallback onClearStartDate;
@@ -28,10 +30,12 @@ class CreateTripForm extends StatelessWidget {
     required this.titleController,
     required this.descriptionController,
     required this.selectedVisibility,
+    this.selectedModality,
     this.startDate,
     this.endDate,
     required this.isLoading,
     required this.onVisibilityChanged,
+    required this.onModalityChanged,
     required this.onSelectStartDate,
     required this.onSelectEndDate,
     required this.onClearStartDate,
@@ -55,6 +59,8 @@ class CreateTripForm extends StatelessWidget {
             onVisibilityChanged: onVisibilityChanged,
           ),
           const SizedBox(height: 24),
+          _buildModalitySelector(context),
+          const SizedBox(height: 24),
           DateRangeSelector(
             startDate: startDate,
             endDate: endDate,
@@ -66,6 +72,90 @@ class CreateTripForm extends StatelessWidget {
           const SizedBox(height: 32),
           CreateTripButton(isLoading: isLoading, onPressed: onSubmit),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModalitySelector(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Trip Type',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildModalityOption(
+                context: context,
+                label: 'Simple',
+                subtitle: 'Single-day trip',
+                modality: TripModality.simple,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildModalityOption(
+                context: context,
+                label: 'Multi-Day',
+                subtitle: 'Multi-day journey',
+                modality: TripModality.multiDay,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModalityOption({
+    required BuildContext context,
+    required String label,
+    required String subtitle,
+    required TripModality modality,
+  }) {
+    final isSelected = selectedModality == modality;
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: isLoading
+          ? null
+          : () => onModalityChanged(isSelected ? null : modality),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          color: isSelected
+              ? colorScheme.primary.withOpacity(0.08)
+              : Colors.transparent,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? colorScheme.primary : null,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

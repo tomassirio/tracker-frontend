@@ -1074,6 +1074,8 @@ class _TripMaintenanceScreenState extends State<TripMaintenanceScreen> {
         return 'Paused';
       case TripStatus.finished:
         return 'Finished';
+      case TripStatus.resting:
+        return 'Resting';
     }
   }
 }

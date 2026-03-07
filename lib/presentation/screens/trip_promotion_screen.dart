@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/services/admin_service.dart';
 import 'package:wanderer_frontend/data/services/trip_service.dart';
@@ -146,58 +147,149 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
 
   Future<void> _promoteTrip(Trip trip) async {
     final donationLinkController = TextEditingController();
+    bool isPreAnnounced = false;
+    DateTime? countdownStartDate;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final isMobile = MediaQuery.of(context).size.width < 600;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final isMobile = MediaQuery.of(context).size.width < 600;
 
-        return AlertDialog(
-          title: const Text('Promote Trip'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Trip: ${trip.name}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+            return AlertDialog(
+              title: const Text('Promote Trip'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Trip: ${trip.name}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'By: ${trip.username}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: donationLinkController,
+                      decoration: const InputDecoration(
+                        labelText: 'Donation Link (optional)',
+                        hintText: 'https://...',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      maxLength: 500,
+                      maxLines: isMobile ? 2 : 1,
+                      keyboardType: TextInputType.url,
+                      textCapitalization: TextCapitalization.none,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.campaign,
+                          size: 16,
+                          color: WandererTheme.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Pre-Announce',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: WandererTheme.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                'Show countdown before trip starts',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: WandererTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isPreAnnounced,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              isPreAnnounced = value;
+                              if (!isPreAnnounced) countdownStartDate = null;
+                            });
+                          },
+                          activeColor: WandererTheme.primaryOrange,
+                        ),
+                      ],
+                    ),
+                    if (isPreAnnounced) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: countdownStartDate ??
+                                DateTime.now().add(
+                                  const Duration(days: 1),
+                                ),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365 * 5),
+                            ),
+                            helpText: 'Select Trip Start Date',
+                          );
+                          if (picked != null) {
+                            setDialogState(
+                                () => countdownStartDate = picked);
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_today, size: 16),
+                        label: Text(
+                          countdownStartDate == null
+                              ? 'Pick Start Date *'
+                              : '${countdownStartDate!.day}/${countdownStartDate!.month}/${countdownStartDate!.year}',
+                        ),
+                      ),
+                      if (countdownStartDate == null)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4),
+                          child: Text(
+                            'Start date is required for pre-announcements',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'By: ${trip.username}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: donationLinkController,
-                  decoration: const InputDecoration(
-                    labelText: 'Donation Link (optional)',
-                    hintText: 'https://...',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  maxLength: 500,
-                  maxLines: isMobile ? 2 : 1,
-                  keyboardType: TextInputType.url,
-                  textCapitalization: TextCapitalization.none,
+                ElevatedButton(
+                  onPressed: isPreAnnounced && countdownStartDate == null
+                      ? null
+                      : () => Navigator.pop(context, true),
+                  child: const Text('Promote'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Promote'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -208,6 +300,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         await _adminService.promoteTrip(
           trip.id,
           donationLink: donationLink.isEmpty ? null : donationLink,
+          isPreAnnounced: isPreAnnounced,
+          countdownStartDate: countdownStartDate,
         );
 
         if (mounted) {
@@ -722,6 +816,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         return Icons.pause_circle;
       case TripStatus.finished:
         return Icons.check_circle;
+      case TripStatus.resting:
+        return Icons.hotel;
     }
   }
 
@@ -735,6 +831,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         return Colors.orange;
       case TripStatus.finished:
         return Colors.grey;
+      case TripStatus.resting:
+        return Colors.indigo;
     }
   }
 
@@ -748,6 +846,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         return 'Paused';
       case TripStatus.finished:
         return 'Finished';
+      case TripStatus.resting:
+        return 'Resting';
     }
   }
 }

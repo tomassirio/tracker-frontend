@@ -656,6 +656,8 @@ class _TripCardState extends State<TripCard> {
         return const Color(0xFFFFC107); // Yellow/Amber
       case TripStatus.finished:
         return const Color(0xFF007BFF); // Blue
+      case TripStatus.resting:
+        return const Color(0xFF3F51B5); // Indigo
     }
   }
 
@@ -670,6 +672,8 @@ class _TripCardState extends State<TripCard> {
         return Icons.pause;
       case TripStatus.finished:
         return Icons.check_circle_outline;
+      case TripStatus.resting:
+        return Icons.hotel;
     }
   }
 

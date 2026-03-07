@@ -529,5 +529,205 @@ void main() {
         expect(json['automaticUpdates'], false);
       });
     });
+
+    group('TripModality', () {
+      test('toJson converts simple modality correctly', () {
+        expect(TripModality.simple.toJson(), 'SIMPLE');
+      });
+
+      test('toJson converts multiDay modality correctly', () {
+        expect(TripModality.multiDay.toJson(), 'MULTI_DAY');
+      });
+
+      test('fromJson parses SIMPLE correctly', () {
+        expect(TripModality.fromJson('SIMPLE'), TripModality.simple);
+      });
+
+      test('fromJson parses MULTI_DAY correctly', () {
+        expect(TripModality.fromJson('MULTI_DAY'), TripModality.multiDay);
+      });
+
+      test('fromJson is case-insensitive', () {
+        expect(TripModality.fromJson('simple'), TripModality.simple);
+        expect(TripModality.fromJson('multi_day'), TripModality.multiDay);
+      });
+
+      test('fromJson throws for invalid value', () {
+        expect(
+          () => TripModality.fromJson('INVALID'),
+          throwsArgumentError,
+        );
+      });
+    });
+
+    group('TripStatus resting', () {
+      test('toJson converts resting status correctly', () {
+        expect(TripStatus.resting.toJson(), 'RESTING');
+      });
+
+      test('fromJson parses RESTING correctly', () {
+        expect(TripStatus.fromJson('RESTING'), TripStatus.resting);
+      });
+
+      test('displayLabel for resting is Resting', () {
+        expect(TripStatus.resting.displayLabel, 'Resting');
+      });
+    });
+
+    group('CreateTripRequest with tripModality', () {
+      test('toJson includes tripModality when set', () {
+        final request = CreateTripRequest(
+          name: 'My Trip',
+          visibility: Visibility.public,
+          tripModality: TripModality.multiDay,
+        );
+
+        final json = request.toJson();
+
+        expect(json['tripModality'], 'MULTI_DAY');
+      });
+
+      test('toJson excludes tripModality when null', () {
+        final request = CreateTripRequest(
+          name: 'My Trip',
+          visibility: Visibility.public,
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('tripModality'), false);
+      });
+    });
+
+    group('ChangeTripSettingsRequest with tripModality', () {
+      test('toJson includes tripModality when set', () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: true,
+          tripModality: TripModality.multiDay,
+        );
+
+        final json = request.toJson();
+
+        expect(json['tripModality'], 'MULTI_DAY');
+      });
+
+      test('toJson excludes tripModality when null', () {
+        final request = ChangeTripSettingsRequest(
+          automaticUpdates: true,
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('tripModality'), false);
+      });
+    });
+
+    group('Trip tripModality', () {
+      test('fromJson parses tripModality from tripSettings', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'name': 'My Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'tripSettings': {
+            'tripModality': 'MULTI_DAY',
+          },
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.tripModality, TripModality.multiDay);
+      });
+
+      test('fromJson defaults tripModality to null when absent', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'name': 'My Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.tripModality, isNull);
+      });
+
+      test('toJson includes tripModality when set', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          tripModality: TripModality.simple,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final json = trip.toJson();
+
+        expect(json['tripModality'], 'SIMPLE');
+      });
+
+      test('toJson excludes tripModality when null', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final json = trip.toJson();
+
+        expect(json.containsKey('tripModality'), false);
+      });
+
+      test('copyWith preserves tripModality when not overridden', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          tripModality: TripModality.multiDay,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final updated = trip.copyWith(name: 'Updated Trip');
+
+        expect(updated.tripModality, TripModality.multiDay);
+      });
+
+      test('copyWith updates tripModality when provided', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          tripModality: TripModality.simple,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final updated = trip.copyWith(tripModality: TripModality.multiDay);
+
+        expect(updated.tripModality, TripModality.multiDay);
+      });
+    });
   });
 }

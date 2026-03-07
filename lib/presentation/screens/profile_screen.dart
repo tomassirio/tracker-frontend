@@ -1028,6 +1028,8 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
         return Colors.orange;
       case TripStatus.finished:
         return Colors.green;
+      case TripStatus.resting:
+        return Colors.indigo;
     }
   }
 

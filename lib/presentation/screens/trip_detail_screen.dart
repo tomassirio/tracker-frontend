@@ -96,6 +96,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
 
+  // Multi-day trip: current day counter (local state — resets on navigation, no backend backing yet)
+  int _currentDay = 1;
+
   // Desktop web: track whether the mouse is hovering over a panel
   // so we can disable map gestures only when hovering.
   bool _isHoveringOverPanel = false;
@@ -116,6 +119,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _userId != null &&
       _trip.userId == _userId &&
       _trip.status == TripStatus.inProgress;
+
+  /// Check if the "Finish Day / Begin Day N" button should be shown
+  /// Only for MULTI_DAY trips on Android, for the trip owner, when IN_PROGRESS or RESTING
+  bool get _showDayButton =>
+      _isAndroid &&
+      _userId != null &&
+      _trip.userId == _userId &&
+      _trip.tripModality == TripModality.multiDay &&
+      (_trip.status == TripStatus.inProgress ||
+          _trip.status == TripStatus.resting);
 
   @override
   void initState() {
@@ -1239,6 +1252,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           case TripStatus.finished:
             message = 'Trip finished!';
             break;
+          case TripStatus.resting:
+            message = 'Resting for the night';
+            break;
           case TripStatus.created:
             message = 'Trip status updated';
             break;
@@ -1253,8 +1269,25 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  /// Handle "Finish Day N" / "Begin Day N+1" button tap for MULTI_DAY trips.
+  /// Day counter is local state — not persisted across app restarts (no backend support yet).
+  Future<void> _handleDayButtonTap() async {
+    if (_trip.status == TripStatus.inProgress) {
+      // Finish current day → rest for the night
+      await _changeTripStatus(TripStatus.resting);
+    } else if (_trip.status == TripStatus.resting) {
+      // Begin the next day; only increment the counter if the status change succeeds.
+      // _changeTripStatus updates _trip.status synchronously via setState before
+      // returning, so the check below correctly reflects the actual outcome.
+      await _changeTripStatus(TripStatus.inProgress);
+      if (mounted && _trip.status == TripStatus.inProgress) {
+        setState(() => _currentDay++);
+      }
+    }
+  }
+
   Future<void> _handleSettingsChange(
-      bool automaticUpdates, int? updateRefresh) async {
+      bool automaticUpdates, int? updateRefresh, TripModality? tripModality) async {
     // Only trip owner can change settings
     if (_userId == null || _trip.userId != _userId) {
       if (mounted) {
@@ -1271,6 +1304,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         _trip.id,
         automaticUpdates,
         updateRefresh,
+        tripModality: tripModality,
       );
 
       // Update local state optimistically - WebSocket will confirm the change
@@ -1278,6 +1312,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         _trip = _trip.copyWith(
           automaticUpdates: automaticUpdates,
           updateRefresh: updateRefresh,
+          tripModality: tripModality ?? _trip.tripModality,
         );
         _isChangingSettings = false;
       });
@@ -1850,6 +1885,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isChangingStatus: _isChangingStatus,
       isChangingSettings: _isChangingSettings,
       showTripUpdatePanel: _showTripUpdatePanel,
+      showDayButton: _showDayButton,
+      currentDay: _currentDay,
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
       isAlreadyFriends: _isAlreadyFriends,
@@ -1871,6 +1908,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
+      onDayButtonTap: _showDayButton ? _handleDayButtonTap : null,
       onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner: _isLoggedIn && _trip.userId != _userId

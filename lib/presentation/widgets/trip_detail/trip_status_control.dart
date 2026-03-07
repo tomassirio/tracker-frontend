@@ -46,11 +46,11 @@ class TripStatusControl extends StatelessWidget {
     return Row(
       children: [
         if (currentStatus == TripStatus.created ||
-            currentStatus == TripStatus.paused)
+            currentStatus == TripStatus.paused ||
+            currentStatus == TripStatus.resting)
           _buildButton(
             context: context,
-            label:
-                currentStatus == TripStatus.created ? 'Start Trip' : 'Resume',
+            label: currentStatus == TripStatus.created ? 'Start Trip' : 'Resume',
             icon: Icons.play_arrow,
             color: WandererTheme.statusCreated,
             onPressed: () => onStatusChange(TripStatus.inProgress),
@@ -62,6 +62,14 @@ class TripStatusControl extends StatelessWidget {
             icon: Icons.pause,
             color: WandererTheme.statusInProgress,
             onPressed: () => onStatusChange(TripStatus.paused),
+          ),
+          const SizedBox(width: 8),
+          _buildButton(
+            context: context,
+            label: 'Rest',
+            icon: Icons.hotel,
+            color: Colors.indigo,
+            onPressed: () => onStatusChange(TripStatus.resting),
           ),
           const SizedBox(width: 8),
           _buildButton(

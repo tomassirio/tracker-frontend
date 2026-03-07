@@ -15,6 +15,8 @@ class UiHelpers {
         return Icons.pause;
       case TripStatus.finished:
         return Icons.check;
+      case TripStatus.resting:
+        return Icons.hotel;
     }
   }
 

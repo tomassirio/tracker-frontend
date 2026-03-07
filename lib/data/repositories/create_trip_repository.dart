@@ -15,6 +15,7 @@ class CreateTripRepository {
     required String name,
     String? description,
     required Visibility visibility,
+    TripModality? tripModality,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
@@ -22,6 +23,7 @@ class CreateTripRepository {
       name: name,
       description: description,
       visibility: visibility,
+      tripModality: tripModality,
       startDate: startDate,
       endDate: endDate,
     );

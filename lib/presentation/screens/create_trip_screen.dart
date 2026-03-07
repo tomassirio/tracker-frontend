@@ -23,6 +23,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   final _descriptionController = TextEditingController();
 
   Visibility _selectedVisibility = Visibility.public;
+  TripModality? _selectedModality;
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isLoading = false;
@@ -120,6 +121,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             ? null
             : _descriptionController.text.trim(),
         visibility: _selectedVisibility,
+        tripModality: _selectedModality,
         startDate: _startDate,
         endDate: _endDate,
       );
@@ -361,12 +363,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 titleController: _titleController,
                 descriptionController: _descriptionController,
                 selectedVisibility: _selectedVisibility,
+                selectedModality: _selectedModality,
                 startDate: _startDate,
                 endDate: _endDate,
                 isLoading: _isLoading,
                 onVisibilityChanged: (visibility) {
                   setState(() {
                     _selectedVisibility = visibility;
+                  });
+                },
+                onModalityChanged: (modality) {
+                  setState(() {
+                    _selectedModality = modality;
                   });
                 },
                 onSelectStartDate: _selectStartDate,

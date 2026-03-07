@@ -88,6 +88,29 @@ void main() {
         expect(promotedTrip.donationLink, 'https://buymeacoffee.com/johndoe');
         expect(promotedTrip.promotedAt,
             DateTime.parse('2024-01-01T00:00:00.000Z'));
+        expect(promotedTrip.isPreAnnounced, false);
+        expect(promotedTrip.countdownStartDate, null);
+      });
+
+      test('fromJson parses isPreAnnounced and countdownStartDate', () {
+        final json = {
+          'id': 'promo-2',
+          'tripId': 'trip456',
+          'tripName': 'Coming Soon Trip',
+          'promotedBy': 'admin-1',
+          'promotedByUsername': 'admin_user',
+          'tripOwnerId': 'user789',
+          'tripOwnerUsername': 'pilgrim',
+          'promotedAt': '2024-01-01T00:00:00.000Z',
+          'preAnnounced': true,
+          'countdownStartDate': '2025-06-01T08:00:00.000Z',
+        };
+
+        final promotedTrip = PromotedTrip.fromJson(json);
+
+        expect(promotedTrip.isPreAnnounced, true);
+        expect(promotedTrip.countdownStartDate,
+            DateTime.parse('2025-06-01T08:00:00.000Z'));
       });
 
       test('fromJson handles null donation link', () {
@@ -131,6 +154,29 @@ void main() {
         expect(json['tripOwnerUsername'], 'johndoe');
         expect(json['donationLink'], 'https://buymeacoffee.com/johndoe');
         expect(json['promotedAt'], '2024-01-01T00:00:00.000Z');
+        expect(json['preAnnounced'], false);
+        expect(json.containsKey('countdownStartDate'), false);
+      });
+
+      test('toJson includes countdownStartDate when pre-announced', () {
+        final startDate = DateTime.parse('2025-06-01T08:00:00.000Z');
+        final promotedTrip = PromotedTrip(
+          id: 'promo-2',
+          tripId: 'trip456',
+          tripName: 'Coming Soon',
+          promotedBy: 'admin-1',
+          promotedByUsername: 'admin_user',
+          tripOwnerId: 'user789',
+          tripOwnerUsername: 'pilgrim',
+          promotedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
+          isPreAnnounced: true,
+          countdownStartDate: startDate,
+        );
+
+        final json = promotedTrip.toJson();
+
+        expect(json['preAnnounced'], true);
+        expect(json['countdownStartDate'], startDate.toIso8601String());
       });
 
       test('toJson excludes null donation link', () {
@@ -177,6 +223,29 @@ void main() {
 
         expect(json.containsKey('donationLink'), false);
       });
+
+      test('toJson with isPreAnnounced and countdownStartDate', () {
+        final startDate = DateTime.parse('2025-06-01T08:00:00.000Z');
+        final request = PromoteTripRequest(
+          isPreAnnounced: true,
+          countdownStartDate: startDate,
+        );
+
+        final json = request.toJson();
+
+        expect(json['isPreAnnounced'], true);
+        expect(json['countdownStartDate'],
+            startDate.toUtc().toIso8601String());
+      });
+
+      test('toJson excludes countdownStartDate when null', () {
+        final request = PromoteTripRequest(isPreAnnounced: false);
+
+        final json = request.toJson();
+
+        expect(json['isPreAnnounced'], false);
+        expect(json.containsKey('countdownStartDate'), false);
+      });
     });
 
     group('UpdatePromotionRequest', () {
@@ -204,6 +273,29 @@ void main() {
         final json = request.toJson();
 
         expect(json.containsKey('donationLink'), false);
+      });
+
+      test('toJson with isPreAnnounced and countdownStartDate', () {
+        final startDate = DateTime.parse('2025-09-15T00:00:00.000Z');
+        final request = UpdatePromotionRequest(
+          isPreAnnounced: true,
+          countdownStartDate: startDate,
+        );
+
+        final json = request.toJson();
+
+        expect(json['isPreAnnounced'], true);
+        expect(json['countdownStartDate'],
+            startDate.toUtc().toIso8601String());
+      });
+
+      test('toJson excludes countdownStartDate when null', () {
+        final request = UpdatePromotionRequest(isPreAnnounced: false);
+
+        final json = request.toJson();
+
+        expect(json['isPreAnnounced'], false);
+        expect(json.containsKey('countdownStartDate'), false);
       });
     });
   });
