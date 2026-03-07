@@ -16,8 +16,9 @@ class TripSettingsControl extends StatefulWidget {
   final TripModality? tripModality;
   final bool isOwner;
   final bool isLoading;
-  final Function(bool automaticUpdates, int? updateRefresh,
-      TripModality? tripModality) onSettingsChange;
+  final Function(
+          bool automaticUpdates, int? updateRefresh, TripModality? tripModality)
+      onSettingsChange;
 
   /// Current trip status - settings only shown when trip is in progress
   final TripStatus tripStatus;
@@ -171,47 +172,48 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Trip Modality selector
-          Row(
-            children: [
-              const Icon(
-                Icons.route,
-                size: 16,
-                color: WandererTheme.textSecondary,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Trip Type',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: WandererTheme.textPrimary,
+          // Trip Modality selector - hidden when already multi-day (irreversible)
+          if (widget.tripModality != TripModality.multiDay) ...[
+            Row(
+              children: [
+                const Icon(
+                  Icons.route,
+                  size: 16,
+                  color: WandererTheme.textSecondary,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildModalityButton(
-                  label: 'Simple',
-                  modality: TripModality.simple,
-                  // Disable SIMPLE if already MULTI_DAY (one-way constraint)
-                  disabled: widget.tripModality == TripModality.multiDay,
+                const SizedBox(width: 8),
+                const Text(
+                  'Trip Type',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: WandererTheme.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildModalityButton(
-                  label: 'Multi-Day',
-                  modality: TripModality.multiDay,
-                  disabled: false,
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildModalityButton(
+                    label: 'Simple',
+                    modality: TripModality.simple,
+                    disabled: false,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildModalityButton(
+                    label: 'Multi-Day',
+                    modality: TripModality.multiDay,
+                    disabled: false,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
           Row(
             children: [
               const Icon(

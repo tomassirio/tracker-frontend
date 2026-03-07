@@ -657,7 +657,7 @@ class _TripCardState extends State<TripCard> {
       case TripStatus.finished:
         return const Color(0xFF007BFF); // Blue
       case TripStatus.resting:
-        return const Color(0xFF3F51B5); // Indigo
+        return WandererTheme.statusResting; // Indigo
     }
   }
 
@@ -673,7 +673,7 @@ class _TripCardState extends State<TripCard> {
       case TripStatus.finished:
         return Icons.check_circle_outline;
       case TripStatus.resting:
-        return Icons.hotel;
+        return Icons.nightlight_round;
     }
   }
 
@@ -688,6 +688,8 @@ class _TripCardState extends State<TripCard> {
         return 'PAUSED';
       case 'FINISHED':
         return 'DONE';
+      case 'RESTING':
+        return 'RESTING';
       default:
         return status.toUpperCase();
     }

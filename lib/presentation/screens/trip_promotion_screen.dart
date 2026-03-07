@@ -817,7 +817,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
       case TripStatus.finished:
         return Icons.check_circle;
       case TripStatus.resting:
-        return Icons.hotel;
+        return Icons.nightlight_round;
     }
   }
 
@@ -832,7 +832,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
       case TripStatus.finished:
         return Colors.grey;
       case TripStatus.resting:
-        return Colors.indigo;
+        return WandererTheme.statusResting;
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart'
     show TripStatus, Visibility;
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/client/api_client.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
@@ -696,7 +697,7 @@ class _HomeScreenState extends State<HomeScreen>
       case TripStatus.created:
         return Icons.edit_outlined;
       case TripStatus.resting:
-        return Icons.hotel;
+        return Icons.nightlight_round;
     }
   }
 
@@ -712,7 +713,7 @@ class _HomeScreenState extends State<HomeScreen>
       case TripStatus.created:
         return Colors.grey;
       case TripStatus.resting:
-        return Colors.indigo;
+        return WandererTheme.statusResting;
     }
   }
 

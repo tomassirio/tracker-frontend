@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_timeline.dart';
 import 'package:flutter/material.dart';
@@ -113,6 +114,214 @@ void main() {
         ),
         findsNWidgets(3),
       );
+    });
+
+    testWidgets('renders day start marker with sun icon and label', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'day-start-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 3, 8, 0),
+          updateType: TripUpdateType.dayStart,
+          city: 'León',
+          country: 'Spain',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Day Started'), findsOneWidget);
+      expect(find.byIcon(Icons.wb_sunny_rounded), findsAtLeastNWidgets(1));
+      expect(find.text('León'), findsOneWidget);
+    });
+
+    testWidgets('renders day end marker with moon icon and label', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'day-end-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 3, 20, 0),
+          updateType: TripUpdateType.dayEnd,
+          message: 'Good night!',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Day Ended'), findsOneWidget);
+      expect(find.byIcon(Icons.nightlight_round), findsAtLeastNWidgets(1));
+      expect(find.text('Good night!'), findsOneWidget);
+    });
+
+    testWidgets('renders mixed regular and day marker entries', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'update-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 3, 10, 0),
+        ),
+        TripLocation(
+          id: 'day-end-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 3, 20, 0),
+          updateType: TripUpdateType.dayEnd,
+        ),
+        TripLocation(
+          id: 'day-start-2',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 4, 8, 0),
+          updateType: TripUpdateType.dayStart,
+        ),
+        TripLocation(
+          id: 'update-2',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 4, 12, 0),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      // Should show both regular location_on icons and day marker labels
+      expect(find.text('Day Ended'), findsOneWidget);
+      expect(find.text('Day Started'), findsOneWidget);
+      // Regular entries show location_on icons
+      expect(find.byIcon(Icons.location_on), findsAtLeastNWidgets(2));
+    });
+
+    testWidgets('day marker does not show regular location row', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'day-start-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 3, 8, 0),
+          updateType: TripUpdateType.dayStart,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      // Day marker should show "Day Started" label, not the full location row
+      expect(find.text('Day Started'), findsOneWidget);
+      // Should not show full coordinate display location
+      expect(find.text('42.8805, -8.5457'), findsNothing);
+    });
+
+    testWidgets('renders trip started marker with flag icon and label', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'trip-started-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 1, 10, 0),
+          updateType: TripUpdateType.tripStarted,
+          city: 'Madrid',
+          country: 'Spain',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Trip Started'), findsOneWidget);
+      expect(find.byIcon(Icons.flag_rounded), findsAtLeastNWidgets(1));
+      expect(find.text('Madrid'), findsOneWidget);
+    });
+
+    testWidgets('renders trip ended marker with score icon and label', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'trip-ended-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 10, 18, 0),
+          updateType: TripUpdateType.tripEnded,
+          message: 'What a journey!',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Trip Ended'), findsOneWidget);
+      expect(find.byIcon(Icons.sports_score_rounded), findsAtLeastNWidgets(1));
+      expect(find.text('What a journey!'), findsOneWidget);
     });
   });
 }

@@ -5,11 +5,27 @@ import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 /// Widget for sending trip updates (location + battery + optional message)
 /// Displays as a floating bubble that expands to show message input
 /// Only shown on Android, for trip owner, when trip is IN_PROGRESS
+/// For MULTI_DAY trips, also includes "Finish Day N" / "Begin Day N+1" button
 class TripUpdatePanel extends StatefulWidget {
   final bool isCollapsed;
   final bool isLoading;
   final VoidCallback onToggleCollapse;
   final Future<void> Function(String? message) onSendUpdate;
+
+  /// Whether to show the "Finish Day / Begin Day" button (multi-day trips only)
+  final bool showDayButton;
+
+  /// Current day number for the day button label
+  final int currentDay;
+
+  /// Whether the trip is in resting state (affects day button label)
+  final bool isResting;
+
+  /// Callback when the day button is tapped.
+  /// Receives the current message text (if any) so the caller can send a
+  /// trip update alongside the status change.  Returns `true` when the
+  /// action was completed (so the panel clears the message field).
+  final Future<bool> Function(String? message)? onDayButtonTap;
 
   const TripUpdatePanel({
     super.key,
@@ -17,6 +33,10 @@ class TripUpdatePanel extends StatefulWidget {
     required this.isLoading,
     required this.onToggleCollapse,
     required this.onSendUpdate,
+    this.showDayButton = false,
+    this.currentDay = 1,
+    this.isResting = false,
+    this.onDayButtonTap,
   });
 
   @override
@@ -61,8 +81,9 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     return _buildExpandedPanel();
   }
 
-  /// Collapsed state - floating bubble with location/send icon
+  /// Collapsed state - floating bubble with send icon
   Widget _buildCollapsedBubble() {
+    final icon = Icons.send_rounded;
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -93,7 +114,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.send_rounded,
+                  icon,
                   size: 24,
                   color: WandererTheme.primaryOrange,
                 ),
@@ -105,7 +126,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     );
   }
 
-  /// Expanded state - message input and send button
+  /// Expanded state - message input, send button, and optional day button
   Widget _buildExpandedPanel() {
     return Container(
       width: 300,
@@ -158,10 +179,10 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                         color: WandererTheme.primaryOrange,
                       ),
                       const SizedBox(width: 8),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Send Update',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: WandererTheme.textPrimary,
@@ -248,35 +269,48 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Send button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: (_isSending || widget.isLoading)
-                              ? null
-                              : _handleSend,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: WandererTheme.primaryOrange,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      // Action buttons row: [Day Button?] [Send Update]
+                      Row(
+                        children: [
+                          // Day button (Finish Day N / Begin Day N+1)
+                          if (widget.showDayButton) ...[
+                            Expanded(
+                              child: _buildDayButton(),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          // Send update button
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: (_isSending || widget.isLoading)
+                                  ? null
+                                  : _handleSend,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: WandererTheme.primaryOrange,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: _isSending
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      ),
+                                    )
+                                  : const Icon(Icons.send, size: 18),
+                              label: Text(
+                                  _isSending ? 'Sending...' : 'Send Update'),
                             ),
                           ),
-                          icon: _isSending
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                )
-                              : const Icon(Icons.send, size: 18),
-                          label:
-                              Text(_isSending ? 'Sending...' : 'Send Update'),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -286,6 +320,42 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Handle day button tap — passes current message text to the callback
+  /// and clears the input field on success.
+  Future<void> _handleDayButtonTap() async {
+    if (widget.onDayButtonTap == null) return;
+
+    final trimmed = _messageController.text.trim();
+    final message = trimmed.isEmpty ? null : trimmed;
+
+    final completed = await widget.onDayButtonTap!(message);
+    if (completed && mounted) {
+      _messageController.clear();
+    }
+  }
+
+  /// Build the "Finish Day N" / "Begin Day N+1" button for multi-day trips
+  Widget _buildDayButton() {
+    final label = widget.isResting
+        ? 'Begin Day ${widget.currentDay + 1}'
+        : 'Finish Day ${widget.currentDay}';
+    final icon = widget.isResting ? Icons.wb_sunny_outlined : Icons.nightlight_round;
+
+    return ElevatedButton.icon(
+      onPressed: _handleDayButtonTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(label),
     );
   }
 }

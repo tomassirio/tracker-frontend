@@ -58,22 +58,8 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
     final timelinePanel = createTimelinePanel(data);
     final tripUpdatePanel =
         data.showTripUpdatePanel ? createTripUpdatePanel(data) : null;
-    final dayButton = data.showDayButton ? createDayButton(data) : null;
 
-    // Bottom action row: [day button?] [send update?]
-    Widget? bottomRow;
-    if (dayButton != null || tripUpdatePanel != null) {
-      bottomRow = Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (dayButton != null) dayButton,
-          if (tripUpdatePanel != null) tripUpdatePanel,
-        ],
-      );
-    }
-
-    if (bottomRow == null) {
+    if (tripUpdatePanel == null) {
       return timelinePanel;
     }
 
@@ -86,7 +72,7 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
           timelinePanel
         else
           Expanded(child: timelinePanel),
-        bottomRow,
+        tripUpdatePanel,
       ],
     );
   }

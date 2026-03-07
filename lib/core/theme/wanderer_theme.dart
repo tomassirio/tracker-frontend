@@ -27,6 +27,7 @@ class WandererTheme {
   static const Color statusInProgress = Color(0xFFFF9800); // Orange
   static const Color statusCompleted = Color(0xFF2196F3); // Blue
   static const Color statusCancelled = Color(0xFFF44336); // Red
+  static const Color statusResting = Color(0xFF5C6BC0); // Indigo
 
   // Map Colors
   static const Color mapRouteColor = Color(0xFF0088FF); // Blue route line
@@ -38,6 +39,14 @@ class WandererTheme {
   static const Color timelineConnector = Color(0xFFE0E0E0);
   static const Color timelineNodeActive = Color(0xFFE07830);
   static const Color timelineNodeCompleted = Color(0xFF4CAF50);
+
+  // Day Marker Colors (multi-day trip timeline)
+  static const Color dayStartColor = Color(0xFFFFA726); // Warm amber/yellow
+  static const Color dayEndColor = Color(0xFF7E57C2); // Violet/purple
+
+  // Trip Lifecycle Marker Colors (timeline)
+  static const Color tripStartedColor = Color(0xFF81C784); // Pastel green
+  static const Color tripEndedColor = Color(0xFFE57373); // Pastel red
 
   // ========================================
   // GLASSMORPHISM DESIGN SYSTEM
@@ -290,6 +299,9 @@ class WandererTheme {
       case 'CANCELLED':
         bgColor = statusCancelled.withOpacity(0.15);
         break;
+      case 'RESTING':
+        bgColor = statusResting.withOpacity(0.15);
+        break;
       default:
         bgColor = Colors.grey.withOpacity(0.15);
     }
@@ -310,6 +322,8 @@ class WandererTheme {
         return statusCompleted;
       case 'CANCELLED':
         return statusCancelled;
+      case 'RESTING':
+        return statusResting;
       default:
         return textSecondary;
     }

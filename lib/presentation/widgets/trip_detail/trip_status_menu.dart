@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
 /// AppBar actions for changing trip status
@@ -46,7 +47,7 @@ class TripStatusMenu extends StatelessWidget {
             children: [
               Icon(
                 UiHelpers.getStatusIcon(TripStatus.resting),
-                color: Colors.indigo,
+                color: WandererTheme.statusResting,
               ),
               const SizedBox(width: 8),
               const Text('Rest for Night'),

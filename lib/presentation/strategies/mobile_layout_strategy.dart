@@ -81,20 +81,6 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
     final timelinePanel = createTimelinePanel(data);
     final tripUpdatePanel =
         data.showTripUpdatePanel ? createTripUpdatePanel(data) : null;
-    final dayButton = data.showDayButton ? createDayButton(data) : null;
-
-    // Bottom action row: [day button?] [send update?]
-    Widget? bottomRow;
-    if (dayButton != null || tripUpdatePanel != null) {
-      bottomRow = Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (dayButton != null) dayButton,
-          if (tripUpdatePanel != null) tripUpdatePanel,
-        ],
-      );
-    }
 
     if (!data.isTimelineCollapsed) {
       return Column(
@@ -108,7 +94,7 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
             ),
             child: timelinePanel,
           ),
-          if (bottomRow != null) bottomRow,
+          if (tripUpdatePanel != null) tripUpdatePanel,
         ],
       );
     }
@@ -119,7 +105,7 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
       mainAxisSize: MainAxisSize.min,
       children: [
         timelinePanel,
-        if (bottomRow != null) bottomRow,
+        if (tripUpdatePanel != null) tripUpdatePanel,
       ],
     );
   }

@@ -15,6 +15,7 @@ class TripLocation {
   final String? country;
   final double? temperatureCelsius;
   final WeatherCondition? weatherCondition;
+  final TripUpdateType updateType;
 
   TripLocation({
     required this.id,
@@ -29,6 +30,7 @@ class TripLocation {
     this.country,
     this.temperatureCelsius,
     this.weatherCondition,
+    this.updateType = TripUpdateType.regular,
   });
 
   factory TripLocation.fromJson(Map<String, dynamic> json) {
@@ -71,6 +73,9 @@ class TripLocation {
       weatherCondition: json['weatherCondition'] != null
           ? WeatherCondition.fromJson(json['weatherCondition'] as String)
           : null,
+      updateType: json['updateType'] != null
+          ? TripUpdateType.fromJson(json['updateType'] as String)
+          : TripUpdateType.regular,
     );
   }
 
@@ -90,6 +95,8 @@ class TripLocation {
           'temperatureCelsius': temperatureCelsius,
         if (weatherCondition != null)
           'weatherCondition': weatherCondition!.toJson(),
+        if (updateType != TripUpdateType.regular)
+          'updateType': updateType.toJson(),
       };
 
   /// Create a copy with updated place information
@@ -106,6 +113,7 @@ class TripLocation {
     String? country,
     double? temperatureCelsius,
     WeatherCondition? weatherCondition,
+    TripUpdateType? updateType,
   }) {
     return TripLocation(
       id: id ?? this.id,
@@ -120,6 +128,7 @@ class TripLocation {
       country: country ?? this.country,
       temperatureCelsius: temperatureCelsius ?? this.temperatureCelsius,
       weatherCondition: weatherCondition ?? this.weatherCondition,
+      updateType: updateType ?? this.updateType,
     );
   }
 
