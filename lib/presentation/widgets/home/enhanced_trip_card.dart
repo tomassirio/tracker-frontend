@@ -109,6 +109,44 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
     return 'Starts ${DateFormat('MMM d, yyyy').format(localStart)}';
   }
 
+  /// Builds the "Pre Announced" badge shown instead of "Draft" for
+  /// promoted pre-announced trips.
+  Widget _buildPreAnnouncedBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.deepPurple.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.deepPurple.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.campaign, size: 16, color: Colors.deepPurple.shade700),
+          const SizedBox(width: 6),
+          Text(
+            'Pre Announced',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _generateStaticMapUrl() {
     if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) {
       final sorted = TripRouteHelper.getSortedLocations(widget.trip);
@@ -521,8 +559,10 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       runSpacing: 6,
                       children: [
                         if (widget.showAllBadges)
-                          StatusBadge(
-                              status: widget.trip.status, compact: false),
+                          _isPreAnnouncedCreated
+                              ? _buildPreAnnouncedBadge()
+                              : StatusBadge(
+                                  status: widget.trip.status, compact: false),
                         if (widget.relationship != null)
                           RelationshipBadge(
                             type: widget.relationship!,

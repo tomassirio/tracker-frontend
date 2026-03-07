@@ -249,6 +249,10 @@ class _HomeScreenState extends State<HomeScreen>
           _promotedTripIds = promoted.map((p) => p.tripId).toSet();
           _promotedTripsById = {for (final p in promoted) p.tripId: p};
         });
+        // Re-categorize so guests can see newly-loaded pre-announced trips.
+        if (!_isLoggedIn) {
+          _categorizeTrips();
+        }
       }
     } catch (e) {
       // Silently fail — user may not have admin access
@@ -258,11 +262,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _categorizeTrips() {
     if (!_isLoggedIn) {
-      // Guest users only see in-progress and paused trips
+      // Guest users see in-progress and paused trips, plus pre-announced
+      // promoted trips (created status with isPreAnnounced=true).
       _discoverTrips = _allTrips
           .where((t) =>
               t.status == TripStatus.inProgress ||
-              t.status == TripStatus.paused)
+              t.status == TripStatus.paused ||
+              _isPreAnnouncedTrip(t))
           .toList();
       _feedTrips = [];
       _applyFilters();
@@ -333,6 +339,12 @@ class _HomeScreenState extends State<HomeScreen>
     // Priority 3: Most recent
     return b.createdAt.compareTo(a.createdAt);
   }
+
+  /// Returns true when [trip] is a promoted pre-announced trip in CREATED status.
+  bool _isPreAnnouncedTrip(Trip trip) =>
+      trip.status == TripStatus.created &&
+      _promotedTripsById.containsKey(trip.id) &&
+      (_promotedTripsById[trip.id]?.isPreAnnounced ?? false);
 
   void _applyFilters() {
     setState(() {
@@ -1008,6 +1020,12 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildGuestDiscoverSection() {
     final filteredTrips = _getFilteredTrips(_discoverTrips);
 
+    // Separate pre-announced promoted trips from regular live/paused trips.
+    final preAnnouncedTrips =
+        filteredTrips.where(_isPreAnnouncedTrip).toList();
+    final regularTrips =
+        filteredTrips.where((t) => !_isPreAnnouncedTrip(t)).toList();
+
     if (filteredTrips.isEmpty) {
       return Center(
         child: Padding(
@@ -1032,7 +1050,23 @@ class _HomeScreenState extends State<HomeScreen>
       );
     }
 
-    return _buildTripGrid(filteredTrips, showRelationship: false);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (preAnnouncedTrips.isNotEmpty) ...[
+          const FeedSectionHeader(
+            title: 'Featured Trips',
+            icon: Icons.star,
+            subtitle: 'Highlighted adventures from the community',
+          ),
+          const SizedBox(height: 12),
+          _buildTripGrid(preAnnouncedTrips, showRelationship: false),
+          const SizedBox(height: 24),
+        ],
+        if (regularTrips.isNotEmpty)
+          _buildTripGrid(regularTrips, showRelationship: false),
+      ],
+    );
   }
 
   Widget _buildTripGrid(
