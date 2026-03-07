@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart'
     show TripStatus, Visibility;
 import 'package:wanderer_frontend/data/client/api_client.dart';
+import 'package:wanderer_frontend/data/models/domain/trip_promotion.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
 import 'package:wanderer_frontend/data/repositories/home_repository.dart';
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen>
   List<Trip> _feedTrips = [];
   List<Trip> _discoverTrips = [];
   Set<String> _promotedTripIds = {};
+  Map<String, PromotedTrip> _promotedTripsById = {};
   Set<String> _friendIds = {};
   Set<String> _followingIds = {};
 
@@ -246,6 +248,7 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) {
         setState(() {
           _promotedTripIds = promoted.map((p) => p.tripId).toSet();
+          _promotedTripsById = {for (final p in promoted) p.tripId: p};
         });
       }
     } catch (e) {
@@ -1093,6 +1096,7 @@ class _HomeScreenState extends State<HomeScreen>
               relationship: relationship,
               showAllBadges: true,
               isPromoted: _promotedTripIds.contains(trip.id),
+              promotedTrip: _promotedTripsById[trip.id],
             );
           },
         );

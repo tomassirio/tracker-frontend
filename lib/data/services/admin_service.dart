@@ -44,8 +44,17 @@ class AdminService {
   }
 
   /// Promote a trip
-  Future<String> promoteTrip(String tripId, {String? donationLink}) async {
-    final request = PromoteTripRequest(donationLink: donationLink);
+  Future<String> promoteTrip(
+    String tripId, {
+    String? donationLink,
+    bool isPreAnnounced = false,
+    DateTime? countdownStartDate,
+  }) async {
+    final request = PromoteTripRequest(
+      donationLink: donationLink,
+      isPreAnnounced: isPreAnnounced,
+      countdownStartDate: countdownStartDate,
+    );
     return await _promotionCommandClient.promoteTrip(tripId, request);
   }
 
@@ -55,8 +64,17 @@ class AdminService {
   }
 
   /// Update trip promotion
-  Future<String> updatePromotion(String tripId, {String? donationLink}) async {
-    final request = UpdatePromotionRequest(donationLink: donationLink);
+  Future<String> updatePromotion(
+    String tripId, {
+    String? donationLink,
+    bool isPreAnnounced = false,
+    DateTime? countdownStartDate,
+  }) async {
+    final request = UpdatePromotionRequest(
+      donationLink: donationLink,
+      isPreAnnounced: isPreAnnounced,
+      countdownStartDate: countdownStartDate,
+    );
     return await _promotionCommandClient.updatePromotion(tripId, request);
   }
 

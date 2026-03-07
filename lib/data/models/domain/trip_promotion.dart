@@ -42,6 +42,8 @@ class PromotedTrip {
   final String tripOwnerId;
   final String tripOwnerUsername;
   final DateTime promotedAt;
+  final bool isPreAnnounced;
+  final DateTime? countdownStartDate;
 
   PromotedTrip({
     required this.id,
@@ -53,6 +55,8 @@ class PromotedTrip {
     required this.tripOwnerId,
     required this.tripOwnerUsername,
     required this.promotedAt,
+    this.isPreAnnounced = false,
+    this.countdownStartDate,
   });
 
   factory PromotedTrip.fromJson(Map<String, dynamic> json) {
@@ -67,6 +71,10 @@ class PromotedTrip {
       tripOwnerUsername: json['tripOwnerUsername'] as String? ?? '',
       promotedAt: DateTime.tryParse(json['promotedAt'] as String? ?? '') ??
           DateTime.now(),
+      isPreAnnounced: json['preAnnounced'] as bool? ?? false,
+      countdownStartDate: json['countdownStartDate'] != null
+          ? DateTime.tryParse(json['countdownStartDate'] as String)
+          : null,
     );
   }
 
@@ -80,5 +88,8 @@ class PromotedTrip {
         'tripOwnerId': tripOwnerId,
         'tripOwnerUsername': tripOwnerUsername,
         'promotedAt': promotedAt.toIso8601String(),
+        'preAnnounced': isPreAnnounced,
+        if (countdownStartDate != null)
+          'countdownStartDate': countdownStartDate!.toIso8601String(),
       };
 }

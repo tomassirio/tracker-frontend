@@ -1,10 +1,13 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../core/constants/api_endpoints.dart';
+import '../../../core/constants/enums.dart';
 import '../../../data/client/google_maps_api_client.dart';
+import '../../../data/models/domain/trip_promotion.dart';
 import '../../helpers/auth_navigation_helper.dart';
 import '../../helpers/trip_route_helper.dart';
 import '../common/user_avatar.dart';
@@ -19,6 +22,7 @@ class EnhancedTripCard extends StatefulWidget {
   final RelationshipType? relationship;
   final bool showAllBadges;
   final bool isPromoted;
+  final PromotedTrip? promotedTrip;
 
   const EnhancedTripCard({
     super.key,
@@ -28,6 +32,7 @@ class EnhancedTripCard extends StatefulWidget {
     this.relationship,
     this.showAllBadges = true,
     this.isPromoted = false,
+    this.promotedTrip,
   });
 
   @override
@@ -84,6 +89,26 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
   }
 
   bool get _hasPlannedRoute => widget.trip.hasPlannedRoute;
+
+  /// Whether this card should show the coming-soon blur+countdown overlay.
+  bool get _isPreAnnouncedCreated =>
+      widget.promotedTrip != null &&
+      widget.promotedTrip!.isPreAnnounced &&
+      widget.trip.status == TripStatus.created;
+
+  /// Formats a countdown string: "X days", "Today", or "Starts [date]".
+  String _formatCountdown(DateTime startDate) {
+    final localStart = startDate.toLocal();
+    final startDay =
+        DateTime(localStart.year, localStart.month, localStart.day);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final days = startDay.difference(today).inDays;
+    if (days <= 0) return 'Starting today!';
+    if (days == 1) return 'Starts tomorrow';
+    if (days < 30) return 'Starts in $days days';
+    return 'Starts ${DateFormat('MMM d, yyyy').format(localStart)}';
+  }
 
   String _generateStaticMapUrl() {
     if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) {
@@ -441,6 +466,52 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                       ),
                     ),
                   ),
+
+                  // Pre-announced blur + countdown overlay
+                  if (_isPreAnnouncedCreated)
+                    Positioned.fill(
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                          child: Container(
+                            color: Colors.black.withOpacity(0.45),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.access_time,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Coming Soon',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                if (widget.promotedTrip!.countdownStartDate !=
+                                    null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _formatCountdown(
+                                      widget.promotedTrip!.countdownStartDate!,
+                                    ),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 11,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
                   // Top badges overlay with shadow for visibility
                   Positioned(
