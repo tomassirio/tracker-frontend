@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/services/admin_service.dart';
 import 'package:wanderer_frontend/data/services/trip_service.dart';
@@ -189,22 +190,48 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                       keyboardType: TextInputType.url,
                       textCapitalization: TextCapitalization.none,
                     ),
-                    const SizedBox(height: 8),
-                    CheckboxListTile(
-                      value: isPreAnnounced,
-                      onChanged: (value) {
-                        setDialogState(() {
-                          isPreAnnounced = value ?? false;
-                          if (!isPreAnnounced) countdownStartDate = null;
-                        });
-                      },
-                      title: const Text('Pre-Announce'),
-                      subtitle: const Text(
-                        'Show countdown before trip starts',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.campaign,
+                          size: 16,
+                          color: WandererTheme.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Pre-Announce',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: WandererTheme.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                'Show countdown before trip starts',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: WandererTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isPreAnnounced,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              isPreAnnounced = value;
+                              if (!isPreAnnounced) countdownStartDate = null;
+                            });
+                          },
+                          activeColor: WandererTheme.primaryOrange,
+                        ),
+                      ],
                     ),
                     if (isPreAnnounced) ...[
                       const SizedBox(height: 8),
