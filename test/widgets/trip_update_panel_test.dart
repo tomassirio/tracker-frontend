@@ -22,7 +22,7 @@ void main() {
       expect(find.byIcon(Icons.send_rounded), findsOneWidget);
     });
 
-    testWidgets('shows sun icon in collapsed state for resting multi-day trips',
+    testWidgets('shows send icon in collapsed state even when resting',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -40,8 +40,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.send_rounded), findsNothing);
+      expect(find.byIcon(Icons.send_rounded), findsOneWidget);
     });
 
     testWidgets('shows send update header when expanded and not resting',
@@ -89,7 +88,7 @@ void main() {
     });
 
     testWidgets(
-        'shows only begin day button when expanded and resting (no send update)',
+        'shows both begin day button and send update when expanded and resting',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -108,13 +107,12 @@ void main() {
         ),
       );
 
-      // Only day button should be visible, not send update
+      // Both day button and send update should be visible
       expect(find.text('Begin Day 3'), findsOneWidget);
       expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
-      expect(find.text('Multi-Day Trip'), findsOneWidget);
-      // Should not show the send update controls
+      expect(find.text('Send Update'), findsAtLeastNWidgets(1));
       expect(find.text('Your location and battery level will be shared'),
-          findsNothing);
+          findsOneWidget);
     });
 
     testWidgets('calls onDayButtonTap when day button is tapped',

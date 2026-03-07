@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for sending trip updates (location + battery + optional message)
@@ -19,7 +18,7 @@ class TripUpdatePanel extends StatefulWidget {
   /// Current day number for the day button label
   final int currentDay;
 
-  /// Whether the trip is in resting state (affects day button label and send button visibility)
+  /// Whether the trip is in resting state (affects day button label)
   final bool isResting;
 
   /// Callback when the day button is tapped
@@ -79,12 +78,9 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     return _buildExpandedPanel();
   }
 
-  /// Collapsed state - floating bubble with location/send icon
-  /// When resting (multi-day), shows sun icon for "Begin Day"
+  /// Collapsed state - floating bubble with send icon
   Widget _buildCollapsedBubble() {
-    final icon = widget.isResting && widget.showDayButton
-        ? Icons.wb_sunny_outlined
-        : Icons.send_rounded;
+    final icon = Icons.send_rounded;
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -117,9 +113,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                 child: Icon(
                   icon,
                   size: 24,
-                  color: widget.isResting && widget.showDayButton
-                      ? Colors.deepPurple
-                      : WandererTheme.primaryOrange,
+                  color: WandererTheme.primaryOrange,
                 ),
               ),
             ),
@@ -131,9 +125,6 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
 
   /// Expanded state - message input, send button, and optional day button
   Widget _buildExpandedPanel() {
-    // When resting, only show the day button (no send update)
-    final showSendUpdate = !widget.isResting;
-
     return Container(
       width: 300,
       margin: const EdgeInsets.all(16),
@@ -187,7 +178,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          showSendUpdate ? 'Send Update' : 'Multi-Day Trip',
+                          'Send Update',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -212,72 +203,70 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (showSendUpdate) ...[
-                        // Info text
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 14,
-                              color: WandererTheme.textSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                'Your location and battery level will be shared',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: WandererTheme.textSecondary,
-                                ),
+                      // Info text
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: WandererTheme.textSecondary,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Your location and battery level will be shared',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: WandererTheme.textSecondary,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Message input
-                        TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration(
-                            hintText: 'Add a message (optional)',
-                            hintStyle: TextStyle(
-                              color: WandererTheme.textTertiary,
-                              fontSize: 14,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.5),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: WandererTheme.glassBorderColor,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: WandererTheme.glassBorderColor,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: WandererTheme.primaryOrange,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
                             ),
                           ),
-                          maxLines: 2,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _handleSend(),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                        ],
+                      ),
+                      const SizedBox(height: 12),
 
-                      // Action buttons row: [Day Button?] [Send Update?]
+                      // Message input
+                      TextField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          hintText: 'Add a message (optional)',
+                          hintStyle: TextStyle(
+                            color: WandererTheme.textTertiary,
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.5),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: WandererTheme.glassBorderColor,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: WandererTheme.glassBorderColor,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: WandererTheme.primaryOrange,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                        ),
+                        maxLines: 2,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _handleSend(),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Action buttons row: [Day Button?] [Send Update]
                       Row(
                         children: [
                           // Day button (Finish Day N / Begin Day N+1)
@@ -285,40 +274,39 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                             Expanded(
                               child: _buildDayButton(),
                             ),
-                            if (showSendUpdate) const SizedBox(width: 8),
+                            const SizedBox(width: 8),
                           ],
                           // Send update button
-                          if (showSendUpdate)
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: (_isSending || widget.isLoading)
-                                    ? null
-                                    : _handleSend,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: WandererTheme.primaryOrange,
-                                  foregroundColor: Colors.white,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: (_isSending || widget.isLoading)
+                                  ? null
+                                  : _handleSend,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: WandererTheme.primaryOrange,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                icon: _isSending
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : const Icon(Icons.send, size: 18),
-                                label: Text(
-                                    _isSending ? 'Sending...' : 'Send Update'),
                               ),
+                              icon: _isSending
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      ),
+                                    )
+                                  : const Icon(Icons.send, size: 18),
+                              label: Text(
+                                  _isSending ? 'Sending...' : 'Send Update'),
                             ),
+                          ),
                         ],
                       ),
                     ],
