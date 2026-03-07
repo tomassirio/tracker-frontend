@@ -124,6 +124,55 @@ void main() {
       expect(find.text('Automatic Updates'), findsOneWidget);
     });
 
+    testWidgets('shows trip type selector for simple trips (not yet multi-day)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              tripModality: TripModality.simple,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Trip Type'), findsOneWidget);
+      expect(find.text('Simple'), findsOneWidget);
+      expect(find.text('Multi-Day'), findsOneWidget);
+    });
+
+    testWidgets('hides trip type selector when trip is already multi-day',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              tripModality: TripModality.multiDay,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      // Trip Type selector should be hidden (multi-day is irreversible)
+      expect(find.text('Trip Type'), findsNothing);
+      expect(find.text('Simple'), findsNothing);
+      // Switch should still be visible
+      expect(find.byType(Switch), findsOneWidget);
+      expect(find.text('Automatic Updates'), findsOneWidget);
+    });
+
     testWidgets('shows time interval field when automaticUpdates is true', (
       WidgetTester tester,
     ) async {
@@ -184,7 +233,8 @@ void main() {
               updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
-              onSettingsChange: (automaticUpdates, updateRefresh, tripModality) {
+              onSettingsChange:
+                  (automaticUpdates, updateRefresh, tripModality) {
                 capturedAutomaticUpdates = automaticUpdates;
                 capturedUpdateRefresh = updateRefresh;
               },
@@ -215,7 +265,8 @@ void main() {
               automaticUpdates: false,
               isOwner: true,
               isLoading: false,
-              onSettingsChange: (automaticUpdates, updateRefresh, tripModality) {
+              onSettingsChange:
+                  (automaticUpdates, updateRefresh, tripModality) {
                 capturedAutomaticUpdates = automaticUpdates;
                 capturedUpdateRefresh = updateRefresh;
               },
