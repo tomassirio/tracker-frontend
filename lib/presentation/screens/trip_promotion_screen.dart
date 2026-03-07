@@ -722,6 +722,8 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
         return Icons.pause_circle;
       case TripStatus.finished:
         return Icons.check_circle;
+      case TripStatus.resting:
+        return Icons.hotel;
     }
   }
 

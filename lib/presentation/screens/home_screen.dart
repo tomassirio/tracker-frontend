@@ -681,6 +681,8 @@ class _HomeScreenState extends State<HomeScreen>
         return Icons.check_circle_outline;
       case TripStatus.created:
         return Icons.edit_outlined;
+      case TripStatus.resting:
+        return Icons.hotel;
     }
   }
 
@@ -695,6 +697,8 @@ class _HomeScreenState extends State<HomeScreen>
         return Colors.blue;
       case TripStatus.created:
         return Colors.grey;
+      case TripStatus.resting:
+        return Colors.indigo;
     }
   }
 
