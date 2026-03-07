@@ -3,7 +3,6 @@ import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart'
     show TripStatus, Visibility;
 import 'package:wanderer_frontend/data/client/api_client.dart';
-import 'package:wanderer_frontend/data/models/domain/trip_promotion.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
 import 'package:wanderer_frontend/data/repositories/home_repository.dart';

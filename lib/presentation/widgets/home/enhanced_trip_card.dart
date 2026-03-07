@@ -7,7 +7,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/constants/enums.dart';
 import '../../../data/client/google_maps_api_client.dart';
-import '../../../data/models/domain/trip_promotion.dart';
 import '../../helpers/auth_navigation_helper.dart';
 import '../../helpers/trip_route_helper.dart';
 import '../common/user_avatar.dart';
