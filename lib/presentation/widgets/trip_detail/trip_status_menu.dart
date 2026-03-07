@@ -46,7 +46,7 @@ class TripStatusMenu extends StatelessWidget {
             children: [
               Icon(
                 UiHelpers.getStatusIcon(TripStatus.resting),
-                color: Colors.indigo,
+                color: const Color(0xFF5C6BC0),
               ),
               const SizedBox(width: 8),
               const Text('Rest for Night'),

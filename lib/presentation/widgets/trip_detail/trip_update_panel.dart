@@ -337,7 +337,7 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     final label = widget.isResting
         ? 'Begin Day ${widget.currentDay + 1}'
         : 'Finish Day ${widget.currentDay}';
-    final icon = widget.isResting ? Icons.wb_sunny_outlined : Icons.hotel;
+    final icon = widget.isResting ? Icons.wb_sunny_outlined : Icons.nightlight_round;
 
     return ElevatedButton.icon(
       onPressed: widget.onDayButtonTap,

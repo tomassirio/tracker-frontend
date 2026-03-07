@@ -136,7 +136,7 @@ void main() {
       expect(find.byIcon(Icons.check), findsOneWidget);
       // Rest button should not be shown (moved to TripUpdatePanel for multi-day trips)
       expect(find.text('Rest'), findsNothing);
-      expect(find.byIcon(Icons.hotel), findsNothing);
+      expect(find.byIcon(Icons.nightlight_round), findsNothing);
     });
 
     testWidgets('calls onStatusChange when Start Trip is tapped', (

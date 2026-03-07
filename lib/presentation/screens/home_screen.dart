@@ -696,7 +696,7 @@ class _HomeScreenState extends State<HomeScreen>
       case TripStatus.created:
         return Icons.edit_outlined;
       case TripStatus.resting:
-        return Icons.hotel;
+        return Icons.nightlight_round;
     }
   }
 
@@ -712,7 +712,7 @@ class _HomeScreenState extends State<HomeScreen>
       case TripStatus.created:
         return Colors.grey;
       case TripStatus.resting:
-        return Colors.indigo;
+        return const Color(0xFF5C6BC0);
     }
   }
 

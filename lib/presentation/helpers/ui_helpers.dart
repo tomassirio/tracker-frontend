@@ -16,7 +16,7 @@ class UiHelpers {
       case TripStatus.finished:
         return Icons.check;
       case TripStatus.resting:
-        return Icons.hotel;
+        return Icons.nightlight_round;
     }
   }
 

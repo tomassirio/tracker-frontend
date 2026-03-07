@@ -27,6 +27,7 @@ class WandererTheme {
   static const Color statusInProgress = Color(0xFFFF9800); // Orange
   static const Color statusCompleted = Color(0xFF2196F3); // Blue
   static const Color statusCancelled = Color(0xFFF44336); // Red
+  static const Color statusResting = Color(0xFF5C6BC0); // Indigo
 
   // Map Colors
   static const Color mapRouteColor = Color(0xFF0088FF); // Blue route line
@@ -290,6 +291,9 @@ class WandererTheme {
       case 'CANCELLED':
         bgColor = statusCancelled.withOpacity(0.15);
         break;
+      case 'RESTING':
+        bgColor = statusResting.withOpacity(0.15);
+        break;
       default:
         bgColor = Colors.grey.withOpacity(0.15);
     }
@@ -310,6 +314,8 @@ class WandererTheme {
         return statusCompleted;
       case 'CANCELLED':
         return statusCancelled;
+      case 'RESTING':
+        return statusResting;
       default:
         return textSecondary;
     }

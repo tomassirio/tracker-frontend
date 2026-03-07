@@ -85,7 +85,7 @@ void main() {
       // Both day button and send button should be visible
       expect(find.text('Finish Day 2'), findsOneWidget);
       expect(find.text('Send Update'), findsAtLeastNWidgets(1));
-      expect(find.byIcon(Icons.hotel), findsOneWidget);
+      expect(find.byIcon(Icons.nightlight_round), findsOneWidget);
     });
 
     testWidgets(
@@ -164,7 +164,7 @@ void main() {
 
       expect(find.text('Finish Day 1'), findsNothing);
       expect(find.text('Begin Day 2'), findsNothing);
-      expect(find.byIcon(Icons.hotel), findsNothing);
+      expect(find.byIcon(Icons.nightlight_round), findsNothing);
     });
   });
 }
