@@ -384,5 +384,103 @@ void main() {
       expect(location.weatherCondition, WeatherCondition.unknown);
       expect(location.temperatureCelsius, 15.0);
     });
+
+    test('should default updateType to regular', () {
+      final location = TripLocation(
+        id: 'test-id',
+        latitude: 40.7128,
+        longitude: -74.0060,
+        timestamp: DateTime.now(),
+      );
+
+      expect(location.updateType, TripUpdateType.regular);
+    });
+
+    test('should parse DAY_START updateType from JSON', () {
+      final json = {
+        'id': 'day-start-1',
+        'latitude': 42.8805,
+        'longitude': -8.5457,
+        'timestamp': '2026-03-03T08:00:00Z',
+        'updateType': 'DAY_START',
+        'city': 'León',
+        'country': 'Spain',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.updateType, TripUpdateType.dayStart);
+      expect(location.city, 'León');
+    });
+
+    test('should parse DAY_END updateType from JSON', () {
+      final json = {
+        'id': 'day-end-1',
+        'latitude': 42.8805,
+        'longitude': -8.5457,
+        'timestamp': '2026-03-03T20:00:00Z',
+        'updateType': 'DAY_END',
+        'message': 'Good night!',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.updateType, TripUpdateType.dayEnd);
+      expect(location.message, 'Good night!');
+    });
+
+    test('should default to regular when updateType is missing from JSON', () {
+      final json = {
+        'id': 'test-id',
+        'latitude': 40.7128,
+        'longitude': -74.0060,
+        'timestamp': '2024-01-01T12:00:00Z',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.updateType, TripUpdateType.regular);
+    });
+
+    test('should include updateType in toJson for non-regular types', () {
+      final location = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: DateTime.parse('2026-03-03T08:00:00Z'),
+        updateType: TripUpdateType.dayStart,
+      );
+
+      final json = location.toJson();
+
+      expect(json['updateType'], 'DAY_START');
+    });
+
+    test('should omit updateType from toJson for regular updates', () {
+      final location = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: DateTime.parse('2026-03-03T12:00:00Z'),
+      );
+
+      final json = location.toJson();
+
+      expect(json.containsKey('updateType'), isFalse);
+    });
+
+    test('should copy with updateType', () {
+      final original = TripLocation(
+        id: 'test-id',
+        latitude: 42.8805,
+        longitude: -8.5457,
+        timestamp: DateTime.now(),
+      );
+
+      final updated = original.copyWith(updateType: TripUpdateType.dayEnd);
+
+      expect(updated.updateType, TripUpdateType.dayEnd);
+      expect(updated.id, original.id);
+    });
   });
 }

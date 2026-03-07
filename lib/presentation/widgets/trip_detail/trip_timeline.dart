@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/presentation/helpers/battery_helpers.dart';
@@ -104,211 +105,363 @@ class TripTimeline extends StatelessWidget {
           final update = updates[index];
           final isLast = index == updates.length - 1;
           final isFirst = index == 0;
+          final isDayMarker = update.updateType == TripUpdateType.dayStart ||
+              update.updateType == TripUpdateType.dayEnd;
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          if (isDayMarker) {
+            return _buildDayMarkerEntry(update, isFirst, isLast);
+          }
+
+          return _buildRegularEntry(update, isFirst, isLast);
+        },
+      ),
+    );
+  }
+
+  /// Build a regular timeline entry (location update)
+  Widget _buildRegularEntry(TripLocation update, bool isFirst, bool isLast) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Timeline connector
+        SizedBox(
+          width: 24,
+          child: Column(
             children: [
-              // Timeline connector
-              SizedBox(
-                width: 24,
-                child: Column(
-                  children: [
-                    // Connector line above (if not first)
-                    if (!isFirst)
-                      Container(
-                        width: 2,
-                        height: 8,
-                        color: WandererTheme.timelineConnector,
-                      ),
-                    // Timeline node
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: isFirst
-                            ? WandererTheme.primaryOrange
-                            : WandererTheme.timelineConnector,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isFirst
-                              ? WandererTheme.primaryOrange
-                              : Colors.grey.shade400,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    // Connector line below (if not last)
-                    if (!isLast)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Container(
-                          width: 2,
-                          height: 80,
-                          color: WandererTheme.timelineConnector,
-                        ),
-                      ),
-                  ],
+              // Connector line above (if not first)
+              if (!isFirst)
+                Container(
+                  width: 2,
+                  height: 8,
+                  color: WandererTheme.timelineConnector,
+                ),
+              // Timeline node
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: isFirst
+                      ? WandererTheme.primaryOrange
+                      : WandererTheme.timelineConnector,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isFirst
+                        ? WandererTheme.primaryOrange
+                        : Colors.grey.shade400,
+                    width: 2,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              // Update card
-              Expanded(
-                child: GestureDetector(
-                  onTap:
-                      onUpdateTap != null ? () => onUpdateTap!(update) : null,
+              // Connector line below (if not last)
+              if (!isLast)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isFirst
-                          ? Colors.white.withOpacity(0.8)
-                          : Colors.white.withOpacity(0.5),
-                      borderRadius:
-                          BorderRadius.circular(WandererTheme.glassRadiusSmall),
-                      border: Border.all(
-                        color: isFirst
-                            ? WandererTheme.primaryOrange.withOpacity(0.3)
-                            : WandererTheme.glassBorderColor,
+                    width: 2,
+                    height: 80,
+                    color: WandererTheme.timelineConnector,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Update card
+        Expanded(
+          child: GestureDetector(
+            onTap: onUpdateTap != null ? () => onUpdateTap!(update) : null,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isFirst
+                    ? Colors.white.withOpacity(0.8)
+                    : Colors.white.withOpacity(0.5),
+                borderRadius:
+                    BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                border: Border.all(
+                  color: isFirst
+                      ? WandererTheme.primaryOrange.withOpacity(0.3)
+                      : WandererTheme.glassBorderColor,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header: timestamp, weather, and battery
+                  Row(
+                    children: [
+                      Text(
+                        _formatTimestamp(update.timestamp),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isFirst
+                              ? WandererTheme.primaryOrange
+                              : WandererTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header: timestamp, weather, and battery
-                        Row(
-                          children: [
-                            Text(
-                              _formatTimestamp(update.timestamp),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: isFirst
-                                    ? WandererTheme.primaryOrange
-                                    : WandererTheme.textSecondary,
-                              ),
-                            ),
-                            Expanded(
-                              child: (update.temperatureCelsius != null ||
-                                      update.weatherCondition != null)
-                                  ? Center(
-                                      child: _buildWeatherBadge(update),
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
-                            if (update.battery != null)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: BatteryHelpers.getBatteryColor(
-                                    update.battery!,
-                                  ).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      BatteryHelpers.getBatteryIcon(
-                                          update.battery!),
-                                      size: 12,
-                                      color: BatteryHelpers.getBatteryColor(
-                                          update.battery!),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      '${update.battery}%',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: BatteryHelpers.getBatteryColor(
-                                            update.battery!),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Location
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 14,
-                              color: WandererTheme.primaryOrange,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                update.displayLocation,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: WandererTheme.textPrimary,
-                                  fontWeight: update.city != null
-                                      ? FontWeight.w500
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Message if present
-                        if (update.message != null &&
-                            update.message!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: WandererTheme.backgroundLight,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              update.message!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: WandererTheme.textSecondary,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
+                      Expanded(
+                        child: (update.temperatureCelsius != null ||
+                                update.weatherCondition != null)
+                            ? Center(
+                                child: _buildWeatherBadge(update),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      if (update.battery != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
                           ),
-                        ],
-                        // Reactions if present
-                        if (update.reactionCount > 0) ...[
-                          const SizedBox(height: 8),
-                          Row(
+                          decoration: BoxDecoration(
+                            color: BatteryHelpers.getBatteryColor(
+                              update.battery!,
+                            ).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.favorite,
+                                BatteryHelpers.getBatteryIcon(update.battery!),
                                 size: 12,
-                                color: Colors.red.shade400,
+                                color: BatteryHelpers.getBatteryColor(
+                                    update.battery!),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 2),
                               Text(
-                                '${update.reactionCount}',
+                                '${update.battery}%',
                                 style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: WandererTheme.textSecondary,
+                                  fontSize: 10,
+                                  color: BatteryHelpers.getBatteryColor(
+                                      update.battery!),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Location
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: WandererTheme.primaryOrange,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          update.displayLocation,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: WandererTheme.textPrimary,
+                            fontWeight: update.city != null
+                                ? FontWeight.w500
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Message if present
+                  if (update.message != null &&
+                      update.message!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: WandererTheme.backgroundLight,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        update.message!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: WandererTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                  // Reactions if present
+                  if (update.reactionCount > 0) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.favorite,
+                          size: 12,
+                          color: Colors.red.shade400,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${update.reactionCount}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: WandererTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build a day marker timeline entry (Day Start / Day End)
+  Widget _buildDayMarkerEntry(
+      TripLocation update, bool isFirst, bool isLast) {
+    final isDayStart = update.updateType == TripUpdateType.dayStart;
+    final markerColor = isDayStart
+        ? WandererTheme.dayStartColor
+        : WandererTheme.dayEndColor;
+    final markerIcon = isDayStart
+        ? Icons.wb_sunny_rounded
+        : Icons.nightlight_round;
+    final label = isDayStart ? 'Day Started' : 'Day Ended';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Timeline connector with themed node
+        SizedBox(
+          width: 24,
+          child: Column(
+            children: [
+              if (!isFirst)
+                Container(
+                  width: 2,
+                  height: 8,
+                  color: WandererTheme.timelineConnector,
+                ),
+              // Larger themed node for day markers
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: markerColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: markerColor,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  markerIcon,
+                  size: 10,
+                  color: Colors.white,
+                ),
+              ),
+              if (!isLast)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Container(
+                    width: 2,
+                    height: 40,
+                    color: WandererTheme.timelineConnector,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Day marker card
+        Expanded(
+          child: GestureDetector(
+            onTap: onUpdateTap != null ? () => onUpdateTap!(update) : null,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: markerColor.withOpacity(0.08),
+                borderRadius:
+                    BorderRadius.circular(WandererTheme.glassRadiusSmall),
+                border: Border.all(
+                  color: markerColor.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    markerIcon,
+                    size: 18,
+                    color: markerColor,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: markerColor,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _formatTimestamp(update.timestamp),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: markerColor.withOpacity(0.7),
+                          ),
+                        ),
+                        if (update.message != null &&
+                            update.message!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            update.message!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: WandererTheme.textSecondary,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
-                      ], // closes Column children
-                    ), // closes Column
-                  ), // closes Container
-                ), // closes GestureDetector
-              ), // closes Expanded
-            ], // closes Row children
-          ); // closes Row
-        },
-      ),
+                      ],
+                    ),
+                  ),
+                  if (update.city != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.location_on,
+                      size: 12,
+                      color: markerColor.withOpacity(0.5),
+                    ),
+                    const SizedBox(width: 2),
+                    Flexible(
+                      child: Text(
+                        update.city!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: markerColor.withOpacity(0.7),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

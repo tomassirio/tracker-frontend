@@ -40,6 +40,10 @@ class WandererTheme {
   static const Color timelineNodeActive = Color(0xFFE07830);
   static const Color timelineNodeCompleted = Color(0xFF4CAF50);
 
+  // Day Marker Colors (multi-day trip timeline)
+  static const Color dayStartColor = Color(0xFFFFA726); // Warm amber/yellow
+  static const Color dayEndColor = Color(0xFF7E57C2); // Violet/purple
+
   // ========================================
   // GLASSMORPHISM DESIGN SYSTEM
   // ========================================

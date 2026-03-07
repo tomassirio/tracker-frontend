@@ -232,5 +232,41 @@ void main() {
         expect(WeatherCondition.values.length, 41);
       });
     });
+
+    group('TripUpdateType', () {
+      test('toJson converts TripUpdateType to string correctly', () {
+        expect(TripUpdateType.regular.toJson(), 'REGULAR');
+        expect(TripUpdateType.dayStart.toJson(), 'DAY_START');
+        expect(TripUpdateType.dayEnd.toJson(), 'DAY_END');
+      });
+
+      test('fromJson parses TripUpdateType from string correctly', () {
+        expect(TripUpdateType.fromJson('REGULAR'), TripUpdateType.regular);
+        expect(TripUpdateType.fromJson('DAY_START'), TripUpdateType.dayStart);
+        expect(TripUpdateType.fromJson('DAY_END'), TripUpdateType.dayEnd);
+      });
+
+      test('fromJson is case-insensitive', () {
+        expect(TripUpdateType.fromJson('regular'), TripUpdateType.regular);
+        expect(TripUpdateType.fromJson('Day_Start'), TripUpdateType.dayStart);
+        expect(TripUpdateType.fromJson('day_end'), TripUpdateType.dayEnd);
+      });
+
+      test('fromJson defaults to regular for unknown values', () {
+        expect(TripUpdateType.fromJson('UNKNOWN'), TripUpdateType.regular);
+        expect(
+            TripUpdateType.fromJson('SOME_OTHER_TYPE'), TripUpdateType.regular);
+      });
+
+      test('displayLabel returns correct labels', () {
+        expect(TripUpdateType.regular.displayLabel, 'Update');
+        expect(TripUpdateType.dayStart.displayLabel, 'Day Start');
+        expect(TripUpdateType.dayEnd.displayLabel, 'Day End');
+      });
+
+      test('has exactly 3 values', () {
+        expect(TripUpdateType.values.length, 3);
+      });
+    });
   });
 }

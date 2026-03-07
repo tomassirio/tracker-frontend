@@ -325,6 +325,55 @@ enum TripStatus {
   }
 }
 
+/// Type of trip update/location entry
+enum TripUpdateType {
+  /// A regular location update
+  regular,
+
+  /// Marks the end of a day in a multi-day trip
+  dayEnd,
+
+  /// Marks the beginning of a new day in a multi-day trip
+  dayStart;
+
+  /// Human-readable label for display
+  String get displayLabel {
+    switch (this) {
+      case TripUpdateType.regular:
+        return 'Update';
+      case TripUpdateType.dayEnd:
+        return 'Day End';
+      case TripUpdateType.dayStart:
+        return 'Day Start';
+    }
+  }
+
+  /// Convert type to string for API
+  String toJson() {
+    switch (this) {
+      case TripUpdateType.regular:
+        return 'REGULAR';
+      case TripUpdateType.dayEnd:
+        return 'DAY_END';
+      case TripUpdateType.dayStart:
+        return 'DAY_START';
+    }
+  }
+
+  /// Parse type from API response
+  static TripUpdateType fromJson(String value) {
+    switch (value.toUpperCase()) {
+      case 'DAY_END':
+        return TripUpdateType.dayEnd;
+      case 'DAY_START':
+        return TripUpdateType.dayStart;
+      case 'REGULAR':
+      default:
+        return TripUpdateType.regular;
+    }
+  }
+}
+
 /// Modality for a trip
 enum TripModality {
   /// A single-day trip
