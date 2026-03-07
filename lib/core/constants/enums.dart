@@ -330,11 +330,11 @@ enum TripUpdateType {
   /// A regular location update
   regular,
 
-  /// Marks the end of a day in a multi-day trip
-  dayEnd,
-
   /// Marks the beginning of a new day in a multi-day trip
-  dayStart;
+  dayStart,
+
+  /// Marks the end of a day in a multi-day trip
+  dayEnd;
 
   /// Human-readable label for display
   String get displayLabel {
