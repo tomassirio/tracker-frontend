@@ -1,7 +1,7 @@
 # wanderer_frontend
 
-![Version](https://img.shields.io/badge/version-1.2.9-blue)
-![Coverage](https://img.shields.io/badge/coverage-29%25-red)
+![Version](https://img.shields.io/badge/version-1.2.10-blue)
+![Coverage](https://img.shields.io/badge/coverage-31%25-red)
 ![Flutter](https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
