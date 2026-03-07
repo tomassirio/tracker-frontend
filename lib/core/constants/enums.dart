@@ -334,7 +334,13 @@ enum TripUpdateType {
   dayStart,
 
   /// Marks the end of a day in a multi-day trip
-  dayEnd;
+  dayEnd,
+
+  /// Marks the very start of the trip
+  tripStarted,
+
+  /// Marks the very end of the trip
+  tripEnded;
 
   /// Human-readable label for display
   String get displayLabel {
@@ -345,6 +351,10 @@ enum TripUpdateType {
         return 'Day End';
       case TripUpdateType.dayStart:
         return 'Day Start';
+      case TripUpdateType.tripStarted:
+        return 'Trip Started';
+      case TripUpdateType.tripEnded:
+        return 'Trip Ended';
     }
   }
 
@@ -357,6 +367,10 @@ enum TripUpdateType {
         return 'DAY_END';
       case TripUpdateType.dayStart:
         return 'DAY_START';
+      case TripUpdateType.tripStarted:
+        return 'TRIP_STARTED';
+      case TripUpdateType.tripEnded:
+        return 'TRIP_ENDED';
     }
   }
 
@@ -367,6 +381,10 @@ enum TripUpdateType {
         return TripUpdateType.dayEnd;
       case 'DAY_START':
         return TripUpdateType.dayStart;
+      case 'TRIP_STARTED':
+        return TripUpdateType.tripStarted;
+      case 'TRIP_ENDED':
+        return TripUpdateType.tripEnded;
       case 'REGULAR':
       default:
         return TripUpdateType.regular;

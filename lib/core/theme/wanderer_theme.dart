@@ -44,6 +44,10 @@ class WandererTheme {
   static const Color dayStartColor = Color(0xFFFFA726); // Warm amber/yellow
   static const Color dayEndColor = Color(0xFF7E57C2); // Violet/purple
 
+  // Trip Lifecycle Marker Colors (timeline)
+  static const Color tripStartedColor = Color(0xFF81C784); // Pastel green
+  static const Color tripEndedColor = Color(0xFFE57373); // Pastel red
+
   // ========================================
   // GLASSMORPHISM DESIGN SYSTEM
   // ========================================

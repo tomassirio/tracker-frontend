@@ -429,6 +429,38 @@ void main() {
       expect(location.message, 'Good night!');
     });
 
+    test('should parse TRIP_STARTED updateType from JSON', () {
+      final json = {
+        'id': 'trip-started-1',
+        'latitude': 42.8805,
+        'longitude': -8.5457,
+        'timestamp': '2026-03-01T10:00:00Z',
+        'updateType': 'TRIP_STARTED',
+        'message': 'Here we go!',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.updateType, TripUpdateType.tripStarted);
+      expect(location.message, 'Here we go!');
+    });
+
+    test('should parse TRIP_ENDED updateType from JSON', () {
+      final json = {
+        'id': 'trip-ended-1',
+        'latitude': 42.8805,
+        'longitude': -8.5457,
+        'timestamp': '2026-03-10T18:00:00Z',
+        'updateType': 'TRIP_ENDED',
+        'message': 'What a journey!',
+      };
+
+      final location = TripLocation.fromJson(json);
+
+      expect(location.updateType, TripUpdateType.tripEnded);
+      expect(location.message, 'What a journey!');
+    });
+
     test('should default to regular when updateType is missing from JSON', () {
       final json = {
         'id': 'test-id',

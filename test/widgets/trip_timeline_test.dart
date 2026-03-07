@@ -260,5 +260,68 @@ void main() {
       // Should not show full coordinate display location
       expect(find.text('42.8805, -8.5457'), findsNothing);
     });
+
+    testWidgets('renders trip started marker with flag icon and label', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'trip-started-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 1, 10, 0),
+          updateType: TripUpdateType.tripStarted,
+          city: 'Madrid',
+          country: 'Spain',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Trip Started'), findsOneWidget);
+      expect(find.byIcon(Icons.flag_rounded), findsAtLeastNWidgets(1));
+      expect(find.text('Madrid'), findsOneWidget);
+    });
+
+    testWidgets('renders trip ended marker with score icon and label', (
+      WidgetTester tester,
+    ) async {
+      final updates = [
+        TripLocation(
+          id: 'trip-ended-1',
+          latitude: 42.8805,
+          longitude: -8.5457,
+          timestamp: DateTime(2026, 3, 10, 18, 0),
+          updateType: TripUpdateType.tripEnded,
+          message: 'What a journey!',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripTimeline(
+              updates: updates,
+              isLoading: false,
+              onRefresh: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Trip Ended'), findsOneWidget);
+      expect(find.byIcon(Icons.sports_score_rounded), findsAtLeastNWidgets(1));
+      expect(find.text('What a journey!'), findsOneWidget);
+    });
   });
 }

@@ -238,18 +238,28 @@ void main() {
         expect(TripUpdateType.regular.toJson(), 'REGULAR');
         expect(TripUpdateType.dayStart.toJson(), 'DAY_START');
         expect(TripUpdateType.dayEnd.toJson(), 'DAY_END');
+        expect(TripUpdateType.tripStarted.toJson(), 'TRIP_STARTED');
+        expect(TripUpdateType.tripEnded.toJson(), 'TRIP_ENDED');
       });
 
       test('fromJson parses TripUpdateType from string correctly', () {
         expect(TripUpdateType.fromJson('REGULAR'), TripUpdateType.regular);
         expect(TripUpdateType.fromJson('DAY_START'), TripUpdateType.dayStart);
         expect(TripUpdateType.fromJson('DAY_END'), TripUpdateType.dayEnd);
+        expect(
+            TripUpdateType.fromJson('TRIP_STARTED'), TripUpdateType.tripStarted);
+        expect(
+            TripUpdateType.fromJson('TRIP_ENDED'), TripUpdateType.tripEnded);
       });
 
       test('fromJson is case-insensitive', () {
         expect(TripUpdateType.fromJson('regular'), TripUpdateType.regular);
         expect(TripUpdateType.fromJson('Day_Start'), TripUpdateType.dayStart);
         expect(TripUpdateType.fromJson('day_end'), TripUpdateType.dayEnd);
+        expect(TripUpdateType.fromJson('trip_started'),
+            TripUpdateType.tripStarted);
+        expect(
+            TripUpdateType.fromJson('Trip_Ended'), TripUpdateType.tripEnded);
       });
 
       test('fromJson defaults to regular for unknown values', () {
@@ -262,10 +272,12 @@ void main() {
         expect(TripUpdateType.regular.displayLabel, 'Update');
         expect(TripUpdateType.dayStart.displayLabel, 'Day Start');
         expect(TripUpdateType.dayEnd.displayLabel, 'Day End');
+        expect(TripUpdateType.tripStarted.displayLabel, 'Trip Started');
+        expect(TripUpdateType.tripEnded.displayLabel, 'Trip Ended');
       });
 
-      test('has exactly 3 values', () {
-        expect(TripUpdateType.values.length, 3);
+      test('has exactly 5 values', () {
+        expect(TripUpdateType.values.length, 5);
       });
     });
   });

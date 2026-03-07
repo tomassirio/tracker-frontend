@@ -106,7 +106,9 @@ class TripTimeline extends StatelessWidget {
           final isLast = index == updates.length - 1;
           final isFirst = index == 0;
           final isDayMarker = update.updateType == TripUpdateType.dayStart ||
-              update.updateType == TripUpdateType.dayEnd;
+              update.updateType == TripUpdateType.dayEnd ||
+              update.updateType == TripUpdateType.tripStarted ||
+              update.updateType == TripUpdateType.tripEnded;
 
           if (isDayMarker) {
             return _buildDayMarkerEntry(update, isFirst, isLast);
@@ -322,17 +324,36 @@ class TripTimeline extends StatelessWidget {
     );
   }
 
-  /// Build a day marker timeline entry (Day Start / Day End)
+  /// Build a day/trip marker timeline entry (Day Start / Day End / Trip Started / Trip Ended)
   Widget _buildDayMarkerEntry(
       TripLocation update, bool isFirst, bool isLast) {
-    final isDayStart = update.updateType == TripUpdateType.dayStart;
-    final markerColor = isDayStart
-        ? WandererTheme.dayStartColor
-        : WandererTheme.dayEndColor;
-    final markerIcon = isDayStart
-        ? Icons.wb_sunny_rounded
-        : Icons.nightlight_round;
-    final label = isDayStart ? 'Day Started' : 'Day Ended';
+    final Color markerColor;
+    final IconData markerIcon;
+    final String label;
+
+    switch (update.updateType) {
+      case TripUpdateType.dayStart:
+        markerColor = WandererTheme.dayStartColor;
+        markerIcon = Icons.wb_sunny_rounded;
+        label = 'Day Started';
+      case TripUpdateType.dayEnd:
+        markerColor = WandererTheme.dayEndColor;
+        markerIcon = Icons.nightlight_round;
+        label = 'Day Ended';
+      case TripUpdateType.tripStarted:
+        markerColor = WandererTheme.tripStartedColor;
+        markerIcon = Icons.flag_rounded;
+        label = 'Trip Started';
+      case TripUpdateType.tripEnded:
+        markerColor = WandererTheme.tripEndedColor;
+        markerIcon = Icons.sports_score_rounded;
+        label = 'Trip Ended';
+      case TripUpdateType.regular:
+        // Should not reach here; fall back to neutral styling
+        markerColor = WandererTheme.textSecondary;
+        markerIcon = Icons.location_on;
+        label = 'Update';
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
