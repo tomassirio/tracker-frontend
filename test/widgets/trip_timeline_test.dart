@@ -143,7 +143,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Day Started'), findsOneWidget);
+      expect(find.text('Day 2 Started'), findsOneWidget);
       expect(find.byIcon(Icons.wb_sunny_rounded), findsAtLeastNWidgets(1));
       expect(find.text('León'), findsOneWidget);
     });
@@ -174,7 +174,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Day Ended'), findsOneWidget);
+      expect(find.text('Day 1 Ended'), findsOneWidget);
       expect(find.byIcon(Icons.nightlight_round), findsAtLeastNWidgets(1));
       expect(find.text('Good night!'), findsOneWidget);
     });
@@ -224,8 +224,8 @@ void main() {
       );
 
       // Should show both regular location_on icons and day marker labels
-      expect(find.text('Day Ended'), findsOneWidget);
-      expect(find.text('Day Started'), findsOneWidget);
+      expect(find.text('Day 2 Ended'), findsOneWidget);
+      expect(find.text('Day 2 Started'), findsOneWidget);
       // Regular entries show location_on icons
       expect(find.byIcon(Icons.location_on), findsAtLeastNWidgets(2));
     });
@@ -255,8 +255,8 @@ void main() {
         ),
       );
 
-      // Day marker should show "Day Started" label, not the full location row
-      expect(find.text('Day Started'), findsOneWidget);
+      // Day marker should show numbered day label, not the full location row
+      expect(find.text('Day 2 Started'), findsOneWidget);
       // Should not show full coordinate display location
       expect(find.text('42.8805, -8.5457'), findsNothing);
     });

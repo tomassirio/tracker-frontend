@@ -3,71 +3,103 @@ import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
-/// AppBar actions for changing trip status
+/// AppBar actions for changing trip status.
+/// Respects the backend transition matrix:
+///   CREATED → IN_PROGRESS, FINISHED
+///   IN_PROGRESS → PAUSED, FINISHED (RESTING via toggle-day for MULTI_DAY)
+///   PAUSED → IN_PROGRESS, FINISHED
+///   RESTING → IN_PROGRESS (via toggle-day), FINISHED
+///   FINISHED → (terminal)
 class TripStatusMenu extends StatelessWidget {
   final Function(TripStatus) onStatusChanged;
+  final TripStatus currentStatus;
+  final TripModality? tripModality;
 
-  const TripStatusMenu({super.key, required this.onStatusChanged});
+  const TripStatusMenu({
+    super.key,
+    required this.onStatusChanged,
+    required this.currentStatus,
+    this.tripModality,
+  });
+
+  bool get _isMultiDay => tripModality == TripModality.multiDay;
+
+  /// Returns the allowed status transitions based on current status and modality
+  List<TripStatus> get _allowedTransitions {
+    switch (currentStatus) {
+      case TripStatus.created:
+        return [TripStatus.inProgress, TripStatus.finished];
+      case TripStatus.inProgress:
+        // RESTING is only reachable via toggle-day endpoint, not shown here
+        return [TripStatus.paused, TripStatus.finished];
+      case TripStatus.paused:
+        return [TripStatus.inProgress, TripStatus.finished];
+      case TripStatus.resting:
+        // IN_PROGRESS from RESTING is via toggle-day for multi-day
+        if (_isMultiDay) {
+          return [TripStatus.finished];
+        }
+        return [TripStatus.inProgress, TripStatus.finished];
+      case TripStatus.finished:
+        return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final transitions = _allowedTransitions;
+    if (transitions.isEmpty) return const SizedBox.shrink();
+
     return PopupMenuButton<TripStatus>(
       icon: const Icon(Icons.more_vert),
       onSelected: onStatusChanged,
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: TripStatus.inProgress,
+      itemBuilder: (context) => transitions.map((status) {
+        return PopupMenuItem(
+          value: status,
           child: Row(
             children: [
               Icon(
-                UiHelpers.getStatusIcon(TripStatus.inProgress),
-                color: Colors.green,
+                UiHelpers.getStatusIcon(status),
+                color: _getStatusColor(status),
               ),
               const SizedBox(width: 8),
-              const Text('Start Trip'),
+              Text(_getStatusLabel(status)),
             ],
           ),
-        ),
-        PopupMenuItem(
-          value: TripStatus.paused,
-          child: Row(
-            children: [
-              Icon(
-                UiHelpers.getStatusIcon(TripStatus.paused),
-                color: Colors.orange,
-              ),
-              const SizedBox(width: 8),
-              const Text('Pause Trip'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: TripStatus.resting,
-          child: Row(
-            children: [
-              Icon(
-                UiHelpers.getStatusIcon(TripStatus.resting),
-                color: WandererTheme.statusResting,
-              ),
-              const SizedBox(width: 8),
-              const Text('Rest for Night'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: TripStatus.finished,
-          child: Row(
-            children: [
-              Icon(
-                UiHelpers.getStatusIcon(TripStatus.finished),
-                color: Colors.grey,
-              ),
-              const SizedBox(width: 8),
-              const Text('Finish Trip'),
-            ],
-          ),
-        ),
-      ],
+        );
+      }).toList(),
     );
+  }
+
+  Color _getStatusColor(TripStatus status) {
+    switch (status) {
+      case TripStatus.inProgress:
+        return Colors.green;
+      case TripStatus.paused:
+        return Colors.orange;
+      case TripStatus.resting:
+        return WandererTheme.statusResting;
+      case TripStatus.finished:
+        return Colors.grey;
+      case TripStatus.created:
+        return Colors.blue;
+    }
+  }
+
+  String _getStatusLabel(TripStatus status) {
+    switch (status) {
+      case TripStatus.inProgress:
+        return currentStatus == TripStatus.created
+            ? 'Start Trip'
+            : 'Resume Trip';
+      case TripStatus.paused:
+        return 'Pause Trip';
+      case TripStatus.resting:
+        return 'Rest for Night';
+      case TripStatus.finished:
+        return 'Finish Trip';
+      case TripStatus.created:
+        return 'Created';
+    }
   }
 }

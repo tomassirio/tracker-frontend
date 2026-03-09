@@ -90,6 +90,12 @@ class TripService {
     return await _tripCommandClient.changeSettings(tripId, request);
   }
 
+  /// Toggle day state for MULTI_DAY trips (end day / start next day)
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> toggleDay(String tripId) async {
+    return await _tripCommandClient.toggleDay(tripId);
+  }
+
   /// Delete a trip
   /// Returns the trip ID immediately. Deletion will be confirmed via WebSocket.
   Future<String> deleteTrip(String tripId) async {

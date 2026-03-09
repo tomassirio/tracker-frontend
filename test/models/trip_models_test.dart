@@ -728,6 +728,234 @@ void main() {
 
         expect(updated.tripModality, TripModality.multiDay);
       });
+
+      test('copyWith updates tripDays and currentDay', () {
+        final trip = Trip(
+          id: 'trip123',
+          userId: 'user456',
+          username: 'testuser',
+          name: 'Test Trip',
+          visibility: Visibility.public,
+          status: TripStatus.inProgress,
+          tripModality: TripModality.multiDay,
+          createdAt: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 2),
+        );
+
+        final days = [
+          TripDay(
+            id: 'day-1',
+            tripId: 'trip123',
+            dayNumber: 1,
+            startTimestamp: DateTime(2024, 1, 1),
+          ),
+        ];
+
+        final updated = trip.copyWith(tripDays: days, currentDay: 2);
+
+        expect(updated.tripDays, isNotNull);
+        expect(updated.tripDays!.length, 1);
+        expect(updated.currentDay, 2);
+      });
+
+      test('fromJson parses tripDays and currentDay', () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'name': 'Multi Day Trip',
+          'username': 'testuser',
+          'status': 'IN_PROGRESS',
+          'visibility': 'PUBLIC',
+          'creationTimestamp': '2024-01-01T00:00:00.000Z',
+          'tripSettings': {
+            'tripModality': 'MULTI_DAY',
+          },
+          'tripDetails': {
+            'currentDay': 3,
+          },
+          'tripDays': [
+            {
+              'id': 'day-1',
+              'tripId': 'trip123',
+              'dayNumber': 1,
+              'startTimestamp': '2024-01-01T08:00:00.000Z',
+              'endTimestamp': '2024-01-01T18:00:00.000Z',
+            },
+            {
+              'id': 'day-2',
+              'tripId': 'trip123',
+              'dayNumber': 2,
+              'startTimestamp': '2024-01-02T08:00:00.000Z',
+              'endTimestamp': '2024-01-02T17:00:00.000Z',
+            },
+            {
+              'id': 'day-3',
+              'tripId': 'trip123',
+              'dayNumber': 3,
+              'startTimestamp': '2024-01-03T09:00:00.000Z',
+            },
+          ],
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.tripModality, TripModality.multiDay);
+        expect(trip.currentDay, 3);
+        expect(trip.tripDays, isNotNull);
+        expect(trip.tripDays!.length, 3);
+        expect(trip.tripDays![0].dayNumber, 1);
+        expect(trip.tripDays![0].endTimestamp, isNotNull);
+        expect(trip.tripDays![0].isActive, false);
+        expect(trip.tripDays![2].dayNumber, 3);
+        expect(trip.tripDays![2].endTimestamp, isNull);
+        expect(trip.tripDays![2].isActive, true);
+      });
+    });
+
+    group('TripDay', () {
+      test('fromJson creates TripDay from JSON', () {
+        final json = {
+          'id': 'day-1',
+          'tripId': 'trip-123',
+          'dayNumber': 1,
+          'startTimestamp': '2024-01-01T08:00:00.000Z',
+          'endTimestamp': '2024-01-01T18:00:00.000Z',
+        };
+
+        final day = TripDay.fromJson(json);
+
+        expect(day.id, 'day-1');
+        expect(day.tripId, 'trip-123');
+        expect(day.dayNumber, 1);
+        expect(day.startTimestamp, isNotNull);
+        expect(day.endTimestamp, isNotNull);
+        expect(day.isActive, false);
+      });
+
+      test('fromJson creates active TripDay (no endTimestamp)', () {
+        final json = {
+          'id': 'day-2',
+          'tripId': 'trip-123',
+          'dayNumber': 2,
+          'startTimestamp': '2024-01-02T08:00:00.000Z',
+        };
+
+        final day = TripDay.fromJson(json);
+
+        expect(day.id, 'day-2');
+        expect(day.dayNumber, 2);
+        expect(day.endTimestamp, isNull);
+        expect(day.isActive, true);
+      });
+
+      test('toJson converts TripDay correctly', () {
+        final day = TripDay(
+          id: 'day-1',
+          tripId: 'trip-123',
+          dayNumber: 1,
+          startTimestamp: DateTime.utc(2024, 1, 1, 8, 0),
+          endTimestamp: DateTime.utc(2024, 1, 1, 18, 0),
+        );
+
+        final json = day.toJson();
+
+        expect(json['id'], 'day-1');
+        expect(json['tripId'], 'trip-123');
+        expect(json['dayNumber'], 1);
+        expect(json.containsKey('startTimestamp'), true);
+        expect(json.containsKey('endTimestamp'), true);
+      });
+
+      test('toJson excludes null endTimestamp', () {
+        final day = TripDay(
+          id: 'day-1',
+          tripId: 'trip-123',
+          dayNumber: 1,
+          startTimestamp: DateTime.utc(2024, 1, 1, 8, 0),
+        );
+
+        final json = day.toJson();
+
+        expect(json.containsKey('endTimestamp'), false);
+      });
+    });
+
+    group('TripLocation lifecycle markers', () {
+      test('regular update is not a lifecycle marker', () {
+        final loc = TripLocation(
+          id: 'loc-1',
+          latitude: 40.0,
+          longitude: -74.0,
+          timestamp: DateTime.now(),
+          updateType: TripUpdateType.regular,
+        );
+
+        expect(loc.isLifecycleMarker, false);
+        expect(loc.hasLocation, true);
+      });
+
+      test('dayStart is a lifecycle marker', () {
+        final loc = TripLocation(
+          id: 'loc-2',
+          latitude: 0.0,
+          longitude: 0.0,
+          timestamp: DateTime.now(),
+          updateType: TripUpdateType.dayStart,
+        );
+
+        expect(loc.isLifecycleMarker, true);
+        expect(loc.hasLocation, false);
+      });
+
+      test('dayEnd is a lifecycle marker', () {
+        final loc = TripLocation(
+          id: 'loc-3',
+          latitude: 0.0,
+          longitude: 0.0,
+          timestamp: DateTime.now(),
+          updateType: TripUpdateType.dayEnd,
+        );
+
+        expect(loc.isLifecycleMarker, true);
+        expect(loc.hasLocation, false);
+      });
+
+      test('tripStarted is a lifecycle marker', () {
+        final loc = TripLocation(
+          id: 'loc-4',
+          latitude: 0.0,
+          longitude: 0.0,
+          timestamp: DateTime.now(),
+          updateType: TripUpdateType.tripStarted,
+        );
+
+        expect(loc.isLifecycleMarker, true);
+      });
+
+      test('tripEnded is a lifecycle marker', () {
+        final loc = TripLocation(
+          id: 'loc-5',
+          latitude: 0.0,
+          longitude: 0.0,
+          timestamp: DateTime.now(),
+          updateType: TripUpdateType.tripEnded,
+        );
+
+        expect(loc.isLifecycleMarker, true);
+      });
+
+      test('lifecycle marker with real location has hasLocation true', () {
+        final loc = TripLocation(
+          id: 'loc-6',
+          latitude: 40.0,
+          longitude: -74.0,
+          timestamp: DateTime.now(),
+          updateType: TripUpdateType.dayStart,
+        );
+
+        expect(loc.isLifecycleMarker, true);
+        expect(loc.hasLocation, true);
+      });
     });
   });
 }

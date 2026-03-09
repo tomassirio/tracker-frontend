@@ -5,11 +5,22 @@ import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Widget for controlling trip status (start/pause/resume/finish)
 /// Only shown on mobile (not web) and only for trip owners
+/// Respects the backend status transition matrix:
+///   CREATED → IN_PROGRESS, FINISHED
+///   IN_PROGRESS → PAUSED, RESTING (multi-day only via toggle-day), FINISHED
+///   PAUSED → IN_PROGRESS, FINISHED
+///   RESTING → IN_PROGRESS (via toggle-day), FINISHED
+///   FINISHED → (terminal)
 class TripStatusControl extends StatelessWidget {
   final TripStatus currentStatus;
   final bool isOwner;
   final bool isLoading;
   final Function(TripStatus) onStatusChange;
+
+  /// Trip modality — affects which buttons are shown.
+  /// For MULTI_DAY trips, RESTING→IN_PROGRESS is handled by the day toggle button,
+  /// not by the status control. Also, Pause is not available for MULTI_DAY IN_PROGRESS.
+  final TripModality? tripModality;
 
   /// Whether running on web platform. Defaults to [kIsWeb].
   /// Can be overridden for testing purposes.
@@ -21,8 +32,11 @@ class TripStatusControl extends StatelessWidget {
     required this.isOwner,
     required this.isLoading,
     required this.onStatusChange,
+    this.tripModality,
     this.isWeb,
   });
+
+  bool get _isMultiDay => tripModality == TripModality.multiDay;
 
   @override
   Widget build(BuildContext context) {
@@ -45,17 +59,34 @@ class TripStatusControl extends StatelessWidget {
 
     return Row(
       children: [
-        if (currentStatus == TripStatus.created ||
-            currentStatus == TripStatus.paused ||
-            currentStatus == TripStatus.resting)
+        // Start / Resume button
+        if (currentStatus == TripStatus.created)
           _buildButton(
             context: context,
-            label:
-                currentStatus == TripStatus.created ? 'Start Trip' : 'Resume',
+            label: 'Start Trip',
             icon: Icons.play_arrow,
             color: WandererTheme.statusCreated,
             onPressed: () => onStatusChange(TripStatus.inProgress),
           ),
+        if (currentStatus == TripStatus.paused)
+          _buildButton(
+            context: context,
+            label: 'Resume',
+            icon: Icons.play_arrow,
+            color: WandererTheme.statusCreated,
+            onPressed: () => onStatusChange(TripStatus.inProgress),
+          ),
+        // For RESTING multi-day trips, Resume is handled by the day toggle button,
+        // so only show Resume here for non-multi-day resting (shouldn't normally happen)
+        if (currentStatus == TripStatus.resting && !_isMultiDay)
+          _buildButton(
+            context: context,
+            label: 'Resume',
+            icon: Icons.play_arrow,
+            color: WandererTheme.statusCreated,
+            onPressed: () => onStatusChange(TripStatus.inProgress),
+          ),
+        // Pause button — available for all trips when IN_PROGRESS
         if (currentStatus == TripStatus.inProgress) ...[
           _buildButton(
             context: context,
@@ -65,6 +96,11 @@ class TripStatusControl extends StatelessWidget {
             onPressed: () => onStatusChange(TripStatus.paused),
           ),
           const SizedBox(width: 8),
+        ],
+        // Finish button — always available from IN_PROGRESS, PAUSED, RESTING
+        if (currentStatus == TripStatus.inProgress ||
+            currentStatus == TripStatus.paused ||
+            currentStatus == TripStatus.resting)
           _buildButton(
             context: context,
             label: 'Finish',
@@ -72,7 +108,6 @@ class TripStatusControl extends StatelessWidget {
             color: WandererTheme.statusCompleted,
             onPressed: () => _showFinishConfirmation(context),
           ),
-        ],
       ],
     );
   }

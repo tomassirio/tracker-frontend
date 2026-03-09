@@ -1022,8 +1022,7 @@ class _HomeScreenState extends State<HomeScreen>
     final filteredTrips = _getFilteredTrips(_discoverTrips);
 
     // Separate pre-announced promoted trips from regular live/paused trips.
-    final preAnnouncedTrips =
-        filteredTrips.where(_isPreAnnouncedTrip).toList();
+    final preAnnouncedTrips = filteredTrips.where(_isPreAnnouncedTrip).toList();
     final regularTrips =
         filteredTrips.where((t) => !_isPreAnnouncedTrip(t)).toList();
 

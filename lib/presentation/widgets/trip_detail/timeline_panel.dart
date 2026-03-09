@@ -141,6 +141,7 @@ class TimelinePanel extends StatelessWidget {
               ),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Header with glass styling
                 Container(
@@ -209,11 +210,16 @@ class TimelinePanel extends StatelessWidget {
                 ),
                 // Timeline content
                 Flexible(
-                  child: TripTimeline(
-                    updates: updates,
-                    isLoading: isLoading,
-                    onRefresh: onRefresh,
-                    onUpdateTap: onUpdateTap,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 380),
+                    child: ClipRect(
+                      child: TripTimeline(
+                        updates: updates,
+                        isLoading: isLoading,
+                        onRefresh: onRefresh,
+                        onUpdateTap: onUpdateTap,
+                      ),
+                    ),
                   ),
                 ),
               ],

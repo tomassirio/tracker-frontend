@@ -19,10 +19,14 @@ class TripMapHelper {
       // Sort chronologically (oldest first) so Update 1 = first trip update
       final locations = List<TripLocation>.from(trip.locations!)
         ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      // Filter out lifecycle markers with no real location (location: null from backend)
+      final mappableLocations = locations
+          .where((loc) => !loc.isLifecycleMarker || loc.hasLocation)
+          .toList();
       final points = <LatLng>[];
 
-      for (int i = 0; i < locations.length; i++) {
-        final location = locations[i];
+      for (int i = 0; i < mappableLocations.length; i++) {
+        final location = mappableLocations[i];
         final position = LatLng(location.latitude, location.longitude);
         points.add(position);
 
@@ -34,7 +38,7 @@ class TripMapHelper {
                 ? InfoWindow.noText
                 : _buildLocationInfoWindow(location, i),
             onTap: onMarkerTap != null ? () => onMarkerTap(location) : null,
-            icon: i == locations.length - 1
+            icon: i == mappableLocations.length - 1
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueGreen,
                   )
@@ -158,11 +162,15 @@ class TripMapHelper {
       // Sort chronologically (oldest first) so Update 1 = first trip update
       final locations = List<TripLocation>.from(trip.locations!)
         ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      // Filter out lifecycle markers with no real location (location: null from backend)
+      final mappableLocations = locations
+          .where((loc) => !loc.isLifecycleMarker || loc.hasLocation)
+          .toList();
       final waypoints = <LatLng>[];
 
-      // Create markers
-      for (int i = 0; i < locations.length; i++) {
-        final location = locations[i];
+      // Create markers only for updates with actual locations
+      for (int i = 0; i < mappableLocations.length; i++) {
+        final location = mappableLocations[i];
         final position = LatLng(location.latitude, location.longitude);
         waypoints.add(position);
 
@@ -178,7 +186,7 @@ class TripMapHelper {
                 ? BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueRed, // Start point - red
                   )
-                : i == locations.length - 1
+                : i == mappableLocations.length - 1
                     ? BitmapDescriptor.defaultMarkerWithHue(
                         BitmapDescriptor.hueGreen, // End point - green
                       )
@@ -345,12 +353,18 @@ class TripMapHelper {
 
   /// Gets the initial location for the map (latest location or planned start)
   static LatLng getInitialLocation(Trip trip) {
-    // First try actual trip locations
+    // First try actual trip locations (skip lifecycle markers with no real coords)
     if (trip.locations != null && trip.locations!.isNotEmpty) {
-      return LatLng(
-        trip.locations!.last.latitude,
-        trip.locations!.last.longitude,
-      );
+      // Find the last location that has real coordinates
+      final validLocations = trip.locations!
+          .where((loc) => !loc.isLifecycleMarker || loc.hasLocation)
+          .toList();
+      if (validLocations.isNotEmpty) {
+        return LatLng(
+          validLocations.last.latitude,
+          validLocations.last.longitude,
+        );
+      }
     }
     // Then try planned start location
     if (trip.plannedStartLocation != null &&

@@ -30,6 +30,11 @@ class TripDetailRepository {
     return allComments.where((c) => c.parentCommentId == null).toList();
   }
 
+  /// Gets full trip data by ID
+  Future<Trip> getTripById(String tripId) async {
+    return await _tripService.getTripById(tripId);
+  }
+
   /// Loads replies for a specific comment via API
   Future<List<Comment>> loadReplies(String commentId) async {
     return await _commentService.getRepliesByCommentId(commentId);
@@ -85,6 +90,13 @@ class TripDetailRepository {
   Future<String> changeTripStatus(String tripId, TripStatus newStatus) async {
     final request = ChangeStatusRequest(status: newStatus);
     return await _tripService.changeStatus(tripId, request);
+  }
+
+  /// Toggles the day state for MULTI_DAY trips.
+  /// IN_PROGRESS → RESTING (end day), RESTING → IN_PROGRESS (start next day).
+  /// Returns the trip ID. Full trip data will be delivered via WebSocket.
+  Future<String> toggleDay(String tripId) async {
+    return await _tripService.toggleDay(tripId);
   }
 
   /// Changes the automatic update settings of a trip

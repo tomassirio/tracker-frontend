@@ -234,8 +234,7 @@ void main() {
         final json = request.toJson();
 
         expect(json['isPreAnnounced'], true);
-        expect(json['countdownStartDate'],
-            startDate.toUtc().toIso8601String());
+        expect(json['countdownStartDate'], startDate.toUtc().toIso8601String());
       });
 
       test('toJson excludes countdownStartDate when null', () {
@@ -285,8 +284,7 @@ void main() {
         final json = request.toJson();
 
         expect(json['isPreAnnounced'], true);
-        expect(json['countdownStartDate'],
-            startDate.toUtc().toIso8601String());
+        expect(json['countdownStartDate'], startDate.toUtc().toIso8601String());
       });
 
       test('toJson excludes countdownStartDate when null', () {

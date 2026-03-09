@@ -87,12 +87,14 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: constraints.maxHeight * 0.6,
-              maxWidth: constraints.maxWidth * _expandedWidthRatio,
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: constraints.maxHeight * 0.6,
+                maxWidth: constraints.maxWidth * _expandedWidthRatio,
+              ),
+              child: timelinePanel,
             ),
-            child: timelinePanel,
           ),
           if (tripUpdatePanel != null) tripUpdatePanel,
         ],

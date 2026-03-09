@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' hide Visibility;
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wanderer_frontend/core/constants/enums.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/user_models.dart';
 import 'package:wanderer_frontend/data/models/comment_models.dart';
@@ -96,8 +97,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
 
-  // Multi-day trip: current day counter (local state — resets on navigation, no backend backing yet)
-  int _currentDay = 1;
+  // Multi-day trip: current day derived from backend's currentDay field
+  int get _currentDay => _trip.currentDay ?? 1;
 
   // Desktop web: track whether the mouse is hovering over a panel
   // so we can disable map gestures only when hovering.
@@ -149,6 +150,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadPromotionInfo();
     _loadTripAchievements();
     _initWebSocket();
+    // Refresh full trip data from backend so the map shows the latest
+    // locations (e.g. updates received via WebSocket while on another screen)
+    _refreshTripData();
   }
 
   Future<void> _initWebSocket() async {
@@ -195,32 +199,80 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() {
       _trip = _trip.copyWith(status: event.newStatus);
     });
+
+    // Reload timeline to pick up any lifecycle markers
+    // (TRIP_STARTED, TRIP_ENDED, DAY_START, DAY_END)
+    _loadTripUpdates();
+
+    // Reload full trip data to pick up updated currentDay / tripDays
+    // after toggle-day transitions
+    if (_trip.tripModality == TripModality.multiDay) {
+      _refreshTripData();
+    }
+  }
+
+  /// Refreshes full trip data from the backend
+  Future<void> _refreshTripData() async {
+    try {
+      final updatedTrip = await _repository.getTripById(_trip.id);
+      if (mounted) {
+        setState(() {
+          _trip = updatedTrip;
+        });
+        _updateMapData();
+        // Move camera to the latest location so the user sees the
+        // current position (especially after returning from another screen)
+        _animateMapToLatestLocation();
+      }
+    } catch (e) {
+      debugPrint('TripDetailScreen: Error refreshing trip data: $e');
+    }
   }
 
   void _handleTripUpdatedEvent(TripUpdatedEvent event) {
-    // Add the new update to the timeline
-    if (event.latitude != null && event.longitude != null) {
-      final newUpdate = TripLocation(
-        id: 'ws_${event.timestamp.millisecondsSinceEpoch}',
-        latitude: event.latitude!,
-        longitude: event.longitude!,
-        timestamp: event.timestamp,
-        battery: event.batteryLevel,
-        message: event.message,
-        city: event.city,
-        country: event.country,
-        temperatureCelsius: event.temperatureCelsius,
-        weatherCondition: event.weatherCondition != null
-            ? WeatherCondition.fromJson(event.weatherCondition!)
-            : null,
-      );
+    // Parse the update type from the event
+    final parsedUpdateType = event.updateType != null
+        ? TripUpdateType.fromJson(event.updateType!)
+        : TripUpdateType.regular;
 
+    // Lifecycle markers (DAY_START, DAY_END, TRIP_STARTED, TRIP_ENDED) may
+    // have location: null. Add them to the timeline but don't create map pins.
+    final hasLocation = event.latitude != null && event.longitude != null;
+
+    final newUpdate = TripLocation(
+      id: 'ws_${event.timestamp.millisecondsSinceEpoch}',
+      latitude: event.latitude ?? 0.0,
+      longitude: event.longitude ?? 0.0,
+      timestamp: event.timestamp,
+      battery: hasLocation ? event.batteryLevel : null,
+      message: event.message,
+      city: hasLocation ? event.city : null,
+      country: hasLocation ? event.country : null,
+      temperatureCelsius: hasLocation ? event.temperatureCelsius : null,
+      weatherCondition: hasLocation && event.weatherCondition != null
+          ? WeatherCondition.fromJson(event.weatherCondition!)
+          : null,
+      updateType: parsedUpdateType,
+    );
+
+    setState(() {
+      _tripUpdates = [newUpdate, ..._tripUpdates];
+    });
+
+    // Only update the map for updates with real locations
+    if (hasLocation) {
+      // Add the new location to _trip.locations so the map helper
+      // rebuilds markers correctly (previous green → orange, new → green)
+      final updatedLocations = <TripLocation>[
+        ...(_trip.locations ?? []),
+        newUpdate,
+      ];
       setState(() {
-        _tripUpdates = [newUpdate, ..._tripUpdates];
+        _trip = _trip.copyWith(locations: updatedLocations);
       });
-
-      // Update the map to show the new location
       _updateMapData();
+      // Animate the camera to the new location
+      _animateMapToLocation(LatLng(event.latitude!, event.longitude!));
     }
   }
 
@@ -247,8 +299,38 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _trip = _trip.copyWith(encodedPolyline: event.encodedPolyline);
     });
 
-    // Update the map to show the new polyline
+    // Redraw the polyline on the map
     _updateMapData();
+
+    // Animate to the latest location on the polyline
+    _animateMapToLatestLocation();
+  }
+
+  /// Smoothly animate the Google Maps camera to the given [target].
+  Future<void> _animateMapToLocation(LatLng target,
+      {double zoom = 15.0}) async {
+    if (_mapController == null) return;
+    await _mapController!.animateCamera(
+      CameraUpdate.newLatLngZoom(target, zoom),
+    );
+  }
+
+  /// Animate the map camera to the latest real location in the trip
+  void _animateMapToLatestLocation() {
+    if (_mapController == null) return;
+
+    // Find the latest update with a real location
+    final latestWithLocation = _tripUpdates
+        .where((u) => !u.isLifecycleMarker || u.hasLocation)
+        .toList();
+    if (latestWithLocation.isNotEmpty) {
+      final latest = latestWithLocation.first;
+      _animateMapToLocation(LatLng(latest.latitude, latest.longitude));
+    } else {
+      // Fall back to trip's initial location
+      final initialLoc = TripMapHelper.getInitialLocation(_trip);
+      _animateMapToLocation(initialLoc);
+    }
   }
 
   void _handleTripSettingsUpdated(TripSettingsUpdatedEvent event) {
@@ -1273,19 +1355,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   /// Handle "Finish Day N" / "Begin Day N+1" button tap for MULTI_DAY trips.
-  /// When finishing a day, shows a confirmation dialog first, then sends a
-  /// trip update (with optional message) before transitioning to resting.
+  /// Calls the backend toggle-day endpoint which handles the status transition.
+  /// When finishing a day, shows a confirmation dialog first.
   /// Returns `true` when the action was completed (message field can be cleared).
   Future<bool> _handleDayButtonTap(String? message) async {
     if (_trip.status == TripStatus.inProgress) {
-      // --- Finish Day: confirmation → send update → change status ---
+      // --- Finish Day: confirmation → toggle day ---
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text('Finish Day $_currentDay'),
           content: Text(
             'Are you sure you want to finish Day $_currentDay? '
-            'Your current location will be sent as a day-end update.',
+            'Your trip status will change to resting.',
           ),
           actions: [
             TextButton(
@@ -1296,7 +1378,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               key: const Key('confirm_finish_day_button'),
               onPressed: () => Navigator.pop(dialogContext, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: WandererTheme.dayEndColor,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Finish Day'),
@@ -1307,38 +1389,75 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
       if (confirmed != true || !mounted) return false;
 
-      // Send a trip update with the message text before changing status
-      try {
-        final permissionReady = await _ensureLocationPermission();
-        if (!permissionReady) return false;
+      setState(() => _isChangingStatus = true);
 
-        final result =
-            await _repository.sendTripUpdate(_trip.id, message: message);
-        if (mounted && !result.isSuccess) {
-          UiHelpers.showErrorMessage(context, result.userMessage);
-          return false;
+      try {
+        await _repository.toggleDay(_trip.id);
+
+        // Update local state optimistically — WebSocket will confirm
+        setState(() {
+          _trip = _trip.copyWith(status: TripStatus.resting);
+          _isChangingStatus = false;
+        });
+
+        // Stop background updates while resting (Android only)
+        if (_isAndroid) {
+          final backgroundManager = BackgroundUpdateManager();
+          await backgroundManager.stopAutoUpdates(_trip.id);
         }
-      } catch (e) {
+
+        // Refresh timeline to show the day-end marker
         if (mounted) {
-          UiHelpers.showErrorMessage(context, 'Error sending update: $e');
+          UiHelpers.showSuccessMessage(context, 'Resting for the night');
+          await _loadTripUpdates();
+        }
+        return true;
+      } catch (e) {
+        setState(() => _isChangingStatus = false);
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Error ending day: $e');
         }
         return false;
       }
-
-      await _changeTripStatus(TripStatus.resting);
-
-      // Refresh timeline to show the new update
-      if (mounted) {
-        await _loadTripUpdates();
-      }
-      return true;
     } else if (_trip.status == TripStatus.resting) {
-      // --- Begin Day: no confirmation needed ---
-      await _changeTripStatus(TripStatus.inProgress);
-      if (mounted && _trip.status == TripStatus.inProgress) {
-        setState(() => _currentDay++);
+      // --- Begin Day: no confirmation needed → toggle day ---
+      setState(() => _isChangingStatus = true);
+
+      try {
+        await _repository.toggleDay(_trip.id);
+
+        // Update local state optimistically — WebSocket will confirm
+        setState(() {
+          _trip = _trip.copyWith(
+            status: TripStatus.inProgress,
+            currentDay: _currentDay + 1,
+          );
+          _isChangingStatus = false;
+        });
+
+        // Resume background updates if enabled (Android only)
+        if (_isAndroid && _trip.automaticUpdates) {
+          final backgroundManager = BackgroundUpdateManager();
+          await backgroundManager.startAutoUpdates(
+            _trip.id,
+            _trip.name,
+            _trip.effectiveUpdateRefresh,
+          );
+        }
+
+        // Refresh timeline to show the day-start marker
+        if (mounted) {
+          UiHelpers.showSuccessMessage(context, 'Day $_currentDay started!');
+          await _loadTripUpdates();
+        }
+        return true;
+      } catch (e) {
+        setState(() => _isChangingStatus = false);
+        if (mounted) {
+          UiHelpers.showErrorMessage(context, 'Error starting day: $e');
+        }
+        return false;
       }
-      return true;
     }
     return false;
   }
@@ -1545,15 +1664,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   /// Handle tap on a timeline update - animate map to that location
+  /// Ignores lifecycle markers (Day Started/Ended, Trip Started/Ended) since
+  /// they have no real location.
   void _handleTimelineUpdateTap(TripLocation update) {
-    if (_mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(update.latitude, update.longitude),
-          15.0, // Zoom level for a good view of the location
-        ),
-      );
-    }
+    if (update.isLifecycleMarker) return;
+    _animateMapToLocation(LatLng(update.latitude, update.longitude));
   }
 
   Future<void> _logout() async {

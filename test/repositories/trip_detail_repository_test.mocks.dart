@@ -50,8 +50,9 @@ class _FakeTrip_1 extends _i1.SmartFake implements _i3.Trip {
         );
 }
 
-class _FakeAuthResponse_2 extends _i1.SmartFake implements _i4.AuthResponse {
-  _FakeAuthResponse_2(
+class _FakeRegisterPendingResponse_2 extends _i1.SmartFake
+    implements _i4.RegisterPendingResponse {
+  _FakeRegisterPendingResponse_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -60,9 +61,8 @@ class _FakeAuthResponse_2 extends _i1.SmartFake implements _i4.AuthResponse {
         );
 }
 
-class _FakeRegisterPendingResponse_3 extends _i1.SmartFake
-    implements _i4.RegisterPendingResponse {
-  _FakeRegisterPendingResponse_3(
+class _FakeAuthResponse_3 extends _i1.SmartFake implements _i4.AuthResponse {
+  _FakeAuthResponse_3(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -182,7 +182,10 @@ class MockCommentService extends _i1.Mock implements _i5.CommentService {
           this,
           Invocation.method(
             #removeReaction,
-            [commentId],
+            [
+              commentId,
+              request,
+            ],
           ),
         )),
       ) as _i6.Future<String>);
@@ -374,6 +377,21 @@ class MockTripService extends _i1.Mock implements _i8.TripService {
       ) as _i6.Future<String>);
 
   @override
+  _i6.Future<String> toggleDay(String? tripId) => (super.noSuchMethod(
+        Invocation.method(
+          #toggleDay,
+          [tripId],
+        ),
+        returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #toggleDay,
+            [tripId],
+          ),
+        )),
+      ) as _i6.Future<String>);
+
+  @override
   _i6.Future<String> deleteTrip(String? tripId) => (super.noSuchMethod(
         Invocation.method(
           #deleteTrip,
@@ -523,7 +541,7 @@ class MockAuthService extends _i1.Mock implements _i10.AuthService {
           [request],
         ),
         returnValue: _i6.Future<_i4.RegisterPendingResponse>.value(
-            _FakeRegisterPendingResponse_3(
+            _FakeRegisterPendingResponse_2(
           this,
           Invocation.method(
             #register,
@@ -533,13 +551,29 @@ class MockAuthService extends _i1.Mock implements _i10.AuthService {
       ) as _i6.Future<_i4.RegisterPendingResponse>);
 
   @override
+  _i6.Future<_i4.AuthResponse> verifyEmail(_i4.VerifyEmailRequest? request) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #verifyEmail,
+          [request],
+        ),
+        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_3(
+          this,
+          Invocation.method(
+            #verifyEmail,
+            [request],
+          ),
+        )),
+      ) as _i6.Future<_i4.AuthResponse>);
+
+  @override
   _i6.Future<_i4.AuthResponse> login(_i4.LoginRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #login,
           [request],
         ),
-        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_2(
+        returnValue: _i6.Future<_i4.AuthResponse>.value(_FakeAuthResponse_3(
           this,
           Invocation.method(
             #login,
@@ -623,6 +657,15 @@ class MockAuthService extends _i1.Mock implements _i10.AuthService {
         ),
         returnValue: _i6.Future<String?>.value(),
       ) as _i6.Future<String?>);
+
+  @override
+  _i6.Future<bool> refreshUserDetails() => (super.noSuchMethod(
+        Invocation.method(
+          #refreshUserDetails,
+          [],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
   _i6.Future<bool> isAdmin() => (super.noSuchMethod(

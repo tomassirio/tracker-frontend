@@ -89,6 +89,7 @@ class ApiEndpoints {
   static String tripVisibility(String tripId) => '/trips/$tripId/visibility';
   static String tripStatus(String tripId) => '/trips/$tripId/status';
   static String tripSettings(String tripId) => '/trips/$tripId/settings';
+  static String tripToggleDay(String tripId) => '/trips/$tripId/toggle-day';
   static String tripFromPlan(String tripPlanId) =>
       '/trips/from-plan/$tripPlanId';
 

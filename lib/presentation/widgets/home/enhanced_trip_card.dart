@@ -148,12 +148,12 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
   }
 
   String _generateStaticMapUrl() {
-    if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) {
-      final sorted = TripRouteHelper.getSortedLocations(widget.trip);
+    final sorted = TripRouteHelper.getSortedLocations(widget.trip);
+    if (sorted.isNotEmpty) {
       final firstLoc = sorted.first;
       final lastLoc = sorted.last;
 
-      if (widget.trip.locations!.length == 1) {
+      if (sorted.length == 1) {
         return _mapsClient.generateStaticMapUrl(
           center: LatLng(firstLoc.latitude, firstLoc.longitude),
           markers: [
@@ -397,7 +397,7 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
   @override
   Widget build(BuildContext context) {
     final hasMapData =
-        (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) ||
+        TripRouteHelper.getSortedLocations(widget.trip).isNotEmpty ||
             _hasPlannedRoute;
 
     return Card(
