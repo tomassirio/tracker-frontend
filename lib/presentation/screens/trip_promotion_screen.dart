@@ -250,8 +250,7 @@ class _TripPromotionScreenState extends State<TripPromotionScreen> {
                             helpText: 'Select Trip Start Date',
                           );
                           if (picked != null) {
-                            setDialogState(
-                                () => countdownStartDate = picked);
+                            setDialogState(() => countdownStartDate = picked);
                           }
                         },
                         icon: const Icon(Icons.calendar_today, size: 16),

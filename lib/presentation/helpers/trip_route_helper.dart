@@ -37,7 +37,9 @@ class TripRouteHelper {
   /// Returns the current cache size (for diagnostics/testing).
   static int get cacheSize => _polylineCache.length;
 
-  /// Returns trip locations sorted chronologically (oldest first).
+  /// Returns trip locations sorted chronologically (oldest first),
+  /// excluding lifecycle markers (DAY_START, DAY_END, TRIP_STARTED,
+  /// TRIP_ENDED) which have no real location.
   ///
   /// This matches the sort order used by
   /// [TripMapHelper.createMapDataWithDirections] so that the miniature
@@ -45,6 +47,7 @@ class TripRouteHelper {
   static List<TripLocation> getSortedLocations(Trip trip) {
     if (trip.locations == null || trip.locations!.isEmpty) return [];
     return List<TripLocation>.from(trip.locations!)
+      ..removeWhere((loc) => loc.isLifecycleMarker)
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
   }
 
@@ -55,7 +58,8 @@ class TripRouteHelper {
   /// 2. In-memory [_polylineCache] (instant, survives navigation).
   /// 3. Straight-line encoding of the raw sorted points.
   ///
-  /// Returns null only if the trip has fewer than 2 locations.
+  /// Returns null only if the trip has fewer than 2 real locations
+  /// (lifecycle markers excluded).
   static String? fetchEncodedPolyline(Trip trip) {
     // 1. Backend-provided polyline (best case: zero API calls)
     if (trip.encodedPolyline != null && trip.encodedPolyline!.isNotEmpty) {
@@ -63,14 +67,15 @@ class TripRouteHelper {
       return trip.encodedPolyline;
     }
 
-    if (trip.locations == null || trip.locations!.length < 2) return null;
+    // 2. Sort and filter locations (excludes lifecycle markers)
+    final sortedLocations = getSortedLocations(trip);
+    if (sortedLocations.length < 2) return null;
 
-    // 2. Check trip-level polyline cache
+    // 3. Check trip-level polyline cache
     final cached = _polylineCache[trip.id];
     if (cached != null) return cached;
 
-    // 3. Sort locations chronologically (matching trip detail screen)
-    final sortedLocations = getSortedLocations(trip);
+    // 4. Encode the sorted points as straight-line segments
     final allPoints = sortedLocations
         .map((loc) => LatLng(loc.latitude, loc.longitude))
         .toList();

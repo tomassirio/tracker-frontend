@@ -83,13 +83,13 @@ class _TripCardState extends State<TripCard> {
 
   /// Generate static map image URL from Google Maps Static API
   String _generateStaticMapUrl() {
-    // First try actual trip locations (sorted chronologically)
-    if (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) {
-      final sorted = TripRouteHelper.getSortedLocations(widget.trip);
+    // First try actual trip locations (sorted chronologically, excluding lifecycle markers)
+    final sorted = TripRouteHelper.getSortedLocations(widget.trip);
+    if (sorted.isNotEmpty) {
       final firstLoc = sorted.first;
       final lastLoc = sorted.last;
 
-      if (widget.trip.locations!.length == 1) {
+      if (sorted.length == 1) {
         // Single location
         return _mapsClient.generateStaticMapUrl(
           center: LatLng(firstLoc.latitude, firstLoc.longitude),
@@ -195,7 +195,7 @@ class _TripCardState extends State<TripCard> {
   @override
   Widget build(BuildContext context) {
     final hasMapData =
-        (widget.trip.locations != null && widget.trip.locations!.isNotEmpty) ||
+        TripRouteHelper.getSortedLocations(widget.trip).isNotEmpty ||
             _hasPlannedRoute;
 
     return Container(

@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -14,7 +15,7 @@ if (localPropertiesFile.exists()) {
     localPropertiesFile.inputStream().use { localProperties.load(it) }
 }
 
-// Try local.properties first, then fall back to .env file
+// Try local.properties first, then fall back to .env file, then --dart-define
 var googleMapsApiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY", "")
 if (googleMapsApiKey.isBlank()) {
     val envFile = rootProject.file("../.env")
@@ -23,6 +24,21 @@ if (googleMapsApiKey.isBlank()) {
             if (line.startsWith("GOOGLE_MAPS_API_KEY=")) {
                 googleMapsApiKey = line.substringAfter("=").trim()
             }
+        }
+    }
+}
+
+// Fall back to --dart-define values (Flutter passes these as base64-encoded project property)
+if (googleMapsApiKey.isBlank()) {
+    val dartDefines = project.properties["dart-defines"] as String?
+    dartDefines?.split(",")?.forEach { encoded ->
+        try {
+            val decoded = String(Base64.getDecoder().decode(encoded))
+            if (decoded.startsWith("GOOGLE_MAPS_API_KEY=")) {
+                googleMapsApiKey = decoded.substringAfter("=").trim()
+            }
+        } catch (_: Exception) {
+            // Ignore malformed entries
         }
     }
 }

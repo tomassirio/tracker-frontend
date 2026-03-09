@@ -76,6 +76,19 @@ class TripCommandClient {
     return _apiClient.handleAcceptedResponse(response);
   }
 
+  /// Toggle day state for MULTI_DAY trips.
+  /// When IN_PROGRESS → ends day (status becomes RESTING).
+  /// When RESTING → starts next day (status becomes IN_PROGRESS).
+  /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
+  Future<String> toggleDay(String tripId) async {
+    final response = await _apiClient.patch(
+      ApiEndpoints.tripToggleDay(tripId),
+      body: {},
+      requireAuth: true,
+    );
+    return _apiClient.handleAcceptedResponse(response);
+  }
+
   /// Delete trip
   /// Requires authentication (USER, ADMIN - owner only)
   /// Returns the trip ID immediately. Deletion will be confirmed via WebSocket.

@@ -2,6 +2,7 @@
 library;
 
 export 'domain/trip.dart';
+export 'domain/trip_day.dart';
 export 'domain/trip_location.dart';
 export 'requests/create_trip_request.dart';
 export 'requests/update_trip_request.dart';

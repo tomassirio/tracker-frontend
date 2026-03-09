@@ -111,13 +111,32 @@ class TripTimeline extends StatelessWidget {
               update.updateType == TripUpdateType.tripEnded;
 
           if (isDayMarker) {
-            return _buildDayMarkerEntry(update, isFirst, isLast);
+            final dayNumber = _computeDayNumber(index);
+            return _buildDayMarkerEntry(update, isFirst, isLast, dayNumber);
           }
 
           return _buildRegularEntry(update, isFirst, isLast);
         },
       ),
     );
+  }
+
+  /// Compute which day number a marker at [markerIndex] belongs to.
+  /// We walk the updates list in chronological order (reverse of display)
+  /// and count DAY_START events to track the current day.
+  /// Day 1 = trip start. Each DAY_START bumps the day number.
+  int _computeDayNumber(int markerIndex) {
+    // Walk in reverse (chronological order, oldest first)
+    int day = 1;
+    for (int i = updates.length - 1; i >= 0; i--) {
+      final t = updates[i].updateType;
+      // DAY_START means a new day begins → increment before checking
+      if (t == TripUpdateType.dayStart) {
+        day++;
+      }
+      if (i == markerIndex) return day;
+    }
+    return day;
   }
 
   /// Build a regular timeline entry (location update)
@@ -273,8 +292,7 @@ class TripTimeline extends StatelessWidget {
                     ],
                   ),
                   // Message if present
-                  if (update.message != null &&
-                      update.message!.isNotEmpty) ...[
+                  if (update.message != null && update.message!.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
@@ -326,7 +344,7 @@ class TripTimeline extends StatelessWidget {
 
   /// Build a day/trip marker timeline entry (Day Start / Day End / Trip Started / Trip Ended)
   Widget _buildDayMarkerEntry(
-      TripLocation update, bool isFirst, bool isLast) {
+      TripLocation update, bool isFirst, bool isLast, int dayNumber) {
     final Color markerColor;
     final IconData markerIcon;
     final String label;
@@ -335,11 +353,11 @@ class TripTimeline extends StatelessWidget {
       case TripUpdateType.dayStart:
         markerColor = WandererTheme.dayStartColor;
         markerIcon = Icons.wb_sunny_rounded;
-        label = 'Day Started';
+        label = 'Day $dayNumber Started';
       case TripUpdateType.dayEnd:
         markerColor = WandererTheme.dayEndColor;
         markerIcon = Icons.nightlight_round;
-        label = 'Day Ended';
+        label = 'Day $dayNumber Ended';
       case TripUpdateType.tripStarted:
         markerColor = WandererTheme.tripStartedColor;
         markerIcon = Icons.flag_rounded;
@@ -400,85 +418,82 @@ class TripTimeline extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        // Day marker card
+        // Day marker card — not tappable (lifecycle markers have no real location)
         Expanded(
-          child: GestureDetector(
-            onTap: onUpdateTap != null ? () => onUpdateTap!(update) : null,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: markerColor.withOpacity(0.08),
-                borderRadius:
-                    BorderRadius.circular(WandererTheme.glassRadiusSmall),
-                border: Border.all(
-                  color: markerColor.withOpacity(0.3),
-                ),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: markerColor.withOpacity(0.08),
+              borderRadius:
+                  BorderRadius.circular(WandererTheme.glassRadiusSmall),
+              border: Border.all(
+                color: markerColor.withOpacity(0.3),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    markerIcon,
-                    size: 18,
-                    color: markerColor,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: markerColor,
-                          ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  markerIcon,
+                  size: 18,
+                  color: markerColor,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: markerColor,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _formatTimestamp(update.timestamp),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: markerColor.withOpacity(0.7),
-                          ),
-                        ),
-                        if (update.message != null &&
-                            update.message!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            update.message!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: WandererTheme.textSecondary,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (update.city != null) ...[
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.location_on,
-                      size: 12,
-                      color: markerColor.withOpacity(0.5),
-                    ),
-                    const SizedBox(width: 2),
-                    Flexible(
-                      child: Text(
-                        update.city!,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _formatTimestamp(update.timestamp),
                         style: TextStyle(
                           fontSize: 11,
                           color: markerColor.withOpacity(0.7),
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
+                      if (update.message != null &&
+                          update.message!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          update.message!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: WandererTheme.textSecondary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (update.city != null) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.location_on,
+                    size: 12,
+                    color: markerColor.withOpacity(0.5),
+                  ),
+                  const SizedBox(width: 2),
+                  Flexible(
+                    child: Text(
+                      update.city!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: markerColor.withOpacity(0.7),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),

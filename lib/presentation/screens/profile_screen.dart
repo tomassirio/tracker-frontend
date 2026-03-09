@@ -988,15 +988,15 @@ class _ProfileTripCardState extends State<ProfileTripCard> {
 
   /// Generate static map image URL from Google Maps Static API
   String _generateStaticMapUrl() {
-    if (widget.trip.locations == null || widget.trip.locations!.isEmpty) {
+    final sorted = TripRouteHelper.getSortedLocations(widget.trip);
+    if (sorted.isEmpty) {
       return '';
     }
 
-    final sorted = TripRouteHelper.getSortedLocations(widget.trip);
     final firstLoc = sorted.first;
     final lastLoc = sorted.last;
 
-    if (widget.trip.locations!.length == 1) {
+    if (sorted.length == 1) {
       // Single location
       return _mapsClient.generateStaticMapUrl(
         center: LatLng(firstLoc.latitude, firstLoc.longitude),

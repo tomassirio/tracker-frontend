@@ -342,12 +342,16 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
     final label = widget.isResting
         ? 'Begin Day ${widget.currentDay + 1}'
         : 'Finish Day ${widget.currentDay}';
-    final icon = widget.isResting ? Icons.wb_sunny_outlined : Icons.nightlight_round;
+    final icon =
+        widget.isResting ? Icons.wb_sunny_outlined : Icons.nightlight_round;
+    final color = widget.isResting
+        ? WandererTheme.dayStartColor
+        : WandererTheme.dayEndColor;
 
     return ElevatedButton.icon(
       onPressed: _handleDayButtonTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: color,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(

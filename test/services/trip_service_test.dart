@@ -141,6 +141,16 @@ void main() {
         expect(mockTripCommandClient.changeStatusCalled, true);
       });
 
+      test('toggleDay toggles day state for multi-day trips', () async {
+        mockTripCommandClient.mockTripId = 'trip-1';
+
+        final result = await tripService.toggleDay('trip-1');
+
+        expect(result, 'trip-1');
+        expect(mockTripCommandClient.toggleDayCalled, true);
+        expect(mockTripCommandClient.lastTripId, 'trip-1');
+      });
+
       test('deleteTrip deletes trip', () async {
         mockTripCommandClient.mockTripId = 'trip-1';
 
@@ -329,6 +339,7 @@ class MockTripCommandClient extends TripCommandClient {
   bool updateTripCalled = false;
   bool changeVisibilityCalled = false;
   bool changeStatusCalled = false;
+  bool toggleDayCalled = false;
   bool deleteTripCalled = false;
   bool createTripFromPlanCalled = false;
   String? lastTripId;
@@ -368,6 +379,14 @@ class MockTripCommandClient extends TripCommandClient {
     changeStatusCalled = true;
     lastTripId = tripId;
     if (shouldThrowError) throw Exception('Failed to change status');
+    return mockTripId!;
+  }
+
+  @override
+  Future<String> toggleDay(String tripId) async {
+    toggleDayCalled = true;
+    lastTripId = tripId;
+    if (shouldThrowError) throw Exception('Failed to toggle day');
     return mockTripId!;
   }
 

@@ -246,10 +246,9 @@ void main() {
         expect(TripUpdateType.fromJson('REGULAR'), TripUpdateType.regular);
         expect(TripUpdateType.fromJson('DAY_START'), TripUpdateType.dayStart);
         expect(TripUpdateType.fromJson('DAY_END'), TripUpdateType.dayEnd);
-        expect(
-            TripUpdateType.fromJson('TRIP_STARTED'), TripUpdateType.tripStarted);
-        expect(
-            TripUpdateType.fromJson('TRIP_ENDED'), TripUpdateType.tripEnded);
+        expect(TripUpdateType.fromJson('TRIP_STARTED'),
+            TripUpdateType.tripStarted);
+        expect(TripUpdateType.fromJson('TRIP_ENDED'), TripUpdateType.tripEnded);
       });
 
       test('fromJson is case-insensitive', () {
@@ -258,8 +257,7 @@ void main() {
         expect(TripUpdateType.fromJson('day_end'), TripUpdateType.dayEnd);
         expect(TripUpdateType.fromJson('trip_started'),
             TripUpdateType.tripStarted);
-        expect(
-            TripUpdateType.fromJson('Trip_Ended'), TripUpdateType.tripEnded);
+        expect(TripUpdateType.fromJson('Trip_Ended'), TripUpdateType.tripEnded);
       });
 
       test('fromJson defaults to regular for unknown values', () {

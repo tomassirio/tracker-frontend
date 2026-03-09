@@ -142,4 +142,15 @@ class TripLocation {
 
   /// Get reaction count
   int get reactionCount => reactions?.length ?? 0;
+
+  /// Whether this update is a lifecycle marker (DAY_START, DAY_END, TRIP_STARTED, TRIP_ENDED)
+  /// Lifecycle markers have location: null from the backend
+  bool get isLifecycleMarker =>
+      updateType == TripUpdateType.dayStart ||
+      updateType == TripUpdateType.dayEnd ||
+      updateType == TripUpdateType.tripStarted ||
+      updateType == TripUpdateType.tripEnded;
+
+  /// Whether this update has a real location (not a 0,0 fallback from null)
+  bool get hasLocation => latitude != 0.0 || longitude != 0.0;
 }

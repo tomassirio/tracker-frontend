@@ -1,5 +1,6 @@
 import '../../../core/constants/enums.dart';
 import 'comment.dart';
+import 'trip_day.dart';
 import 'trip_location.dart';
 
 /// Simple location for planned waypoints
@@ -55,6 +56,9 @@ class Trip {
   // Backend-computed encoded polyline (Google Encoded Polyline Algorithm)
   final String? encodedPolyline;
   final DateTime? polylineUpdatedAt;
+  // Multi-day trip data
+  final List<TripDay>? tripDays;
+  final int? currentDay;
 
   /// Default update refresh interval in seconds (30 minutes)
   static const int defaultUpdateRefresh = 1800;
@@ -95,6 +99,8 @@ class Trip {
     this.plannedWaypoints,
     this.encodedPolyline,
     this.polylineUpdatedAt,
+    this.tripDays,
+    this.currentDay,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -193,6 +199,13 @@ class Trip {
       polylineUpdatedAt: json['polylineUpdatedAt'] != null
           ? DateTime.tryParse(json['polylineUpdatedAt'] as String)
           : null,
+      tripDays: json['tripDays'] != null && json['tripDays'] is List
+          ? (json['tripDays'] as List)
+              .where((day) => day != null)
+              .map((day) => TripDay.fromJson(day as Map<String, dynamic>))
+              .toList()
+          : null,
+      currentDay: (tripDetails?['currentDay'] ?? json['currentDay']) as int?,
     );
   }
 
@@ -228,6 +241,9 @@ class Trip {
         if (encodedPolyline != null) 'encodedPolyline': encodedPolyline,
         if (polylineUpdatedAt != null)
           'polylineUpdatedAt': polylineUpdatedAt!.toIso8601String(),
+        if (tripDays != null)
+          'tripDays': tripDays!.map((day) => day.toJson()).toList(),
+        if (currentDay != null) 'currentDay': currentDay,
       };
 
   /// Check if trip has planned route from a trip plan
@@ -263,6 +279,8 @@ class Trip {
     List<PlannedWaypoint>? plannedWaypoints,
     String? encodedPolyline,
     DateTime? polylineUpdatedAt,
+    List<TripDay>? tripDays,
+    int? currentDay,
   }) {
     return Trip(
       id: id ?? this.id,
@@ -289,6 +307,8 @@ class Trip {
       plannedWaypoints: plannedWaypoints ?? this.plannedWaypoints,
       encodedPolyline: encodedPolyline ?? this.encodedPolyline,
       polylineUpdatedAt: polylineUpdatedAt ?? this.polylineUpdatedAt,
+      tripDays: tripDays ?? this.tripDays,
+      currentDay: currentDay ?? this.currentDay,
     );
   }
 }
