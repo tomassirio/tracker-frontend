@@ -30,6 +30,7 @@ class TripInfoCard extends StatelessWidget {
   final bool isPromoted;
   final List<UserAchievement> tripAchievements;
   final VoidCallback? onTestBackgroundUpdate;
+  final Function(Visibility)? onVisibilityChange;
 
   const TripInfoCard({
     super.key,
@@ -49,6 +50,7 @@ class TripInfoCard extends StatelessWidget {
     this.isPromoted = false,
     this.tripAchievements = const [],
     this.onTestBackgroundUpdate,
+    this.onVisibilityChange,
   });
 
   @override
@@ -394,11 +396,14 @@ class TripInfoCard extends StatelessWidget {
                       'comments',
                     ),
                     const SizedBox(width: 16),
-                    _buildStatItem(
-                      _getVisibilityIcon(trip.visibility.toJson()),
-                      trip.visibility.toJson(),
-                      '',
-                    ),
+                    if (onVisibilityChange != null)
+                      _buildTappableVisibilityItem(context)
+                    else
+                      _buildStatItem(
+                        _getVisibilityIcon(trip.visibility.toJson()),
+                        trip.visibility.toJson(),
+                        '',
+                      ),
                     if (isPromoted) ...[
                       const SizedBox(width: 16),
                       Container(
@@ -656,6 +661,94 @@ class TripInfoCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildTappableVisibilityItem(BuildContext context) {
+    return InkWell(
+      onTap: () => _showVisibilityPicker(context),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+        child: Row(
+          children: [
+            Icon(
+              _getVisibilityIcon(trip.visibility.toJson()),
+              size: 16,
+              color: WandererTheme.primaryOrange,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              trip.visibility.toJson(),
+              style: TextStyle(
+                fontSize: 13,
+                color: WandererTheme.primaryOrange,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(
+              Icons.edit,
+              size: 12,
+              color: WandererTheme.primaryOrange,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showVisibilityPicker(BuildContext context) {
+    showModalBottomSheet<Visibility>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Change Visibility',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.public, color: Colors.green),
+              title: const Text('Public'),
+              subtitle: const Text('Visible to everyone'),
+              selected: trip.visibility == Visibility.public,
+              onTap: () => Navigator.pop(context, Visibility.public),
+            ),
+            ListTile(
+              leading: Icon(Icons.shield, color: Colors.orange.shade700),
+              title: const Text('Protected'),
+              subtitle: const Text('Visible to friends only'),
+              selected: trip.visibility == Visibility.protected,
+              onTap: () => Navigator.pop(context, Visibility.protected),
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock, color: Colors.red),
+              title: const Text('Private'),
+              subtitle: const Text('Only visible to you'),
+              selected: trip.visibility == Visibility.private,
+              onTap: () => Navigator.pop(context, Visibility.private),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    ).then((selectedVisibility) {
+      if (selectedVisibility != null &&
+          selectedVisibility != trip.visibility &&
+          onVisibilityChange != null) {
+        onVisibilityChange!(selectedVisibility);
+      }
+    });
   }
 
   Widget _buildStatItem(IconData icon, String value, String label) {

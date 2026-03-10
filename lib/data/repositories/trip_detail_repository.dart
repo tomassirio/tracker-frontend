@@ -92,6 +92,14 @@ class TripDetailRepository {
     return await _tripService.changeStatus(tripId, request);
   }
 
+  /// Changes the visibility of a trip
+  /// Returns the trip ID. Full trip data will be delivered via WebSocket.
+  Future<String> changeTripVisibility(
+      String tripId, Visibility newVisibility) async {
+    final request = ChangeVisibilityRequest(visibility: newVisibility);
+    return await _tripService.changeVisibility(tripId, request);
+  }
+
   /// Toggles the day state for MULTI_DAY trips.
   /// IN_PROGRESS → RESTING (end day), RESTING → IN_PROGRESS (start next day).
   /// Returns the trip ID. Full trip data will be delivered via WebSocket.

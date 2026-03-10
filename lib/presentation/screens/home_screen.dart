@@ -106,9 +106,10 @@ class _HomeScreenState extends State<HomeScreen>
         if (_tabController.index != 0) {
           _visibilityFilter = null;
           // Reset status filter if current filter is not valid for Feed/Discover
-          // (only inProgress and paused are shown in those tabs)
+          // (only inProgress, resting, and paused are shown in those tabs)
           if (_statusFilter != null &&
               _statusFilter != TripStatus.inProgress &&
+              _statusFilter != TripStatus.resting &&
               _statusFilter != TripStatus.paused) {
             _statusFilter = null;
           }
@@ -212,8 +213,24 @@ class _HomeScreenState extends State<HomeScreen>
       } else {
         // Not logged in, only show public trips
         final trips = await _repository.getPublicTrips();
+
+        // Merge with previously known active trips that the backend may not
+        // return (e.g. RESTING trips are active but the /trips/public endpoint
+        // might exclude them).  We keep any trip from the old list whose
+        // status is still "active" (in_progress, resting, paused) and public,
+        // as long as it is not already present in the fresh response.
+        final freshIds = trips.map((t) => t.id).toSet();
+        final preservedTrips = _allTrips.where((t) {
+          if (freshIds.contains(t.id)) return false;
+          final isActive = t.status == TripStatus.inProgress ||
+              t.status == TripStatus.resting ||
+              t.status == TripStatus.paused;
+          final isPublic = t.visibility == Visibility.public;
+          return isActive && isPublic;
+        }).toList();
+
         setState(() {
-          _allTrips = trips;
+          _allTrips = [...trips, ...preservedTrips];
           _myTrips = [];
           _friendIds = {};
           _followingIds = {};
@@ -250,10 +267,9 @@ class _HomeScreenState extends State<HomeScreen>
           _promotedTripIds = promoted.map((p) => p.tripId).toSet();
           _promotedTripsById = {for (final p in promoted) p.tripId: p};
         });
-        // Re-categorize so guests can see newly-loaded pre-announced trips.
-        if (!_isLoggedIn) {
-          _categorizeTrips();
-        }
+        // Re-categorize since promoted data affects which trips appear in
+        // the discover list (promoted completed / pre-announced trips).
+        _categorizeTrips();
       }
     } catch (e) {
       // Silently fail — user may not have admin access
@@ -262,60 +278,96 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _categorizeTrips() {
+    // Build the discover list with the same criteria for both guest and
+    // logged-in users so "Explore Public Trips" and the Discover tab show
+    // identical content.
+    //
+    // Criteria for a trip to appear in Discover / Explore Public Trips:
+    //   1. Public AND active (in_progress, resting, paused)  → Discover section
+    //   2. Promoted AND active                               → Featured section
+    //   3. Promoted AND completed (finished)                  → Featured section
+    //   4. Promoted AND created + pre-announced               → Featured (pre-announced)
+    //
+    // Anything else (draft non-promoted, completed non-promoted, private, etc.)
+    // is excluded.
+
+    final discoverTrips = <Trip>[];
+
+    for (final trip in _allTrips) {
+      final isPublic = trip.visibility == Visibility.public;
+      final isActive = trip.status == TripStatus.inProgress ||
+          trip.status == TripStatus.resting ||
+          trip.status == TripStatus.paused;
+      final isPromoted = _promotedTripIds.contains(trip.id);
+
+      // Rule 1 & 2: Public + active trips (promoted or not)
+      if (isPublic && isActive) {
+        discoverTrips.add(trip);
+        continue;
+      }
+
+      // Rule 3: Promoted + completed
+      if (isPromoted && trip.status == TripStatus.finished) {
+        discoverTrips.add(trip);
+        continue;
+      }
+
+      // Rule 4: Promoted + created + pre-announced
+      if (isPromoted && trip.status == TripStatus.created) {
+        final promotedTrip = _promotedTripsById[trip.id];
+        if (promotedTrip != null && promotedTrip.isPreAnnounced) {
+          discoverTrips.add(trip);
+          continue;
+        }
+      }
+    }
+
+    // Sort discover by date
+    discoverTrips.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
     if (!_isLoggedIn) {
-      // Guest users see in-progress and paused trips, plus pre-announced
-      // promoted trips (created status with isPreAnnounced=true).
-      _discoverTrips = _allTrips
-          .where((t) =>
-              t.status == TripStatus.inProgress ||
-              t.status == TripStatus.paused ||
-              _isPreAnnouncedTrip(t))
-          .toList();
-      _feedTrips = [];
+      setState(() {
+        _discoverTrips = discoverTrips;
+        _feedTrips = [];
+      });
       _applyFilters();
       return;
     }
 
-    // Categorize trips for feed
+    // Categorize trips for feed (logged-in only)
     final feedTrips = <Trip>[];
-    final discoverTrips = <Trip>[];
 
     for (final trip in _allTrips) {
-      // Skip user's own trips from feed/discover
-      if (trip.userId == _userId) continue;
-
-      // Only show in-progress and paused trips in feed/discover
-      final isActiveOrPaused = trip.status == TripStatus.inProgress ||
+      final isActive = trip.status == TripStatus.inProgress ||
+          trip.status == TripStatus.resting ||
           trip.status == TripStatus.paused;
-      if (!isActiveOrPaused) continue;
+      if (!isActive) continue;
 
-      final isFriend = _friendIds.contains(trip.userId);
-      final isFollowing = _followingIds.contains(trip.userId);
+      final isOwnTrip = trip.userId == _userId;
       final isPublic = trip.visibility == Visibility.public;
 
-      // Add to feed if from friend or following
-      if (isFriend || isFollowing) {
-        // Friends can see PUBLIC and PROTECTED
-        if (isFriend && (isPublic || trip.visibility == Visibility.protected)) {
-          feedTrips.add(trip);
-        }
-        // Following can only see PUBLIC
-        else if (isFollowing && !isFriend && isPublic) {
-          feedTrips.add(trip);
-        }
-      }
+      // Skip user's own trips from feed
+      if (!isOwnTrip) {
+        final isFriend = _friendIds.contains(trip.userId);
+        final isFollowing = _followingIds.contains(trip.userId);
 
-      // Add all public trips to discover
-      if (isPublic) {
-        discoverTrips.add(trip);
+        // Add to feed if from friend or following
+        if (isFriend || isFollowing) {
+          // Friends can see PUBLIC and PROTECTED
+          if (isFriend &&
+              (isPublic || trip.visibility == Visibility.protected)) {
+            feedTrips.add(trip);
+          }
+          // Following can only see PUBLIC
+          else if (isFollowing && !isFriend && isPublic) {
+            feedTrips.add(trip);
+          }
+        }
       }
     }
 
     // Sort feed by priority
     feedTrips.sort(_compareTripsByPriority);
-
-    // Sort discover by date
-    discoverTrips.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     setState(() {
       _feedTrips = feedTrips;
@@ -327,9 +379,11 @@ class _HomeScreenState extends State<HomeScreen>
 
   /// Compare trips by priority for feed sorting
   int _compareTripsByPriority(Trip a, Trip b) {
-    // Priority 1: Live trips (IN_PROGRESS)
-    final aIsLive = a.status == TripStatus.inProgress;
-    final bIsLive = b.status == TripStatus.inProgress;
+    // Priority 1: Live and resting trips (IN_PROGRESS, RESTING)
+    final aIsLive =
+        a.status == TripStatus.inProgress || a.status == TripStatus.resting;
+    final bIsLive =
+        b.status == TripStatus.inProgress || b.status == TripStatus.resting;
     if (aIsLive != bIsLive) return aIsLive ? -1 : 1;
 
     // Priority 2: Friends over following
@@ -340,12 +394,6 @@ class _HomeScreenState extends State<HomeScreen>
     // Priority 3: Most recent
     return b.createdAt.compareTo(a.createdAt);
   }
-
-  /// Returns true when [trip] is a promoted pre-announced trip in CREATED status.
-  bool _isPreAnnouncedTrip(Trip trip) =>
-      trip.status == TripStatus.created &&
-      _promotedTripsById.containsKey(trip.id) &&
-      (_promotedTripsById[trip.id]?.isPreAnnounced ?? false);
 
   void _applyFilters() {
     setState(() {
@@ -771,8 +819,11 @@ class _HomeScreenState extends State<HomeScreen>
     final filteredTrips = _getFilteredTrips(_myTrips);
 
     // Group trips by status
-    final activeTrips =
-        filteredTrips.where((t) => t.status == TripStatus.inProgress).toList();
+    // Resting trips are shown alongside active trips (like live, but with a resting badge)
+    final activeTrips = filteredTrips
+        .where((t) =>
+            t.status == TripStatus.inProgress || t.status == TripStatus.resting)
+        .toList();
     final pausedTrips =
         filteredTrips.where((t) => t.status == TripStatus.paused).toList();
     final draftTrips =
@@ -862,18 +913,23 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildFeedTab() {
     final filteredTrips = _getFilteredTrips(_feedTrips);
 
-    // Group by live and other
-    final liveTrips =
-        filteredTrips.where((t) => t.status == TripStatus.inProgress).toList();
+    // Group by live (including resting) and other
+    final liveTrips = filteredTrips
+        .where((t) =>
+            t.status == TripStatus.inProgress || t.status == TripStatus.resting)
+        .toList();
     final friendsTrips = filteredTrips
         .where((t) =>
-            _friendIds.contains(t.userId) && t.status != TripStatus.inProgress)
+            _friendIds.contains(t.userId) &&
+            t.status != TripStatus.inProgress &&
+            t.status != TripStatus.resting)
         .toList();
     final followingTrips = filteredTrips
         .where((t) =>
             _followingIds.contains(t.userId) &&
             !_friendIds.contains(t.userId) &&
-            t.status != TripStatus.inProgress)
+            t.status != TripStatus.inProgress &&
+            t.status != TripStatus.resting)
         .toList();
 
     if (filteredTrips.isEmpty) {
@@ -951,10 +1007,12 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDiscoverTab() {
     final filteredTrips = _getFilteredTrips(_discoverTrips);
-    final promotedTripsList =
-        _allTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
 
-    // Exclude promoted trips from discover section
+    // Separate promoted trips (featured) from regular public trips.
+    // Both come from the same _discoverTrips list which already applies the
+    // correct inclusion criteria in _categorizeTrips().
+    final promotedTripsList =
+        filteredTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
     final nonPromotedTrips =
         filteredTrips.where((t) => !_promotedTripIds.contains(t.id)).toList();
 
@@ -1021,10 +1079,11 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildGuestDiscoverSection() {
     final filteredTrips = _getFilteredTrips(_discoverTrips);
 
-    // Separate pre-announced promoted trips from regular live/paused trips.
-    final preAnnouncedTrips = filteredTrips.where(_isPreAnnouncedTrip).toList();
-    final regularTrips =
-        filteredTrips.where((t) => !_isPreAnnouncedTrip(t)).toList();
+    // Separate promoted trips (featured) from regular public trips.
+    final promotedTripsList =
+        filteredTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
+    final nonPromotedTrips =
+        filteredTrips.where((t) => !_promotedTripIds.contains(t.id)).toList();
 
     if (filteredTrips.isEmpty) {
       return Center(
@@ -1053,18 +1112,18 @@ class _HomeScreenState extends State<HomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (preAnnouncedTrips.isNotEmpty) ...[
+        if (promotedTripsList.isNotEmpty) ...[
           const FeedSectionHeader(
             title: 'Featured Trips',
             icon: Icons.star,
             subtitle: 'Highlighted adventures from the community',
           ),
           const SizedBox(height: 12),
-          _buildTripGrid(preAnnouncedTrips, showRelationship: false),
+          _buildTripGrid(promotedTripsList, showRelationship: false),
           const SizedBox(height: 24),
         ],
-        if (regularTrips.isNotEmpty)
-          _buildTripGrid(regularTrips, showRelationship: false),
+        if (nonPromotedTrips.isNotEmpty)
+          _buildTripGrid(nonPromotedTrips, showRelationship: false),
       ],
     );
   }

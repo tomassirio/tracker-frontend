@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:geolocator/geolocator.dart';
@@ -50,6 +51,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
+  final Completer<GoogleMapController> _mapControllerCompleter = Completer();
   StreamSubscription<WebSocketEvent>? _wsSubscription;
   late Trip _trip;
   Set<Marker> _markers = {};
@@ -96,6 +98,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isTripUpdateCollapsed = true;
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
+  bool _hasInitialMapPosition = false;
+  bool _isMapLoading = true;
 
   // Multi-day trip: current day derived from backend's currentDay field
   int get _currentDay => _trip.currentDay ?? 1;
@@ -142,17 +146,38 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _repository = TripDetailRepository();
 
     _trip = widget.trip;
-    _updateMapData();
+    // Don't call _updateMapData() here — it would use stale trip data.
+    // Let _initializeMapPosition() handle everything after loading fresh data.
     _checkLoginStatus();
     _loadUserInfo();
     _loadComments();
-    _loadTripUpdates();
     _loadPromotionInfo();
     _loadTripAchievements();
     _initWebSocket();
-    // Refresh full trip data from backend so the map shows the latest
-    // locations (e.g. updates received via WebSocket while on another screen)
-    _refreshTripData();
+    // Load trip updates and full trip data together, then set the initial
+    // camera position exactly once (instant jump, no distracting animation).
+    _initializeMapPosition();
+  }
+
+  /// Loads trip updates and refreshes trip data in parallel, then positions
+  /// the map camera instantly at the latest location. This avoids the jarring
+  /// "zoom to stale position → animate to real position" sequence.
+  Future<void> _initializeMapPosition() async {
+    // Fire data requests and wait for the map controller in parallel
+    await Future.wait([
+      _loadTripUpdates(),
+      _refreshTripData(),
+      _mapControllerCompleter.future,
+    ]);
+    // Now both the data and the map are ready — jump to latest location
+    // (map data was already updated by _refreshTripData)
+    if (mounted) {
+      _animateMapToLatestLocation(animate: false);
+      setState(() {
+        _isMapLoading = false;
+      });
+    }
+    _hasInitialMapPosition = true;
   }
 
   Future<void> _initWebSocket() async {
@@ -220,9 +245,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _trip = updatedTrip;
         });
         _updateMapData();
-        // Move camera to the latest location so the user sees the
-        // current position (especially after returning from another screen)
-        _animateMapToLatestLocation();
+        // Only animate the camera on subsequent refreshes (e.g. after a
+        // WebSocket status change). The very first positioning is handled by
+        // _initializeMapPosition with an instant jump.
+        if (_hasInitialMapPosition) {
+          _animateMapToLatestLocation(animate: true);
+        }
       }
     } catch (e) {
       debugPrint('TripDetailScreen: Error refreshing trip data: $e');
@@ -302,21 +330,30 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     // Redraw the polyline on the map
     _updateMapData();
 
-    // Animate to the latest location on the polyline
-    _animateMapToLatestLocation();
+    // Animate to the latest location on the polyline (only after the initial
+    // camera position has been set — during startup, _initializeMapPosition
+    // handles the first jump).
+    if (_hasInitialMapPosition) {
+      _animateMapToLatestLocation(animate: true);
+    }
   }
 
-  /// Smoothly animate the Google Maps camera to the given [target].
+  /// Move the Google Maps camera to the given [target].
+  /// When [animate] is true, uses a smooth animation; otherwise jumps instantly.
   Future<void> _animateMapToLocation(LatLng target,
-      {double zoom = 15.0}) async {
+      {double zoom = 15.0, bool animate = true}) async {
     if (_mapController == null) return;
-    await _mapController!.animateCamera(
-      CameraUpdate.newLatLngZoom(target, zoom),
-    );
+    final update = CameraUpdate.newLatLngZoom(target, zoom);
+    if (animate) {
+      await _mapController!.animateCamera(update);
+    } else {
+      await _mapController!.moveCamera(update);
+    }
   }
 
-  /// Animate the map camera to the latest real location in the trip
-  void _animateMapToLatestLocation() {
+  /// Move the map camera to the latest real location in the trip.
+  /// When [animate] is true, uses a smooth animation; otherwise jumps instantly.
+  void _animateMapToLatestLocation({bool animate = true}) {
     if (_mapController == null) return;
 
     // Find the latest update with a real location
@@ -325,11 +362,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         .toList();
     if (latestWithLocation.isNotEmpty) {
       final latest = latestWithLocation.first;
-      _animateMapToLocation(LatLng(latest.latitude, latest.longitude));
+      _animateMapToLocation(LatLng(latest.latitude, latest.longitude),
+          animate: animate);
     } else {
       // Fall back to trip's initial location
       final initialLoc = TripMapHelper.getInitialLocation(_trip);
-      _animateMapToLocation(initialLoc);
+      _animateMapToLocation(initialLoc, animate: animate);
     }
   }
 
@@ -1354,6 +1392,37 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  Future<void> _changeTripVisibility(Visibility newVisibility) async {
+    // Validate that user is the trip owner
+    if (_userId == null || _trip.userId != _userId) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Only trip owner can change visibility');
+      }
+      return;
+    }
+
+    try {
+      await _repository.changeTripVisibility(_trip.id, newVisibility);
+
+      // Update local state optimistically - WebSocket will confirm the change
+      setState(() {
+        _trip = _trip.copyWith(visibility: newVisibility);
+      });
+
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+          context,
+          'Visibility changed to ${newVisibility.toJson()}',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error changing visibility: $e');
+      }
+    }
+  }
+
   /// Handle "Finish Day N" / "Begin Day N+1" button tap for MULTI_DAY trips.
   /// Calls the backend toggle-day endpoint which handles the status transition.
   /// When finishing a day, shows a confirmation dialog first.
@@ -1871,7 +1940,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   initialZoom: TripMapHelper.getInitialZoom(_trip),
                   markers: _markers,
                   polylines: _polylines,
-                  onMapCreated: (controller) => _mapController = controller,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    if (!_mapControllerCompleter.isCompleted) {
+                      _mapControllerCompleter.complete(controller);
+                    }
+                  },
                   isOwner: _userId != null && _trip.userId == _userId,
                   // On mobile: disable map gestures when any panel is expanded
                   // to prevent scroll-through on touch devices.
@@ -1889,6 +1963,45 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   onMapTap: _onInfoWindowClosed,
                 ),
               ),
+
+              // Map loading overlay with blur and spinner
+              if (_isMapLoading)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.1),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                WandererTheme.primaryOrange,
+                              ),
+                              strokeWidth: 3,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Loading trip...',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.5),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
               // Left side: Trip Info and Comments (floating glass panels)
               Positioned(
@@ -2091,6 +2204,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           : null,
       onTestBackgroundUpdate:
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
+      onVisibilityChange:
+          _isLoggedIn && _trip.userId == _userId ? _changeTripVisibility : null,
     );
   }
 
