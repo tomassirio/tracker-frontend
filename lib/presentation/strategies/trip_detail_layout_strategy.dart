@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/models/comment_models.dart';
 import 'package:wanderer_frontend/data/models/achievement_models.dart';
@@ -68,6 +68,7 @@ class TripDetailLayoutData {
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
   final VoidCallback? onTestBackgroundUpdate;
+  final Function(Visibility)? onVisibilityChange;
 
   const TripDetailLayoutData({
     required this.trip,
@@ -120,6 +121,7 @@ class TripDetailLayoutData {
     this.onFollowTripOwner,
     this.onSendFriendRequestToTripOwner,
     this.onTestBackgroundUpdate,
+    this.onVisibilityChange,
   });
 }
 
@@ -163,6 +165,7 @@ abstract class TripDetailLayoutStrategy {
       isPromoted: data.isPromoted,
       tripAchievements: data.tripAchievements,
       onTestBackgroundUpdate: data.onTestBackgroundUpdate,
+      onVisibilityChange: data.onVisibilityChange,
     );
   }
 

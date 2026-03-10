@@ -1354,6 +1354,37 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  Future<void> _changeTripVisibility(Visibility newVisibility) async {
+    // Validate that user is the trip owner
+    if (_userId == null || _trip.userId != _userId) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+            context, 'Only trip owner can change visibility');
+      }
+      return;
+    }
+
+    try {
+      await _repository.changeTripVisibility(_trip.id, newVisibility);
+
+      // Update local state optimistically - WebSocket will confirm the change
+      setState(() {
+        _trip = _trip.copyWith(visibility: newVisibility);
+      });
+
+      if (mounted) {
+        UiHelpers.showSuccessMessage(
+          context,
+          'Visibility changed to ${newVisibility.toJson()}',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error changing visibility: $e');
+      }
+    }
+  }
+
   /// Handle "Finish Day N" / "Begin Day N+1" button tap for MULTI_DAY trips.
   /// Calls the backend toggle-day endpoint which handles the status transition.
   /// When finishing a day, shows a confirmation dialog first.
@@ -2091,6 +2122,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           : null,
       onTestBackgroundUpdate:
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
+      onVisibilityChange:
+          _isLoggedIn && _trip.userId == _userId ? _changeTripVisibility : null,
     );
   }
 
