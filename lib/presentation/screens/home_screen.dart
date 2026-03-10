@@ -130,6 +130,9 @@ class _HomeScreenState extends State<HomeScreen>
       case WebSocketEventType.tripStatusChanged:
         _handleTripStatusChanged(event as TripStatusChangedEvent);
         break;
+      case WebSocketEventType.commentAdded:
+        _handleCommentAdded(event as CommentAddedEvent);
+        break;
       case WebSocketEventType.tripUpdated:
       case WebSocketEventType.tripCreated:
       case WebSocketEventType.tripDeleted:
@@ -149,6 +152,33 @@ class _HomeScreenState extends State<HomeScreen>
         _categorizeTrips();
       });
     }
+  }
+
+  void _handleCommentAdded(CommentAddedEvent event) {
+    final tripId = event.tripId;
+    if (tripId == null) return;
+
+    setState(() {
+      // Update in _allTrips (used by Feed and Discover tabs)
+      final allIndex = _allTrips.indexWhere((t) => t.id == tripId);
+      if (allIndex != -1) {
+        _allTrips[allIndex] = _allTrips[allIndex].copyWith(
+          commentsCount: _allTrips[allIndex].commentsCount + 1,
+        );
+      }
+
+      // Update in _myTrips (used by My Trips tab)
+      final myIndex = _myTrips.indexWhere((t) => t.id == tripId);
+      if (myIndex != -1) {
+        _myTrips[myIndex] = _myTrips[myIndex].copyWith(
+          commentsCount: _myTrips[myIndex].commentsCount + 1,
+        );
+      }
+
+      if (allIndex != -1 || myIndex != -1) {
+        _categorizeTrips();
+      }
+    });
   }
 
   @override
