@@ -413,6 +413,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                         prefixIcon: Icon(Icons.title),
                       ),
                       textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter a plan name';

@@ -6,6 +6,8 @@ class PasswordField extends StatefulWidget {
   final String label;
   final bool isLogin;
   final TextEditingController? compareController;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
 
   const PasswordField({
     super.key,
@@ -13,6 +15,8 @@ class PasswordField extends StatefulWidget {
     this.label = 'Password',
     this.isLogin = true,
     this.compareController,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -44,6 +48,8 @@ class _PasswordFieldState extends State<PasswordField> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       obscureText: _obscurePassword,
+      textInputAction: widget.textInputAction ?? TextInputAction.done,
+      onFieldSubmitted: widget.onFieldSubmitted,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter your password';
