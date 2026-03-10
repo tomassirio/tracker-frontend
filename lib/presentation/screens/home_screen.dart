@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart'
-    show TripStatus, Visibility;
+    show TripModality, TripStatus, Visibility;
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/client/api_client.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
@@ -146,11 +146,55 @@ class _HomeScreenState extends State<HomeScreen>
   void _handleTripStatusChanged(TripStatusChangedEvent event) {
     final tripIndex = _allTrips.indexWhere((t) => t.id == event.tripId);
     if (tripIndex != -1) {
+      final trip = _allTrips[tripIndex];
+      final updatedTrip = trip.copyWith(
+        status: event.newStatus,
+        currentDay: event.currentDay ?? trip.currentDay,
+      );
+
       setState(() {
-        _allTrips[tripIndex] =
-            _allTrips[tripIndex].copyWith(status: event.newStatus);
+        _allTrips[tripIndex] = updatedTrip;
+
+        // Also update in _myTrips if present
+        final myIndex = _myTrips.indexWhere((t) => t.id == event.tripId);
+        if (myIndex != -1) {
+          _myTrips[myIndex] = _myTrips[myIndex].copyWith(
+            status: event.newStatus,
+            currentDay: event.currentDay ?? _myTrips[myIndex].currentDay,
+          );
+        }
+
         _categorizeTrips();
       });
+
+      // For multi-day trips, re-fetch full data to ensure currentDay is
+      // up-to-date (in case the payload didn't include it)
+      if (trip.tripModality == TripModality.multiDay &&
+          event.currentDay == null) {
+        _refreshTripById(event.tripId!);
+      }
+    }
+  }
+
+  /// Re-fetches a single trip by ID and updates it in the local lists.
+  Future<void> _refreshTripById(String tripId) async {
+    try {
+      final updatedTrip = await _tripService.getTripById(tripId);
+      if (!mounted) return;
+
+      setState(() {
+        final allIndex = _allTrips.indexWhere((t) => t.id == tripId);
+        if (allIndex != -1) {
+          _allTrips[allIndex] = updatedTrip;
+        }
+        final myIndex = _myTrips.indexWhere((t) => t.id == tripId);
+        if (myIndex != -1) {
+          _myTrips[myIndex] = updatedTrip;
+        }
+        _categorizeTrips();
+      });
+    } catch (e) {
+      debugPrint('Failed to refresh trip $tripId: $e');
     }
   }
 

@@ -277,8 +277,18 @@ class _TripCardState extends State<TripCard> {
                       Positioned(
                         bottom: 8,
                         right: 8,
-                        child: _buildVisibilityBadge(),
+                        child: Wrap(
+                          spacing: 6,
+                          children: [
+                            _buildVisibilityBadge(),
+                            if (widget.trip.currentDay != null &&
+                                widget.trip.tripModality ==
+                                    TripModality.multiDay)
+                              _buildDayBadge(widget.trip.currentDay!),
+                          ],
+                        ),
                       ),
+
 
                       // Delete button overlay (top right)
                       if (widget.onDelete != null)

@@ -171,30 +171,6 @@ class TripInfoCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Current day badge for multi-day trips
-                    if (trip.tripModality == TripModality.multiDay &&
-                        trip.currentDay != null) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.deepPurple.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Text(
-                          'Day ${trip.currentDay}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                      ),
-                    ],
                     const SizedBox(width: 8),
                     // Share / QR code button
                     Container(
@@ -404,6 +380,30 @@ class TripInfoCard extends StatelessWidget {
                         trip.visibility.toJson(),
                         '',
                       ),
+                    // Current day badge for multi-day trips
+                    if (trip.tripModality == TripModality.multiDay &&
+                        trip.currentDay != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.deepPurple.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          'Day ${trip.currentDay}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ),
+                    ],
                     if (isPromoted) ...[
                       const SizedBox(width: 16),
                       Container(
