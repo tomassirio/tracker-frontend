@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:geolocator/geolocator.dart';
@@ -98,6 +99,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
   bool _hasInitialMapPosition = false;
+  bool _isMapLoading = true;
 
   // Multi-day trip: current day derived from backend's currentDay field
   int get _currentDay => _trip.currentDay ?? 1;
@@ -144,7 +146,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _repository = TripDetailRepository();
 
     _trip = widget.trip;
-    _updateMapData();
+    // Don't call _updateMapData() here — it would use stale trip data.
+    // Let _initializeMapPosition() handle everything after loading fresh data.
     _checkLoginStatus();
     _loadUserInfo();
     _loadComments();
@@ -166,9 +169,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _refreshTripData(),
       _mapControllerCompleter.future,
     ]);
-    // Now both the data and the map are ready — jump instantly
+    // Now both the data and the map are ready — jump to latest location
+    // (map data was already updated by _refreshTripData)
     if (mounted) {
       _animateMapToLatestLocation(animate: false);
+      setState(() {
+        _isMapLoading = false;
+      });
     }
     _hasInitialMapPosition = true;
   }
@@ -1956,6 +1963,45 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   onMapTap: _onInfoWindowClosed,
                 ),
               ),
+
+              // Map loading overlay with blur and spinner
+              if (_isMapLoading)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.1),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                WandererTheme.primaryOrange,
+                              ),
+                              strokeWidth: 3,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Loading trip...',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.5),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
               // Left side: Trip Info and Comments (floating glass panels)
               Positioned(
