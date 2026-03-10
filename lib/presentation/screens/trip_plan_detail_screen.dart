@@ -97,26 +97,52 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         : null;
   }
 
-  /// Shows options for a waypoint (currently delete)
+  /// Shows info for a waypoint in view mode (no delete)
   void _showWaypointOptions(int waypointIndex) {
+    final waypoint = _tripPlan.waypoints[waypointIndex];
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: WandererTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: Text('Delete Waypoint ${waypointIndex + 1}'),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmDeleteWaypoint(waypointIndex);
-              },
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.more_horiz, color: Colors.blue, size: 20),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Waypoint ${waypointIndex + 1}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.close),
-              title: const Text('Cancel'),
-              onTap: () => Navigator.pop(context),
+              leading: Icon(Icons.location_on, color: Colors.blue.shade300),
+              title: Text(
+                '${waypoint.lat.toStringAsFixed(4)}, ${waypoint.lon.toStringAsFixed(4)}',
+              ),
+              subtitle: Text(
+                'Tap Edit in the toolbar to modify',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: WandererTheme.textTertiary,
+                ),
+              ),
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -421,28 +447,34 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                     ),
                   ),
           ),
-          // Floating Info Card (bottom left)
+          // Floating Info Card (centered at bottom)
           Positioned(
             left: 0,
+            right: 0,
             bottom: 0,
             child: SafeArea(
-              child: TripPlanInfoCard(
-                tripPlan: _tripPlan,
-                isCollapsed: _isInfoCollapsed,
-                onToggleCollapse: () {
-                  setState(() {
-                    _isInfoCollapsed = !_isInfoCollapsed;
-                  });
-                },
-                onEdit: () {
-                  _initEditLocations();
-                  setState(() {
-                    _isEditing = true;
-                    _editFormExpanded = false;
-                    _showEditWaypointsList = false;
-                  });
-                },
-                onDelete: _deleteTripPlan,
+              child: Align(
+                alignment: _isInfoCollapsed
+                    ? Alignment.bottomLeft
+                    : Alignment.bottomCenter,
+                child: TripPlanInfoCard(
+                  tripPlan: _tripPlan,
+                  isCollapsed: _isInfoCollapsed,
+                  onToggleCollapse: () {
+                    setState(() {
+                      _isInfoCollapsed = !_isInfoCollapsed;
+                    });
+                  },
+                  onEdit: () {
+                    _initEditLocations();
+                    setState(() {
+                      _isEditing = true;
+                      _editFormExpanded = false;
+                      _showEditWaypointsList = false;
+                    });
+                  },
+                  onDelete: _deleteTripPlan,
+                ),
               ),
             ),
           ),
