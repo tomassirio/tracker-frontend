@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/models/requests/create_trip_plan_backend_request.dart';
 import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
@@ -13,6 +14,9 @@ class CreateTripPlanScreen extends StatefulWidget {
   State<CreateTripPlanScreen> createState() => _CreateTripPlanScreenState();
 }
 
+/// The type of point the user wants to place next on the map
+enum _PlacementMode { start, end, waypoint }
+
 class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   final TripPlanService _tripPlanService = TripPlanService();
   final _formKey = GlobalKey<FormState>();
@@ -23,8 +27,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   final Set<Marker> _markers = {};
   final List<LatLng> _waypoints = [];
 
-  // Default to user's approximate location or a central location
-  static const LatLng _defaultLocation = LatLng(40.7128, -74.0060); // New York
+  static const LatLng _defaultLocation = LatLng(40.7128, -74.0060);
   LatLng _initialCameraLocation = _defaultLocation;
   LatLng? _startLocation;
   LatLng? _endLocation;
@@ -33,8 +36,22 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   String _planType = 'SIMPLE';
   DateTime? _startDate;
   DateTime? _endDate;
-  int? _multiDayTripDays;
   bool _isLoading = false;
+
+  /// Controls whether the form sheet is expanded
+  bool _formExpanded = false;
+
+  /// Which point type the next map tap will place
+  _PlacementMode _placementMode = _PlacementMode.start;
+
+  /// Whether to show the floating waypoints reorder panel
+  bool _showWaypointsList = false;
+
+  /// Computed number of days between start and end dates
+  int? get _daysBetween {
+    if (_startDate == null || _endDate == null) return null;
+    return _endDate!.difference(_startDate!).inDays + 1;
+  }
 
   @override
   void initState() {
@@ -44,32 +61,26 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        // Location services are not enabled, use default
         setState(() => _isLoadingLocation = false);
         return;
       }
 
-      // Check location permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          // Permission denied, use default location
           setState(() => _isLoadingLocation = false);
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        // Permission denied forever, use default location
         setState(() => _isLoadingLocation = false);
         return;
       }
 
-      // Get current position
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
         timeLimit: const Duration(seconds: 10),
@@ -82,12 +93,10 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
         _isLoadingLocation = false;
       });
 
-      // Move camera to user's location if map is already created
       _mapController?.animateCamera(
         CameraUpdate.newLatLngZoom(userLocation, 12),
       );
     } catch (e) {
-      // Error getting location, use default
       setState(() => _isLoadingLocation = false);
     }
   }
@@ -106,32 +115,47 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   void _onMapTapped(LatLng location) {
     setState(() {
-      if (_startLocation == null) {
-        _startLocation = location;
-        _addMarker(
-          location,
-          'start',
-          'Start Location',
-          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        );
-      } else if (_endLocation == null) {
-        _endLocation = location;
-        _addMarker(
-          location,
-          'end',
-          'End Location',
-          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        );
-      } else {
-        // Add as waypoint
-        final waypointNumber = _waypoints.length + 1;
-        _waypoints.add(location);
-        _addMarker(
-          location,
-          'waypoint_$waypointNumber',
-          'Waypoint $waypointNumber',
-          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        );
+      switch (_placementMode) {
+        case _PlacementMode.start:
+          // Replace existing start marker if any
+          _markers.removeWhere((m) => m.markerId.value == 'start');
+          _startLocation = location;
+          _addMarker(
+            location,
+            'start',
+            'Start Location',
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          );
+          // Auto-advance to next unset point
+          if (_endLocation == null) {
+            _placementMode = _PlacementMode.end;
+          } else {
+            _placementMode = _PlacementMode.waypoint;
+          }
+          break;
+        case _PlacementMode.end:
+          // Replace existing end marker if any
+          _markers.removeWhere((m) => m.markerId.value == 'end');
+          _endLocation = location;
+          _addMarker(
+            location,
+            'end',
+            'End Location',
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          );
+          // Auto-advance to waypoints
+          _placementMode = _PlacementMode.waypoint;
+          break;
+        case _PlacementMode.waypoint:
+          final waypointNumber = _waypoints.length + 1;
+          _waypoints.add(location);
+          _addMarker(
+            location,
+            'waypoint_$waypointNumber',
+            'Waypoint $waypointNumber',
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          );
+          break;
       }
     });
   }
@@ -148,8 +172,178 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
         position: location,
         infoWindow: InfoWindow(title: title),
         icon: icon,
+        draggable: true,
+        onTap: () => _onMarkerTapped(id, title),
+        onDragEnd: (newPosition) => _onMarkerDragEnd(id, newPosition),
       ),
     );
+  }
+
+  /// Called when a marker is dragged to a new position on the map
+  void _onMarkerDragEnd(String markerId, LatLng newPosition) {
+    setState(() {
+      if (markerId == 'start') {
+        _startLocation = newPosition;
+      } else if (markerId == 'end') {
+        _endLocation = newPosition;
+      } else if (markerId.startsWith('waypoint_')) {
+        final index = int.tryParse(markerId.split('_').last);
+        if (index != null && index > 0 && index <= _waypoints.length) {
+          _waypoints[index - 1] = newPosition;
+        }
+      }
+      // Rebuild the moved marker with updated position
+      _markers.removeWhere((m) => m.markerId.value == markerId);
+      final icon = markerId == 'start'
+          ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
+          : markerId == 'end'
+              ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)
+              : BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueBlue);
+      final title = markerId == 'start'
+          ? 'Start Location'
+          : markerId == 'end'
+              ? 'End Location'
+              : 'Waypoint ${markerId.split('_').last}';
+      _addMarker(newPosition, markerId, title, icon);
+    });
+  }
+
+  /// Shows a bottom sheet when a marker is tapped, allowing the user to
+  /// delete the point or re-place it.
+  void _onMarkerTapped(String markerId, String title) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: WandererTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Row(
+                children: [
+                  Icon(
+                    _iconForMarkerId(markerId),
+                    color: _colorForMarkerId(markerId),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                Icons.my_location_rounded,
+                color: WandererTheme.primaryOrange,
+              ),
+              title: const Text('Re-place on map'),
+              subtitle: Text(
+                'Tap the map to set a new position',
+                style: TextStyle(fontSize: 12, color: WandererTheme.textTertiary),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  if (markerId == 'start') {
+                    _placementMode = _PlacementMode.start;
+                  } else if (markerId == 'end') {
+                    _placementMode = _PlacementMode.end;
+                  } else {
+                    _placementMode = _PlacementMode.waypoint;
+                  }
+                });
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: const Text(
+                'Remove',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _deleteMarker(markerId);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _deleteMarker(String markerId) {
+    setState(() {
+      _markers.removeWhere((m) => m.markerId.value == markerId);
+      if (markerId == 'start') {
+        _startLocation = null;
+        _placementMode = _PlacementMode.start;
+      } else if (markerId == 'end') {
+        _endLocation = null;
+        _placementMode = _PlacementMode.end;
+      } else if (markerId.startsWith('waypoint_')) {
+        final index = int.tryParse(markerId.split('_').last);
+        if (index != null && index > 0 && index <= _waypoints.length) {
+          _waypoints.removeAt(index - 1);
+          _rebuildWaypointMarkers();
+        }
+      }
+    });
+  }
+
+  /// Removes all waypoint markers and re-adds them with corrected numbering
+  void _rebuildWaypointMarkers() {
+    _markers.removeWhere(
+      (m) => m.markerId.value.startsWith('waypoint_'),
+    );
+    for (int i = 0; i < _waypoints.length; i++) {
+      _addMarker(
+        _waypoints[i],
+        'waypoint_${i + 1}',
+        'Waypoint ${i + 1}',
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      );
+    }
+    // Auto-close panel when no waypoints left
+    if (_waypoints.isEmpty) {
+      _showWaypointsList = false;
+    }
+  }
+
+  /// Reorders waypoints when the user drags items in the list
+  void _onReorderWaypoints(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex--;
+      final item = _waypoints.removeAt(oldIndex);
+      _waypoints.insert(newIndex, item);
+      _rebuildWaypointMarkers();
+    });
+  }
+
+  IconData _iconForMarkerId(String id) {
+    if (id == 'start') return Icons.trip_origin;
+    if (id == 'end') return Icons.place;
+    return Icons.more_horiz;
+  }
+
+  Color _colorForMarkerId(String id) {
+    if (id == 'start') return Colors.green;
+    if (id == 'end') return Colors.red;
+    return Colors.blue;
   }
 
   void _clearAllMarkers() {
@@ -158,6 +352,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       _waypoints.clear();
       _startLocation = null;
       _endLocation = null;
+      _placementMode = _PlacementMode.start;
+      _showWaypointsList = false;
     });
   }
 
@@ -174,11 +370,13 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       setState(() {
         _endLocation = null;
         _markers.removeWhere((marker) => marker.markerId.value == 'end');
+        _placementMode = _PlacementMode.end;
       });
     } else if (_startLocation != null) {
       setState(() {
         _startLocation = null;
         _markers.removeWhere((marker) => marker.markerId.value == 'start');
+        _placementMode = _PlacementMode.start;
       });
     }
   }
@@ -191,9 +389,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (picked != null) {
-      setState(() {
-        _startDate = picked;
-      });
+      setState(() => _startDate = picked);
     }
   }
 
@@ -205,20 +401,20 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (picked != null) {
-      setState(() {
-        _endDate = picked;
-      });
+      setState(() => _endDate = picked);
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.month}/${date.day}/${date.year}';
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   Future<void> _createTripPlan() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     if (_startLocation == null || _endLocation == null) {
       UiHelpers.showErrorMessage(
@@ -236,10 +432,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Build metadata if needed
       final metadata = <String, dynamic>{};
-      if (_planType == 'MULTI_DAY' && _multiDayTripDays != null) {
-        metadata['multiDayTrip'] = _multiDayTripDays;
+      if (_planType == 'MULTI_DAY' && _daysBetween != null) {
+        metadata['multiDayTrip'] = _daysBetween;
       }
 
       final request = CreateTripPlanBackendRequest(
@@ -284,251 +479,294 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: WandererTheme.backgroundLight,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Create Trip Plan'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('New Trip Plan'),
+        backgroundColor: Colors.white.withOpacity(0.9),
+        elevation: 0,
         actions: [
           if (_markers.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.undo),
+              icon: const Icon(Icons.undo_rounded),
               tooltip: 'Remove last marker',
               onPressed: _removeLastWaypoint,
             ),
           if (_markers.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.clear_all),
+              icon: const Icon(Icons.layers_clear_rounded),
               tooltip: 'Clear all markers',
               onPressed: _clearAllMarkers,
             ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Map Section
-          Expanded(
-            flex: 3,
-            child: Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _initialCameraLocation,
-                    zoom: 12,
-                  ),
-                  markers: _markers,
-                  onMapCreated: _onMapCreated,
-                  onTap: _onMapTapped,
-                  myLocationButtonEnabled: true,
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: true,
-                ),
-                // Map instructions overlay
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 20,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Tap on map to add locations:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          _buildLocationStatus(
-                            'Start',
-                            _startLocation != null,
-                            Colors.green,
-                          ),
-                          _buildLocationStatus(
-                            'End',
-                            _endLocation != null,
-                            Colors.red,
-                          ),
-                          _buildLocationStatus(
-                            'Waypoints',
-                            _waypoints.isNotEmpty,
-                            Colors.blue,
-                            count: _waypoints.length,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Loading overlay while getting location
-                if (_isLoadingLocation)
-                  Positioned(
-                    bottom: 16,
-                    left: 16,
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text('Getting your location...'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+          // Full-screen map
+          Positioned.fill(
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _initialCameraLocation,
+                zoom: 12,
+              ),
+              markers: _markers,
+              onMapCreated: _onMapCreated,
+              onTap: _onMapTapped,
+              myLocationButtonEnabled: true,
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 56,
+                bottom: _formExpanded ? 420 : 180,
+              ),
             ),
           ),
-          // Form Section
-          Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Plan Name *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.title),
-                      ),
-                      textCapitalization: TextCapitalization.words,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a plan name';
-                        }
-                        if (value.trim().length < 3) {
-                          return 'Plan name must be at least 3 characters';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description (Optional)',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.description),
-                      ),
-                      maxLines: 2,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _planType,
-                      decoration: const InputDecoration(
-                        labelText: 'Plan Type',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.category),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'SIMPLE',
-                          child: Text('Simple'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'MULTI_DAY',
-                          child: Text('Multi-Day'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'ROAD_TRIP',
-                          child: Text('Road Trip'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'HIKING',
-                          child: Text('Hiking'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _planType = value!;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _selectStartDate,
-                            icon: const Icon(Icons.calendar_today),
-                            label: Text(
-                              _startDate == null
-                                  ? 'Start Date'
-                                  : _formatDate(_startDate!),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _selectEndDate,
-                            icon: const Icon(Icons.calendar_today),
-                            label: Text(
-                              _endDate == null
-                                  ? 'End Date'
-                                  : _formatDate(_endDate!),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_planType == 'MULTI_DAY') ...[
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Number of Days',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.event),
-                        ),
-                        keyboardType: TextInputType.number,
-                        textCapitalization: TextCapitalization.none,
-                        onChanged: (value) {
-                          _multiDayTripDays = int.tryParse(value);
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _createTripPlan,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Create Trip Plan',
-                              style: TextStyle(fontSize: 16),
-                            ),
+          // Location status chips (floating over map)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 64,
+            left: 16,
+            right: 16,
+            child: _buildLocationChips(),
+          ),
+          // Loading indicator for location
+          if (_isLoadingLocation)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 110,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: WandererTheme.primaryOrange,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Getting location...',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Floating waypoints reorder panel
+          if (_showWaypointsList && _waypoints.isNotEmpty)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 100,
+              left: 12,
+              right: 12,
+              bottom: _formExpanded ? 470 : 210,
+              child: _buildWaypointsPanel(),
+            ),
+          // Bottom draggable form sheet
+          _buildFormSheet(),
+        ],
+      ),
+    );
+  }
+
+  /// Compact location status chips floating on the map — tappable to select
+  /// which point type to place next
+  Widget _buildLocationChips() {
+    return Row(
+      children: [
+        _buildStatusChip(
+          label: 'Start',
+          isSet: _startLocation != null,
+          isActive: _placementMode == _PlacementMode.start,
+          color: Colors.green,
+          icon: Icons.trip_origin,
+          onTap: () => setState(() => _placementMode = _PlacementMode.start),
+        ),
+        const SizedBox(width: 6),
+        _buildStatusChip(
+          label: 'End',
+          isSet: _endLocation != null,
+          isActive: _placementMode == _PlacementMode.end,
+          color: Colors.red,
+          icon: Icons.place,
+          onTap: () => setState(() => _placementMode = _PlacementMode.end),
+        ),
+        const SizedBox(width: 6),
+        _buildStatusChip(
+          label: _waypoints.isEmpty
+              ? 'Waypoints'
+              : 'Waypoints (${_waypoints.length})',
+          isSet: _waypoints.isNotEmpty,
+          isActive: _placementMode == _PlacementMode.waypoint,
+          color: Colors.blue,
+          icon: Icons.more_horiz,
+          onTap: () {
+            setState(() {
+              _placementMode = _PlacementMode.waypoint;
+              if (_waypoints.isNotEmpty) {
+                _showWaypointsList = !_showWaypointsList;
+              }
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusChip({
+    required String label,
+    required bool isSet,
+    required bool isActive,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? color.withOpacity(0.25)
+              : isSet
+                  ? color.withOpacity(0.15)
+                  : Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive
+                ? color
+                : isSet
+                    ? color.withOpacity(0.4)
+                    : Colors.grey.shade300,
+            width: isActive ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSet ? Icons.check_circle : icon,
+              size: 14,
+              color: isActive || isSet ? color : Colors.grey.shade500,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive || isSet ? color : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Floating panel showing waypoints in a reorderable list
+  Widget _buildWaypointsPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+            child: Row(
+              children: [
+                const Icon(Icons.reorder_rounded, size: 18, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  'Waypoints (${_waypoints.length})',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: WandererTheme.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'Drag to reorder',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: WandererTheme.textTertiary,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 20,
+                    color: WandererTheme.textTertiary,
+                  ),
+                  onPressed: () =>
+                      setState(() => _showWaypointsList = false),
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // Reorderable list
+          Flexible(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
+              ),
+              child: ReorderableListView.builder(
+                shrinkWrap: true,
+                itemCount: _waypoints.length,
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    elevation: 4,
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    child: child,
+                  );
+                },
+                onReorder: _onReorderWaypoints,
+                itemBuilder: (context, index) {
+                  final waypoint = _waypoints[index];
+                  return _buildWaypointTile(index, waypoint);
+                },
               ),
             ),
           ),
@@ -537,41 +775,478 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     );
   }
 
-  Widget _buildLocationStatus(
-    String label,
-    bool isSet,
-    Color color, {
-    int? count,
+  Widget _buildWaypointTile(int index, LatLng waypoint) {
+    final key = ValueKey('wp_${waypoint.latitude}_${waypoint.longitude}_$index');
+    return Container(
+      key: key,
+      color: Colors.white,
+      child: ListTile(
+        dense: true,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        leading: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '${index + 1}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+        title: Text(
+          'Waypoint ${index + 1}',
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+        subtitle: Text(
+          '${waypoint.latitude.toStringAsFixed(4)}, ${waypoint.longitude.toStringAsFixed(4)}',
+          style: TextStyle(fontSize: 11, color: WandererTheme.textTertiary),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _waypoints.removeAt(index);
+                  _rebuildWaypointMarkers();
+                });
+              },
+              child: Icon(
+                Icons.remove_circle_outline,
+                size: 18,
+                color: Colors.red.shade300,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.drag_handle_rounded,
+              size: 20,
+              color: WandererTheme.textTertiary,
+            ),
+          ],
+        ),
+        onTap: () {
+          // Center map on this waypoint
+          _mapController?.animateCamera(
+            CameraUpdate.newLatLng(waypoint),
+          );
+        },
+      ),
+    );
+  }
+
+  /// The bottom form sheet that slides up
+  Widget _buildFormSheet() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: GestureDetector(
+        onVerticalDragUpdate: (details) {
+          if (details.primaryDelta! < -4) {
+            setState(() => _formExpanded = true);
+          } else if (details.primaryDelta! > 4) {
+            setState(() => _formExpanded = false);
+          }
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          height: _formExpanded ? 460 : 200,
+          decoration: BoxDecoration(
+            color: WandererTheme.backgroundLight,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              GestureDetector(
+                onTap: () =>
+                    setState(() => _formExpanded = !_formExpanded),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Form content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  physics: _formExpanded
+                      ? const BouncingScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Plan Name
+                        _buildSectionLabel('Plan Name'),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: _inputDecoration(
+                            'e.g., Weekend Hiking Adventure',
+                          ),
+                          textCapitalization: TextCapitalization.words,
+                          textInputAction: TextInputAction.next,
+                          onTap: () {
+                            if (!_formExpanded) {
+                              setState(() => _formExpanded = true);
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter a plan name';
+                            }
+                            if (value.trim().length < 3) {
+                              return 'Plan name must be at least 3 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        // Description
+                        _buildSectionLabel('Description'),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _descriptionController,
+                          decoration: _inputDecoration(
+                            'Tell us about this plan... (optional)',
+                          ),
+                          maxLines: 2,
+                          textCapitalization: TextCapitalization.sentences,
+                          onTap: () {
+                            if (!_formExpanded) {
+                              setState(() => _formExpanded = true);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        // Plan Type toggle
+                        _buildSectionLabel('Plan Type'),
+                        const SizedBox(height: 10),
+                        _buildPlanTypeSelector(),
+                        const SizedBox(height: 20),
+                        // Dates
+                        _buildSectionLabel('Dates'),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildDateButton(
+                                label: 'Start',
+                                date: _startDate,
+                                onTap: _selectStartDate,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildDateButton(
+                                label: 'End',
+                                date: _endDate,
+                                onTap: _selectEndDate,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_daysBetween != null) ...[
+                          const SizedBox(height: 10),
+                          _buildDaysInfoBadge(),
+                        ],
+                        const SizedBox(height: 24),
+                        // Create button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed:
+                                _isLoading ? null : _createTripPlan,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: WandererTheme.primaryOrange,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.grey.shade300,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Create Plan',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Segmented plan type selector
+  Widget _buildPlanTypeSelector() {
+    final types = [
+      {'value': 'SIMPLE', 'label': 'Simple', 'icon': Icons.wb_sunny_outlined},
+      {
+        'value': 'MULTI_DAY',
+        'label': 'Multi-Day',
+        'icon': Icons.luggage_outlined,
+      },
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: types.map((type) {
+          final isSelected = _planType == type['value'];
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _planType = type['value'] as String),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? WandererTheme.primaryOrange.withOpacity(0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isSelected
+                        ? WandererTheme.primaryOrange
+                        : Colors.transparent,
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      type['icon'] as IconData,
+                      size: 20,
+                      color: isSelected
+                          ? WandererTheme.primaryOrange
+                          : WandererTheme.textTertiary,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      type['label'] as String,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? WandererTheme.primaryOrange
+                            : WandererTheme.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  /// Date button styled as a card
+  Widget _buildDateButton({
+    required String label,
+    required DateTime? date,
+    required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+    final hasDate = date != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasDate
+                ? WandererTheme.primaryOrange.withOpacity(0.5)
+                : Colors.grey.shade200,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today_rounded,
+              size: 18,
+              color: hasDate
+                  ? WandererTheme.primaryOrange
+                  : WandererTheme.textTertiary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: WandererTheme.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hasDate ? _formatDate(date) : 'Select',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: hasDate ? FontWeight.w600 : FontWeight.w400,
+                      color: hasDate
+                          ? WandererTheme.textPrimary
+                          : WandererTheme.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Info badge showing the auto-calculated number of days between dates
+  Widget _buildDaysInfoBadge() {
+    final days = _daysBetween!;
+    final isMultiDay = _planType == 'MULTI_DAY';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isMultiDay
+            ? WandererTheme.primaryOrange.withOpacity(0.06)
+            : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isMultiDay
+              ? WandererTheme.primaryOrange.withOpacity(0.2)
+              : Colors.grey.shade200,
+        ),
+      ),
       child: Row(
         children: [
           Icon(
-            isSet ? Icons.check_circle : Icons.circle_outlined,
+            Icons.date_range_rounded,
             size: 16,
-            color: isSet ? color : Colors.grey,
+            color: isMultiDay
+                ? WandererTheme.primaryOrange
+                : WandererTheme.textTertiary,
           ),
           const SizedBox(width: 8),
           Text(
-            label,
+            days == 1 ? '1 day' : '$days days',
             style: TextStyle(
-              fontSize: 14,
-              color: isSet ? Colors.black87 : Colors.grey,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isMultiDay
+                  ? WandererTheme.primaryOrange
+                  : WandererTheme.textSecondary,
             ),
           ),
-          if (count != null && count > 0) ...[
-            const SizedBox(width: 4),
+          if (isMultiDay && days > 1) ...[
+            const SizedBox(width: 6),
             Text(
-              '($count)',
+              '· Multi-day trip',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: color,
+                fontSize: 12,
+                color: WandererTheme.primaryOrange.withOpacity(0.7),
               ),
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: WandererTheme.textPrimary,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey.shade400),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: WandererTheme.primaryOrange,
+          width: 1.5,
+        ),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
       ),
     );
   }

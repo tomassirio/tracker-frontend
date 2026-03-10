@@ -35,6 +35,13 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   // Collapsible panel state
   bool _isInfoCollapsed = false;
 
+  // Edit mode map state
+  List<LatLng> _editWaypoints = [];
+  LatLng? _editStartLocation;
+  LatLng? _editEndLocation;
+  bool _editFormExpanded = false;
+  bool _showEditWaypointsList = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +50,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     _selectedPlanType = _tripPlan.planType;
     _startDate = _tripPlan.startDate;
     _endDate = _tripPlan.endDate;
+    _initEditLocations();
     _updateMapData();
   }
 
@@ -75,6 +83,18 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         _polylines = mapData.polylines;
       });
     }
+  }
+
+  /// Populates the editable location fields from the current trip plan
+  void _initEditLocations() {
+    _editWaypoints =
+        _tripPlan.waypoints.map((w) => LatLng(w.lat, w.lon)).toList();
+    _editStartLocation = _tripPlan.startLocation != null
+        ? LatLng(_tripPlan.startLocation!.lat, _tripPlan.startLocation!.lon)
+        : null;
+    _editEndLocation = _tripPlan.endLocation != null
+        ? LatLng(_tripPlan.endLocation!.lat, _tripPlan.endLocation!.lon)
+        : null;
   }
 
   /// Shows options for a waypoint (currently delete)
@@ -146,6 +166,11 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         ..removeAt(waypointIndex);
 
       final request = UpdateTripPlanRequest(
+        name: _tripPlan.name,
+        startDate: _tripPlan.startDate,
+        endDate: _tripPlan.endDate,
+        startLocation: _tripPlan.startLocation,
+        endLocation: _tripPlan.endLocation,
         waypoints: updatedWaypoints,
       );
 
@@ -221,8 +246,23 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     try {
       final request = UpdateTripPlanRequest(
         name: _nameController.text.trim(),
-        plannedStartDate: _startDate,
-        plannedEndDate: _endDate,
+        startDate: _startDate,
+        endDate: _endDate,
+        startLocation: _editStartLocation != null
+            ? PlanLocation(
+                lat: _editStartLocation!.latitude,
+                lon: _editStartLocation!.longitude,
+              )
+            : _tripPlan.startLocation,
+        endLocation: _editEndLocation != null
+            ? PlanLocation(
+                lat: _editEndLocation!.latitude,
+                lon: _editEndLocation!.longitude,
+              )
+            : _tripPlan.endLocation,
+        waypoints: _editWaypoints
+            .map((w) => PlanLocation(lat: w.latitude, lon: w.longitude))
+            .toList(),
       );
 
       final planId = await _tripPlanService.updateTripPlan(
@@ -239,6 +279,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
           _isEditing = false;
           _isLoading = false;
         });
+        _initEditLocations();
+        _updateMapData();
         UiHelpers.showSuccessMessage(context, 'Trip plan updated successfully');
       }
     } catch (e) {
@@ -312,7 +354,14 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () => setState(() => _isEditing = true),
+            onPressed: () {
+              _initEditLocations();
+              setState(() {
+                _isEditing = true;
+                _editFormExpanded = false;
+                _showEditWaypointsList = false;
+              });
+            },
             tooltip: 'Edit',
           ),
           IconButton(
@@ -385,7 +434,14 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                     _isInfoCollapsed = !_isInfoCollapsed;
                   });
                 },
-                onEdit: () => setState(() => _isEditing = true),
+                onEdit: () {
+                  _initEditLocations();
+                  setState(() {
+                    _isEditing = true;
+                    _editFormExpanded = false;
+                    _showEditWaypointsList = false;
+                  });
+                },
                 onDelete: _deleteTripPlan,
               ),
             ),
@@ -395,27 +451,44 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     );
   }
 
-  /// Builds the edit screen with traditional layout
+  /// Builds the edit screen with fullscreen map and bottom sheet form
   Widget _buildEditScreen() {
     return Scaffold(
+      backgroundColor: WandererTheme.backgroundLight,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Edit Trip Plan'),
-        backgroundColor: WandererTheme.primaryOrange,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white.withOpacity(0.9),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            setState(() {
+              _isEditing = false;
+              _nameController.text = _tripPlan.name;
+              _selectedPlanType = _tripPlan.planType;
+              _startDate = _tripPlan.startDate;
+              _endDate = _tripPlan.endDate;
+              _editWaypoints =
+                  _tripPlan.waypoints.map((w) => LatLng(w.lat, w.lon)).toList();
+              _editStartLocation = _tripPlan.startLocation != null
+                  ? LatLng(
+                      _tripPlan.startLocation!.lat,
+                      _tripPlan.startLocation!.lon,
+                    )
+                  : null;
+              _editEndLocation = _tripPlan.endLocation != null
+                  ? LatLng(
+                      _tripPlan.endLocation!.lat,
+                      _tripPlan.endLocation!.lon,
+                    )
+                  : null;
+              _showEditWaypointsList = false;
+            });
+          },
+          tooltip: 'Cancel',
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              setState(() {
-                _isEditing = false;
-                _nameController.text = _tripPlan.name;
-                _selectedPlanType = _tripPlan.planType;
-                _startDate = _tripPlan.startDate;
-                _endDate = _tripPlan.endDate;
-              });
-            },
-            tooltip: 'Cancel',
-          ),
           IconButton(
             icon: _isLoading
                 ? const SizedBox(
@@ -423,184 +496,619 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: WandererTheme.primaryOrange,
                     ),
                   )
-                : const Icon(Icons.check),
+                : const Icon(Icons.check_rounded),
             onPressed: _isLoading ? null : _saveChanges,
             tooltip: 'Save',
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Name
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
-                ),
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.next,
+      body: Stack(
+        children: [
+          // Full-screen map with draggable markers
+          Positioned.fill(
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _editStartLocation ??
+                    const LatLng(40.7128, -74.0060),
+                zoom: 10,
               ),
-              const SizedBox(height: 16),
-              // Plan Type
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Plan Type',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      DropdownButtonFormField<String>(
-                        value: _selectedPlanType,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'SIMPLE',
-                            child: Text('Simple'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'MULTI_DAY',
-                            child: Text('Multi-Day'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'ROAD_TRIP',
-                            child: Text('Road Trip'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedPlanType = value);
-                          }
-                        },
-                      ),
-                    ],
+              markers: _buildEditMarkers(),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                if (_editStartLocation != null) {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    _fitEditBounds();
+                  });
+                }
+              },
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              zoomControlsEnabled: false,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 56,
+                bottom: _editFormExpanded ? 420 : 200,
+              ),
+            ),
+          ),
+          // Location chips
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 64,
+            left: 16,
+            right: 16,
+            child: _buildEditLocationChips(),
+          ),
+          // Floating waypoints reorder panel
+          if (_showEditWaypointsList && _editWaypoints.isNotEmpty)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 100,
+              left: 12,
+              right: 12,
+              bottom: _editFormExpanded ? 430 : 210,
+              child: _buildEditWaypointsPanel(),
+            ),
+          // Bottom form sheet
+          _buildEditFormSheet(),
+        ],
+      ),
+    );
+  }
+
+  Set<Marker> _buildEditMarkers() {
+    final markers = <Marker>{};
+    if (_editStartLocation != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('start'),
+        position: _editStartLocation!,
+        infoWindow: const InfoWindow(title: 'Start Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        draggable: true,
+        onDragEnd: (pos) =>
+            setState(() => _editStartLocation = pos),
+        onTap: () => _showEditMarkerOptions('start', 'Start Location'),
+      ));
+    }
+    if (_editEndLocation != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('end'),
+        position: _editEndLocation!,
+        infoWindow: const InfoWindow(title: 'End Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        draggable: true,
+        onDragEnd: (pos) =>
+            setState(() => _editEndLocation = pos),
+        onTap: () => _showEditMarkerOptions('end', 'End Location'),
+      ));
+    }
+    for (int i = 0; i < _editWaypoints.length; i++) {
+      markers.add(Marker(
+        markerId: MarkerId('waypoint_${i + 1}'),
+        position: _editWaypoints[i],
+        infoWindow: InfoWindow(title: 'Waypoint ${i + 1}'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        draggable: true,
+        onDragEnd: (pos) {
+          setState(() => _editWaypoints[i] = pos);
+        },
+        onTap: () => _showEditMarkerOptions(
+          'waypoint_${i + 1}',
+          'Waypoint ${i + 1}',
+        ),
+      ));
+    }
+    return markers;
+  }
+
+  void _showEditMarkerOptions(String markerId, String title) {
+    final color = markerId == 'start'
+        ? Colors.green
+        : markerId == 'end'
+            ? Colors.red
+            : Colors.blue;
+    final icon = markerId == 'start'
+        ? Icons.trip_origin
+        : markerId == 'end'
+            ? Icons.place
+            : Icons.more_horiz;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: WandererTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Row(
+                children: [
+                  Icon(icon, color: color, size: 20),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            if (markerId.startsWith('waypoint_'))
+              ListTile(
+                leading:
+                    const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text(
+                  'Remove',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  final index =
+                      int.tryParse(markerId.split('_').last);
+                  if (index != null &&
+                      index > 0 &&
+                      index <= _editWaypoints.length) {
+                    setState(
+                        () => _editWaypoints.removeAt(index - 1));
+                  }
+                },
+              ),
+            ListTile(
+              leading: Icon(Icons.drag_indicator_rounded,
+                  color: WandererTheme.textTertiary),
+              title: const Text('Drag marker on map to move'),
+              subtitle: Text(
+                'Long press and drag to reposition',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: WandererTheme.textTertiary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditLocationChips() {
+    return Row(
+      children: [
+        _buildEditChip(
+          label: 'Start',
+          isSet: _editStartLocation != null,
+          color: Colors.green,
+          icon: Icons.trip_origin,
+        ),
+        const SizedBox(width: 6),
+        _buildEditChip(
+          label: 'End',
+          isSet: _editEndLocation != null,
+          color: Colors.red,
+          icon: Icons.place,
+        ),
+        const SizedBox(width: 6),
+        GestureDetector(
+          onTap: () {
+            if (_editWaypoints.isNotEmpty) {
+              setState(
+                  () => _showEditWaypointsList = !_showEditWaypointsList);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: _showEditWaypointsList
+                  ? Colors.blue.withOpacity(0.25)
+                  : _editWaypoints.isNotEmpty
+                      ? Colors.blue.withOpacity(0.15)
+                      : Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _showEditWaypointsList
+                    ? Colors.blue
+                    : _editWaypoints.isNotEmpty
+                        ? Colors.blue.withOpacity(0.4)
+                        : Colors.grey.shade300,
+                width: _showEditWaypointsList ? 2 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _editWaypoints.isNotEmpty
+                      ? Icons.check_circle
+                      : Icons.more_horiz,
+                  size: 14,
+                  color: _editWaypoints.isNotEmpty
+                      ? Colors.blue
+                      : Colors.grey.shade500,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _editWaypoints.isEmpty
+                      ? 'Waypoints'
+                      : 'Waypoints (${_editWaypoints.length})',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: _showEditWaypointsList
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    color: _editWaypoints.isNotEmpty
+                        ? Colors.blue
+                        : Colors.grey.shade600,
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEditChip({
+    required String label,
+    required bool isSet,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color:
+            isSet ? color.withOpacity(0.15) : Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSet ? color.withOpacity(0.4) : Colors.grey.shade300,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isSet ? Icons.check_circle : icon,
+            size: 14,
+            color: isSet ? color : Colors.grey.shade500,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: isSet ? color : Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditWaypointsPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+            child: Row(
+              children: [
+                const Icon(Icons.reorder_rounded,
+                    size: 18, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  'Waypoints (${_editWaypoints.length})',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: WandererTheme.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'Drag to reorder',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: WandererTheme.textTertiary,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: Icon(Icons.close_rounded,
+                      size: 20, color: WandererTheme.textTertiary),
+                  onPressed: () =>
+                      setState(() => _showEditWaypointsList = false),
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Flexible(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
               ),
-              const SizedBox(height: 8),
-              // Dates
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Dates',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+              child: ReorderableListView.builder(
+                shrinkWrap: true,
+                itemCount: _editWaypoints.length,
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    elevation: 4,
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    child: child,
+                  );
+                },
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    if (newIndex > oldIndex) newIndex--;
+                    final item = _editWaypoints.removeAt(oldIndex);
+                    _editWaypoints.insert(newIndex, item);
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final wp = _editWaypoints[index];
+                  return Container(
+                    key: ValueKey(
+                      'ewp_${wp.latitude}_${wp.longitude}_$index',
+                    ),
+                    color: Colors.white,
+                    child: ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      leading: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.blue,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
+                      title: Text(
+                        'Waypoint ${index + 1}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${wp.latitude.toStringAsFixed(4)}, ${wp.longitude.toStringAsFixed(4)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: WandererTheme.textTertiary,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _selectStartDate,
-                              icon: const Icon(Icons.calendar_today),
-                              label: Text(
-                                _startDate != null
-                                    ? _formatDate(_startDate!)
-                                    : 'Start Date',
-                              ),
+                          GestureDetector(
+                            onTap: () => setState(
+                                () => _editWaypoints.removeAt(index)),
+                            child: Icon(
+                              Icons.remove_circle_outline,
+                              size: 18,
+                              color: Colors.red.shade300,
                             ),
                           ),
                           const SizedBox(width: 8),
+                          Icon(
+                            Icons.drag_handle_rounded,
+                            size: 20,
+                            color: WandererTheme.textTertiary,
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        _mapController?.animateCamera(
+                          CameraUpdate.newLatLng(wp),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditFormSheet() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: GestureDetector(
+        onVerticalDragUpdate: (details) {
+          if (details.primaryDelta! < -4) {
+            setState(() => _editFormExpanded = true);
+          } else if (details.primaryDelta! > 4) {
+            setState(() => _editFormExpanded = false);
+          }
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          height: _editFormExpanded ? 420 : 200,
+          decoration: BoxDecoration(
+            color: WandererTheme.backgroundLight,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              GestureDetector(
+                onTap: () => setState(
+                    () => _editFormExpanded = !_editFormExpanded),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  physics: _editFormExpanded
+                      ? const BouncingScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name
+                      _buildEditSectionLabel('Plan Name'),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: _editInputDecoration(
+                          'e.g., Weekend Hiking Adventure',
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                        onTap: () {
+                          if (!_editFormExpanded) {
+                            setState(() => _editFormExpanded = true);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      // Plan Type
+                      _buildEditSectionLabel('Plan Type'),
+                      const SizedBox(height: 10),
+                      _buildEditPlanTypeSelector(),
+                      const SizedBox(height: 20),
+                      // Dates
+                      _buildEditSectionLabel('Dates'),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
                           Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _selectEndDate,
-                              icon: const Icon(Icons.calendar_today),
-                              label: Text(
-                                _endDate != null
-                                    ? _formatDate(_endDate!)
-                                    : 'End Date',
-                              ),
+                            child: _buildEditDateButton(
+                              label: 'Start',
+                              date: _startDate,
+                              onTap: _selectStartDate,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildEditDateButton(
+                              label: 'End',
+                              date: _endDate,
+                              onTap: _selectEndDate,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Locations Summary
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Route',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildLocationRow(
-                        'Start',
-                        _tripPlan.startLocation,
-                        Colors.green,
-                      ),
-                      if (_tripPlan.waypoints.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          '${_tripPlan.waypoints.length} waypoint(s)',
-                          style: TextStyle(
-                            color: Colors.orange.shade700,
-                            fontSize: 14,
-                          ),
-                        ),
+                      if (_startDate != null && _endDate != null) ...[
+                        const SizedBox(height: 10),
+                        _buildEditDaysInfo(),
                       ],
-                      const SizedBox(height: 8),
-                      _buildLocationRow(
-                        'End',
-                        _tripPlan.endLocation,
-                        Colors.red,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Created Date
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.access_time, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Created: ${_formatDate(_tripPlan.createdTimestamp)}',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
+                      const SizedBox(height: 24),
+                      // Save button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _saveChanges,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: WandererTheme.primaryOrange,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.grey.shade300,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Save Changes',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -612,36 +1120,257 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     );
   }
 
-  Widget _buildLocationRow(String label, PlanLocation? location, Color color) {
-    final hasLocation =
-        location != null && location.lat != 0 && location.lon != 0;
+  Widget _buildEditPlanTypeSelector() {
+    final types = [
+      {'value': 'SIMPLE', 'label': 'Simple', 'icon': Icons.wb_sunny_outlined},
+      {
+        'value': 'MULTI_DAY',
+        'label': 'Multi-Day',
+        'icon': Icons.luggage_outlined,
+      },
+    ];
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: types.map((type) {
+          final isSelected = _selectedPlanType == type['value'];
+          return Expanded(
+            child: GestureDetector(
+              onTap: () =>
+                  setState(() => _selectedPlanType = type['value'] as String),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? WandererTheme.primaryOrange.withOpacity(0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isSelected
+                        ? WandererTheme.primaryOrange
+                        : Colors.transparent,
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      type['icon'] as IconData,
+                      size: 20,
+                      color: isSelected
+                          ? WandererTheme.primaryOrange
+                          : WandererTheme.textTertiary,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      type['label'] as String,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? WandererTheme.primaryOrange
+                            : WandererTheme.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: hasLocation ? color : Colors.grey,
-            shape: BoxShape.circle,
+  Widget _buildEditDateButton({
+    required String label,
+    required DateTime? date,
+    required VoidCallback onTap,
+  }) {
+    final hasDate = date != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasDate
+                ? WandererTheme.primaryOrange.withOpacity(0.5)
+                : Colors.grey.shade200,
           ),
         ),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today_rounded,
+              size: 18,
+              color: hasDate
+                  ? WandererTheme.primaryOrange
+                  : WandererTheme.textTertiary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: WandererTheme.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hasDate ? _formatEditDate(date) : 'Select',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight:
+                          hasDate ? FontWeight.w600 : FontWeight.w400,
+                      color: hasDate
+                          ? WandererTheme.textPrimary
+                          : WandererTheme.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: Text(
-            hasLocation
-                ? '${location.lat.toStringAsFixed(4)}, ${location.lon.toStringAsFixed(4)}'
-                : 'Not set',
+      ),
+    );
+  }
+
+  String _formatEditDate(DateTime date) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Widget _buildEditDaysInfo() {
+    final days = _endDate!.difference(_startDate!).inDays + 1;
+    final isMultiDay = _selectedPlanType == 'MULTI_DAY';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isMultiDay
+            ? WandererTheme.primaryOrange.withOpacity(0.06)
+            : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isMultiDay
+              ? WandererTheme.primaryOrange.withOpacity(0.2)
+              : Colors.grey.shade200,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.date_range_rounded,
+            size: 16,
+            color: isMultiDay
+                ? WandererTheme.primaryOrange
+                : WandererTheme.textTertiary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            days == 1 ? '1 day' : '$days days',
             style: TextStyle(
-              color: hasLocation ? Colors.black87 : Colors.grey,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isMultiDay
+                  ? WandererTheme.primaryOrange
+                  : WandererTheme.textSecondary,
             ),
           ),
+          if (isMultiDay && days > 1) ...[
+            const SizedBox(width: 6),
+            Text(
+              '\u00b7 Multi-day trip',
+              style: TextStyle(
+                fontSize: 12,
+                color: WandererTheme.primaryOrange.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditSectionLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: WandererTheme.textPrimary,
+      ),
+    );
+  }
+
+  InputDecoration _editInputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey.shade400),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: WandererTheme.primaryOrange,
+          width: 1.5,
         ),
-      ],
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
+    );
+  }
+
+  void _fitEditBounds() {
+    final allPoints = <LatLng>[
+      if (_editStartLocation != null) _editStartLocation!,
+      if (_editEndLocation != null) _editEndLocation!,
+      ..._editWaypoints,
+    ];
+    if (allPoints.length < 2 || _mapController == null) return;
+
+    double minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+    for (final p in allPoints) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+    _mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        ),
+        50,
+      ),
     );
   }
 
