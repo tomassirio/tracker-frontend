@@ -1015,6 +1015,9 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
   /// Mobile edit layout with bottom sheet form (original behavior)
   Widget _buildEditScreenMobile() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final expandedHeight =
+        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
@@ -1069,7 +1072,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               zoomControlsEnabled: false,
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 56,
-                bottom: _editFormExpanded ? 420 : 200,
+                bottom: _editFormExpanded ? expandedHeight : 200,
               ),
             ),
           ),
@@ -1135,7 +1138,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               top: MediaQuery.of(context).padding.top + 100,
               left: 12,
               right: 12,
-              bottom: _editFormExpanded ? 430 : 210,
+              bottom: _editFormExpanded ? expandedHeight + 10 : 210,
               child: Listener(
                 behavior: HitTestBehavior.opaque,
                 onPointerDown: (_) => _editIgnoreNextMapTap = true,
@@ -1593,6 +1596,9 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   }
 
   Widget _buildEditFormSheet() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final expandedHeight =
+        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
@@ -1608,7 +1614,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: _editFormExpanded ? 420 : 200,
+          height: _editFormExpanded ? expandedHeight : 200,
           decoration: BoxDecoration(
             color: WandererTheme.backgroundLight,
             borderRadius: const BorderRadius.vertical(

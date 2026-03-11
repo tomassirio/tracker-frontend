@@ -1066,6 +1066,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// Mobile layout with bottom sheet form (original behavior)
   Widget _buildMobileLayout() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final expandedHeight =
+        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
@@ -1107,7 +1110,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               zoomControlsEnabled: false,
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 56,
-                bottom: _formExpanded ? 420 : 180,
+                bottom: _formExpanded ? expandedHeight : 180,
               ),
             ),
           ),
@@ -1173,7 +1176,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               top: MediaQuery.of(context).padding.top + 100,
               left: 12,
               right: 12,
-              bottom: _formExpanded ? 470 : 210,
+              bottom: _formExpanded ? expandedHeight + 10 : 210,
               child: Listener(
                 behavior: HitTestBehavior.opaque,
                 onPointerDown: (_) => _ignoreNextMapTap = true,
@@ -1492,6 +1495,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// The bottom form sheet that slides up
   Widget _buildFormSheet() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final expandedHeight =
+        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
@@ -1511,7 +1517,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            height: _formExpanded ? 460 : 200,
+            height: _formExpanded ? expandedHeight : 200,
             decoration: BoxDecoration(
               color: WandererTheme.backgroundLight,
               borderRadius: const BorderRadius.vertical(
