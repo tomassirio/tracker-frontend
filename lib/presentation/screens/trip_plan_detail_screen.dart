@@ -517,6 +517,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                 zoom: 10,
               ),
               markers: _buildEditMarkers(),
+              polylines: _buildEditPolylines(),
               onMapCreated: (controller) {
                 _mapController = controller;
                 if (_editStartLocation != null) {
@@ -844,6 +845,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                 zoom: 10,
               ),
               markers: _buildEditMarkers(),
+              polylines: _buildEditPolylines(),
               onMapCreated: (controller) {
                 _mapController = controller;
                 if (_editStartLocation != null) {
@@ -925,6 +927,101 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
       ));
     }
     return markers;
+  }
+
+  /// Builds polylines for the edit mode map.
+  /// Uses the stored encoded polyline from the trip plan if locations haven't
+  /// changed, otherwise falls back to straight lines connecting edit points.
+  Set<Polyline> _buildEditPolylines() {
+    final polylines = <Polyline>{};
+    final points = <LatLng>[];
+
+    if (_editStartLocation != null) points.add(_editStartLocation!);
+    points.addAll(_editWaypoints);
+    if (_editEndLocation != null) points.add(_editEndLocation!);
+
+    if (points.length < 2) return polylines;
+
+    // Check if locations match the original trip plan (no dragging occurred)
+    final locationsUnchanged = _editLocationsMatchTripPlan();
+
+    // If locations are unchanged, try to use the stored encoded polyline
+    if (locationsUnchanged) {
+      final polylineStr =
+          _tripPlan.plannedPolyline ?? _tripPlan.encodedPolyline;
+      if (polylineStr != null && polylineStr.isNotEmpty) {
+        try {
+          final routePoints = PolylineCodec.decode(polylineStr);
+          polylines.add(
+            Polyline(
+              polylineId: const PolylineId('edit_route'),
+              points: routePoints,
+              color: Colors.blue,
+              width: 5,
+              geodesic: false,
+              visible: true,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+            ),
+          );
+          return polylines;
+        } catch (_) {
+          // Fall through to straight-line fallback
+        }
+      }
+    }
+
+    // Fallback: straight dashed lines connecting edit points
+    polylines.add(
+      Polyline(
+        polylineId: const PolylineId('edit_route'),
+        points: points,
+        color: Colors.blue.withOpacity(0.7),
+        width: 3,
+        patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+        geodesic: false,
+        visible: true,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+        jointType: JointType.round,
+      ),
+    );
+    return polylines;
+  }
+
+  /// Checks whether the edit locations still match the original trip plan
+  bool _editLocationsMatchTripPlan() {
+    // Check start location
+    if (_tripPlan.startLocation != null && _editStartLocation != null) {
+      if (_editStartLocation!.latitude != _tripPlan.startLocation!.lat ||
+          _editStartLocation!.longitude != _tripPlan.startLocation!.lon) {
+        return false;
+      }
+    } else if (_tripPlan.startLocation != null || _editStartLocation != null) {
+      return false;
+    }
+
+    // Check end location
+    if (_tripPlan.endLocation != null && _editEndLocation != null) {
+      if (_editEndLocation!.latitude != _tripPlan.endLocation!.lat ||
+          _editEndLocation!.longitude != _tripPlan.endLocation!.lon) {
+        return false;
+      }
+    } else if (_tripPlan.endLocation != null || _editEndLocation != null) {
+      return false;
+    }
+
+    // Check waypoints
+    if (_editWaypoints.length != _tripPlan.waypoints.length) return false;
+    for (int i = 0; i < _editWaypoints.length; i++) {
+      if (_editWaypoints[i].latitude != _tripPlan.waypoints[i].lat ||
+          _editWaypoints[i].longitude != _tripPlan.waypoints[i].lon) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   void _showEditMarkerOptions(String markerId, String title) {
