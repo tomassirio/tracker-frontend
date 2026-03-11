@@ -136,7 +136,8 @@ class Trip {
             .map((wp) => PlannedWaypoint.fromJson(wp as Map<String, dynamic>))
             .toList();
       }
-      plannedEncodedPolyline = tripDetails['encodedPolyline'] as String?;
+      plannedEncodedPolyline = tripDetails['plannedPolyline'] as String? ??
+          tripDetails['encodedPolyline'] as String?;
       if (plannedEncodedPolyline != null) {
         debugPrint(
           'Trip.fromJson: Found plannedEncodedPolyline in tripDetails '

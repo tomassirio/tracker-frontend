@@ -38,14 +38,15 @@ class _TripPlanCardState extends State<TripPlanCard> {
   }
 
   /// Load the encoded polyline for the miniature map.
-  /// Prefers the backend-provided polyline (zero API calls), falling back
-  /// to encoding the raw plan points as straight lines.
+  /// Prefers the user-provided planned polyline, then the backend-computed
+  /// polyline, falling back to encoding the raw plan points as straight lines.
   void _loadRoute() {
-    // 1. Backend-provided polyline (best case: zero API calls)
-    if (widget.plan.encodedPolyline != null &&
-        widget.plan.encodedPolyline!.isNotEmpty) {
+    // 1. User-provided planned polyline (best case: zero API calls)
+    final polyline =
+        widget.plan.plannedPolyline ?? widget.plan.encodedPolyline;
+    if (polyline != null && polyline.isNotEmpty) {
       setState(() {
-        _encodedPolyline = widget.plan.encodedPolyline;
+        _encodedPolyline = polyline;
       });
       return;
     }

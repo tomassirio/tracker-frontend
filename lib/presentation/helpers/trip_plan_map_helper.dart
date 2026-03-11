@@ -160,15 +160,13 @@ class TripPlanMapHelper {
       points.add(endLatLng);
     }
 
-    // Use backend-provided polyline, fall back to straight lines
+    // Use planned polyline, backend-computed polyline, or fall back to straight lines
     if (points.length >= 2) {
-      if (tripPlan.encodedPolyline != null &&
-          tripPlan.encodedPolyline!.isNotEmpty) {
-        // Best case: use backend-computed polyline (zero API calls)
+      final polylineStr =
+          tripPlan.plannedPolyline ?? tripPlan.encodedPolyline;
+      if (polylineStr != null && polylineStr.isNotEmpty) {
         try {
-          final routePoints = PolylineCodec.decode(
-            tripPlan.encodedPolyline!,
-          );
+          final routePoints = PolylineCodec.decode(polylineStr);
           polylines.add(
             Polyline(
               polylineId: const PolylineId('route'),
