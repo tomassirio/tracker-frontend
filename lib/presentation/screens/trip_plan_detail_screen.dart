@@ -321,24 +321,34 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     );
   }
 
-  Future<void> _selectDateRange() async {
-    final DateTimeRange? picked = await showDateRangePicker(
+  Future<void> _selectStartDate() async {
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialDateRange:
-          _startDate != null
-              ? DateTimeRange(
-                  start: _startDate!,
-                  end: _endDate ?? _startDate!,
-                )
-              : null,
+      initialDate: _startDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
-        _startDate = picked.start;
-        _endDate = picked.end;
+        _startDate = picked;
+        if (_endDate != null && _endDate!.isBefore(picked)) {
+          _endDate = null;
+        }
       });
+    }
+  }
+
+  Future<void> _selectEndDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate:
+          _endDate ??
+          (_startDate ?? DateTime.now()).add(const Duration(days: 1)),
+      firstDate: _startDate ?? DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+    );
+    if (picked != null && mounted) {
+      setState(() => _endDate = picked);
     }
   }
 
@@ -758,13 +768,17 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
           Positioned(
             left: 0,
             top: 0,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              width: _isEditPanelCollapsed ? 88 : panelWidth,
-              child: _isEditPanelCollapsed
-                  ? _buildCollapsedEditBubble()
-                  : _buildExpandedEditPanel(),
+            child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (_) => _editIgnoreNextMapTap = true,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                width: _isEditPanelCollapsed ? 88 : panelWidth,
+                child: _isEditPanelCollapsed
+                    ? _buildCollapsedEditBubble()
+                    : _buildExpandedEditPanel(),
+              ),
             ),
           ),
         ],
@@ -949,7 +963,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                               child: _buildEditDateButton(
                                 label: 'Start',
                                 date: _startDate,
-                                onTap: _selectDateRange,
+                                onTap: _selectStartDate,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -957,7 +971,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                               child: _buildEditDateButton(
                                 label: 'End',
                                 date: _endDate,
-                                onTap: _selectDateRange,
+                                onTap: _selectEndDate,
                               ),
                             ),
                           ],
@@ -1607,7 +1621,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
       left: 0,
       right: 0,
       bottom: 0,
-      child: GestureDetector(
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: (_) => _editIgnoreNextMapTap = true,
+        child: GestureDetector(
         onVerticalDragUpdate: (details) {
           if (details.primaryDelta! < -4) {
             setState(() => _editFormExpanded = true);
@@ -1692,7 +1709,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                             child: _buildEditDateButton(
                               label: 'Start',
                               date: _startDate,
-                              onTap: _selectDateRange,
+                              onTap: _selectStartDate,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -1700,7 +1717,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                             child: _buildEditDateButton(
                               label: 'End',
                               date: _endDate,
-                              onTap: _selectDateRange,
+                              onTap: _selectEndDate,
                             ),
                           ),
                         ],
@@ -1750,6 +1767,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
