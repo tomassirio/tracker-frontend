@@ -60,6 +60,10 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   /// Whether to show the floating waypoints reorder panel
   bool _showWaypointsList = false;
 
+  /// Flag to ignore the next map tap — set when a UI overlay is tapped on web
+  /// to prevent the underlying platform view from also firing onTap.
+  bool _ignoreNextMapTap = false;
+
   /// Computed number of days between start and end dates
   int? get _daysBetween {
     if (_startDate == null || _endDate == null) return null;
@@ -218,6 +222,12 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   }
 
   void _onMapTapped(LatLng location) {
+    // Ignore map taps that originated from UI overlay interactions (web issue)
+    if (_ignoreNextMapTap) {
+      _ignoreNextMapTap = false;
+      return;
+    }
+
     setState(() {
       switch (_placementMode) {
         case _PlacementMode.start:
@@ -649,9 +659,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             top: MediaQuery.of(context).padding.top + 64,
             left: 16,
             right: 16,
-            child: GestureDetector(
+            child: Listener(
               behavior: HitTestBehavior.opaque,
-              onTap: () {},
+              onPointerDown: (_) => _ignoreNextMapTap = true,
               child: _buildLocationChips(),
             ),
           ),
