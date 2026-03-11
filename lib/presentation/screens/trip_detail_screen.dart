@@ -101,6 +101,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _hasInitialMapPosition = false;
   bool _isMapLoading = true;
 
+  // Planned waypoints overlay toggle (for trips created from a plan)
+  bool _showPlannedWaypoints = false;
+
   // Multi-day trip: current day derived from backend's currentDay field
   int get _currentDay => _trip.currentDay ?? 1;
 
@@ -863,6 +866,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final mapData = TripMapHelper.createMapDataWithDirections(
         _trip,
         onMarkerTap: _onMapMarkerTapped,
+        showPlannedWaypoints: _showPlannedWaypoints,
       );
       setState(() {
         _markers = mapData.markers;
@@ -873,6 +877,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final mapData = TripMapHelper.createMapData(
         _trip,
         onMarkerTap: _onMapMarkerTapped,
+        showPlannedWaypoints: _showPlannedWaypoints,
       );
       setState(() {
         _markers = mapData.markers;
@@ -2178,6 +2183,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isPromoted: _isPromoted,
       donationLink: _donationLink,
       tripAchievements: _tripAchievements,
+      showPlannedWaypoints: _showPlannedWaypoints,
       onToggleTripInfo: () => _handleToggleTripInfo(isMobile),
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
@@ -2206,6 +2212,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
       onVisibilityChange:
           _isLoggedIn && _trip.userId == _userId ? _changeTripVisibility : null,
+      onTogglePlannedWaypoints: _trip.hasPlannedRoute
+          ? () {
+              setState(() {
+                _showPlannedWaypoints = !_showPlannedWaypoints;
+              });
+              _updateMapData();
+            }
+          : null,
     );
   }
 

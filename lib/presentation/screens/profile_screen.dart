@@ -365,6 +365,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   hintText: 'Your display name',
                 ),
                 textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -384,6 +385,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   hintText: 'https://example.com/avatar.jpg',
                 ),
                 textCapitalization: TextCapitalization.none,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => Navigator.pop(context, true),
               ),
             ],
           ),

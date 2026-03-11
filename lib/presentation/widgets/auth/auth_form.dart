@@ -53,17 +53,31 @@ class AuthForm extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Username field
-              UsernameField(controller: usernameController, isLogin: isLogin),
+              UsernameField(
+                controller: usernameController,
+                isLogin: isLogin,
+                textInputAction: TextInputAction.next,
+              ),
               const SizedBox(height: 16),
 
               // Email field (only for registration)
               if (!isLogin) ...[
-                EmailField(controller: emailController),
+                EmailField(
+                  controller: emailController,
+                  textInputAction: TextInputAction.next,
+                ),
                 const SizedBox(height: 16),
               ],
 
               // Password field
-              PasswordField(controller: passwordController, isLogin: isLogin),
+              PasswordField(
+                controller: passwordController,
+                isLogin: isLogin,
+                textInputAction:
+                    isLogin ? TextInputAction.done : TextInputAction.next,
+                onFieldSubmitted:
+                    isLogin ? (_) => isLoading ? null : onSubmit() : null,
+              ),
               const SizedBox(height: 16),
 
               // Confirm password field (only for registration)
@@ -73,6 +87,8 @@ class AuthForm extends StatelessWidget {
                   label: 'Confirm Password',
                   isLogin: false,
                   compareController: passwordController,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => isLoading ? null : onSubmit(),
                 ),
                 const SizedBox(height: 16),
               ],

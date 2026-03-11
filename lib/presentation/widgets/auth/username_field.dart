@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 class UsernameField extends StatelessWidget {
   final TextEditingController controller;
   final bool isLogin;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
 
   const UsernameField({
     super.key,
     required this.controller,
     required this.isLogin,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -21,6 +25,8 @@ class UsernameField extends StatelessWidget {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       textCapitalization: TextCapitalization.none,
+      textInputAction: textInputAction ?? TextInputAction.next,
+      onFieldSubmitted: onFieldSubmitted,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Please enter your username';

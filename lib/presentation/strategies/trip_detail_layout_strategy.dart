@@ -69,6 +69,9 @@ class TripDetailLayoutData {
   final VoidCallback? onSendFriendRequestToTripOwner;
   final VoidCallback? onTestBackgroundUpdate;
   final Function(Visibility)? onVisibilityChange;
+  final bool showPlannedWaypoints; // Toggle for planned waypoints overlay
+  final VoidCallback?
+      onTogglePlannedWaypoints; // Callback to toggle planned waypoints
 
   const TripDetailLayoutData({
     required this.trip,
@@ -101,6 +104,8 @@ class TripDetailLayoutData {
     this.isPromoted = false,
     this.donationLink,
     this.tripAchievements = const [],
+    this.showPlannedWaypoints = false,
+    this.onTogglePlannedWaypoints,
     required this.onToggleTripInfo,
     required this.onToggleComments,
     required this.onToggleTimeline,
@@ -166,6 +171,8 @@ abstract class TripDetailLayoutStrategy {
       tripAchievements: data.tripAchievements,
       onTestBackgroundUpdate: data.onTestBackgroundUpdate,
       onVisibilityChange: data.onVisibilityChange,
+      showPlannedWaypoints: data.showPlannedWaypoints,
+      onTogglePlannedWaypoints: data.onTogglePlannedWaypoints,
     );
   }
 
