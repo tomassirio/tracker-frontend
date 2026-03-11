@@ -649,46 +649,54 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             top: MediaQuery.of(context).padding.top + 64,
             left: 16,
             right: 16,
-            child: _buildLocationChips(),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: _buildLocationChips(),
+            ),
           ),
           // Loading indicator for location
           if (_isLoadingLocation)
             Positioned(
               top: MediaQuery.of(context).padding.top + 110,
               left: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: WandererTheme.primaryOrange,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Getting location...',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: WandererTheme.primaryOrange,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Getting location...',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -699,46 +707,54 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               left: 12,
               right: 12,
               bottom: _formExpanded ? 470 : 210,
-              child: _buildWaypointsPanel(),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: _buildWaypointsPanel(),
+              ),
             ),
           // Route computing indicator
           if (_isComputingRoute)
             Positioned(
               top: MediaQuery.of(context).padding.top + 110,
               right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.blue,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Computing route...',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Computing route...',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -802,6 +818,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -1013,6 +1030,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       right: 0,
       bottom: 0,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onVerticalDragUpdate: (details) {
           if (details.primaryDelta! < -4) {
             setState(() => _formExpanded = true);
