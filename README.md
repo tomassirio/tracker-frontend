@@ -1,11 +1,22 @@
-# Wanderer Frontend
+<p align="center">
+  <img src="assets/images/wanderer-logo.png" alt="Wanderer Logo" width="180" />
+</p>
 
-![Version](https://img.shields.io/badge/version-1.2.12-blue)
-![Coverage](https://img.shields.io/badge/coverage-30%25-red)
-![Flutter](https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter)
-![License](https://img.shields.io/badge/license-MIT-green)
+<h1 align="center">Wanderer Frontend</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.2.12-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/coverage-30%25-red" alt="Coverage" />
+  <img src="https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter" alt="Flutter" />
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
+</p>
 
 A cross-platform Flutter application for tracking trips and adventures in real time. Runs on the web, Android, and iOS.
+
+<!-- TODO: Add a hero/feature image showcasing the app -->
+<!-- <p align="center">
+  <img src="docs/screenshots/feature.png" alt="Wanderer Feature Overview" width="800" />
+</p> -->
 
 ## Features
 
@@ -21,6 +32,18 @@ A cross-platform Flutter application for tracking trips and adventures in real t
 - **Push Notifications** — Receive notifications for follows, comments, and reactions (Android)
 - **Background Updates** — Continue sending location updates while the app is in the background (Android)
 - **Admin Panel** — User management and trip data maintenance tools for administrators
+
+### Screenshots
+
+<!-- TODO: Replace these placeholders with actual screenshots -->
+
+| Home | Trip Detail | Trip Map |
+|:----:|:-----------:|:--------:|
+| <!-- <img src="docs/screenshots/home.png" width="250" /> --> *screenshot placeholder* | <!-- <img src="docs/screenshots/trip-detail.png" width="250" /> --> *screenshot placeholder* | <!-- <img src="docs/screenshots/trip-map.png" width="250" /> --> *screenshot placeholder* |
+
+| Create Trip | Profile | Trip Planning |
+|:-----------:|:-------:|:-------------:|
+| <!-- <img src="docs/screenshots/create-trip.png" width="250" /> --> *screenshot placeholder* | <!-- <img src="docs/screenshots/profile.png" width="250" /> --> *screenshot placeholder* | <!-- <img src="docs/screenshots/trip-planning.png" width="250" /> --> *screenshot placeholder* |
 
 ## Architecture
 
