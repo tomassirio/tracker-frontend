@@ -11,6 +11,9 @@ import 'package:wanderer_frontend/presentation/helpers/trip_plan_map_helper.dart
 import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plan_info_card.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
+/// The type of point the user wants to place next on the map in edit mode
+enum _EditPlacementMode { start, end, waypoint }
+
 /// Screen for viewing and editing a trip plan
 class TripPlanDetailScreen extends StatefulWidget {
   final TripPlan tripPlan;
@@ -47,6 +50,21 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   bool _editFormExpanded = false;
   bool _showEditWaypointsList = false;
   bool _isEditPanelCollapsed = false;
+
+  /// Placement mode for adding/moving points in edit mode
+  _EditPlacementMode _editPlacementMode = _EditPlacementMode.waypoint;
+
+  /// Polylines computed for edit mode (road-snapped or fallback)
+  final Set<Polyline> _editPolylines = {};
+
+  /// The computed encoded polyline for saving
+  String? _editEncodedPolyline;
+
+  /// Whether a route computation is in progress
+  bool _isEditComputingRoute = false;
+
+  /// Flag to ignore the next map tap on web
+  bool _editIgnoreNextMapTap = false;
 
   @override
   void initState() {
@@ -104,6 +122,151 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     _editEndLocation = _tripPlan.endLocation != null
         ? LatLng(_tripPlan.endLocation!.lat, _tripPlan.endLocation!.lon)
         : null;
+    _editPlacementMode = _EditPlacementMode.waypoint;
+    _editEncodedPolyline =
+        _tripPlan.plannedPolyline ?? _tripPlan.encodedPolyline;
+  }
+
+  /// Builds ordered points for the edit mode polyline: start → waypoints → end.
+  List<LatLng> _buildEditOrderedPoints() {
+    final points = <LatLng>[];
+    if (_editStartLocation != null) points.add(_editStartLocation!);
+    points.addAll(_editWaypoints);
+    if (_editEndLocation != null) points.add(_editEndLocation!);
+    return points;
+  }
+
+  /// Computes a road-snapped polyline via the Directions API for edit mode.
+  /// Falls back to a straight-line polyline if the API call fails.
+  Future<void> _computeEditRoutePolyline() async {
+    final points = _buildEditOrderedPoints();
+
+    if (points.length < 2) {
+      setState(() {
+        _editPolylines.clear();
+        _editEncodedPolyline = null;
+      });
+      return;
+    }
+
+    // Show straight-line fallback immediately while loading
+    setState(() {
+      _editPolylines.clear();
+      _editPolylines.add(
+        Polyline(
+          polylineId: const PolylineId('edit_route'),
+          points: points,
+          color: Colors.blue.withOpacity(0.5),
+          width: 3,
+          patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+          geodesic: false,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+        ),
+      );
+      _isEditComputingRoute = true;
+    });
+
+    try {
+      final result = await _directionsClient.getRouteWithPoints(points);
+
+      if (!mounted) return;
+
+      if (result != null) {
+        setState(() {
+          _editPolylines.clear();
+          _editPolylines.add(
+            Polyline(
+              polylineId: const PolylineId('edit_route'),
+              points: result.routePoints,
+              color: Colors.blue,
+              width: 5,
+              geodesic: false,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+            ),
+          );
+          _editEncodedPolyline = result.encodedPolyline;
+          _isEditComputingRoute = false;
+        });
+      } else {
+        setState(() {
+          _editEncodedPolyline = PolylineCodec.encode(points);
+          _isEditComputingRoute = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('TripPlanDetailScreen: Edit route computation failed: $e');
+      if (!mounted) return;
+      setState(() {
+        _editEncodedPolyline = PolylineCodec.encode(points);
+        _isEditComputingRoute = false;
+      });
+    }
+  }
+
+  /// Initializes edit polylines — uses existing encoded polyline if locations
+  /// haven't changed, otherwise computes a new one.
+  void _initEditPolylines() {
+    if (_editLocationsMatchTripPlan()) {
+      final polylineStr =
+          _tripPlan.plannedPolyline ?? _tripPlan.encodedPolyline;
+      if (polylineStr != null && polylineStr.isNotEmpty) {
+        try {
+          final routePoints = PolylineCodec.decode(polylineStr);
+          setState(() {
+            _editPolylines.clear();
+            _editPolylines.add(
+              Polyline(
+                polylineId: const PolylineId('edit_route'),
+                points: routePoints,
+                color: Colors.blue,
+                width: 5,
+                geodesic: false,
+                startCap: Cap.roundCap,
+                endCap: Cap.roundCap,
+                jointType: JointType.round,
+              ),
+            );
+            _editEncodedPolyline = polylineStr;
+          });
+          return;
+        } catch (_) {
+          // Fall through to compute
+        }
+      }
+    }
+    _computeEditRoutePolyline();
+  }
+
+  /// Called when the user taps on the map in edit mode
+  void _onEditMapTapped(LatLng location) {
+    if (_editIgnoreNextMapTap) {
+      _editIgnoreNextMapTap = false;
+      return;
+    }
+
+    setState(() {
+      switch (_editPlacementMode) {
+        case _EditPlacementMode.start:
+          _editStartLocation = location;
+          if (_editEndLocation == null) {
+            _editPlacementMode = _EditPlacementMode.end;
+          } else {
+            _editPlacementMode = _EditPlacementMode.waypoint;
+          }
+          break;
+        case _EditPlacementMode.end:
+          _editEndLocation = location;
+          _editPlacementMode = _EditPlacementMode.waypoint;
+          break;
+        case _EditPlacementMode.waypoint:
+          _editWaypoints.add(location);
+          break;
+      }
+    });
+    _computeEditRoutePolyline();
   }
 
   /// Shows info for a waypoint in view mode (no delete)
@@ -195,27 +358,14 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Build ordered points for polyline computation
-      final points = <LatLng>[];
-      final startLoc = _editStartLocation ??
-          (_tripPlan.startLocation != null
-              ? LatLng(
-                  _tripPlan.startLocation!.lat, _tripPlan.startLocation!.lon)
-              : null);
-      final endLoc = _editEndLocation ??
-          (_tripPlan.endLocation != null
-              ? LatLng(_tripPlan.endLocation!.lat, _tripPlan.endLocation!.lon)
-              : null);
-
-      if (startLoc != null) points.add(startLoc);
-      points.addAll(_editWaypoints);
-      if (endLoc != null) points.add(endLoc);
-
-      // Compute road-snapped polyline from Directions API
-      String? encodedPolyline;
-      if (points.length >= 2) {
-        final result = await _directionsClient.getRoutePolyline(points);
-        encodedPolyline = result ?? PolylineCodec.encode(points);
+      // Use the already-computed encoded polyline, or compute a fallback
+      String? encodedPolyline = _editEncodedPolyline;
+      if (encodedPolyline == null) {
+        final points = _buildEditOrderedPoints();
+        if (points.length >= 2) {
+          final result = await _directionsClient.getRoutePolyline(points);
+          encodedPolyline = result ?? PolylineCodec.encode(points);
+        }
       }
 
       final request = UpdateTripPlanRequest(
@@ -416,6 +566,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                   },
                   onEdit: () {
                     _initEditLocations();
+                    _initEditPolylines();
                     setState(() {
                       _isEditing = true;
                       _editFormExpanded = false;
@@ -456,6 +607,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
           : null;
       _showEditWaypointsList = false;
       _isEditPanelCollapsed = false;
+      _editPolylines.clear();
+      _editEncodedPolyline = null;
+      _editPlacementMode = _EditPlacementMode.waypoint;
+      _isEditComputingRoute = false;
     });
   }
 
@@ -517,7 +672,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                 zoom: 10,
               ),
               markers: _buildEditMarkers(),
-              polylines: _buildEditPolylines(),
+              polylines: _editPolylines,
               onMapCreated: (controller) {
                 _mapController = controller;
                 if (_editStartLocation != null) {
@@ -526,6 +681,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                   });
                 }
               },
+              onTap: _onEditMapTapped,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
               zoomControlsEnabled: true,
@@ -541,8 +697,57 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
             top: MediaQuery.of(context).padding.top + kToolbarHeight + 8,
             left: (_isEditPanelCollapsed ? 88 : panelWidth) + 16,
             right: 16,
-            child: _buildEditLocationChips(),
+            child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (_) => _editIgnoreNextMapTap = true,
+              child: _buildEditLocationChips(),
+            ),
           ),
+          // Route computing indicator
+          if (_isEditComputingRoute)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight + 44,
+              right: 16,
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _editIgnoreNextMapTap = true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Computing route...',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           // Floating waypoints reorder panel (to the right of side panel)
           if (_showEditWaypointsList && _editWaypoints.isNotEmpty)
             Positioned(
@@ -550,7 +755,11 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               left: (_isEditPanelCollapsed ? 88 : panelWidth) + 12,
               right: 12,
               bottom: 16,
-              child: _buildEditWaypointsPanel(),
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _editIgnoreNextMapTap = true,
+                child: _buildEditWaypointsPanel(),
+              ),
             ),
           // Floating glass side panel
           Positioned(
@@ -845,7 +1054,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                 zoom: 10,
               ),
               markers: _buildEditMarkers(),
-              polylines: _buildEditPolylines(),
+              polylines: _editPolylines,
               onMapCreated: (controller) {
                 _mapController = controller;
                 if (_editStartLocation != null) {
@@ -854,6 +1063,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                   });
                 }
               },
+              onTap: _onEditMapTapped,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
               zoomControlsEnabled: false,
@@ -868,8 +1078,57 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
             top: MediaQuery.of(context).padding.top + 64,
             left: 16,
             right: 16,
-            child: _buildEditLocationChips(),
+            child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (_) => _editIgnoreNextMapTap = true,
+              child: _buildEditLocationChips(),
+            ),
           ),
+          // Route computing indicator
+          if (_isEditComputingRoute)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 110,
+              right: 16,
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _editIgnoreNextMapTap = true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Computing route...',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           // Floating waypoints reorder panel
           if (_showEditWaypointsList && _editWaypoints.isNotEmpty)
             Positioned(
@@ -877,7 +1136,11 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               left: 12,
               right: 12,
               bottom: _editFormExpanded ? 430 : 210,
-              child: _buildEditWaypointsPanel(),
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _editIgnoreNextMapTap = true,
+                child: _buildEditWaypointsPanel(),
+              ),
             ),
           // Bottom form sheet
           _buildEditFormSheet(),
@@ -895,7 +1158,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         infoWindow: const InfoWindow(title: 'Start Location'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         draggable: true,
-        onDragEnd: (pos) => setState(() => _editStartLocation = pos),
+        onDragEnd: (pos) {
+          setState(() => _editStartLocation = pos);
+          _computeEditRoutePolyline();
+        },
         onTap: () => _showEditMarkerOptions('start', 'Start Location'),
       ));
     }
@@ -906,7 +1172,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         infoWindow: const InfoWindow(title: 'End Location'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         draggable: true,
-        onDragEnd: (pos) => setState(() => _editEndLocation = pos),
+        onDragEnd: (pos) {
+          setState(() => _editEndLocation = pos);
+          _computeEditRoutePolyline();
+        },
         onTap: () => _showEditMarkerOptions('end', 'End Location'),
       ));
     }
@@ -919,6 +1188,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         draggable: true,
         onDragEnd: (pos) {
           setState(() => _editWaypoints[i] = pos);
+          _computeEditRoutePolyline();
         },
         onTap: () => _showEditMarkerOptions(
           'waypoint_${i + 1}',
@@ -927,67 +1197,6 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
       ));
     }
     return markers;
-  }
-
-  /// Builds polylines for the edit mode map.
-  /// Uses the stored encoded polyline from the trip plan if locations haven't
-  /// changed, otherwise falls back to straight lines connecting edit points.
-  Set<Polyline> _buildEditPolylines() {
-    final polylines = <Polyline>{};
-    final points = <LatLng>[];
-
-    if (_editStartLocation != null) points.add(_editStartLocation!);
-    points.addAll(_editWaypoints);
-    if (_editEndLocation != null) points.add(_editEndLocation!);
-
-    if (points.length < 2) return polylines;
-
-    // Check if locations match the original trip plan (no dragging occurred)
-    final locationsUnchanged = _editLocationsMatchTripPlan();
-
-    // If locations are unchanged, try to use the stored encoded polyline
-    if (locationsUnchanged) {
-      final polylineStr =
-          _tripPlan.plannedPolyline ?? _tripPlan.encodedPolyline;
-      if (polylineStr != null && polylineStr.isNotEmpty) {
-        try {
-          final routePoints = PolylineCodec.decode(polylineStr);
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('edit_route'),
-              points: routePoints,
-              color: Colors.blue,
-              width: 5,
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
-            ),
-          );
-          return polylines;
-        } catch (_) {
-          // Fall through to straight-line fallback
-        }
-      }
-    }
-
-    // Fallback: straight dashed lines connecting edit points
-    polylines.add(
-      Polyline(
-        polylineId: const PolylineId('edit_route'),
-        points: points,
-        color: Colors.blue.withOpacity(0.7),
-        width: 3,
-        patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-        geodesic: false,
-        visible: true,
-        startCap: Cap.roundCap,
-        endCap: Cap.roundCap,
-        jointType: JointType.round,
-      ),
-    );
-    return polylines;
   }
 
   /// Checks whether the edit locations still match the original trip plan
