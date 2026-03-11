@@ -530,7 +530,14 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
         lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
       );
     } finally {
-      if (mounted) setState(() => _isPickerOpen = false);
+      if (mounted) {
+        setState(() {
+          _isPickerOpen = false;
+          // Absorb the trailing map tap that the platform view fires
+          // after the dialog dismisses (Save / Cancel / X click).
+          _ignoreNextMapTap = true;
+        });
+      }
     }
     if (picked != null && mounted) {
       setState(() {
