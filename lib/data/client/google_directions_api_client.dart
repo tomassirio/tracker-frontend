@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
+import 'directions_web_stub.dart'
+    if (dart.library.js_interop) 'directions_web_impl.dart' as directions_web;
 import 'polyline_codec.dart';
 
 /// Client for Google Directions API.
@@ -36,6 +38,21 @@ class GoogleDirectionsApiClient {
   /// request fails or the API returns no routes.
   Future<String?> getRoutePolyline(List<LatLng> points) async {
     if (points.length < 2) return null;
+
+    // On web, use the Google Maps JS DirectionsService to avoid CORS issues
+    if (kIsWeb) {
+      try {
+        final webResult =
+            await directions_web.getDirectionsPolylineWeb(points, _apiKey);
+        if (webResult != null) return webResult;
+      } catch (e) {
+        debugPrint(
+          'GoogleDirectionsApiClient: Web JS fallback failed: $e',
+        );
+      }
+      // If web JS approach failed, return null (HTTP won't work due to CORS)
+      return null;
+    }
 
     final origin = points.first;
     final destination = points.last;
