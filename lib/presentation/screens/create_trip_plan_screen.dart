@@ -789,7 +789,6 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
           Positioned(
             left: 0,
             top: 0,
-            bottom: 0,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
@@ -851,6 +850,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// Expanded glass side panel with the create form
   Widget _buildExpandedSidePanel() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    // topOffset = statusBar + appBar + panel top margin (8) + panel bottom margin (16)
+    final topOffset =
+        MediaQuery.of(context).padding.top + kToolbarHeight + 8 + 16;
+    final maxPanelHeight = screenHeight - topOffset - 16;
     return Container(
       margin: EdgeInsets.only(
         left: 16,
@@ -868,17 +872,20 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             sigmaX: WandererTheme.glassBlurSigma,
             sigmaY: WandererTheme.glassBlurSigma,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: WandererTheme.glassBackground,
-              borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-              border: Border.all(
-                color: WandererTheme.glassBorderColor,
-                width: 1,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxPanelHeight),
+            child: Container(
+              decoration: BoxDecoration(
+                color: WandererTheme.glassBackground,
+                borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+                border: Border.all(
+                  color: WandererTheme.glassBorderColor,
+                  width: 1,
+                ),
               ),
-            ),
-            child: Column(
-              children: [
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                 // Header
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -941,7 +948,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                   ),
                 ),
                 // Scrollable form content
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Form(
@@ -1053,7 +1060,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                     ),
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
