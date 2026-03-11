@@ -1041,8 +1041,11 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   /// Mobile edit layout with bottom sheet form (original behavior)
   Widget _buildEditScreenMobile() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final expandedHeight = screenHeight +
+        keyboardHeight -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
@@ -1625,8 +1628,11 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
   Widget _buildEditFormSheet() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final expandedHeight = screenHeight +
+        keyboardHeight -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,

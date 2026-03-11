@@ -1096,8 +1096,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   /// Mobile layout with bottom sheet form (original behavior)
   Widget _buildMobileLayout() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final expandedHeight = screenHeight +
+        keyboardHeight -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
@@ -1528,8 +1531,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   /// The bottom form sheet that slides up
   Widget _buildFormSheet() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final expandedHeight = screenHeight +
+        keyboardHeight -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
