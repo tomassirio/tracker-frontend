@@ -670,9 +670,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 110,
               left: 16,
-              child: GestureDetector(
+              child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onTap: () {},
+                onPointerDown: (_) => _ignoreNextMapTap = true,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -717,9 +717,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               left: 12,
               right: 12,
               bottom: _formExpanded ? 470 : 210,
-              child: GestureDetector(
+              child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onTap: () {},
+                onPointerDown: (_) => _ignoreNextMapTap = true,
                 child: _buildWaypointsPanel(),
               ),
             ),
@@ -728,9 +728,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 110,
               right: 16,
-              child: GestureDetector(
+              child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onTap: () {},
+                onPointerDown: (_) => _ignoreNextMapTap = true,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1039,179 +1039,183 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       left: 0,
       right: 0,
       bottom: 0,
-      child: GestureDetector(
+      child: Listener(
         behavior: HitTestBehavior.opaque,
-        onVerticalDragUpdate: (details) {
-          if (details.primaryDelta! < -4) {
-            setState(() => _formExpanded = true);
-          } else if (details.primaryDelta! > 4) {
-            setState(() => _formExpanded = false);
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          height: _formExpanded ? 460 : 200,
-          decoration: BoxDecoration(
-            color: WandererTheme.backgroundLight,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+        onPointerDown: (_) => _ignoreNextMapTap = true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onVerticalDragUpdate: (details) {
+            if (details.primaryDelta! < -4) {
+              setState(() => _formExpanded = true);
+            } else if (details.primaryDelta! > 4) {
+              setState(() => _formExpanded = false);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            height: _formExpanded ? 460 : 200,
+            decoration: BoxDecoration(
+              color: WandererTheme.backgroundLight,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Drag handle
-              GestureDetector(
-                onTap: () => setState(() => _formExpanded = !_formExpanded),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Drag handle
+                GestureDetector(
+                  onTap: () => setState(() => _formExpanded = !_formExpanded),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    child: Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // Form content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  physics: _formExpanded
-                      ? const BouncingScrollPhysics()
-                      : const NeverScrollableScrollPhysics(),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Plan Name
-                        _buildSectionLabel('Plan Name'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: _inputDecoration(
-                            'e.g., Weekend Hiking Adventure',
-                          ),
-                          textCapitalization: TextCapitalization.words,
-                          textInputAction: TextInputAction.next,
-                          onTap: () {
-                            if (!_formExpanded) {
-                              setState(() => _formExpanded = true);
-                            }
-                          },
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a plan name';
-                            }
-                            if (value.trim().length < 3) {
-                              return 'Plan name must be at least 3 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        // Description
-                        _buildSectionLabel('Description'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _descriptionController,
-                          decoration: _inputDecoration(
-                            'Tell us about this plan... (optional)',
-                          ),
-                          maxLines: 2,
-                          textCapitalization: TextCapitalization.sentences,
-                          onTap: () {
-                            if (!_formExpanded) {
-                              setState(() => _formExpanded = true);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        // Plan Type toggle
-                        _buildSectionLabel('Plan Type'),
-                        const SizedBox(height: 10),
-                        _buildPlanTypeSelector(),
-                        const SizedBox(height: 20),
-                        // Dates
-                        _buildSectionLabel('Dates'),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildDateButton(
-                                label: 'Start',
-                                date: _startDate,
-                                onTap: _selectStartDate,
-                              ),
+                // Form content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    physics: _formExpanded
+                        ? const BouncingScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Plan Name
+                          _buildSectionLabel('Plan Name'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: _inputDecoration(
+                              'e.g., Weekend Hiking Adventure',
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildDateButton(
-                                label: 'End',
-                                date: _endDate,
-                                onTap: _selectEndDate,
-                              ),
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.next,
+                            onTap: () {
+                              if (!_formExpanded) {
+                                setState(() => _formExpanded = true);
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a plan name';
+                              }
+                              if (value.trim().length < 3) {
+                                return 'Plan name must be at least 3 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          // Description
+                          _buildSectionLabel('Description'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _descriptionController,
+                            decoration: _inputDecoration(
+                              'Tell us about this plan... (optional)',
                             ),
-                          ],
-                        ),
-                        if (_daysBetween != null) ...[
+                            maxLines: 2,
+                            textCapitalization: TextCapitalization.sentences,
+                            onTap: () {
+                              if (!_formExpanded) {
+                                setState(() => _formExpanded = true);
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          // Plan Type toggle
+                          _buildSectionLabel('Plan Type'),
                           const SizedBox(height: 10),
-                          _buildDaysInfoBadge(),
-                        ],
-                        const SizedBox(height: 24),
-                        // Create button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _createTripPlan,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: WandererTheme.primaryOrange,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: Colors.grey.shade300,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                          _buildPlanTypeSelector(),
+                          const SizedBox(height: 20),
+                          // Dates
+                          _buildSectionLabel('Dates'),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildDateButton(
+                                  label: 'Start',
+                                  date: _startDate,
+                                  onTap: _selectStartDate,
+                                ),
                               ),
-                              elevation: 0,
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Create Plan',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildDateButton(
+                                  label: 'End',
+                                  date: _endDate,
+                                  onTap: _selectEndDate,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                          if (_daysBetween != null) ...[
+                            const SizedBox(height: 10),
+                            _buildDaysInfoBadge(),
+                          ],
+                          const SizedBox(height: 24),
+                          // Create button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _createTripPlan,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: WandererTheme.primaryOrange,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: Colors.grey.shade300,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Create Plan',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
