@@ -51,6 +51,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   bool _showEditWaypointsList = false;
   bool _isEditPanelCollapsed = false;
 
+  /// Cached expanded height — computed when the keyboard is not visible so
+  /// opening the soft keyboard doesn't cause the sheet to shrink.
+  double? _cachedExpandedHeight;
+
   /// Placement mode for adding/moving points in edit mode
   _EditPlacementMode _editPlacementMode = _EditPlacementMode.waypoint;
 
@@ -90,6 +94,21 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     _mapController?.dispose();
     _directionsClient.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final mq = MediaQuery.of(context);
+    // Only update the cached height when the keyboard is not showing, so the
+    // sheet doesn't shrink when the user focuses a text field.
+    if (mq.viewInsets.bottom == 0) {
+      final newHeight =
+          mq.size.height - mq.padding.top - kToolbarHeight;
+      if (newHeight != _cachedExpandedHeight) {
+        _cachedExpandedHeight = newHeight;
+      }
+    }
   }
 
   /// Updates map data using backend polyline or straight-line fallback
@@ -1041,11 +1060,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   /// Mobile edit layout with bottom sheet form (original behavior)
   Widget _buildEditScreenMobile() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final expandedHeight = screenHeight +
-        keyboardHeight -
-        MediaQuery.of(context).padding.top -
-        kToolbarHeight;
+    final expandedHeight = _cachedExpandedHeight ??
+        (screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight);
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
@@ -1628,11 +1644,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
   Widget _buildEditFormSheet() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final expandedHeight = screenHeight +
-        keyboardHeight -
-        MediaQuery.of(context).padding.top -
-        kToolbarHeight;
+    final expandedHeight = _cachedExpandedHeight ??
+        (screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight);
     return Positioned(
       left: 0,
       right: 0,
