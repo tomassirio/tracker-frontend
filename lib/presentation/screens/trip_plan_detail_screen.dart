@@ -321,30 +321,23 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     );
   }
 
-  Future<void> _selectStartDate() async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDate: _startDate ?? DateTime.now(),
+      initialDateRange:
+          _startDate != null
+              ? DateTimeRange(
+                  start: _startDate!,
+                  end: _endDate ?? _startDate!,
+                )
+              : null,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (picked != null) {
       setState(() {
-        _startDate = picked;
-      });
-    }
-  }
-
-  Future<void> _selectEndDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _endDate ?? _startDate ?? DateTime.now(),
-      firstDate: _startDate ?? DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
-    if (picked != null) {
-      setState(() {
-        _endDate = picked;
+        _startDate = picked.start;
+        _endDate = picked.end;
       });
     }
   }
@@ -949,7 +942,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                               child: _buildEditDateButton(
                                 label: 'Start',
                                 date: _startDate,
-                                onTap: _selectStartDate,
+                                onTap: _selectDateRange,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -957,7 +950,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                               child: _buildEditDateButton(
                                 label: 'End',
                                 date: _endDate,
-                                onTap: _selectEndDate,
+                                onTap: _selectDateRange,
                               ),
                             ),
                           ],
@@ -1049,30 +1042,33 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
       ),
       body: Stack(
         children: [
-          // Full-screen map with draggable markers
+          // Full-screen map with draggable markers (disabled when form sheet is fully expanded)
           Positioned.fill(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _editStartLocation ?? const LatLng(40.7128, -74.0060),
-                zoom: 10,
-              ),
-              markers: _buildEditMarkers(),
-              polylines: _editPolylines,
-              onMapCreated: (controller) {
-                _mapController = controller;
-                if (_editStartLocation != null) {
-                  Future.delayed(const Duration(milliseconds: 300), () {
-                    _fitEditBounds();
-                  });
-                }
-              },
-              onTap: _onEditMapTapped,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-              zoomControlsEnabled: false,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 56,
-                bottom: _editFormExpanded ? expandedHeight : 200,
+            child: AbsorbPointer(
+              absorbing: _editFormExpanded,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: _editStartLocation ?? const LatLng(40.7128, -74.0060),
+                  zoom: 10,
+                ),
+                markers: _buildEditMarkers(),
+                polylines: _editPolylines,
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  if (_editStartLocation != null) {
+                    Future.delayed(const Duration(milliseconds: 300), () {
+                      _fitEditBounds();
+                    });
+                  }
+                },
+                onTap: _onEditMapTapped,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                zoomControlsEnabled: false,
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 56,
+                  bottom: _editFormExpanded ? expandedHeight : 200,
+                ),
               ),
             ),
           ),
@@ -1688,7 +1684,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                             child: _buildEditDateButton(
                               label: 'Start',
                               date: _startDate,
-                              onTap: _selectStartDate,
+                              onTap: _selectDateRange,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -1696,7 +1692,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                             child: _buildEditDateButton(
                               label: 'End',
                               date: _endDate,
-                              onTap: _selectEndDate,
+                              onTap: _selectDateRange,
                             ),
                           ),
                         ],

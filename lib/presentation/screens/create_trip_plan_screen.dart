@@ -506,27 +506,24 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     _computeRoutePolyline();
   }
 
-  Future<void> _selectStartDate() async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDate: _startDate ?? DateTime.now(),
+      initialDateRange:
+          _startDate != null
+              ? DateTimeRange(
+                  start: _startDate!,
+                  end: _endDate ?? _startDate!,
+                )
+              : null,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (picked != null) {
-      setState(() => _startDate = picked);
-    }
-  }
-
-  Future<void> _selectEndDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _endDate ?? _startDate ?? DateTime.now(),
-      firstDate: _startDate ?? DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
-    if (picked != null) {
-      setState(() => _endDate = picked);
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
     }
   }
 
@@ -999,7 +996,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                                 child: _buildDateButton(
                                   label: 'Start',
                                   date: _startDate,
-                                  onTap: _selectStartDate,
+                                  onTap: _selectDateRange,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -1007,7 +1004,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                                 child: _buildDateButton(
                                   label: 'End',
                                   date: _endDate,
-                                  onTap: _selectEndDate,
+                                  onTap: _selectDateRange,
                                 ),
                               ),
                             ],
@@ -1094,23 +1091,26 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       ),
       body: Stack(
         children: [
-          // Full-screen map
+          // Full-screen map (disabled when form sheet is fully expanded)
           Positioned.fill(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _initialCameraLocation,
-                zoom: 12,
-              ),
-              markers: _markers,
-              polylines: _polylines,
-              onMapCreated: _onMapCreated,
-              onTap: _onMapTapped,
-              myLocationButtonEnabled: true,
-              myLocationEnabled: true,
-              zoomControlsEnabled: false,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 56,
-                bottom: _formExpanded ? expandedHeight : 180,
+            child: AbsorbPointer(
+              absorbing: _formExpanded,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: _initialCameraLocation,
+                  zoom: 12,
+                ),
+                markers: _markers,
+                polylines: _polylines,
+                onMapCreated: _onMapCreated,
+                onTap: _onMapTapped,
+                myLocationButtonEnabled: true,
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 56,
+                  bottom: _formExpanded ? expandedHeight : 180,
+                ),
               ),
             ),
           ),
@@ -1620,7 +1620,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                                 child: _buildDateButton(
                                   label: 'Start',
                                   date: _startDate,
-                                  onTap: _selectStartDate,
+                                  onTap: _selectDateRange,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -1628,7 +1628,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                                 child: _buildDateButton(
                                   label: 'End',
                                   date: _endDate,
-                                  onTap: _selectEndDate,
+                                  onTap: _selectDateRange,
                                 ),
                               ),
                             ],
