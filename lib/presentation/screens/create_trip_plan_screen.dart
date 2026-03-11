@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
+import 'package:wanderer_frontend/data/client/google_directions_api_client.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
 import 'package:wanderer_frontend/data/models/requests/create_trip_plan_backend_request.dart';
 import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
@@ -25,7 +28,17 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   GoogleMapController? _mapController;
   final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
   final List<LatLng> _waypoints = [];
+
+  /// Directions API client for computing road-snapped polylines
+  late final GoogleDirectionsApiClient _directionsClient;
+
+  /// The computed encoded polyline string to send to the backend
+  String? _encodedPolyline;
+
+  /// Whether a polyline computation is in progress
+  bool _isComputingRoute = false;
 
   static const LatLng _defaultLocation = LatLng(40.7128, -74.0060);
   LatLng _initialCameraLocation = _defaultLocation;
@@ -56,6 +69,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   @override
   void initState() {
     super.initState();
+    _directionsClient =
+        GoogleDirectionsApiClient(ApiEndpoints.googleMapsApiKey);
     _getCurrentLocation();
   }
 
@@ -106,11 +121,100 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     _mapController?.dispose();
+    _directionsClient.dispose();
     super.dispose();
   }
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
+  }
+
+  /// Builds the ordered list of plan points: start → waypoints → end.
+  List<LatLng> _buildOrderedPoints() {
+    final points = <LatLng>[];
+    if (_startLocation != null) points.add(_startLocation!);
+    points.addAll(_waypoints);
+    if (_endLocation != null) points.add(_endLocation!);
+    return points;
+  }
+
+  /// Computes a road-snapped polyline via the Directions API and shows it
+  /// on the map. Falls back to a straight-line polyline if the API call
+  /// fails or if start/end are not yet set.
+  Future<void> _computeRoutePolyline() async {
+    final points = _buildOrderedPoints();
+
+    if (points.length < 2) {
+      // Not enough points — clear any existing polyline
+      setState(() {
+        _polylines.clear();
+        _encodedPolyline = null;
+      });
+      return;
+    }
+
+    // Show straight-line fallback immediately while loading
+    _showStraightLinePolyline(points);
+
+    setState(() => _isComputingRoute = true);
+
+    try {
+      final result = await _directionsClient.getRouteWithPoints(points);
+
+      if (!mounted) return;
+
+      if (result != null) {
+        setState(() {
+          _polylines.clear();
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('planned_route'),
+              points: result.routePoints,
+              color: Colors.blue,
+              width: 5,
+              geodesic: false,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+            ),
+          );
+          _encodedPolyline = result.encodedPolyline;
+          _isComputingRoute = false;
+        });
+      } else {
+        // API returned no route — keep straight-line fallback and encode it
+        setState(() {
+          _encodedPolyline = PolylineCodec.encode(points);
+          _isComputingRoute = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('CreateTripPlanScreen: Route computation failed: $e');
+      if (!mounted) return;
+      setState(() {
+        _encodedPolyline = PolylineCodec.encode(points);
+        _isComputingRoute = false;
+      });
+    }
+  }
+
+  /// Shows a dashed straight-line polyline as an immediate visual fallback.
+  void _showStraightLinePolyline(List<LatLng> points) {
+    setState(() {
+      _polylines.clear();
+      _polylines.add(
+        Polyline(
+          polylineId: const PolylineId('planned_route'),
+          points: points,
+          color: Colors.blue.withOpacity(0.5),
+          width: 3,
+          patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+          geodesic: false,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+        ),
+      );
+    });
   }
 
   void _onMapTapped(LatLng location) {
@@ -158,6 +262,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
           break;
       }
     });
+    _computeRoutePolyline();
   }
 
   void _addMarker(
@@ -198,8 +303,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
           ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
           : markerId == 'end'
               ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)
-              : BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueBlue);
+              : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       final title = markerId == 'start'
           ? 'Start Location'
           : markerId == 'end'
@@ -207,6 +311,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               : 'Waypoint ${markerId.split('_').last}';
       _addMarker(newPosition, markerId, title, icon);
     });
+    _computeRoutePolyline();
   }
 
   /// Shows a bottom sheet when a marker is tapped, allowing the user to
@@ -253,7 +358,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               title: const Text('Re-place on map'),
               subtitle: Text(
                 'Tap the map to set a new position',
-                style: TextStyle(fontSize: 12, color: WandererTheme.textTertiary),
+                style:
+                    TextStyle(fontSize: 12, color: WandererTheme.textTertiary),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -303,6 +409,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
         }
       }
     });
+    _computeRoutePolyline();
   }
 
   /// Removes all waypoint markers and re-adds them with corrected numbering
@@ -332,6 +439,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
       _waypoints.insert(newIndex, item);
       _rebuildWaypointMarkers();
     });
+    _computeRoutePolyline();
   }
 
   IconData _iconForMarkerId(String id) {
@@ -349,9 +457,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   void _clearAllMarkers() {
     setState(() {
       _markers.clear();
+      _polylines.clear();
       _waypoints.clear();
       _startLocation = null;
       _endLocation = null;
+      _encodedPolyline = null;
       _placementMode = _PlacementMode.start;
       _showWaypointsList = false;
     });
@@ -379,6 +489,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
         _placementMode = _PlacementMode.start;
       });
     }
+    _computeRoutePolyline();
   }
 
   Future<void> _selectStartDate() async {
@@ -407,8 +518,18 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -454,6 +575,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             .map((loc) => GeoLocation(lat: loc.latitude, lon: loc.longitude))
             .toList(),
         metadata: metadata.isNotEmpty ? metadata : null,
+        encodedPolyline: _encodedPolyline,
       );
 
       await _tripPlanService.createTripPlanBackend(request);
@@ -510,6 +632,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                 zoom: 12,
               ),
               markers: _markers,
+              polylines: _polylines,
               onMapCreated: _onMapCreated,
               onTap: _onMapTapped,
               myLocationButtonEnabled: true,
@@ -577,6 +700,47 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               right: 12,
               bottom: _formExpanded ? 470 : 210,
               child: _buildWaypointsPanel(),
+            ),
+          // Route computing indicator
+          if (_isComputingRoute)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 110,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Computing route...',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
             ),
           // Bottom draggable form sheet
           _buildFormSheet(),
@@ -735,8 +899,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                     size: 20,
                     color: WandererTheme.textTertiary,
                   ),
-                  onPressed: () =>
-                      setState(() => _showWaypointsList = false),
+                  onPressed: () => setState(() => _showWaypointsList = false),
                   padding: EdgeInsets.zero,
                   constraints:
                       const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -776,14 +939,14 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   }
 
   Widget _buildWaypointTile(int index, LatLng waypoint) {
-    final key = ValueKey('wp_${waypoint.latitude}_${waypoint.longitude}_$index');
+    final key =
+        ValueKey('wp_${waypoint.latitude}_${waypoint.longitude}_$index');
     return Container(
       key: key,
       color: Colors.white,
       child: ListTile(
         dense: true,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         leading: Container(
           width: 28,
           height: 28,
@@ -878,8 +1041,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             children: [
               // Drag handle
               GestureDetector(
-                onTap: () =>
-                    setState(() => _formExpanded = !_formExpanded),
+                onTap: () => setState(() => _formExpanded = !_formExpanded),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
@@ -987,8 +1149,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                           width: double.infinity,
                           height: 52,
                           child: ElevatedButton(
-                            onPressed:
-                                _isLoading ? null : _createTripPlan,
+                            onPressed: _isLoading ? null : _createTripPlan,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: WandererTheme.primaryOrange,
                               foregroundColor: Colors.white,

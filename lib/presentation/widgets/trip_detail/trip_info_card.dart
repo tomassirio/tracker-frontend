@@ -31,6 +31,8 @@ class TripInfoCard extends StatelessWidget {
   final List<UserAchievement> tripAchievements;
   final VoidCallback? onTestBackgroundUpdate;
   final Function(Visibility)? onVisibilityChange;
+  final bool showPlannedWaypoints;
+  final VoidCallback? onTogglePlannedWaypoints;
 
   const TripInfoCard({
     super.key,
@@ -51,6 +53,8 @@ class TripInfoCard extends StatelessWidget {
     this.tripAchievements = const [],
     this.onTestBackgroundUpdate,
     this.onVisibilityChange,
+    this.showPlannedWaypoints = false,
+    this.onTogglePlannedWaypoints,
   });
 
   @override
@@ -507,6 +511,54 @@ class TripInfoCard extends StatelessWidget {
                                 (ua) => _buildAchievementBadge(context, ua),
                               )
                               .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                // Planned waypoints toggle (for trips created from a plan)
+                if (onTogglePlannedWaypoints != null &&
+                    trip.hasPlannedRoute) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.purple.withOpacity(0.2),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.route,
+                          size: 16,
+                          color: Colors.purple.shade600,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Show Planned Route',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: WandererTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 24,
+                          child: Switch(
+                            value: showPlannedWaypoints,
+                            onChanged: (_) => onTogglePlannedWaypoints!(),
+                            activeColor: Colors.purple.shade600,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          ),
                         ),
                       ],
                     ),

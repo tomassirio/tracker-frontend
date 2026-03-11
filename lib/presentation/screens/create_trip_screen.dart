@@ -474,9 +474,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected
-                ? WandererTheme.primaryOrange
-                : Colors.transparent,
+            color:
+                isSelected ? WandererTheme.primaryOrange : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -569,9 +568,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           color: isSelected ? WandererTheme.primaryOrange : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected
-                ? WandererTheme.primaryOrange
-                : Colors.grey.shade300,
+            color:
+                isSelected ? WandererTheme.primaryOrange : Colors.grey.shade300,
           ),
         ),
         child: Row(
@@ -588,8 +586,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color:
-                    isSelected ? Colors.white : WandererTheme.textSecondary,
+                color: isSelected ? Colors.white : WandererTheme.textSecondary,
               ),
             ),
           ],
@@ -779,8 +776,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
   /// Sticky bottom create button
   Widget _buildBottomButton() {
-    final canCreate =
-        _createFromPlan ? _selectedTripPlan != null : true;
+    final canCreate = _createFromPlan ? _selectedTripPlan != null : true;
 
     return Container(
       padding: const EdgeInsets.all(20),

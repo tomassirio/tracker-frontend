@@ -55,11 +55,12 @@ class TripRouteHelper {
   ///
   /// Priority order:
   /// 1. Backend-provided [Trip.encodedPolyline] (zero API calls — best case).
-  /// 2. In-memory [_polylineCache] (instant, survives navigation).
-  /// 3. Straight-line encoding of the raw sorted points.
+  /// 2. Planned encoded polyline from trip plan [Trip.plannedEncodedPolyline].
+  /// 3. In-memory [_polylineCache] (instant, survives navigation).
+  /// 4. Straight-line encoding of the raw sorted points.
   ///
   /// Returns null only if the trip has fewer than 2 real locations
-  /// (lifecycle markers excluded).
+  /// (lifecycle markers excluded) and no planned polyline is available.
   static String? fetchEncodedPolyline(Trip trip) {
     // 1. Backend-provided polyline (best case: zero API calls)
     if (trip.encodedPolyline != null && trip.encodedPolyline!.isNotEmpty) {
@@ -67,20 +68,26 @@ class TripRouteHelper {
       return trip.encodedPolyline;
     }
 
-    // 2. Sort and filter locations (excludes lifecycle markers)
+    // 2. Planned encoded polyline from trip plan (road-snapped route)
+    if (trip.plannedEncodedPolyline != null &&
+        trip.plannedEncodedPolyline!.isNotEmpty) {
+      _polylineCache[trip.id] = trip.plannedEncodedPolyline!;
+      return trip.plannedEncodedPolyline;
+    }
+
+    // 3. Sort and filter locations (excludes lifecycle markers)
     final sortedLocations = getSortedLocations(trip);
     if (sortedLocations.length < 2) return null;
 
-    // 3. Check trip-level polyline cache
+    // 4. Check trip-level polyline cache
     final cached = _polylineCache[trip.id];
     if (cached != null) return cached;
 
-    // 4. Encode the sorted points as straight-line segments
+    // 5. Encode the sorted points as straight-line segments
     final allPoints = sortedLocations
         .map((loc) => LatLng(loc.latitude, loc.longitude))
         .toList();
 
-    // 4. Encode the raw sorted points as straight-line segments
     try {
       final encoded = PolylineCodec.encode(allPoints);
       _polylineCache[trip.id] = encoded;

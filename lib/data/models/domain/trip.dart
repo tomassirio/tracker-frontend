@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import '../../../core/constants/enums.dart';
 import 'comment.dart';
 import 'trip_day.dart';
@@ -53,6 +54,8 @@ class Trip {
   final PlannedWaypoint? plannedStartLocation;
   final PlannedWaypoint? plannedEndLocation;
   final List<PlannedWaypoint>? plannedWaypoints;
+  // Encoded polyline from the trip plan (road-snapped route between waypoints)
+  final String? plannedEncodedPolyline;
   // Backend-computed encoded polyline (Google Encoded Polyline Algorithm)
   final String? encodedPolyline;
   final DateTime? polylineUpdatedAt;
@@ -97,6 +100,7 @@ class Trip {
     this.plannedStartLocation,
     this.plannedEndLocation,
     this.plannedWaypoints,
+    this.plannedEncodedPolyline,
     this.encodedPolyline,
     this.polylineUpdatedAt,
     this.tripDays,
@@ -112,6 +116,7 @@ class Trip {
     PlannedWaypoint? plannedStart;
     PlannedWaypoint? plannedEnd;
     List<PlannedWaypoint>? plannedWaypoints;
+    String? plannedEncodedPolyline;
 
     if (tripDetails != null) {
       if (tripDetails['startLocation'] != null) {
@@ -130,6 +135,18 @@ class Trip {
             .where((wp) => wp != null)
             .map((wp) => PlannedWaypoint.fromJson(wp as Map<String, dynamic>))
             .toList();
+      }
+      plannedEncodedPolyline = tripDetails['encodedPolyline'] as String?;
+      if (plannedEncodedPolyline != null) {
+        debugPrint(
+          'Trip.fromJson: Found plannedEncodedPolyline in tripDetails '
+          'with length ${plannedEncodedPolyline.length}',
+        );
+      } else {
+        debugPrint(
+          'Trip.fromJson: No plannedEncodedPolyline found in tripDetails. '
+          'tripDetails keys: ${tripDetails.keys.toList()}',
+        );
       }
     }
 
@@ -195,6 +212,7 @@ class Trip {
       plannedStartLocation: plannedStart,
       plannedEndLocation: plannedEnd,
       plannedWaypoints: plannedWaypoints,
+      plannedEncodedPolyline: plannedEncodedPolyline,
       encodedPolyline: json['encodedPolyline'] as String?,
       polylineUpdatedAt: json['polylineUpdatedAt'] != null
           ? DateTime.tryParse(json['polylineUpdatedAt'] as String)
@@ -238,6 +256,8 @@ class Trip {
         if (plannedWaypoints != null)
           'plannedWaypoints':
               plannedWaypoints!.map((wp) => wp.toJson()).toList(),
+        if (plannedEncodedPolyline != null)
+          'plannedEncodedPolyline': plannedEncodedPolyline,
         if (encodedPolyline != null) 'encodedPolyline': encodedPolyline,
         if (polylineUpdatedAt != null)
           'polylineUpdatedAt': polylineUpdatedAt!.toIso8601String(),
@@ -277,6 +297,7 @@ class Trip {
     PlannedWaypoint? plannedStartLocation,
     PlannedWaypoint? plannedEndLocation,
     List<PlannedWaypoint>? plannedWaypoints,
+    String? plannedEncodedPolyline,
     String? encodedPolyline,
     DateTime? polylineUpdatedAt,
     List<TripDay>? tripDays,
@@ -305,6 +326,8 @@ class Trip {
       plannedStartLocation: plannedStartLocation ?? this.plannedStartLocation,
       plannedEndLocation: plannedEndLocation ?? this.plannedEndLocation,
       plannedWaypoints: plannedWaypoints ?? this.plannedWaypoints,
+      plannedEncodedPolyline:
+          plannedEncodedPolyline ?? this.plannedEncodedPolyline,
       encodedPolyline: encodedPolyline ?? this.encodedPolyline,
       polylineUpdatedAt: polylineUpdatedAt ?? this.polylineUpdatedAt,
       tripDays: tripDays ?? this.tripDays,

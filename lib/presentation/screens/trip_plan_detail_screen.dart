@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
+import 'package:wanderer_frontend/data/client/google_directions_api_client.dart';
+import 'package:wanderer_frontend/data/client/polyline_codec.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
@@ -19,6 +22,7 @@ class TripPlanDetailScreen extends StatefulWidget {
 
 class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   final TripPlanService _tripPlanService = TripPlanService();
+  late final GoogleDirectionsApiClient _directionsClient;
   late TripPlan _tripPlan;
   bool _isEditing = false;
   bool _isLoading = false;
@@ -45,6 +49,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _directionsClient =
+        GoogleDirectionsApiClient(ApiEndpoints.googleMapsApiKey);
     _tripPlan = widget.tripPlan;
     _nameController = TextEditingController(text: _tripPlan.name);
     _selectedPlanType = _tripPlan.planType;
@@ -58,6 +64,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   void dispose() {
     _nameController.dispose();
     _mapController?.dispose();
+    _directionsClient.dispose();
     super.dispose();
   }
 
@@ -229,10 +236,6 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.month}/${date.day}/${date.year}';
-  }
-
   Future<void> _selectStartDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -270,6 +273,29 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Build ordered points for polyline computation
+      final points = <LatLng>[];
+      final startLoc = _editStartLocation ??
+          (_tripPlan.startLocation != null
+              ? LatLng(
+                  _tripPlan.startLocation!.lat, _tripPlan.startLocation!.lon)
+              : null);
+      final endLoc = _editEndLocation ??
+          (_tripPlan.endLocation != null
+              ? LatLng(_tripPlan.endLocation!.lat, _tripPlan.endLocation!.lon)
+              : null);
+
+      if (startLoc != null) points.add(startLoc);
+      points.addAll(_editWaypoints);
+      if (endLoc != null) points.add(endLoc);
+
+      // Compute road-snapped polyline from Directions API
+      String? encodedPolyline;
+      if (points.length >= 2) {
+        final result = await _directionsClient.getRoutePolyline(points);
+        encodedPolyline = result ?? PolylineCodec.encode(points);
+      }
+
       final request = UpdateTripPlanRequest(
         name: _nameController.text.trim(),
         startDate: _startDate,
@@ -289,6 +315,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         waypoints: _editWaypoints
             .map((w) => PlanLocation(lat: w.latitude, lon: w.longitude))
             .toList(),
+        encodedPolyline: encodedPolyline,
       );
 
       final planId = await _tripPlanService.updateTripPlan(
@@ -543,8 +570,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
           Positioned.fill(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: _editStartLocation ??
-                    const LatLng(40.7128, -74.0060),
+                target: _editStartLocation ?? const LatLng(40.7128, -74.0060),
                 zoom: 10,
               ),
               markers: _buildEditMarkers(),
@@ -597,8 +623,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         infoWindow: const InfoWindow(title: 'Start Location'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         draggable: true,
-        onDragEnd: (pos) =>
-            setState(() => _editStartLocation = pos),
+        onDragEnd: (pos) => setState(() => _editStartLocation = pos),
         onTap: () => _showEditMarkerOptions('start', 'Start Location'),
       ));
     }
@@ -609,8 +634,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         infoWindow: const InfoWindow(title: 'End Location'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         draggable: true,
-        onDragEnd: (pos) =>
-            setState(() => _editEndLocation = pos),
+        onDragEnd: (pos) => setState(() => _editEndLocation = pos),
         onTap: () => _showEditMarkerOptions('end', 'End Location'),
       ));
     }
@@ -676,21 +700,18 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
             const Divider(height: 1),
             if (markerId.startsWith('waypoint_'))
               ListTile(
-                leading:
-                    const Icon(Icons.delete_outline, color: Colors.red),
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
                 title: const Text(
                   'Remove',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  final index =
-                      int.tryParse(markerId.split('_').last);
+                  final index = int.tryParse(markerId.split('_').last);
                   if (index != null &&
                       index > 0 &&
                       index <= _editWaypoints.length) {
-                    setState(
-                        () => _editWaypoints.removeAt(index - 1));
+                    setState(() => _editWaypoints.removeAt(index - 1));
                   }
                 },
               ),
@@ -733,14 +754,12 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         GestureDetector(
           onTap: () {
             if (_editWaypoints.isNotEmpty) {
-              setState(
-                  () => _showEditWaypointsList = !_showEditWaypointsList);
+              setState(() => _showEditWaypointsList = !_showEditWaypointsList);
             }
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: _showEditWaypointsList
                   ? Colors.blue.withOpacity(0.25)
@@ -808,8 +827,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color:
-            isSet ? color.withOpacity(0.15) : Colors.white.withOpacity(0.9),
+        color: isSet ? color.withOpacity(0.15) : Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isSet ? color.withOpacity(0.4) : Colors.grey.shade300,
@@ -864,8 +882,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
             padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
             child: Row(
               children: [
-                const Icon(Icons.reorder_rounded,
-                    size: 18, color: Colors.blue),
+                const Icon(Icons.reorder_rounded, size: 18, color: Colors.blue),
                 const SizedBox(width: 8),
                 Text(
                   'Waypoints (${_editWaypoints.length})',
@@ -967,8 +984,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           GestureDetector(
-                            onTap: () => setState(
-                                () => _editWaypoints.removeAt(index)),
+                            onTap: () =>
+                                setState(() => _editWaypoints.removeAt(index)),
                             child: Icon(
                               Icons.remove_circle_outline,
                               size: 18,
@@ -1033,8 +1050,8 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
             children: [
               // Drag handle
               GestureDetector(
-                onTap: () => setState(
-                    () => _editFormExpanded = !_editFormExpanded),
+                onTap: () =>
+                    setState(() => _editFormExpanded = !_editFormExpanded),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
@@ -1266,8 +1283,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                     hasDate ? _formatEditDate(date) : 'Select',
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight:
-                          hasDate ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: hasDate ? FontWeight.w600 : FontWeight.w400,
                       color: hasDate
                           ? WandererTheme.textPrimary
                           : WandererTheme.textTertiary,
@@ -1284,8 +1300,18 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
   String _formatEditDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }

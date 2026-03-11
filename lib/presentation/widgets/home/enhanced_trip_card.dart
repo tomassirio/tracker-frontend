@@ -169,7 +169,8 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.calendar_today, size: 12, color: WandererTheme.primaryOrange),
+          Icon(Icons.calendar_today,
+              size: 12, color: WandererTheme.primaryOrange),
           const SizedBox(width: 4),
           Text(
             'Day $day',
@@ -273,6 +274,7 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
           widget.trip.plannedEndLocation!.latitude,
           widget.trip.plannedEndLocation!.longitude,
         ),
+        encodedPolyline: widget.trip.plannedEncodedPolyline,
       );
     }
 
@@ -665,8 +667,7 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                             compact: false,
                           ),
                           if (widget.trip.currentDay != null &&
-                              widget.trip.tripModality ==
-                                  TripModality.multiDay)
+                              widget.trip.tripModality == TripModality.multiDay)
                             _buildDayBadge(widget.trip.currentDay!),
                         ],
                       ),
