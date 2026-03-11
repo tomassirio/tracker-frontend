@@ -383,6 +383,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
       final request = UpdateTripPlanRequest(
         name: _nameController.text.trim(),
+        planType: _selectedPlanType,
         startDate: _startDate,
         endDate: _endDate,
         startLocation: _editStartLocation != null

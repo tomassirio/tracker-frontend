@@ -5,6 +5,7 @@ import '../domain/trip_plan.dart';
 class UpdateTripPlanRequest {
   final String? name;
   final String? description;
+  final String? planType;
   final DateTime? plannedStartDate;
   final DateTime? plannedEndDate;
   final DateTime? startDate;
@@ -18,6 +19,7 @@ class UpdateTripPlanRequest {
   UpdateTripPlanRequest({
     this.name,
     this.description,
+    this.planType,
     this.plannedStartDate,
     this.plannedEndDate,
     this.startDate,
@@ -32,6 +34,7 @@ class UpdateTripPlanRequest {
   Map<String, dynamic> toJson() => {
         if (name != null) 'name': name,
         if (description != null) 'description': description,
+        if (planType != null) 'planType': planType,
         if (plannedStartDate != null)
           'plannedStartDate': plannedStartDate!.toIso8601String(),
         if (plannedEndDate != null)
