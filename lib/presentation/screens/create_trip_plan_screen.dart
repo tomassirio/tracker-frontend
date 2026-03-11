@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -53,6 +54,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// Controls whether the form sheet is expanded
   bool _formExpanded = false;
+
+  /// Whether the desktop side panel is collapsed
+  bool _isPanelCollapsed = false;
 
   /// Which point type the next map tap will place
   _PlacementMode _placementMode = _PlacementMode.start;
@@ -610,12 +614,465 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 600;
+        if (isWide) {
+          return _buildDesktopLayout();
+        }
+        return _buildMobileLayout();
+      },
+    );
+  }
+
+  /// Desktop/Web layout with floating glass side panel on the left
+  Widget _buildDesktopLayout() {
+    const double panelWidth = 400.0;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('New Trip Plan'),
-        backgroundColor: Colors.white.withOpacity(0.9),
+        backgroundColor: WandererTheme.primaryOrange.withOpacity(0.9),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          if (_markers.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.undo_rounded),
+              tooltip: 'Remove last marker',
+              onPressed: _removeLastWaypoint,
+            ),
+          if (_markers.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.layers_clear_rounded),
+              tooltip: 'Clear all markers',
+              onPressed: _clearAllMarkers,
+            ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // Full-screen map
+          Positioned.fill(
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _initialCameraLocation,
+                zoom: 12,
+              ),
+              markers: _markers,
+              polylines: _polylines,
+              onMapCreated: _onMapCreated,
+              onTap: _onMapTapped,
+              myLocationButtonEnabled: true,
+              myLocationEnabled: true,
+              zoomControlsEnabled: true,
+              mapToolbarEnabled: false,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight,
+                left: _isPanelCollapsed ? 88 : panelWidth,
+              ),
+            ),
+          ),
+          // Location status chips (offset to right of panel)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + kToolbarHeight + 8,
+            left: (_isPanelCollapsed ? 88 : panelWidth) + 16,
+            right: 16,
+            child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (_) => _ignoreNextMapTap = true,
+              child: _buildLocationChips(),
+            ),
+          ),
+          // Loading indicator for location
+          if (_isLoadingLocation)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight + 44,
+              left: (_isPanelCollapsed ? 88 : panelWidth) + 16,
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _ignoreNextMapTap = true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: WandererTheme.primaryOrange,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Getting location...',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          // Route computing indicator
+          if (_isComputingRoute)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight + 44,
+              right: 16,
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _ignoreNextMapTap = true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Computing route...',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          // Floating waypoints reorder panel (to the right of side panel)
+          if (_showWaypointsList && _waypoints.isNotEmpty)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight + 44,
+              left: (_isPanelCollapsed ? 88 : panelWidth) + 12,
+              right: 12,
+              bottom: 16,
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _ignoreNextMapTap = true,
+                child: _buildWaypointsPanel(),
+              ),
+            ),
+          // Floating glass side panel
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              width: _isPanelCollapsed ? 88 : panelWidth,
+              child: _isPanelCollapsed
+                  ? _buildCollapsedPanelBubble()
+                  : _buildExpandedSidePanel(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Collapsed panel bubble (matching edit trip plan style)
+  Widget _buildCollapsedPanelBubble() {
+    return Align(
+      alignment: Alignment.bottomLeft,
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: WandererTheme.floatingShadow,
+        ),
+        child: ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: WandererTheme.glassBlurSigma,
+              sigmaY: WandererTheme.glassBlurSigma,
+            ),
+            child: Material(
+              color: WandererTheme.glassBackground,
+              shape: CircleBorder(
+                side: BorderSide(
+                  color: WandererTheme.glassBorderColor,
+                  width: 1,
+                ),
+              ),
+              child: InkWell(
+                onTap: () => setState(() => _isPanelCollapsed = false),
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(shape: BoxShape.circle),
+                  child: Icon(
+                    Icons.add_location_alt_outlined,
+                    size: 24,
+                    color: WandererTheme.primaryOrange,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Expanded glass side panel with the create form
+  Widget _buildExpandedSidePanel() {
+    return Container(
+      margin: EdgeInsets.only(
+        left: 16,
+        top: MediaQuery.of(context).padding.top + kToolbarHeight + 8,
+        bottom: 16,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+        boxShadow: WandererTheme.floatingShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: WandererTheme.glassBlurSigma,
+            sigmaY: WandererTheme.glassBlurSigma,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: WandererTheme.glassBackground,
+              borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
+              border: Border.all(
+                color: WandererTheme.glassBorderColor,
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.4),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(WandererTheme.glassRadius),
+                      topRight: Radius.circular(WandererTheme.glassRadius),
+                    ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: WandererTheme.glassBorderColor,
+                        width: 0.5,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.add_location_alt_outlined,
+                        size: 18,
+                        color: WandererTheme.primaryOrange,
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'New Trip Plan',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: WandererTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.remove,
+                            size: 18,
+                            color: WandererTheme.textSecondary,
+                          ),
+                          onPressed: () =>
+                              setState(() => _isPanelCollapsed = true),
+                          tooltip: 'Minimize',
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Scrollable form content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Plan Name
+                          _buildSectionLabel('Plan Name'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: _inputDecoration(
+                              'e.g., Weekend Hiking Adventure',
+                            ),
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a plan name';
+                              }
+                              if (value.trim().length < 3) {
+                                return 'Plan name must be at least 3 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          // Description
+                          _buildSectionLabel('Description'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _descriptionController,
+                            decoration: _inputDecoration(
+                              'Tell us about this plan... (optional)',
+                            ),
+                            maxLines: 2,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                          const SizedBox(height: 20),
+                          // Plan Type
+                          _buildSectionLabel('Plan Type'),
+                          const SizedBox(height: 10),
+                          _buildPlanTypeSelector(),
+                          const SizedBox(height: 20),
+                          // Dates
+                          _buildSectionLabel('Dates'),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildDateButton(
+                                  label: 'Start',
+                                  date: _startDate,
+                                  onTap: _selectStartDate,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildDateButton(
+                                  label: 'End',
+                                  date: _endDate,
+                                  onTap: _selectEndDate,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_daysBetween != null) ...[
+                            const SizedBox(height: 10),
+                            _buildDaysInfoBadge(),
+                          ],
+                          const SizedBox(height: 24),
+                          // Create button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _createTripPlan,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: WandererTheme.primaryOrange,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: Colors.grey.shade300,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Create Plan',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Mobile layout with bottom sheet form (original behavior)
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      backgroundColor: WandererTheme.backgroundLight,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('New Trip Plan'),
+        backgroundColor: WandererTheme.primaryOrange.withOpacity(0.9),
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           if (_markers.isNotEmpty)
