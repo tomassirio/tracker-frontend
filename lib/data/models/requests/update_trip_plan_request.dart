@@ -13,7 +13,7 @@ class UpdateTripPlanRequest {
   final PlanLocation? endLocation;
   final List<PlannedLocation>? plannedLocations;
   final List<PlanLocation>? waypoints;
-  final String? encodedPolyline;
+  final String? plannedPolyline;
 
   UpdateTripPlanRequest({
     this.name,
@@ -26,7 +26,7 @@ class UpdateTripPlanRequest {
     this.endLocation,
     this.plannedLocations,
     this.waypoints,
-    this.encodedPolyline,
+    this.plannedPolyline,
   });
 
   Map<String, dynamic> toJson() => {
@@ -47,6 +47,6 @@ class UpdateTripPlanRequest {
               plannedLocations!.map((loc) => loc.toJson()).toList(),
         if (waypoints != null)
           'waypoints': waypoints!.map((loc) => loc.toJson()).toList(),
-        if (encodedPolyline != null) 'encodedPolyline': encodedPolyline,
+        if (plannedPolyline != null) 'plannedPolyline': plannedPolyline,
       };
 }

@@ -315,7 +315,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         waypoints: _editWaypoints
             .map((w) => PlanLocation(lat: w.latitude, lon: w.longitude))
             .toList(),
-        encodedPolyline: encodedPolyline,
+        plannedPolyline: encodedPolyline,
       );
 
       final planId = await _tripPlanService.updateTripPlan(

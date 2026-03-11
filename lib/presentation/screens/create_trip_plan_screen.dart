@@ -575,7 +575,7 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             .map((loc) => GeoLocation(lat: loc.latitude, lon: loc.longitude))
             .toList(),
         metadata: metadata.isNotEmpty ? metadata : null,
-        encodedPolyline: _encodedPolyline,
+        plannedPolyline: _encodedPolyline,
       );
 
       await _tripPlanService.createTripPlanBackend(request);

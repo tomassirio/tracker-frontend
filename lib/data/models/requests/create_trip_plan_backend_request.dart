@@ -18,7 +18,7 @@ class CreateTripPlanBackendRequest {
   final GeoLocation endLocation;
   final List<GeoLocation> waypoints;
   final Map<String, dynamic>? metadata;
-  final String? encodedPolyline;
+  final String? plannedPolyline;
 
   CreateTripPlanBackendRequest({
     required this.name,
@@ -29,7 +29,7 @@ class CreateTripPlanBackendRequest {
     required this.endLocation,
     this.waypoints = const [],
     this.metadata,
-    this.encodedPolyline,
+    this.plannedPolyline,
   });
 
   Map<String, dynamic> toJson() => {
@@ -42,6 +42,6 @@ class CreateTripPlanBackendRequest {
         'endLocation': endLocation.toJson(),
         'waypoints': waypoints.map((w) => w.toJson()).toList(),
         if (metadata != null) 'metadata': metadata,
-        if (encodedPolyline != null) 'encodedPolyline': encodedPolyline,
+        if (plannedPolyline != null) 'plannedPolyline': plannedPolyline,
       };
 }

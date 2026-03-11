@@ -5,28 +5,28 @@ import 'package:wanderer_frontend/data/models/requests/update_trip_plan_request.
 void main() {
   group('UpdateTripPlanRequest', () {
     group('toJson', () {
-      test('includes encodedPolyline when provided', () {
+      test('includes plannedPolyline when provided', () {
         final request = UpdateTripPlanRequest(
           name: 'Updated Trip',
           startLocation: PlanLocation(lat: 37.7749, lon: -122.4194),
           endLocation: PlanLocation(lat: 34.0522, lon: -118.2437),
-          encodedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
+          plannedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
         );
 
         final json = request.toJson();
 
-        expect(json['encodedPolyline'], '_p~iF~ps|U_ulLnnqC_mqNvxq`@');
+        expect(json['plannedPolyline'], '_p~iF~ps|U_ulLnnqC_mqNvxq`@');
         expect(json['name'], 'Updated Trip');
       });
 
-      test('excludes encodedPolyline when null', () {
+      test('excludes plannedPolyline when null', () {
         final request = UpdateTripPlanRequest(
           name: 'No Polyline',
         );
 
         final json = request.toJson();
 
-        expect(json.containsKey('encodedPolyline'), isFalse);
+        expect(json.containsKey('plannedPolyline'), isFalse);
       });
 
       test('includes all fields when provided', () {
@@ -39,7 +39,7 @@ void main() {
           waypoints: [
             PlanLocation(lat: 41.8781, lon: -87.6298),
           ],
-          encodedPolyline: 'test_encoded_polyline',
+          plannedPolyline: 'test_planned_polyline',
         );
 
         final json = request.toJson();
@@ -51,7 +51,7 @@ void main() {
         expect(json['endLocation']['lat'], 42.3601);
         expect(json['waypoints'], isA<List>());
         expect(json['waypoints'].length, 1);
-        expect(json['encodedPolyline'], 'test_encoded_polyline');
+        expect(json['plannedPolyline'], 'test_planned_polyline');
       });
 
       test('only includes non-null fields', () {
@@ -68,7 +68,7 @@ void main() {
         expect(json.containsKey('startLocation'), isFalse);
         expect(json.containsKey('endLocation'), isFalse);
         expect(json.containsKey('waypoints'), isFalse);
-        expect(json.containsKey('encodedPolyline'), isFalse);
+        expect(json.containsKey('plannedPolyline'), isFalse);
       });
     });
   });

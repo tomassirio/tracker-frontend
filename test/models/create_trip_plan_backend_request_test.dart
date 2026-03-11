@@ -188,7 +188,7 @@ void main() {
         expect(json.containsKey('metadata'), isFalse);
       });
 
-      test('includes encodedPolyline when provided', () {
+      test('includes plannedPolyline when provided', () {
         final request = CreateTripPlanBackendRequest(
           name: 'Polyline Test',
           planType: 'ROAD_TRIP',
@@ -196,15 +196,15 @@ void main() {
           endDate: DateTime(2025, 3, 20),
           startLocation: GeoLocation(lat: 37.7749, lon: -122.4194),
           endLocation: GeoLocation(lat: 34.0522, lon: -118.2437),
-          encodedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
+          plannedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
         );
 
         final json = request.toJson();
 
-        expect(json['encodedPolyline'], '_p~iF~ps|U_ulLnnqC_mqNvxq`@');
+        expect(json['plannedPolyline'], '_p~iF~ps|U_ulLnnqC_mqNvxq`@');
       });
 
-      test('excludes encodedPolyline when null', () {
+      test('excludes plannedPolyline when null', () {
         final request = CreateTripPlanBackendRequest(
           name: 'No Polyline',
           planType: 'SIMPLE',
@@ -216,7 +216,7 @@ void main() {
 
         final json = request.toJson();
 
-        expect(json.containsKey('encodedPolyline'), isFalse);
+        expect(json.containsKey('plannedPolyline'), isFalse);
       });
     });
   });
