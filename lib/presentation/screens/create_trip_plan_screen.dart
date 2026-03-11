@@ -55,10 +55,6 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
   /// Controls whether the form sheet is expanded
   bool _formExpanded = false;
 
-  /// Cached expanded height — computed when the keyboard is not visible so
-  /// opening the soft keyboard doesn't cause the sheet to shrink.
-  double? _cachedExpandedHeight;
-
   /// Whether the desktop side panel is collapsed
   bool _isPanelCollapsed = false;
 
@@ -88,21 +84,6 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     _directionsClient =
         GoogleDirectionsApiClient(ApiEndpoints.googleMapsApiKey);
     _getCurrentLocation();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final mq = MediaQuery.of(context);
-    // Only update the cached height when the keyboard is not showing, so the
-    // sheet doesn't shrink when the user focuses a text field.
-    if (mq.viewInsets.bottom == 0) {
-      final newHeight =
-          mq.size.height - mq.padding.top - kToolbarHeight;
-      if (newHeight != _cachedExpandedHeight) {
-        _cachedExpandedHeight = newHeight;
-      }
-    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -1114,12 +1095,13 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// Mobile layout with bottom sheet form (original behavior)
   Widget _buildMobileLayout() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight = _cachedExpandedHeight ??
-        (screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight);
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('New Trip Plan'),
         backgroundColor: WandererTheme.primaryOrange.withOpacity(0.9),
@@ -1546,9 +1528,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// The bottom form sheet that slides up
   Widget _buildFormSheet() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight = _cachedExpandedHeight ??
-        (screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight);
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
@@ -1605,7 +1587,12 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                 // Form content
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      0,
+                      20,
+                      MediaQuery.of(context).viewInsets.bottom,
+                    ),
                     physics: _formExpanded
                         ? const BouncingScrollPhysics()
                         : const NeverScrollableScrollPhysics(),

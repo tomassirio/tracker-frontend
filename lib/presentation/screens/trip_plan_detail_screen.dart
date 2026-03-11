@@ -51,10 +51,6 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   bool _showEditWaypointsList = false;
   bool _isEditPanelCollapsed = false;
 
-  /// Cached expanded height — computed when the keyboard is not visible so
-  /// opening the soft keyboard doesn't cause the sheet to shrink.
-  double? _cachedExpandedHeight;
-
   /// Placement mode for adding/moving points in edit mode
   _EditPlacementMode _editPlacementMode = _EditPlacementMode.waypoint;
 
@@ -94,21 +90,6 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     _mapController?.dispose();
     _directionsClient.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final mq = MediaQuery.of(context);
-    // Only update the cached height when the keyboard is not showing, so the
-    // sheet doesn't shrink when the user focuses a text field.
-    if (mq.viewInsets.bottom == 0) {
-      final newHeight =
-          mq.size.height - mq.padding.top - kToolbarHeight;
-      if (newHeight != _cachedExpandedHeight) {
-        _cachedExpandedHeight = newHeight;
-      }
-    }
   }
 
   /// Updates map data using backend polyline or straight-line fallback
@@ -1059,12 +1040,13 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
   /// Mobile edit layout with bottom sheet form (original behavior)
   Widget _buildEditScreenMobile() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight = _cachedExpandedHeight ??
-        (screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight);
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Edit Trip Plan'),
         backgroundColor: Colors.white.withOpacity(0.9),
@@ -1643,9 +1625,9 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   }
 
   Widget _buildEditFormSheet() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight = _cachedExpandedHeight ??
-        (screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight);
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
@@ -1701,7 +1683,12 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    0,
+                    20,
+                    MediaQuery.of(context).viewInsets.bottom,
+                  ),
                   physics: _editFormExpanded
                       ? const BouncingScrollPhysics()
                       : const NeverScrollableScrollPhysics(),
