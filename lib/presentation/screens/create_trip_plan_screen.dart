@@ -1095,12 +1095,13 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// Mobile layout with bottom sheet form (original behavior)
   Widget _buildMobileLayout() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('New Trip Plan'),
         backgroundColor: WandererTheme.primaryOrange.withOpacity(0.9),
@@ -1527,9 +1528,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
 
   /// The bottom form sheet that slides up
   Widget _buildFormSheet() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
@@ -1586,7 +1587,12 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                 // Form content
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      0,
+                      20,
+                      MediaQuery.of(context).viewInsets.bottom,
+                    ),
                     physics: _formExpanded
                         ? const BouncingScrollPhysics()
                         : const NeverScrollableScrollPhysics(),

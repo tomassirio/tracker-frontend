@@ -383,6 +383,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
       final request = UpdateTripPlanRequest(
         name: _nameController.text.trim(),
+        planType: _selectedPlanType,
         startDate: _startDate,
         endDate: _endDate,
         startLocation: _editStartLocation != null
@@ -1040,12 +1041,13 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
 
   /// Mobile edit layout with bottom sheet form (original behavior)
   Widget _buildEditScreenMobile() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Scaffold(
       backgroundColor: WandererTheme.backgroundLight,
       extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Edit Trip Plan'),
         backgroundColor: Colors.white.withOpacity(0.9),
@@ -1624,9 +1626,9 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   }
 
   Widget _buildEditFormSheet() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final expandedHeight =
-        screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight;
+    final expandedHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
     return Positioned(
       left: 0,
       right: 0,
@@ -1682,7 +1684,12 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    0,
+                    20,
+                    MediaQuery.of(context).viewInsets.bottom,
+                  ),
                   physics: _editFormExpanded
                       ? const BouncingScrollPhysics()
                       : const NeverScrollableScrollPhysics(),
