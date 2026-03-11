@@ -162,8 +162,7 @@ class TripPlanMapHelper {
 
     // Use planned polyline, backend-computed polyline, or fall back to straight lines
     if (points.length >= 2) {
-      final polylineStr =
-          tripPlan.plannedPolyline ?? tripPlan.encodedPolyline;
+      final polylineStr = tripPlan.plannedPolyline ?? tripPlan.encodedPolyline;
       if (polylineStr != null && polylineStr.isNotEmpty) {
         try {
           final routePoints = PolylineCodec.decode(polylineStr);

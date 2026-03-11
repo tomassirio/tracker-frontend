@@ -146,38 +146,62 @@ class TripMapHelper {
 
     // Create polyline connecting all planned points
     // Prefer plan's encoded polyline for road-snapped route
-    if (points.length >= 2) {
-      if (trip.plannedEncodedPolyline != null &&
-          trip.plannedEncodedPolyline!.isNotEmpty) {
-        try {
-          final routePoints = PolylineCodec.decode(
-            trip.plannedEncodedPolyline!,
-          );
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('planned_route'),
-              points: routePoints,
-              color: Colors.purple.withOpacity(0.7),
-              width: 3,
-              patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
+    if (trip.plannedEncodedPolyline != null &&
+        trip.plannedEncodedPolyline!.isNotEmpty) {
+      try {
+        final routePoints = PolylineCodec.decode(
+          trip.plannedEncodedPolyline!,
+        );
+        polylines.add(
+          Polyline(
+            polylineId: const PolylineId('planned_route'),
+            points: routePoints,
+            color: Colors.purple.withOpacity(0.7),
+            width: 3,
+            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+            geodesic: false,
+            visible: true,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+            jointType: JointType.round,
+          ),
+        );
+
+        // If no markers were added from tripDetails, add start/end from polyline
+        if (markers.isEmpty && routePoints.length >= 2) {
+          markers.add(
+            Marker(
+              markerId: const MarkerId('planned_start'),
+              position: routePoints.first,
+              infoWindow: const InfoWindow(title: 'Planned Start'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueGreen,
+              ),
             ),
           );
-        } catch (e) {
-          debugPrint(
-            'TripMapHelper: Failed to decode planned polyline in fallback, '
-            'using straight lines: $e',
+          markers.add(
+            Marker(
+              markerId: const MarkerId('planned_end'),
+              position: routePoints.last,
+              infoWindow: const InfoWindow(title: 'Planned End'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueRed,
+              ),
+            ),
           );
+        }
+      } catch (e) {
+        debugPrint(
+          'TripMapHelper: Failed to decode planned polyline in fallback, '
+          'using straight lines: $e',
+        );
+        if (points.length >= 2) {
           _addPlannedStraightLinePolyline(polylines, points);
         }
-      } else {
-        // Fallback: dashed straight lines
-        _addPlannedStraightLinePolyline(polylines, points);
       }
+    } else if (points.length >= 2) {
+      // Fallback: dashed straight lines
+      _addPlannedStraightLinePolyline(polylines, points);
     }
 
     return MapData(markers: markers, polylines: polylines);
@@ -416,39 +440,66 @@ class TripMapHelper {
     }
 
     // Add planned route polyline
-    if (points.length >= 2) {
+    if (trip.plannedEncodedPolyline != null &&
+        trip.plannedEncodedPolyline!.isNotEmpty) {
       // Prefer the plan's encoded polyline for road-snapped route
-      if (trip.plannedEncodedPolyline != null &&
-          trip.plannedEncodedPolyline!.isNotEmpty) {
-        try {
-          final routePoints = PolylineCodec.decode(
-            trip.plannedEncodedPolyline!,
-          );
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('planned_route'),
-              points: routePoints,
-              color: Colors.purple,
-              width: 4,
-              patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
+      try {
+        final routePoints = PolylineCodec.decode(
+          trip.plannedEncodedPolyline!,
+        );
+        polylines.add(
+          Polyline(
+            polylineId: const PolylineId('planned_route'),
+            points: routePoints,
+            color: Colors.purple,
+            width: 4,
+            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+            geodesic: false,
+            visible: true,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+            jointType: JointType.round,
+          ),
+        );
+
+        // If no markers were added from tripDetails, add start/end from polyline
+        if (markers
+                .where((m) => m.markerId.value.startsWith('planned_'))
+                .isEmpty &&
+            routePoints.length >= 2) {
+          markers.add(
+            Marker(
+              markerId: const MarkerId('planned_start'),
+              position: routePoints.first,
+              infoWindow: const InfoWindow(title: 'Planned Start'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueGreen,
+              ),
             ),
           );
-        } catch (e) {
-          debugPrint(
-            'TripMapHelper: Failed to decode planned polyline, '
-            'falling back to straight lines: $e',
+          markers.add(
+            Marker(
+              markerId: const MarkerId('planned_end'),
+              position: routePoints.last,
+              infoWindow: const InfoWindow(title: 'Planned End'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueRed,
+              ),
+            ),
           );
+        }
+      } catch (e) {
+        debugPrint(
+          'TripMapHelper: Failed to decode planned polyline, '
+          'falling back to straight lines: $e',
+        );
+        if (points.length >= 2) {
           _addPlannedStraightLinePolyline(polylines, points);
         }
-      } else {
-        // Fallback: straight dashed lines between planned waypoints
-        _addPlannedStraightLinePolyline(polylines, points);
       }
+    } else if (points.length >= 2) {
+      // Fallback: straight dashed lines between planned waypoints
+      _addPlannedStraightLinePolyline(polylines, points);
     }
   }
 
@@ -541,40 +592,64 @@ class TripMapHelper {
     }
 
     // Create polyline for planned route - prefer encoded polyline
-    if (points.length >= 2) {
+    if (trip.plannedEncodedPolyline != null &&
+        trip.plannedEncodedPolyline!.isNotEmpty) {
       debugPrint(
         'TripMapHelper: Creating planned route for trip ${trip.id}. '
-        'plannedEncodedPolyline exists: ${trip.plannedEncodedPolyline != null}, '
-        'is not empty: ${trip.plannedEncodedPolyline?.isNotEmpty ?? false}',
+        'plannedEncodedPolyline exists: true, '
+        'is not empty: true',
       );
-      if (trip.plannedEncodedPolyline != null &&
-          trip.plannedEncodedPolyline!.isNotEmpty) {
-        try {
-          final routePoints = PolylineCodec.decode(
-            trip.plannedEncodedPolyline!,
-          );
-          debugPrint(
-            'TripMapHelper: Successfully decoded planned polyline '
-            'with ${routePoints.length} points',
-          );
-          polylines.add(
-            Polyline(
-              polylineId: const PolylineId('planned_route'),
-              points: routePoints,
-              color: Colors.purple,
-              width: 4,
-              geodesic: false,
-              visible: true,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
+      try {
+        final routePoints = PolylineCodec.decode(
+          trip.plannedEncodedPolyline!,
+        );
+        debugPrint(
+          'TripMapHelper: Successfully decoded planned polyline '
+          'with ${routePoints.length} points',
+        );
+        polylines.add(
+          Polyline(
+            polylineId: const PolylineId('planned_route'),
+            points: routePoints,
+            color: Colors.purple,
+            width: 4,
+            geodesic: false,
+            visible: true,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+            jointType: JointType.round,
+          ),
+        );
+
+        // If no markers were added from tripDetails, add start/end from polyline
+        if (markers.isEmpty && routePoints.length >= 2) {
+          markers.add(
+            Marker(
+              markerId: const MarkerId('planned_start'),
+              position: routePoints.first,
+              infoWindow: const InfoWindow(title: 'Planned Start'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueGreen,
+              ),
             ),
           );
-        } catch (e) {
-          debugPrint(
-            'TripMapHelper: Failed to decode planned polyline in directions, '
-            'using straight lines: $e',
+          markers.add(
+            Marker(
+              markerId: const MarkerId('planned_end'),
+              position: routePoints.last,
+              infoWindow: const InfoWindow(title: 'Planned End'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueRed,
+              ),
+            ),
           );
+        }
+      } catch (e) {
+        debugPrint(
+          'TripMapHelper: Failed to decode planned polyline in directions, '
+          'using straight lines: $e',
+        );
+        if (points.length >= 2) {
           polylines.add(
             Polyline(
               polylineId: const PolylineId('planned_route'),
@@ -588,20 +663,24 @@ class TripMapHelper {
             ),
           );
         }
-      } else {
-        polylines.add(
-          Polyline(
-            polylineId: const PolylineId('planned_route'),
-            points: points,
-            color: Colors.purple,
-            width: 4,
-            geodesic: false,
-            visible: true,
-            startCap: Cap.roundCap,
-            endCap: Cap.roundCap,
-          ),
-        );
       }
+    } else if (points.length >= 2) {
+      debugPrint(
+        'TripMapHelper: No encoded polyline for trip ${trip.id}, '
+        'using straight lines',
+      );
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('planned_route'),
+          points: points,
+          color: Colors.purple,
+          width: 4,
+          geodesic: false,
+          visible: true,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+        ),
+      );
     }
 
     return MapData(markers: markers, polylines: polylines);
@@ -645,6 +724,20 @@ class TripMapHelper {
       final wp = trip.plannedWaypoints!.first;
       if (wp.latitude != 0 && wp.longitude != 0) {
         return LatLng(wp.latitude, wp.longitude);
+      }
+    }
+    // Then try decoding the planned encoded polyline
+    if (trip.plannedEncodedPolyline != null &&
+        trip.plannedEncodedPolyline!.isNotEmpty) {
+      try {
+        final routePoints = PolylineCodec.decode(
+          trip.plannedEncodedPolyline!,
+        );
+        if (routePoints.isNotEmpty) {
+          return routePoints.first;
+        }
+      } catch (_) {
+        // Ignore decode errors, fall through to default
       }
     }
     return const LatLng(40.7128, -74.0060); // Default to NYC

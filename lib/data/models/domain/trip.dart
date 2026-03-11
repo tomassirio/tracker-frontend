@@ -138,17 +138,22 @@ class Trip {
       }
       plannedEncodedPolyline = tripDetails['plannedPolyline'] as String? ??
           tripDetails['encodedPolyline'] as String?;
-      if (plannedEncodedPolyline != null) {
-        debugPrint(
-          'Trip.fromJson: Found plannedEncodedPolyline in tripDetails '
-          'with length ${plannedEncodedPolyline.length}',
-        );
-      } else {
-        debugPrint(
-          'Trip.fromJson: No plannedEncodedPolyline found in tripDetails. '
-          'tripDetails keys: ${tripDetails.keys.toList()}',
-        );
-      }
+    }
+
+    // Also check top-level plannedPolyline (backend returns it at root level)
+    plannedEncodedPolyline ??= json['plannedPolyline'] as String?;
+
+    if (plannedEncodedPolyline != null) {
+      debugPrint(
+        'Trip.fromJson: Found plannedEncodedPolyline '
+        'with length ${plannedEncodedPolyline.length}',
+      );
+    } else {
+      debugPrint(
+        'Trip.fromJson: No plannedEncodedPolyline found. '
+        'tripDetails keys: ${tripDetails?.keys.toList()}, '
+        'top-level keys: ${json.keys.toList()}',
+      );
     }
 
     return Trip(
@@ -271,7 +276,8 @@ class Trip {
   bool get hasPlannedRoute =>
       plannedStartLocation != null ||
       plannedEndLocation != null ||
-      (plannedWaypoints != null && plannedWaypoints!.isNotEmpty);
+      (plannedWaypoints != null && plannedWaypoints!.isNotEmpty) ||
+      (plannedEncodedPolyline != null && plannedEncodedPolyline!.isNotEmpty);
 
   /// Creates a copy of this Trip with the given fields replaced with new values.
   /// Useful for merging updated trip data while preserving existing fields.

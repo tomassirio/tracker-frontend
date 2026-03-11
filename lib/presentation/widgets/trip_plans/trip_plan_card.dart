@@ -42,8 +42,7 @@ class _TripPlanCardState extends State<TripPlanCard> {
   /// polyline, falling back to encoding the raw plan points as straight lines.
   void _loadRoute() {
     // 1. User-provided planned polyline (best case: zero API calls)
-    final polyline =
-        widget.plan.plannedPolyline ?? widget.plan.encodedPolyline;
+    final polyline = widget.plan.plannedPolyline ?? widget.plan.encodedPolyline;
     if (polyline != null && polyline.isNotEmpty) {
       setState(() {
         _encodedPolyline = polyline;
