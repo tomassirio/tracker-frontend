@@ -66,6 +66,10 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   /// Flag to ignore the next map tap on web
   bool _editIgnoreNextMapTap = false;
 
+  /// True while a date picker dialog is open — gates map tap handling so
+  /// tapping a date inside the dialog does not also drop a waypoint.
+  bool _isPickerOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -246,6 +250,9 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
       _editIgnoreNextMapTap = false;
       return;
     }
+    // Ignore map taps while a date picker dialog is open (Flutter Web platform
+    // view receives the click independently of the dialog overlay).
+    if (_isPickerOpen) return;
 
     setState(() {
       switch (_editPlacementMode) {
@@ -321,34 +328,30 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     );
   }
 
-  Future<void> _selectStartDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _startDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
+  Future<void> _selectDateRange() async {
+    setState(() => _isPickerOpen = true);
+    DateTimeRange? picked;
+    try {
+      picked = await showDateRangePicker(
+        context: context,
+        initialDateRange:
+            _startDate != null
+                ? DateTimeRange(
+                    start: _startDate!,
+                    end: _endDate ?? _startDate!,
+                  )
+                : null,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      );
+    } finally {
+      if (mounted) setState(() => _isPickerOpen = false);
+    }
     if (picked != null && mounted) {
       setState(() {
-        _startDate = picked;
-        if (_endDate != null && _endDate!.isBefore(picked)) {
-          _endDate = null;
-        }
+        _startDate = picked!.start;
+        _endDate = picked.end;
       });
-    }
-  }
-
-  Future<void> _selectEndDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate:
-          _endDate ??
-          (_startDate ?? DateTime.now()).add(const Duration(days: 1)),
-      firstDate: _startDate ?? DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
-    if (picked != null && mounted) {
-      setState(() => _endDate = picked);
     }
   }
 
@@ -963,7 +966,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                               child: _buildEditDateButton(
                                 label: 'Start',
                                 date: _startDate,
-                                onTap: _selectStartDate,
+                                onTap: _selectDateRange,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -971,7 +974,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                               child: _buildEditDateButton(
                                 label: 'End',
                                 date: _endDate,
-                                onTap: _selectEndDate,
+                                onTap: _selectDateRange,
                               ),
                             ),
                           ],
@@ -1709,7 +1712,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                             child: _buildEditDateButton(
                               label: 'Start',
                               date: _startDate,
-                              onTap: _selectStartDate,
+                              onTap: _selectDateRange,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -1717,7 +1720,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                             child: _buildEditDateButton(
                               label: 'End',
                               date: _endDate,
-                              onTap: _selectEndDate,
+                              onTap: _selectDateRange,
                             ),
                           ),
                         ],
