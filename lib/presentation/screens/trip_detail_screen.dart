@@ -115,6 +115,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   // Custom info window: currently selected map marker location
   TripLocation? _selectedMapLocation;
 
+  // User's current device location (used as fallback for empty maps)
+  LatLng? _userLocation;
+
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -158,9 +161,40 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadPromotionInfo();
     _loadTripAchievements();
     _initWebSocket();
+    _fetchUserLocation();
     // Load trip updates and full trip data together, then set the initial
     // camera position exactly once (instant jump, no distracting animation).
     _initializeMapPosition();
+  }
+
+  /// Fetches the user's current device location so that freshly-created trips
+  /// (with no locations or planned route) centre on the user's real position
+  /// instead of the hardcoded NYC default.
+  Future<void> _fetchUserLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+      if (permission == LocationPermission.deniedForever) return;
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      if (mounted) {
+        setState(() {
+          _userLocation = LatLng(position.latitude, position.longitude);
+        });
+      }
+    } catch (e) {
+      debugPrint('TripDetailScreen: Could not get user location: $e');
+    }
   }
 
   /// Loads trip updates and refreshes trip data in parallel, then positions
@@ -370,7 +404,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           animate: animate);
     } else {
       // Fall back to trip's initial location
-      final initialLoc = TripMapHelper.getInitialLocation(_trip);
+      final initialLoc =
+          TripMapHelper.getInitialLocation(_trip, userLocation: _userLocation);
       _animateMapToLocation(initialLoc, animate: animate);
     }
   }
@@ -2009,7 +2044,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               // Full-screen Map (background)
               Positioned.fill(
                 child: TripMapView(
-                  initialLocation: TripMapHelper.getInitialLocation(_trip),
+                  initialLocation: TripMapHelper.getInitialLocation(_trip,
+                      userLocation: _userLocation),
                   initialZoom: TripMapHelper.getInitialZoom(_trip),
                   markers: _markers,
                   polylines: _polylines,

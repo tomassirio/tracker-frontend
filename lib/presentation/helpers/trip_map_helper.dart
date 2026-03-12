@@ -686,8 +686,12 @@ class TripMapHelper {
     return MapData(markers: markers, polylines: polylines);
   }
 
-  /// Gets the initial location for the map (latest location or planned start)
-  static LatLng getInitialLocation(Trip trip) {
+  /// Gets the initial location for the map (latest location or planned start).
+  ///
+  /// When [userLocation] is provided it is used as the last fallback before the
+  /// hardcoded NYC default so that freshly-created trips without any location
+  /// data centre on the user's actual position.
+  static LatLng getInitialLocation(Trip trip, {LatLng? userLocation}) {
     // First try actual trip locations (skip lifecycle markers with no real coords)
     if (trip.locations != null && trip.locations!.isNotEmpty) {
       // Find the last location that has real coordinates
@@ -739,6 +743,10 @@ class TripMapHelper {
       } catch (_) {
         // Ignore decode errors, fall through to default
       }
+    }
+    // Then try the user's current device location
+    if (userLocation != null) {
+      return userLocation;
     }
     return const LatLng(40.7128, -74.0060); // Default to NYC
   }
