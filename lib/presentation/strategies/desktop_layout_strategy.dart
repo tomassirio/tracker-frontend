@@ -35,6 +35,7 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
   @override
   Widget buildLeftPanel(BoxConstraints constraints, TripDetailLayoutData data) {
     final tripInfoCard = createTripInfoCard(data);
+    final tripSettingsPanel = createTripSettingsPanel(data);
     final commentsSection = createCommentsSection(data);
 
     return Column(
@@ -44,6 +45,7 @@ class DesktopLayoutStrategy extends TripDetailLayoutStrategy {
           : MainAxisSize.max,
       children: [
         tripInfoCard,
+        tripSettingsPanel,
         if (data.isCommentsCollapsed)
           commentsSection
         else

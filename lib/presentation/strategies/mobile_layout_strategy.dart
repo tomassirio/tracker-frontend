@@ -12,7 +12,9 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
   @override
   double calculateLeftPanelWidth(
       BoxConstraints constraints, TripDetailLayoutData data) {
-    if (data.isTripInfoCollapsed && data.isCommentsCollapsed) {
+    if (data.isTripInfoCollapsed &&
+        data.isCommentsCollapsed &&
+        data.isTripSettingsCollapsed) {
       return _collapsedWidth;
     }
     return constraints.maxWidth * _expandedWidthRatio;
@@ -25,15 +27,21 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
   @override
   Widget buildLeftPanel(BoxConstraints constraints, TripDetailLayoutData data) {
     final tripInfoCard = createTripInfoCard(data);
+    final tripSettingsPanel = createTripSettingsPanel(data);
     final commentsSection = createCommentsSection(data);
-    if (data.isTripInfoCollapsed && data.isCommentsCollapsed) {
+
+    final allCollapsed = data.isTripInfoCollapsed &&
+        data.isCommentsCollapsed &&
+        data.isTripSettingsCollapsed;
+
+    if (allCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [tripInfoCard, commentsSection],
+        children: [tripInfoCard, tripSettingsPanel, commentsSection],
       );
     }
-    if (!data.isTripInfoCollapsed && data.isCommentsCollapsed) {
+    if (!data.isTripInfoCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -44,11 +52,12 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
             ),
             child: SingleChildScrollView(child: tripInfoCard),
           ),
+          tripSettingsPanel,
           commentsSection,
         ],
       );
     }
-    if (data.isTripInfoCollapsed && !data.isCommentsCollapsed) {
+    if (!data.isTripSettingsCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -58,20 +67,26 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
             constraints: BoxConstraints(
               maxHeight: constraints.maxHeight * _maxHeightRatio,
             ),
-            child: commentsSection,
+            child: SingleChildScrollView(child: tripSettingsPanel),
           ),
+          commentsSection,
         ],
       );
     }
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.6),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [tripInfoCard, commentsSection],
+    // Comments expanded
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        tripInfoCard,
+        tripSettingsPanel,
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: constraints.maxHeight * _maxHeightRatio,
+          ),
+          child: commentsSection,
         ),
-      ),
+      ],
     );
   }
 

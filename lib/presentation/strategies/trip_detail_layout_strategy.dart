@@ -5,6 +5,7 @@ import 'package:wanderer_frontend/data/models/achievement_models.dart';
 import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/comments_section.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_info_card.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_settings_panel.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/timeline_panel.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_update_panel.dart';
 import 'package:wanderer_frontend/presentation/strategies/mobile_layout_strategy.dart';
@@ -25,6 +26,7 @@ class TripDetailLayoutData {
   final bool isCommentsCollapsed;
   final bool isTripInfoCollapsed;
   final bool isTripUpdateCollapsed;
+  final bool isTripSettingsCollapsed;
   final bool isSendingUpdate;
   final CommentSortOption sortOption;
   final TextEditingController commentController;
@@ -50,6 +52,7 @@ class TripDetailLayoutData {
   final VoidCallback onToggleComments;
   final VoidCallback onToggleTimeline;
   final VoidCallback onToggleTripUpdate;
+  final VoidCallback onToggleTripSettings;
   final VoidCallback onRefreshTimeline;
   final Function(TripLocation)? onTimelineUpdateTap;
   final Function(CommentSortOption) onSortChanged;
@@ -87,6 +90,7 @@ class TripDetailLayoutData {
     required this.isCommentsCollapsed,
     required this.isTripInfoCollapsed,
     required this.isTripUpdateCollapsed,
+    required this.isTripSettingsCollapsed,
     required this.isSendingUpdate,
     required this.sortOption,
     required this.commentController,
@@ -110,6 +114,7 @@ class TripDetailLayoutData {
     required this.onToggleComments,
     required this.onToggleTimeline,
     required this.onToggleTripUpdate,
+    required this.onToggleTripSettings,
     required this.onRefreshTimeline,
     this.onTimelineUpdateTap,
     required this.onSortChanged,
@@ -158,10 +163,6 @@ abstract class TripDetailLayoutStrategy {
       isCollapsed: data.isTripInfoCollapsed,
       onToggleCollapse: data.onToggleTripInfo,
       currentUserId: data.currentUserId,
-      isChangingStatus: data.isChangingStatus,
-      onStatusChange: data.onStatusChange,
-      isChangingSettings: data.isChangingSettings,
-      onSettingsChange: data.onSettingsChange,
       onFollowUser: data.onFollowTripOwner,
       onSendFriendRequest: data.onSendFriendRequestToTripOwner,
       isFollowing: data.isFollowingTripOwner,
@@ -169,10 +170,29 @@ abstract class TripDetailLayoutStrategy {
       isAlreadyFriends: data.isAlreadyFriends,
       isPromoted: data.isPromoted,
       tripAchievements: data.tripAchievements,
-      onTestBackgroundUpdate: data.onTestBackgroundUpdate,
       onVisibilityChange: data.onVisibilityChange,
+    );
+  }
+
+  /// Helper to create TripSettingsPanel with proper callbacks
+  @protected
+  TripSettingsPanel createTripSettingsPanel(TripDetailLayoutData data) {
+    return TripSettingsPanel(
+      isCollapsed: data.isTripSettingsCollapsed,
+      onToggleCollapse: data.onToggleTripSettings,
+      isOwner: data.currentUserId != null &&
+          data.trip.userId == data.currentUserId,
+      tripHasPlannedRoute: data.trip.hasPlannedRoute,
       showPlannedWaypoints: data.showPlannedWaypoints,
       onTogglePlannedWaypoints: data.onTogglePlannedWaypoints,
+      automaticUpdates: data.trip.automaticUpdates,
+      updateRefresh: data.trip.updateRefresh,
+      tripModality: data.trip.tripModality,
+      isLoading: data.isChangingSettings,
+      onSettingsChange: data.onSettingsChange,
+      tripStatus: data.trip.status,
+      tripId: data.trip.id,
+      onTestBackgroundUpdate: data.onTestBackgroundUpdate,
     );
   }
 
