@@ -2,15 +2,6 @@
   <img src="assets/images/wanderer-logo.png" alt="Wanderer Logo" width="180" />
 </p>
 
-<<<<<<< copilot/rewrite-readme-file
-<h1 align="center">Wanderer Frontend</h1>
-=======
-![Version](https://img.shields.io/badge/version-1.2.13-blue)
-![Coverage](https://img.shields.io/badge/coverage-28%25-red)
-![Flutter](https://img.shields.io/badge/Flutter-3.27.1-02569B?logo=flutter)
-![License](https://img.shields.io/badge/license-MIT-green)
->>>>>>> master
-
 <p align="center">
   <img src="https://img.shields.io/badge/version-1.2.12-blue" alt="Version" />
   <img src="https://img.shields.io/badge/coverage-30%25-red" alt="Coverage" />
