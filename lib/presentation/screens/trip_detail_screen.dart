@@ -27,6 +27,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/comments_section.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_lifecycle_buttons.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:wanderer_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
@@ -97,6 +98,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isCommentsCollapsed = false;
   bool _isTripInfoCollapsed = false;
   bool _isTripUpdateCollapsed = true;
+  bool _isTripSettingsCollapsed = true;
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
   bool _hasInitialMapPosition = false;
@@ -1703,6 +1705,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isCommentsCollapsed = true;
           _isTimelineCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
@@ -2067,7 +2070,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       ? (_isTripInfoCollapsed &&
                           _isCommentsCollapsed &&
                           _isTimelineCollapsed &&
-                          _isTripUpdateCollapsed)
+                          _isTripUpdateCollapsed &&
+                          _isTripSettingsCollapsed)
                       : !_isHoveringOverPanel,
                   selectedLocation: _selectedMapLocation,
                   onInfoWindowClosed: _onInfoWindowClosed,
@@ -2162,6 +2166,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   child: strategy.buildTimelinePanel(constraints, layoutData),
                 ),
               ),
+
+              // Lifecycle circle buttons (mobile only, owner only)
+              // Positioned on right side above native Google Maps zoom controls
+              if (isMobile &&
+                  _userId != null &&
+                  _trip.userId == _userId &&
+                  _trip.status != TripStatus.finished)
+                Positioned(
+                  right: 8,
+                  bottom: 120,
+                  child: TripLifecycleButtons(
+                    currentStatus: _trip.status,
+                    tripModality: _trip.tripModality,
+                    isOwner: true,
+                    isLoading: _isChangingStatus,
+                    onStatusChange: _changeTripStatus,
+                  ),
+                ),
 
               // Floating donation button for promoted trips
               if (_isPromoted && _donationLink != null)
@@ -2272,6 +2294,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isCommentsCollapsed: _isCommentsCollapsed,
       isTripInfoCollapsed: _isTripInfoCollapsed,
       isTripUpdateCollapsed: _isTripUpdateCollapsed,
+      isTripSettingsCollapsed: _isTripSettingsCollapsed,
       isSendingUpdate: _isSendingUpdate,
       sortOption: _sortOption,
       commentController: _commentController,
@@ -2294,6 +2317,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
       onToggleTripUpdate: () => _handleToggleTripUpdate(isMobile),
+      onToggleTripSettings: () => _handleToggleTripSettings(isMobile),
       onRefreshTimeline: _loadTripUpdates,
       onTimelineUpdateTap: _handleTimelineUpdateTap,
       onSortChanged: _changeSortOption,
@@ -2340,6 +2364,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isCommentsCollapsed = true;
           _isTimelineCollapsed = true;
           _isTripUpdateCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
@@ -2359,6 +2384,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isTimelineCollapsed = true;
           _isTripUpdateCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
@@ -2378,10 +2404,31 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isCommentsCollapsed = true;
           _isTripUpdateCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
         _isTimelineCollapsed = true;
+      }
+    });
+  }
+
+  /// Handle trip settings panel toggle with mobile-specific behavior
+  void _handleToggleTripSettings(bool isMobile) {
+    setState(() {
+      if (_isTripSettingsCollapsed) {
+        // Opening
+        _isTripSettingsCollapsed = false;
+        if (isMobile) {
+          // Close other panels on mobile
+          _isTripInfoCollapsed = true;
+          _isCommentsCollapsed = true;
+          _isTimelineCollapsed = true;
+          _isTripUpdateCollapsed = true;
+        }
+      } else {
+        // Closing
+        _isTripSettingsCollapsed = true;
       }
     });
   }
