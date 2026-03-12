@@ -174,7 +174,7 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
 
   Widget _buildCollapsedBubble() {
     return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+      margin: const EdgeInsets.only(top: 16, right: 16, bottom: 8),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: WandererTheme.floatingShadow,

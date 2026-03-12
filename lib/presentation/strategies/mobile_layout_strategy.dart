@@ -6,8 +6,8 @@ import 'package:wanderer_frontend/presentation/strategies/trip_detail_layout_str
 /// - Collapsed panels show as floating bubbles
 /// - Expanded panels are constrained to leave map visible
 class MobileLayoutStrategy extends TripDetailLayoutStrategy {
-  // Wide enough to fit the info bubble + settings bubble side by side.
-  static const double _collapsedWidth = 176.0;
+  // Wide enough to fit the info bubble (88 px) + settings bubble (72 px) side by side.
+  static const double _collapsedWidth = 160.0;
   static const double _expandedWidthRatio = 0.85;
   static const double _maxHeightRatio = 0.7;
   @override
@@ -73,19 +73,13 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
     if (data.isTripInfoCollapsed &&
         !data.isTripSettingsCollapsed &&
         data.isCommentsCollapsed) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tripInfoCard,
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: constraints.maxHeight * _maxHeightRatio,
-            ),
-            child: SingleChildScrollView(child: tripSettingsPanel),
-          ),
-          commentsSection,
-        ],
+      // Settings expanded: show only the settings panel — info and comments
+      // bubbles are hidden so the card stands alone (not sandwiched).
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: constraints.maxHeight * _maxHeightRatio,
+        ),
+        child: SingleChildScrollView(child: tripSettingsPanel),
       );
     }
     // Comments expanded
