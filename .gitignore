@@ -292,3 +292,5 @@ DerivedData/
 GoogleService-Info.plist
 # Plugins (already resolved through pubspec.yaml)
 .flutter-plugins
+key.properties
+*.jks

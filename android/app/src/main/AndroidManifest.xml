@@ -20,6 +20,12 @@
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
 
+        <!-- Foreground service for background location tracking during trips -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
+
         <!-- Required for Google Maps on Android 9+ -->
         <uses-library
             android:name="org.apache.http.legacy"
