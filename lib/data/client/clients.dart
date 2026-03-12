@@ -21,5 +21,8 @@ export 'query/promotion_query_client.dart';
 export 'query/user_query_client.dart';
 
 // Export Google API Clients
+export 'google_directions_api_client.dart';
 export 'google_maps_api_client.dart';
 export 'polyline_codec.dart';
+export 'directions_web_stub.dart'
+    if (dart.library.js_interop) 'directions_web_impl.dart';

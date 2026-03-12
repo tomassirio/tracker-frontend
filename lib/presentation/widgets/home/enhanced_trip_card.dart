@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/constants/enums.dart';
+import '../../../core/theme/wanderer_theme.dart';
 import '../../../data/client/google_maps_api_client.dart';
 import '../../helpers/auth_navigation_helper.dart';
 import '../../helpers/trip_route_helper.dart';
@@ -147,6 +148,43 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
     );
   }
 
+  Widget _buildDayBadge(int day) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: WandererTheme.primaryOrange.withOpacity(0.4),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: WandererTheme.primaryOrange.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today,
+              size: 12, color: WandererTheme.primaryOrange),
+          const SizedBox(width: 4),
+          Text(
+            'Day $day',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: WandererTheme.primaryOrange,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _generateStaticMapUrl() {
     final sorted = TripRouteHelper.getSortedLocations(widget.trip);
     if (sorted.isNotEmpty) {
@@ -236,6 +274,7 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
           widget.trip.plannedEndLocation!.latitude,
           widget.trip.plannedEndLocation!.longitude,
         ),
+        encodedPolyline: widget.trip.plannedEncodedPolyline,
       );
     }
 
@@ -620,9 +659,17 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                     Positioned(
                       bottom: 10,
                       left: 10,
-                      child: VisibilityBadge(
-                        visibility: widget.trip.visibility,
-                        compact: false,
+                      child: Wrap(
+                        spacing: 6,
+                        children: [
+                          VisibilityBadge(
+                            visibility: widget.trip.visibility,
+                            compact: false,
+                          ),
+                          if (widget.trip.currentDay != null &&
+                              widget.trip.tripModality == TripModality.multiDay)
+                            _buildDayBadge(widget.trip.currentDay!),
+                        ],
                       ),
                     ),
 

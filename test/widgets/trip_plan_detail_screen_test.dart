@@ -118,6 +118,7 @@ void main() {
         expect(tripPlan.endLocation, isNull);
         expect(tripPlan.waypoints, isEmpty);
         expect(tripPlan.encodedPolyline, isNull);
+        expect(tripPlan.plannedPolyline, isNull);
         expect(tripPlan.polylineUpdatedAt, isNull);
       });
 
@@ -128,11 +129,13 @@ void main() {
           name: 'Polyline Plan',
           planType: 'MULTI_DAY',
           encodedPolyline: 'a~l~Fjk~uOwHJy@P',
+          plannedPolyline: 'user_planned_polyline',
           polylineUpdatedAt: DateTime(2026, 3, 1, 14, 30),
           createdTimestamp: DateTime(2026, 3, 1),
         );
 
         expect(tripPlan.encodedPolyline, 'a~l~Fjk~uOwHJy@P');
+        expect(tripPlan.plannedPolyline, 'user_planned_polyline');
         expect(tripPlan.polylineUpdatedAt, DateTime(2026, 3, 1, 14, 30));
       });
 
@@ -161,6 +164,24 @@ void main() {
         );
       });
 
+      test('fromJson parses plannedPolyline', () {
+        final json = {
+          'id': 'plan-123',
+          'userId': 'user-456',
+          'name': 'Planned Route Plan',
+          'planType': 'MULTI_DAY',
+          'waypoints': [],
+          'encodedPolyline': 'backend_computed',
+          'plannedPolyline': 'user_provided',
+          'createdTimestamp': '2026-03-01T10:00:00.000Z',
+        };
+
+        final tripPlan = TripPlan.fromJson(json);
+
+        expect(tripPlan.encodedPolyline, 'backend_computed');
+        expect(tripPlan.plannedPolyline, 'user_provided');
+      });
+
       test('fromJson handles missing polyline fields gracefully', () {
         final json = {
           'id': 'plan-123',
@@ -184,6 +205,7 @@ void main() {
           name: 'Polyline Plan',
           planType: 'MULTI_DAY',
           encodedPolyline: 'a~l~Fjk~uOwHJy@P',
+          plannedPolyline: 'user_planned_polyline',
           polylineUpdatedAt: DateTime(2026, 3, 1, 14, 30),
           createdTimestamp: DateTime(2026, 3, 1),
         );
@@ -191,6 +213,7 @@ void main() {
         final json = tripPlan.toJson();
 
         expect(json['encodedPolyline'], 'a~l~Fjk~uOwHJy@P');
+        expect(json['plannedPolyline'], 'user_planned_polyline');
         expect(json.containsKey('polylineUpdatedAt'), true);
       });
 
@@ -206,6 +229,7 @@ void main() {
         final json = tripPlan.toJson();
 
         expect(json.containsKey('encodedPolyline'), false);
+        expect(json.containsKey('plannedPolyline'), false);
         expect(json.containsKey('polylineUpdatedAt'), false);
       });
     });

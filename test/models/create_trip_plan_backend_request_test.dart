@@ -187,6 +187,37 @@ void main() {
 
         expect(json.containsKey('metadata'), isFalse);
       });
+
+      test('includes plannedPolyline when provided', () {
+        final request = CreateTripPlanBackendRequest(
+          name: 'Polyline Test',
+          planType: 'ROAD_TRIP',
+          startDate: DateTime(2025, 3, 15),
+          endDate: DateTime(2025, 3, 20),
+          startLocation: GeoLocation(lat: 37.7749, lon: -122.4194),
+          endLocation: GeoLocation(lat: 34.0522, lon: -118.2437),
+          plannedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
+        );
+
+        final json = request.toJson();
+
+        expect(json['plannedPolyline'], '_p~iF~ps|U_ulLnnqC_mqNvxq`@');
+      });
+
+      test('excludes plannedPolyline when null', () {
+        final request = CreateTripPlanBackendRequest(
+          name: 'No Polyline',
+          planType: 'SIMPLE',
+          startDate: DateTime(2025, 8, 1),
+          endDate: DateTime(2025, 8, 5),
+          startLocation: GeoLocation(lat: 0.0, lon: 0.0),
+          endLocation: GeoLocation(lat: 1.0, lon: 1.0),
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('plannedPolyline'), isFalse);
+      });
     });
   });
 }

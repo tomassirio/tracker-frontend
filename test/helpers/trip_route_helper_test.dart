@@ -256,6 +256,96 @@ void main() {
         final result = TripRouteHelper.fetchEncodedPolyline(trip);
         expect(result, 'backend_single_loc_polyline');
       });
+
+      test('returns planned encoded polyline when no backend polyline', () {
+        final trip = _createTrip(
+          id: 'planned-poly-trip',
+          locations: null,
+          plannedEncodedPolyline: 'planned_route_polyline',
+        );
+
+        final result = TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'planned_route_polyline');
+      });
+
+      test('planned polyline is cached in memory', () {
+        final trip = _createTrip(
+          id: 'planned-cache-trip',
+          plannedEncodedPolyline: 'planned_polyline_data',
+        );
+
+        TripRouteHelper.fetchEncodedPolyline(trip);
+
+        expect(
+          TripRouteHelper.getCachedPolyline('planned-cache-trip'),
+          'planned_polyline_data',
+        );
+      });
+
+      test('backend polyline takes priority over planned polyline', () {
+        final trip = _createTrip(
+          id: 'both-poly-trip',
+          encodedPolyline: 'backend_polyline',
+          plannedEncodedPolyline: 'planned_polyline',
+        );
+
+        final result = TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'backend_polyline');
+      });
+
+      test('planned polyline takes priority over cache and straight lines', () {
+        final loc1 = _createLocation(
+          id: 'loc1',
+          lat: 52.0,
+          lng: 5.0,
+          timestamp: DateTime(2025, 1, 1, 8, 0),
+        );
+        final loc2 = _createLocation(
+          id: 'loc2',
+          lat: 52.1,
+          lng: 5.1,
+          timestamp: DateTime(2025, 1, 1, 12, 0),
+        );
+
+        // Pre-populate cache with stale data
+        TripRouteHelper.cachePolyline(
+            'planned-priority-trip', 'stale_cached_data');
+
+        final trip = _createTrip(
+          id: 'planned-priority-trip',
+          locations: [loc1, loc2],
+          plannedEncodedPolyline: 'planned_road_snapped',
+        );
+
+        final result = TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'planned_road_snapped');
+      });
+
+      test('ignores empty planned polyline string', () {
+        final loc1 = _createLocation(
+          id: 'loc1',
+          lat: 52.0,
+          lng: 5.0,
+          timestamp: DateTime(2025, 1, 1, 8, 0),
+        );
+        final loc2 = _createLocation(
+          id: 'loc2',
+          lat: 52.1,
+          lng: 5.1,
+          timestamp: DateTime(2025, 1, 1, 12, 0),
+        );
+
+        TripRouteHelper.cachePolyline('empty-planned-trip', 'cached_fallback');
+
+        final trip = _createTrip(
+          id: 'empty-planned-trip',
+          locations: [loc1, loc2],
+          plannedEncodedPolyline: '',
+        );
+
+        final result = TripRouteHelper.fetchEncodedPolyline(trip);
+        expect(result, 'cached_fallback');
+      });
     });
   });
 }
@@ -265,6 +355,7 @@ Trip _createTrip({
   String id = 'test-trip-id',
   List<TripLocation>? locations,
   String? encodedPolyline,
+  String? plannedEncodedPolyline,
 }) {
   return Trip(
     id: id,
@@ -277,6 +368,7 @@ Trip _createTrip({
     updatedAt: DateTime(2025, 1, 1),
     locations: locations,
     encodedPolyline: encodedPolyline,
+    plannedEncodedPolyline: plannedEncodedPolyline,
   );
 }
 

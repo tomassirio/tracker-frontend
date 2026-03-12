@@ -150,11 +150,13 @@ class WebSocketEvent {
 class TripStatusChangedEvent extends WebSocketEvent {
   final TripStatus newStatus;
   final TripStatus? previousStatus;
+  final int? currentDay;
 
   TripStatusChangedEvent({
     required String tripId,
     required this.newStatus,
     this.previousStatus,
+    this.currentDay,
     required super.payload,
     super.timestamp,
   }) : super(
@@ -172,6 +174,7 @@ class TripStatusChangedEvent extends WebSocketEvent {
       previousStatus: payload['previousStatus'] != null
           ? TripStatus.fromJson(payload['previousStatus'] as String)
           : null,
+      currentDay: payload['currentDay'] as int?,
       payload: payload,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String)

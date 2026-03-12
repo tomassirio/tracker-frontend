@@ -167,7 +167,7 @@ class _TripCardState extends State<TripCard> {
 
     if (markers.isEmpty) return '';
 
-    // If we have start and end, use route map
+    // If we have start and end, use route map with the plan's polyline
     if (widget.trip.plannedStartLocation != null &&
         widget.trip.plannedEndLocation != null &&
         widget.trip.plannedStartLocation!.latitude != 0 &&
@@ -181,6 +181,7 @@ class _TripCardState extends State<TripCard> {
           widget.trip.plannedEndLocation!.latitude,
           widget.trip.plannedEndLocation!.longitude,
         ),
+        encodedPolyline: widget.trip.plannedEncodedPolyline,
       );
     }
 
@@ -277,7 +278,16 @@ class _TripCardState extends State<TripCard> {
                       Positioned(
                         bottom: 8,
                         right: 8,
-                        child: _buildVisibilityBadge(),
+                        child: Wrap(
+                          spacing: 6,
+                          children: [
+                            _buildVisibilityBadge(),
+                            if (widget.trip.currentDay != null &&
+                                widget.trip.tripModality ==
+                                    TripModality.multiDay)
+                              _buildDayBadge(widget.trip.currentDay!),
+                          ],
+                        ),
                       ),
 
                       // Delete button overlay (top right)
@@ -598,6 +608,44 @@ class _TripCardState extends State<TripCard> {
         icon,
         size: 14,
         color: color,
+      ),
+    );
+  }
+
+  /// Build day badge for multi-day trips
+  Widget _buildDayBadge(int day) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: WandererTheme.primaryOrange.withOpacity(0.4),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: WandererTheme.primaryOrange.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today,
+              size: 12, color: WandererTheme.primaryOrange),
+          const SizedBox(width: 4),
+          Text(
+            'Day $day',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: WandererTheme.primaryOrange,
+            ),
+          ),
+        ],
       ),
     );
   }

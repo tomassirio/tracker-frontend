@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 /// Email input field with validation
 class EmailField extends StatelessWidget {
   final TextEditingController controller;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
 
-  const EmailField({super.key, required this.controller});
+  const EmailField({
+    super.key,
+    required this.controller,
+    this.textInputAction,
+    this.onFieldSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +24,8 @@ class EmailField extends StatelessWidget {
       ),
       keyboardType: TextInputType.emailAddress,
       textCapitalization: TextCapitalization.none,
+      textInputAction: textInputAction ?? TextInputAction.next,
+      onFieldSubmitted: onFieldSubmitted,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Please enter your email';
