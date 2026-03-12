@@ -1230,8 +1230,16 @@ class _HomeScreenState extends State<HomeScreen>
           _buildTripGrid(promotedTripsList, showRelationship: false),
           const SizedBox(height: 24),
         ],
-        if (nonPromotedTrips.isNotEmpty)
+        if (nonPromotedTrips.isNotEmpty) ...[
+          FeedSectionHeader(
+            title: 'Discover',
+            icon: Icons.public,
+            count: nonPromotedTrips.length,
+            subtitle: 'Explore public trips from the community',
+          ),
+          const SizedBox(height: 12),
           _buildTripGrid(nonPromotedTrips, showRelationship: false),
+        ],
       ],
     );
   }
