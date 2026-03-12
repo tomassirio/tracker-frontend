@@ -197,6 +197,14 @@ jobs:
       - name: Inject Google Maps API key for Android
         run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
 
+      - name: Set up keystore for signing
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=${{ github.workspace }}/android/app/upload-keystore.jks" >> android/key.properties
+
       - name: Build APK
         run: |
           flutter build apk --release \
