@@ -54,22 +54,19 @@ class BackgroundLocationDisclosure {
               SizedBox(height: 6),
               _DisclosureBullet(
                 icon: Icons.battery_saver,
-                text:
-                    'Battery level is included with each update to help your '
+                text: 'Battery level is included with each update to help your '
                     'followers know your device status.',
               ),
               SizedBox(height: 6),
               _DisclosureBullet(
                 icon: Icons.schedule,
-                text:
-                    'Updates are sent at the interval you choose in trip '
+                text: 'Updates are sent at the interval you choose in trip '
                     'settings (e.g., every 15 minutes).',
               ),
               SizedBox(height: 6),
               _DisclosureBullet(
                 icon: Icons.stop_circle_outlined,
-                text:
-                    'Background location collection stops automatically when '
+                text: 'Background location collection stops automatically when '
                     'you pause or finish your trip.',
               ),
               SizedBox(height: 16),
@@ -119,4 +116,3 @@ class _DisclosureBullet extends StatelessWidget {
     );
   }
 }
-

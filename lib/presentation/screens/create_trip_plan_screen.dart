@@ -519,13 +519,12 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
     try {
       picked = await showDateRangePicker(
         context: context,
-        initialDateRange:
-            _startDate != null
-                ? DateTimeRange(
-                    start: _startDate!,
-                    end: _endDate ?? _startDate!,
-                  )
-                : null,
+        initialDateRange: _startDate != null
+            ? DateTimeRange(
+                start: _startDate!,
+                end: _endDate ?? _startDate!,
+              )
+            : null,
         firstDate: DateTime.now(),
         lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
       );
@@ -910,180 +909,180 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.4),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(WandererTheme.glassRadius),
-                      topRight: Radius.circular(WandererTheme.glassRadius),
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: WandererTheme.glassBorderColor,
-                        width: 0.5,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.4),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(WandererTheme.glassRadius),
+                        topRight: Radius.circular(WandererTheme.glassRadius),
+                      ),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: WandererTheme.glassBorderColor,
+                          width: 0.5,
+                        ),
                       ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.add_location_alt_outlined,
-                        size: 18,
-                        color: WandererTheme.primaryOrange,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'New Trip Plan',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: WandererTheme.textPrimary,
-                          ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.add_location_alt_outlined,
+                          size: 18,
+                          color: WandererTheme.primaryOrange,
                         ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.remove,
-                            size: 18,
-                            color: WandererTheme.textSecondary,
-                          ),
-                          onPressed: () =>
-                              setState(() => _isPanelCollapsed = true),
-                          tooltip: 'Minimize',
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Scrollable form content
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Plan Name
-                          _buildSectionLabel('Plan Name'),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: _inputDecoration(
-                              'e.g., Weekend Hiking Adventure',
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'New Trip Plan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: WandererTheme.textPrimary,
                             ),
-                            textCapitalization: TextCapitalization.words,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter a plan name';
-                              }
-                              if (value.trim().length < 3) {
-                                return 'Plan name must be at least 3 characters';
-                              }
-                              return null;
-                            },
                           ),
-                          const SizedBox(height: 16),
-                          // Description
-                          _buildSectionLabel('Description'),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _descriptionController,
-                            decoration: _inputDecoration(
-                              'Tell us about this plan... (optional)',
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.remove,
+                              size: 18,
+                              color: WandererTheme.textSecondary,
                             ),
-                            maxLines: 2,
-                            textCapitalization: TextCapitalization.sentences,
+                            onPressed: () =>
+                                setState(() => _isPanelCollapsed = true),
+                            tooltip: 'Minimize',
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            padding: EdgeInsets.zero,
                           ),
-                          const SizedBox(height: 20),
-                          // Plan Type
-                          _buildSectionLabel('Plan Type'),
-                          const SizedBox(height: 10),
-                          _buildPlanTypeSelector(),
-                          const SizedBox(height: 20),
-                          // Dates
-                          _buildSectionLabel('Dates'),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildDateButton(
-                                  label: 'Start',
-                                  date: _startDate,
-                                  onTap: _selectDateRange,
-                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Scrollable form content
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Plan Name
+                            _buildSectionLabel('Plan Name'),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: _inputDecoration(
+                                'e.g., Weekend Hiking Adventure',
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _buildDateButton(
-                                  label: 'End',
-                                  date: _endDate,
-                                  onTap: _selectDateRange,
-                                ),
+                              textCapitalization: TextCapitalization.words,
+                              textInputAction: TextInputAction.next,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter a plan name';
+                                }
+                                if (value.trim().length < 3) {
+                                  return 'Plan name must be at least 3 characters';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            // Description
+                            _buildSectionLabel('Description'),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _descriptionController,
+                              decoration: _inputDecoration(
+                                'Tell us about this plan... (optional)',
                               ),
-                            ],
-                          ),
-                          if (_daysBetween != null) ...[
+                              maxLines: 2,
+                              textCapitalization: TextCapitalization.sentences,
+                            ),
+                            const SizedBox(height: 20),
+                            // Plan Type
+                            _buildSectionLabel('Plan Type'),
                             const SizedBox(height: 10),
-                            _buildDaysInfoBadge(),
-                          ],
-                          const SizedBox(height: 24),
-                          // Create button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _createTripPlan,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: WandererTheme.primaryOrange,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: Colors.grey.shade300,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                            _buildPlanTypeSelector(),
+                            const SizedBox(height: 20),
+                            // Dates
+                            _buildSectionLabel('Dates'),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildDateButton(
+                                    label: 'Start',
+                                    date: _startDate,
+                                    onTap: _selectDateRange,
+                                  ),
                                 ),
-                                elevation: 0,
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Create Plan',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _buildDateButton(
+                                    label: 'End',
+                                    date: _endDate,
+                                    onTap: _selectDateRange,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                            if (_daysBetween != null) ...[
+                              const SizedBox(height: 10),
+                              _buildDaysInfoBadge(),
+                            ],
+                            const SizedBox(height: 24),
+                            // Create button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _createTripPlan,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: WandererTheme.primaryOrange,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey.shade300,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Create Plan',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
                 ],
               ),
             ),

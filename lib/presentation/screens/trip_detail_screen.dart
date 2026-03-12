@@ -27,6 +27,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_map_view.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/comments_section.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_lifecycle_buttons.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/wanderer_app_bar.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/app_sidebar.dart';
 import 'package:wanderer_frontend/presentation/strategies/trip_detail_layout_strategy.dart';
@@ -97,6 +98,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _isCommentsCollapsed = false;
   bool _isTripInfoCollapsed = false;
   bool _isTripUpdateCollapsed = true;
+  bool _isTripSettingsCollapsed = true;
   bool _isSendingUpdate = false;
   bool _hasInitializedPanelStates = false;
   bool _hasInitialMapPosition = false;
@@ -114,6 +116,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   // Custom info window: currently selected map marker location
   TripLocation? _selectedMapLocation;
+
+  // User's current device location (used as fallback for empty maps)
+  LatLng? _userLocation;
 
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -150,6 +155,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _repository = TripDetailRepository();
 
     _trip = widget.trip;
+    // Default to showing the planned route when the trip has one
+    _showPlannedWaypoints = _trip.hasPlannedRoute;
     // Don't call _updateMapData() here — it would use stale trip data.
     // Let _initializeMapPosition() handle everything after loading fresh data.
     _checkLoginStatus();
@@ -158,9 +165,40 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadPromotionInfo();
     _loadTripAchievements();
     _initWebSocket();
+    _fetchUserLocation();
     // Load trip updates and full trip data together, then set the initial
     // camera position exactly once (instant jump, no distracting animation).
     _initializeMapPosition();
+  }
+
+  /// Fetches the user's current device location so that freshly-created trips
+  /// (with no locations or planned route) centre on the user's real position
+  /// instead of the hardcoded NYC default.
+  Future<void> _fetchUserLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+      if (permission == LocationPermission.deniedForever) return;
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      if (mounted) {
+        setState(() {
+          _userLocation = LatLng(position.latitude, position.longitude);
+        });
+      }
+    } catch (e) {
+      debugPrint('TripDetailScreen: Could not get user location: $e');
+    }
   }
 
   /// Loads trip updates and refreshes trip data in parallel, then positions
@@ -370,7 +408,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           animate: animate);
     } else {
       // Fall back to trip's initial location
-      final initialLoc = TripMapHelper.getInitialLocation(_trip);
+      final initialLoc =
+          TripMapHelper.getInitialLocation(_trip, userLocation: _userLocation);
       _animateMapToLocation(initialLoc, animate: animate);
     }
   }
@@ -1666,6 +1705,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isCommentsCollapsed = true;
           _isTimelineCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
@@ -2009,7 +2049,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               // Full-screen Map (background)
               Positioned.fill(
                 child: TripMapView(
-                  initialLocation: TripMapHelper.getInitialLocation(_trip),
+                  initialLocation: TripMapHelper.getInitialLocation(_trip,
+                      userLocation: _userLocation),
                   initialZoom: TripMapHelper.getInitialZoom(_trip),
                   markers: _markers,
                   polylines: _polylines,
@@ -2029,7 +2070,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       ? (_isTripInfoCollapsed &&
                           _isCommentsCollapsed &&
                           _isTimelineCollapsed &&
-                          _isTripUpdateCollapsed)
+                          _isTripUpdateCollapsed &&
+                          _isTripSettingsCollapsed)
                       : !_isHoveringOverPanel,
                   selectedLocation: _selectedMapLocation,
                   onInfoWindowClosed: _onInfoWindowClosed,
@@ -2124,6 +2166,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   child: strategy.buildTimelinePanel(constraints, layoutData),
                 ),
               ),
+
+              // Lifecycle circle buttons (mobile only, owner only)
+              // Positioned on right side above native Google Maps zoom controls
+              if (isMobile &&
+                  _userId != null &&
+                  _trip.userId == _userId &&
+                  _trip.status != TripStatus.finished)
+                Positioned(
+                  right: 8,
+                  bottom: 120,
+                  child: TripLifecycleButtons(
+                    currentStatus: _trip.status,
+                    tripModality: _trip.tripModality,
+                    isOwner: true,
+                    isLoading: _isChangingStatus,
+                    onStatusChange: _changeTripStatus,
+                  ),
+                ),
 
               // Floating donation button for promoted trips
               if (_isPromoted && _donationLink != null)
@@ -2234,6 +2294,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isCommentsCollapsed: _isCommentsCollapsed,
       isTripInfoCollapsed: _isTripInfoCollapsed,
       isTripUpdateCollapsed: _isTripUpdateCollapsed,
+      isTripSettingsCollapsed: _isTripSettingsCollapsed,
       isSendingUpdate: _isSendingUpdate,
       sortOption: _sortOption,
       commentController: _commentController,
@@ -2256,6 +2317,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onToggleComments: () => _handleToggleComments(isMobile),
       onToggleTimeline: () => _handleToggleTimeline(isMobile),
       onToggleTripUpdate: () => _handleToggleTripUpdate(isMobile),
+      onToggleTripSettings: () => _handleToggleTripSettings(isMobile),
       onRefreshTimeline: _loadTripUpdates,
       onTimelineUpdateTap: _handleTimelineUpdateTap,
       onSortChanged: _changeSortOption,
@@ -2302,6 +2364,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isCommentsCollapsed = true;
           _isTimelineCollapsed = true;
           _isTripUpdateCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
@@ -2321,6 +2384,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isTimelineCollapsed = true;
           _isTripUpdateCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
@@ -2340,10 +2404,31 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isTripInfoCollapsed = true;
           _isCommentsCollapsed = true;
           _isTripUpdateCollapsed = true;
+          _isTripSettingsCollapsed = true;
         }
       } else {
         // Closing
         _isTimelineCollapsed = true;
+      }
+    });
+  }
+
+  /// Handle trip settings panel toggle with mobile-specific behavior
+  void _handleToggleTripSettings(bool isMobile) {
+    setState(() {
+      if (_isTripSettingsCollapsed) {
+        // Opening
+        _isTripSettingsCollapsed = false;
+        if (isMobile) {
+          // Close other panels on mobile
+          _isTripInfoCollapsed = true;
+          _isCommentsCollapsed = true;
+          _isTimelineCollapsed = true;
+          _isTripUpdateCollapsed = true;
+        }
+      } else {
+        // Closing
+        _isTripSettingsCollapsed = true;
       }
     });
   }

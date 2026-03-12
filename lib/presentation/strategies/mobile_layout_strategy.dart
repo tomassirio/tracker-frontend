@@ -6,13 +6,16 @@ import 'package:wanderer_frontend/presentation/strategies/trip_detail_layout_str
 /// - Collapsed panels show as floating bubbles
 /// - Expanded panels are constrained to leave map visible
 class MobileLayoutStrategy extends TripDetailLayoutStrategy {
-  static const double _collapsedWidth = 88.0;
+  // Wide enough to fit the info bubble (88 px) + settings bubble (72 px) side by side.
+  static const double _collapsedWidth = 160.0;
   static const double _expandedWidthRatio = 0.85;
   static const double _maxHeightRatio = 0.7;
   @override
   double calculateLeftPanelWidth(
       BoxConstraints constraints, TripDetailLayoutData data) {
-    if (data.isTripInfoCollapsed && data.isCommentsCollapsed) {
+    if (data.isTripInfoCollapsed &&
+        data.isCommentsCollapsed &&
+        data.isTripSettingsCollapsed) {
       return _collapsedWidth;
     }
     return constraints.maxWidth * _expandedWidthRatio;
@@ -25,15 +28,33 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
   @override
   Widget buildLeftPanel(BoxConstraints constraints, TripDetailLayoutData data) {
     final tripInfoCard = createTripInfoCard(data);
+    final tripSettingsPanel = createTripSettingsPanel(data);
     final commentsSection = createCommentsSection(data);
-    if (data.isTripInfoCollapsed && data.isCommentsCollapsed) {
+
+    final allCollapsed = data.isTripInfoCollapsed &&
+        data.isCommentsCollapsed &&
+        data.isTripSettingsCollapsed;
+
+    if (allCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [tripInfoCard, commentsSection],
+        children: [
+          // Info bubble and settings bubble sit side-by-side in a Row.
+          // Settings is only visible when it has content (_hasContent check
+          // inside TripSettingsPanel), so when absent it collapses to zero.
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [tripInfoCard, tripSettingsPanel],
+          ),
+          commentsSection,
+        ],
       );
     }
-    if (!data.isTripInfoCollapsed && data.isCommentsCollapsed) {
+    if (!data.isTripInfoCollapsed &&
+        data.isCommentsCollapsed &&
+        data.isTripSettingsCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -44,34 +65,41 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
             ),
             child: SingleChildScrollView(child: tripInfoCard),
           ),
+          tripSettingsPanel,
           commentsSection,
         ],
       );
     }
-    if (data.isTripInfoCollapsed && !data.isCommentsCollapsed) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tripInfoCard,
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: constraints.maxHeight * _maxHeightRatio,
-            ),
-            child: commentsSection,
-          ),
-        ],
+    if (data.isTripInfoCollapsed &&
+        !data.isTripSettingsCollapsed &&
+        data.isCommentsCollapsed) {
+      // Settings expanded: show only the settings panel — info and comments
+      // bubbles are hidden so the card stands alone (not sandwiched).
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: constraints.maxHeight * _maxHeightRatio,
+        ),
+        child: SingleChildScrollView(child: tripSettingsPanel),
       );
     }
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.6),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    // Comments expanded: keep info + settings bubbles side-by-side (same as
+    // the all-collapsed case) so the ⚙ cog doesn't jump below the ⓘ bubble.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
           mainAxisSize: MainAxisSize.min,
-          children: [tripInfoCard, commentsSection],
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [tripInfoCard, tripSettingsPanel],
         ),
-      ),
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: constraints.maxHeight * _maxHeightRatio,
+          ),
+          child: commentsSection,
+        ),
+      ],
     );
   }
 

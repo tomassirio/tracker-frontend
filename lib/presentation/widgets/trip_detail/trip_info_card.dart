@@ -6,8 +6,6 @@ import 'package:wanderer_frontend/data/models/achievement_models.dart';
 import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/core/constants/enums.dart';
-import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_status_control.dart';
-import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_settings_control.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/trip_share_dialog.dart';
 
 /// Widget displaying trip information card with glassmorphism design
@@ -17,11 +15,6 @@ class TripInfoCard extends StatelessWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
   final String? currentUserId;
-  final bool isChangingStatus;
-  final Function(TripStatus)? onStatusChange;
-  final bool isChangingSettings;
-  final Function(bool automaticUpdates, int? updateRefresh,
-      TripModality? tripModality)? onSettingsChange;
   final VoidCallback? onFollowUser;
   final VoidCallback? onSendFriendRequest;
   final bool isFollowing;
@@ -29,10 +22,7 @@ class TripInfoCard extends StatelessWidget {
   final bool isAlreadyFriends;
   final bool isPromoted;
   final List<UserAchievement> tripAchievements;
-  final VoidCallback? onTestBackgroundUpdate;
   final Function(Visibility)? onVisibilityChange;
-  final bool showPlannedWaypoints;
-  final VoidCallback? onTogglePlannedWaypoints;
 
   const TripInfoCard({
     super.key,
@@ -40,10 +30,6 @@ class TripInfoCard extends StatelessWidget {
     required this.isCollapsed,
     required this.onToggleCollapse,
     this.currentUserId,
-    this.isChangingStatus = false,
-    this.onStatusChange,
-    this.isChangingSettings = false,
-    this.onSettingsChange,
     this.onFollowUser,
     this.onSendFriendRequest,
     this.isFollowing = false,
@@ -51,10 +37,7 @@ class TripInfoCard extends StatelessWidget {
     this.isAlreadyFriends = false,
     this.isPromoted = false,
     this.tripAchievements = const [],
-    this.onTestBackgroundUpdate,
     this.onVisibilityChange,
-    this.showPlannedWaypoints = false,
-    this.onTogglePlannedWaypoints,
   });
 
   @override
@@ -516,80 +499,7 @@ class TripInfoCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                // Planned waypoints toggle (for trips created from a plan)
-                if (onTogglePlannedWaypoints != null &&
-                    trip.hasPlannedRoute) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.purple.withOpacity(0.2),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.route,
-                          size: 16,
-                          color: Colors.purple.shade600,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Show Planned Route',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: WandererTheme.textSecondary,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 24,
-                          child: Switch(
-                            value: showPlannedWaypoints,
-                            onChanged: (_) => onTogglePlannedWaypoints!(),
-                            activeColor: Colors.purple.shade600,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                // Trip status control (mobile only, owner only)
-                if (onStatusChange != null && currentUserId != null) ...[
-                  const SizedBox(height: 8),
-                  TripStatusControl(
-                    currentStatus: trip.status,
-                    isOwner: trip.userId == currentUserId,
-                    isLoading: isChangingStatus,
-                    onStatusChange: onStatusChange!,
-                    tripModality: trip.tripModality,
-                  ),
-                ],
-                // Trip settings control (owner only)
-                if (onSettingsChange != null && currentUserId != null) ...[
-                  const SizedBox(height: 8),
-                  TripSettingsControl(
-                    automaticUpdates: trip.automaticUpdates,
-                    updateRefresh: trip.updateRefresh,
-                    tripModality: trip.tripModality,
-                    isOwner: trip.userId == currentUserId,
-                    isLoading: isChangingSettings,
-                    onSettingsChange: onSettingsChange!,
-                    tripStatus: trip.status,
-                    tripId: trip.id,
-                    onTestBackgroundUpdate: onTestBackgroundUpdate,
-                  ),
-                ],
+
               ],
             ),
           ),

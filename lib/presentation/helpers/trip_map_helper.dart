@@ -69,8 +69,8 @@ class TripMapHelper {
         _addPlannedRouteOverlay(trip, markers, polylines);
       }
     }
-    // Fall back to planned route from trip plan
-    else if (trip.hasPlannedRoute) {
+    // Fall back to planned route from trip plan (only when toggle is on)
+    else if (showPlannedWaypoints && trip.hasPlannedRoute) {
       final mapData = _createPlannedRouteMapData(trip);
       return mapData;
     }
@@ -305,8 +305,8 @@ class TripMapHelper {
 
       return MapData(markers: markers, polylines: polylines);
     }
-    // Fall back to planned route with directions
-    else if (trip.hasPlannedRoute) {
+    // Fall back to planned route with directions (only when toggle is on)
+    else if (showPlannedWaypoints && trip.hasPlannedRoute) {
       return _createPlannedRouteMapDataWithDirections(trip);
     }
 
@@ -613,6 +613,7 @@ class TripMapHelper {
             points: routePoints,
             color: Colors.purple,
             width: 4,
+            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
             geodesic: false,
             visible: true,
             startCap: Cap.roundCap,
@@ -656,6 +657,7 @@ class TripMapHelper {
               points: points,
               color: Colors.purple,
               width: 4,
+              patterns: [PatternItem.dash(20), PatternItem.gap(10)],
               geodesic: false,
               visible: true,
               startCap: Cap.roundCap,
@@ -675,6 +677,7 @@ class TripMapHelper {
           points: points,
           color: Colors.purple,
           width: 4,
+          patterns: [PatternItem.dash(20), PatternItem.gap(10)],
           geodesic: false,
           visible: true,
           startCap: Cap.roundCap,
@@ -686,8 +689,12 @@ class TripMapHelper {
     return MapData(markers: markers, polylines: polylines);
   }
 
-  /// Gets the initial location for the map (latest location or planned start)
-  static LatLng getInitialLocation(Trip trip) {
+  /// Gets the initial location for the map (latest location or planned start).
+  ///
+  /// When [userLocation] is provided it is used as the last fallback before the
+  /// hardcoded NYC default so that freshly-created trips without any location
+  /// data centre on the user's actual position.
+  static LatLng getInitialLocation(Trip trip, {LatLng? userLocation}) {
     // First try actual trip locations (skip lifecycle markers with no real coords)
     if (trip.locations != null && trip.locations!.isNotEmpty) {
       // Find the last location that has real coordinates
@@ -739,6 +746,10 @@ class TripMapHelper {
       } catch (_) {
         // Ignore decode errors, fall through to default
       }
+    }
+    // Then try the user's current device location
+    if (userLocation != null) {
+      return userLocation;
     }
     return const LatLng(40.7128, -74.0060); // Default to NYC
   }
