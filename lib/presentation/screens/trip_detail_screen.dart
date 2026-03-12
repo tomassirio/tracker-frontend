@@ -21,6 +21,7 @@ import 'package:wanderer_frontend/core/services/background_update_manager.dart';
 import 'package:wanderer_frontend/presentation/helpers/trip_map_helper.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/helpers/dialog_helper.dart';
+import 'package:wanderer_frontend/presentation/helpers/background_location_disclosure.dart';
 import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_detail/reaction_picker.dart';
@@ -1344,6 +1345,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isChangingStatus = true);
 
     try {
+      // If starting/resuming with automatic updates, ensure background location
+      // permission is granted (shows prominent disclosure on Android).
+      if (newStatus == TripStatus.inProgress &&
+          _trip.automaticUpdates &&
+          _isAndroid) {
+        final hasPermission =
+            await _ensureLocationPermission(requireBackground: true);
+        if (!hasPermission) {
+          setState(() => _isChangingStatus = false);
+          return;
+        }
+      }
+
       await _repository.changeTripStatus(_trip.id, newStatus);
 
       // Update local state optimistically - WebSocket will confirm the change
@@ -1511,12 +1525,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
         // Resume background updates if enabled (Android only)
         if (_isAndroid && _trip.automaticUpdates) {
-          final backgroundManager = BackgroundUpdateManager();
-          await backgroundManager.startAutoUpdates(
-            _trip.id,
-            _trip.name,
-            _trip.effectiveUpdateRefresh,
-          );
+          final hasPermission =
+              await _ensureLocationPermission(requireBackground: true);
+          if (hasPermission) {
+            final backgroundManager = BackgroundUpdateManager();
+            await backgroundManager.startAutoUpdates(
+              _trip.id,
+              _trip.name,
+              _trip.effectiveUpdateRefresh,
+            );
+          }
         }
 
         // Refresh timeline to show the day-start marker
@@ -1550,6 +1568,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => _isChangingSettings = true);
 
     try {
+      // If enabling automatic updates on Android, ensure background location
+      // permission is granted (shows prominent disclosure).
+      if (automaticUpdates && _isAndroid) {
+        final hasPermission =
+            await _ensureLocationPermission(requireBackground: true);
+        if (!hasPermission) {
+          setState(() => _isChangingSettings = false);
+          return;
+        }
+      }
+
       await _repository.changeTripSettings(
         _trip.id,
         automaticUpdates,
@@ -1693,7 +1722,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// Ensures location permission is granted, requesting it from the user
   /// if necessary.  Returns `true` when permission is sufficient to proceed.
-  Future<bool> _ensureLocationPermission() async {
+  ///
+  /// On Android, when background location is needed (automatic trip updates),
+  /// this also shows a prominent in-app disclosure as required by Google Play
+  /// and requests ACCESS_BACKGROUND_LOCATION (i.e. "Allow all the time").
+  Future<bool> _ensureLocationPermission(
+      {bool requireBackground = false}) async {
     if (!await Geolocator.isLocationServiceEnabled()) {
       if (mounted) {
         UiHelpers.showErrorMessage(
@@ -1732,6 +1766,40 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         await Geolocator.openAppSettings();
       }
       return false;
+    }
+
+    // On Android, if background location is needed (for automatic updates),
+    // show the prominent disclosure and request "Allow all the time".
+    if (requireBackground &&
+        !kIsWeb &&
+        Platform.isAndroid &&
+        permission == LocationPermission.whileInUse) {
+      if (!mounted) return false;
+      final userConsented = await BackgroundLocationDisclosure.show(context);
+      if (!userConsented) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+            context,
+            'Background location is required for automatic trip updates. '
+            'You can still send manual updates.',
+          );
+        }
+        return false;
+      }
+
+      // After consent, trigger the system prompt for background location
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.always) {
+        if (mounted) {
+          UiHelpers.showErrorMessage(
+            context,
+            'Please select "Allow all the time" in your device settings '
+            'to enable automatic trip updates.',
+          );
+          await Geolocator.openAppSettings();
+        }
+        return false;
+      }
     }
 
     return true;
