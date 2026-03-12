@@ -13,10 +13,7 @@
 
 A cross-platform Flutter application for tracking trips and adventures in real time. Runs on the web, Android, and iOS.
 
-<!-- TODO: Add a hero/feature image showcasing the app -->
-<!-- <p align="center">
-  <img src="assets/images/wanderer-feature.png" alt="Wanderer Feature Overview" width="800" />
-</p> -->
+![Wanderer Feature Overview](assets/images/wanderer-feature.png)
 
 ## Features
 
@@ -35,15 +32,13 @@ A cross-platform Flutter application for tracking trips and adventures in real t
 
 ### Screenshots
 
-<!-- TODO: Replace these placeholders with actual screenshots -->
+| Home | Trip Detail | Trip Map |
+|:----:|:-----------:|:--------:|
+| ![Home](assets/images/inApp/home.jpeg) | ![Trip Detail](assets/images/inApp/trip_details.jpeg) | ![Trip Map](assets/images/inApp/in_map.jpeg) |
 
-|                                           Home                                           |                                           Trip Detail                                            |                                          Trip Map                                          |
-|:----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|
-| <!-- <img src="assets/images/inApp/home.jpeg" width="250" /> --> *screenshot placeholder* | <!-- <img src="assets/images/inApp/trip_details.jpeg" width="250" /> --> *screenshot placeholder* | <!-- <img src="assets/images/inApp/in_map.jpeg" width="250" /> --> *screenshot placeholder* |
-
-|                                           Create Trip                                           |                                           Profile                                            |                                             Trip Planning                                             |
-|:-----------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------:|
-| <!-- <img src="assets/images/inApp/trip_create.jpeg" width="250" /> --> *screenshot placeholder* | <!-- <img src="assets/images/inApp/profile.jpeg" width="250" /> --> *screenshot placeholder* | <!-- <img src="assets/images/inApp/trip_plan_create.jpeg" width="250" /> --> *screenshot placeholder* |
+| Create Trip | Profile | Trip Planning |
+|:-----------:|:-------:|:-------------:|
+| ![Create Trip](assets/images/inApp/trip_create.jpeg) | ![Profile](assets/images/inApp/profile.jpeg) | ![Trip Planning](assets/images/inApp/trip_plan_create.jpeg) |
 
 ## Architecture
 
