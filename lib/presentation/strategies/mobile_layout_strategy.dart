@@ -82,13 +82,17 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
         child: SingleChildScrollView(child: tripSettingsPanel),
       );
     }
-    // Comments expanded
+    // Comments expanded: keep info + settings bubbles side-by-side (same as
+    // the all-collapsed case) so the ⚙ cog doesn't jump below the ⓘ bubble.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        tripInfoCard,
-        tripSettingsPanel,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [tripInfoCard, tripSettingsPanel],
+        ),
         ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: constraints.maxHeight * _maxHeightRatio,
