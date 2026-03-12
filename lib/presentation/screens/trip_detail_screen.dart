@@ -2179,7 +2179,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   child: TripLifecycleButtons(
                     currentStatus: _trip.status,
                     tripModality: _trip.tripModality,
-                    isOwner: _trip.userId == _userId,
+                    isOwner: true,
                     isLoading: _isChangingStatus,
                     onStatusChange: _changeTripStatus,
                   ),

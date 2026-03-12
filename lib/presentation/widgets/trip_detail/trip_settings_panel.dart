@@ -9,6 +9,9 @@ import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 /// Minimum allowed update interval in minutes (Android WorkManager limitation)
 const int _settingsMinIntervalMinutes = 15;
 
+/// Maximum allowed update interval in minutes
+const int _settingsMaxIntervalMinutes = 9999;
+
 /// Collapsible settings panel shown as a cog-icon bubble when collapsed.
 /// Contains: Show Planned Route toggle, Trip Type selector, Automatic Updates.
 /// Only shown on mobile. Visible when trip has a planned route OR the current
@@ -72,17 +75,22 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
   late TextEditingController _intervalController;
   TripModality? _tripModality;
 
+  /// Converts seconds to clamped minutes for display in the interval field.
+  int _secondsToMinutes(int? seconds) {
+    if (seconds == null) return _settingsMinIntervalMinutes;
+    return (seconds / 60)
+        .round()
+        .clamp(_settingsMinIntervalMinutes, _settingsMaxIntervalMinutes);
+  }
+
   @override
   void initState() {
     super.initState();
     _automaticUpdates = widget.automaticUpdates;
     _tripModality = widget.tripModality;
-    final minutes = widget.updateRefresh != null
-        ? (widget.updateRefresh! / 60)
-            .round()
-            .clamp(_settingsMinIntervalMinutes, 9999)
-        : _settingsMinIntervalMinutes;
-    _intervalController = TextEditingController(text: minutes.toString());
+    _intervalController = TextEditingController(
+      text: _secondsToMinutes(widget.updateRefresh).toString(),
+    );
   }
 
   @override
@@ -95,12 +103,8 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
       _tripModality = widget.tripModality;
     }
     if (oldWidget.updateRefresh != widget.updateRefresh) {
-      final minutes = widget.updateRefresh != null
-          ? (widget.updateRefresh! / 60)
-              .round()
-              .clamp(_settingsMinIntervalMinutes, 9999)
-          : _settingsMinIntervalMinutes;
-      _intervalController.text = minutes.toString();
+      _intervalController.text =
+          _secondsToMinutes(widget.updateRefresh).toString();
     }
   }
 
@@ -139,20 +143,8 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
 
   void _handleSave() {
     _validateAndClampInterval();
+    // After clamping, the value is guaranteed to be valid.
     final minutes = int.tryParse(_intervalController.text);
-    if (_automaticUpdates &&
-        (minutes == null || minutes < _settingsMinIntervalMinutes)) {
-      UiHelpers.showErrorMessage(
-        context,
-        'Minimum interval is $_settingsMinIntervalMinutes minutes',
-      );
-      if (minutes != null && minutes < _settingsMinIntervalMinutes) {
-        setState(() {
-          _intervalController.text = _settingsMinIntervalMinutes.toString();
-        });
-      }
-      return;
-    }
     final seconds = minutes != null ? minutes * 60 : null;
     widget.onSettingsChange?.call(_automaticUpdates, seconds, _tripModality);
   }

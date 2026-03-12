@@ -41,7 +41,9 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
         children: [tripInfoCard, tripSettingsPanel, commentsSection],
       );
     }
-    if (!data.isTripInfoCollapsed) {
+    if (!data.isTripInfoCollapsed &&
+        data.isCommentsCollapsed &&
+        data.isTripSettingsCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -57,7 +59,9 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
         ],
       );
     }
-    if (!data.isTripSettingsCollapsed) {
+    if (data.isTripInfoCollapsed &&
+        !data.isTripSettingsCollapsed &&
+        data.isCommentsCollapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
