@@ -13,9 +13,11 @@ const int _settingsMinIntervalMinutes = 15;
 const int _settingsMaxIntervalMinutes = 9999;
 
 /// Collapsible settings panel shown as a cog-icon bubble when collapsed.
-/// Contains: Show Planned Route toggle, Trip Type selector, Automatic Updates.
-/// Only shown on mobile. Visible when trip has a planned route OR the current
-/// user is the owner and the trip is in progress.
+/// Contains: Show Planned Route toggle (all users, all platforms),
+/// Trip Type selector (owner + in-progress, all platforms), and
+/// Automatic Updates settings (owner + in-progress + mobile only).
+/// Visible when the trip has a planned route OR the current user is the owner
+/// and the trip is in progress.
 class TripSettingsPanel extends StatefulWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
@@ -116,11 +118,12 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
 
   /// Returns true when there is at least one section to display.
   bool get _hasContent {
-    final effectiveIsWeb = widget.isWeb ?? kIsWeb;
-    if (effectiveIsWeb) return false;
     return widget.tripHasPlannedRoute ||
         (widget.isOwner && widget.tripStatus == TripStatus.inProgress);
   }
+
+  /// Whether the trip type can still be changed (irreversible once multi-day).
+  bool get _canChangeTripType => widget.tripModality != TripModality.multiDay;
 
   void _validateAndClampInterval() {
     final text = _intervalController.text.trim();
@@ -153,6 +156,9 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
   Widget build(BuildContext context) {
     if (!_hasContent) return const SizedBox.shrink();
 
+    // Evaluate once so sub-methods can use it
+    final effectiveIsWeb = widget.isWeb ?? kIsWeb;
+
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),
       firstCurve: Curves.easeInOut,
@@ -162,7 +168,7 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
       crossFadeState:
           widget.isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       firstChild: _buildCollapsedBubble(),
-      secondChild: _buildExpandedCard(context),
+      secondChild: _buildExpandedCard(context, effectiveIsWeb),
     );
   }
 
@@ -207,7 +213,7 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     );
   }
 
-  Widget _buildExpandedCard(BuildContext context) {
+  Widget _buildExpandedCard(BuildContext context, bool effectiveIsWeb) {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -276,7 +282,8 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                 ),
                 const SizedBox(height: 12),
 
-                // Show Planned Route toggle (when available)
+                // Show Planned Route toggle — available to ALL users on ALL platforms
+                // when the trip was created from a plan.
                 if (widget.tripHasPlannedRoute &&
                     widget.onTogglePlannedWaypoints != null) ...[
                   _buildPlannedRouteToggle(),
@@ -285,11 +292,12 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                     const SizedBox(height: 12),
                 ],
 
-                // Owner-only settings (only when in progress)
+                // Owner-only settings — only when trip is in progress
                 if (widget.isOwner &&
                     widget.tripStatus == TripStatus.inProgress) ...[
-                  // Trip Type selector (hidden once already multi-day)
-                  if (widget.tripModality != TripModality.multiDay) ...[
+                  // Trip Type selector — available on all platforms when not
+                  // already multi-day (irreversible once set).
+                  if (_canChangeTripType) ...[
                     _buildSectionLabel(Icons.route, 'Trip Type'),
                     const SizedBox(height: 8),
                     Row(
@@ -312,124 +320,130 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                     const SizedBox(height: 12),
                   ],
 
-                  // Automatic Updates toggle
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.update,
-                        size: 16,
-                        color: WandererTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Automatic Updates',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: WandererTheme.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      Switch(
-                        value: _automaticUpdates,
-                        onChanged: widget.isLoading
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _automaticUpdates = value;
-                                });
-                              },
-                        activeColor: WandererTheme.primaryOrange,
-                      ),
-                    ],
-                  ),
-                  if (_automaticUpdates) ...[
-                    const SizedBox(height: 12),
+                  // Automatic Updates — mobile only (WorkManager / background
+                  // location is an Android concept; not applicable on web).
+                  if (!effectiveIsWeb) ...[
                     Row(
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _intervalController,
-                            enabled: !widget.isLoading,
-                            keyboardType: TextInputType.number,
-                            textCapitalization: TextCapitalization.none,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            decoration: InputDecoration(
-                              labelText:
-                                  'Update Interval (min $_settingsMinIntervalMinutes min)',
-                              hintText: 'e.g., 15',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              isDense: true,
-                              suffixText: 'min',
-                            ),
-                            style: const TextStyle(fontSize: 13),
-                            onEditingComplete: _validateAndClampInterval,
-                            onTapOutside: (_) {
-                              _validateAndClampInterval();
-                              FocusScope.of(context).unfocus();
-                            },
-                          ),
+                        const Icon(
+                          Icons.update,
+                          size: 16,
+                          color: WandererTheme.textSecondary,
                         ),
                         const SizedBox(width: 8),
-                        _buildSaveButton(),
+                        const Text(
+                          'Automatic Updates',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: WandererTheme.textPrimary,
+                          ),
+                        ),
+                        const Spacer(),
+                        Switch(
+                          value: _automaticUpdates,
+                          onChanged: widget.isLoading
+                              ? null
+                              : (value) {
+                                  setState(() {
+                                    _automaticUpdates = value;
+                                  });
+                                },
+                          activeColor: WandererTheme.primaryOrange,
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Location will be automatically updated at this interval when trip is active',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: WandererTheme.textSecondary,
+                    if (_automaticUpdates) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _intervalController,
+                              enabled: !widget.isLoading,
+                              keyboardType: TextInputType.number,
+                              textCapitalization: TextCapitalization.none,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              decoration: InputDecoration(
+                                labelText:
+                                    'Update Interval (min $_settingsMinIntervalMinutes min)',
+                                hintText: 'e.g., 15',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                isDense: true,
+                                suffixText: 'min',
+                              ),
+                              style: const TextStyle(fontSize: 13),
+                              onEditingComplete: _validateAndClampInterval,
+                              onTapOutside: (_) {
+                                _validateAndClampInterval();
+                                FocusScope.of(context).unfocus();
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildSaveButton(),
+                        ],
                       ),
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 8),
-                    _buildSaveButton(fullWidth: true),
-                  ],
-
-                  // Debug-only test button
-                  if (kDebugMode && widget.onTestBackgroundUpdate != null) ...[
-                    const SizedBox(height: 12),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: widget.isLoading
-                            ? null
-                            : widget.onTestBackgroundUpdate,
-                        icon: const Icon(Icons.bug_report, size: 16),
-                        label: const Text(
-                          '🧪 Test Background Update Now',
-                          style: TextStyle(fontSize: 12),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Location will be automatically updated at this interval when trip is active',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: WandererTheme.textSecondary,
                         ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.deepOrange,
-                          side: const BorderSide(color: Colors.deepOrange),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 8),
+                      _buildSaveButton(fullWidth: true),
+                    ],
+
+                    // Debug-only test button
+                    if (kDebugMode && widget.onTestBackgroundUpdate != null) ...[
+                      const SizedBox(height: 12),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: widget.isLoading
+                              ? null
+                              : widget.onTestBackgroundUpdate,
+                          icon: const Icon(Icons.bug_report, size: 16),
+                          label: const Text(
+                            '🧪 Test Background Update Now',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.deepOrange,
+                            side: const BorderSide(color: Colors.deepOrange),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const Text(
-                      'Fires a one-off WorkManager task immediately '
-                      '(same code path as periodic, no 15 min wait)',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: WandererTheme.textTertiary,
-                        fontStyle: FontStyle.italic,
+                      const Text(
+                        'Fires a one-off WorkManager task immediately '
+                        '(same code path as periodic, no 15 min wait)',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: WandererTheme.textTertiary,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
-                    ),
+                    ],
+                  ] else if (_canChangeTripType) ...[
+                    // Web: show Save button for Trip Type changes only.
+                    _buildSaveButton(fullWidth: true),
                   ],
                 ],
               ],
