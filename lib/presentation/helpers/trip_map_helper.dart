@@ -69,8 +69,8 @@ class TripMapHelper {
         _addPlannedRouteOverlay(trip, markers, polylines);
       }
     }
-    // Fall back to planned route from trip plan
-    else if (trip.hasPlannedRoute) {
+    // Fall back to planned route from trip plan (only when toggle is on)
+    else if (showPlannedWaypoints && trip.hasPlannedRoute) {
       final mapData = _createPlannedRouteMapData(trip);
       return mapData;
     }
@@ -305,8 +305,8 @@ class TripMapHelper {
 
       return MapData(markers: markers, polylines: polylines);
     }
-    // Fall back to planned route with directions
-    else if (trip.hasPlannedRoute) {
+    // Fall back to planned route with directions (only when toggle is on)
+    else if (showPlannedWaypoints && trip.hasPlannedRoute) {
       return _createPlannedRouteMapDataWithDirections(trip);
     }
 
@@ -613,6 +613,7 @@ class TripMapHelper {
             points: routePoints,
             color: Colors.purple,
             width: 4,
+            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
             geodesic: false,
             visible: true,
             startCap: Cap.roundCap,
@@ -656,6 +657,7 @@ class TripMapHelper {
               points: points,
               color: Colors.purple,
               width: 4,
+              patterns: [PatternItem.dash(20), PatternItem.gap(10)],
               geodesic: false,
               visible: true,
               startCap: Cap.roundCap,
@@ -675,6 +677,7 @@ class TripMapHelper {
           points: points,
           color: Colors.purple,
           width: 4,
+          patterns: [PatternItem.dash(20), PatternItem.gap(10)],
           geodesic: false,
           visible: true,
           startCap: Cap.roundCap,

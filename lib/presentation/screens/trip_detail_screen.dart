@@ -153,6 +153,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _repository = TripDetailRepository();
 
     _trip = widget.trip;
+    // Default to showing the planned route when the trip has one
+    _showPlannedWaypoints = _trip.hasPlannedRoute;
     // Don't call _updateMapData() here — it would use stale trip data.
     // Let _initializeMapPosition() handle everything after loading fresh data.
     _checkLoginStatus();
