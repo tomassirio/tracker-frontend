@@ -341,6 +341,14 @@ class _HomeScreenState extends State<HomeScreen>
           _promotedTripIds = promoted.map((p) => p.tripId).toSet();
           _promotedTripsById = {for (final p in promoted) p.tripId: p};
         });
+
+        // For guest users, promoted pre-announced trips (status: created) are
+        // not returned by the /trips/public endpoint.  Fetch them individually
+        // so that _categorizeTrips() Rule 4 can include them in Discover.
+        if (!_isLoggedIn) {
+          await _fetchMissingPromotedTrips(promoted);
+        }
+
         // Re-categorize since promoted data affects which trips appear in
         // the discover list (promoted completed / pre-announced trips).
         _categorizeTrips();
@@ -348,6 +356,32 @@ class _HomeScreenState extends State<HomeScreen>
     } catch (e) {
       // Silently fail — user may not have admin access
       debugPrint('Failed to load promoted trips: $e');
+    }
+  }
+
+  /// Fetches promoted trips that are not yet in [_allTrips] (e.g. pre-announced
+  /// trips with status `created` which the public trips endpoint excludes).
+  Future<void> _fetchMissingPromotedTrips(List<PromotedTrip> promoted) async {
+    final existingIds = _allTrips.map((t) => t.id).toSet();
+    final missingPromoted =
+        promoted.where((p) => !existingIds.contains(p.tripId)).toList();
+
+    if (missingPromoted.isEmpty) return;
+
+    final fetched = <Trip>[];
+    for (final p in missingPromoted) {
+      try {
+        final trip = await _tripService.getPublicTripById(p.tripId);
+        fetched.add(trip);
+      } catch (e) {
+        debugPrint('Could not fetch promoted trip ${p.tripId}: $e');
+      }
+    }
+
+    if (fetched.isNotEmpty && mounted) {
+      setState(() {
+        _allTrips = [..._allTrips, ...fetched];
+      });
     }
   }
 

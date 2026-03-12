@@ -33,6 +33,12 @@ class TripService {
     return await _tripQueryClient.getTripById(tripId);
   }
 
+  /// Get a public trip by ID (no authentication required)
+  /// Used to fetch promoted pre-announced trips for guest users
+  Future<Trip> getPublicTripById(String tripId) async {
+    return await _tripQueryClient.getPublicTripById(tripId);
+  }
+
   /// Get all trips (admin only)
   Future<List<Trip>> getAllTrips() async {
     return await _tripQueryClient.getAllTrips();

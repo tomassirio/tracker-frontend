@@ -19,6 +19,16 @@ class TripQueryClient {
     return _apiClient.handleResponse(response, Trip.fromJson);
   }
 
+  /// Get a public trip by ID (no authentication required)
+  /// Used to fetch promoted pre-announced trips for guest users
+  Future<Trip> getPublicTripById(String tripId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.tripById(tripId),
+      requireAuth: false,
+    );
+    return _apiClient.handleResponse(response, Trip.fromJson);
+  }
+
   /// Get all trips
   /// Requires authentication (ADMIN only)
   Future<List<Trip>> getAllTrips() async {

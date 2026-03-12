@@ -334,13 +334,12 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     try {
       picked = await showDateRangePicker(
         context: context,
-        initialDateRange:
-            _startDate != null
-                ? DateTimeRange(
-                    start: _startDate!,
-                    end: _endDate ?? _startDate!,
-                  )
-                : null,
+        initialDateRange: _startDate != null
+            ? DateTimeRange(
+                start: _startDate!,
+                end: _endDate ?? _startDate!,
+              )
+            : null,
         firstDate: DateTime.now(),
         lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
       );
@@ -880,156 +879,156 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.4),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(WandererTheme.glassRadius),
-                      topRight: Radius.circular(WandererTheme.glassRadius),
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: WandererTheme.glassBorderColor,
-                        width: 0.5,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.4),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(WandererTheme.glassRadius),
+                        topRight: Radius.circular(WandererTheme.glassRadius),
+                      ),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: WandererTheme.glassBorderColor,
+                          width: 0.5,
+                        ),
                       ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: WandererTheme.primaryOrange,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Edit Trip Plan',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: WandererTheme.textPrimary,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.remove,
-                            size: 18,
-                            color: WandererTheme.textSecondary,
-                          ),
-                          onPressed: () => setState(
-                            () => _isEditPanelCollapsed = true,
-                          ),
-                          tooltip: 'Minimize',
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Scrollable form content
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        // Name
-                        _buildEditSectionLabel('Plan Name'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: _editInputDecoration(
-                            'e.g., Weekend Hiking Adventure',
-                          ),
-                          textCapitalization: TextCapitalization.words,
+                        Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: WandererTheme.primaryOrange,
                         ),
-                        const SizedBox(height: 20),
-                        // Plan Type
-                        _buildEditSectionLabel('Plan Type'),
-                        const SizedBox(height: 10),
-                        _buildEditPlanTypeSelector(),
-                        const SizedBox(height: 20),
-                        // Dates
-                        _buildEditSectionLabel('Dates'),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildEditDateButton(
-                                label: 'Start',
-                                date: _startDate,
-                                onTap: _selectDateRange,
-                              ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Edit Trip Plan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: WandererTheme.textPrimary,
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildEditDateButton(
-                                label: 'End',
-                                date: _endDate,
-                                onTap: _selectDateRange,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (_startDate != null && _endDate != null) ...[
-                          const SizedBox(height: 10),
-                          _buildEditDaysInfo(),
-                        ],
-                        const SizedBox(height: 24),
-                        // Save button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _saveChanges,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: WandererTheme.primaryOrange,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: Colors.grey.shade300,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Save Changes',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.remove,
+                              size: 18,
+                              color: WandererTheme.textSecondary,
+                            ),
+                            onPressed: () => setState(
+                              () => _isEditPanelCollapsed = true,
+                            ),
+                            tooltip: 'Minimize',
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                  // Scrollable form content
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Name
+                          _buildEditSectionLabel('Plan Name'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: _editInputDecoration(
+                              'e.g., Weekend Hiking Adventure',
+                            ),
+                            textCapitalization: TextCapitalization.words,
+                          ),
+                          const SizedBox(height: 20),
+                          // Plan Type
+                          _buildEditSectionLabel('Plan Type'),
+                          const SizedBox(height: 10),
+                          _buildEditPlanTypeSelector(),
+                          const SizedBox(height: 20),
+                          // Dates
+                          _buildEditSectionLabel('Dates'),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildEditDateButton(
+                                  label: 'Start',
+                                  date: _startDate,
+                                  onTap: _selectDateRange,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildEditDateButton(
+                                  label: 'End',
+                                  date: _endDate,
+                                  onTap: _selectDateRange,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_startDate != null && _endDate != null) ...[
+                            const SizedBox(height: 10),
+                            _buildEditDaysInfo(),
+                          ],
+                          const SizedBox(height: 24),
+                          // Save button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _saveChanges,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: WandererTheme.primaryOrange,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: Colors.grey.shade300,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Save Changes',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1637,154 +1636,154 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         behavior: HitTestBehavior.opaque,
         onPointerDown: (_) => _editIgnoreNextMapTap = true,
         child: GestureDetector(
-        onVerticalDragUpdate: (details) {
-          if (details.primaryDelta! < -4) {
-            setState(() => _editFormExpanded = true);
-          } else if (details.primaryDelta! > 4) {
-            setState(() => _editFormExpanded = false);
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          height: _editFormExpanded ? expandedHeight : 200,
-          decoration: BoxDecoration(
-            color: WandererTheme.backgroundLight,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+          onVerticalDragUpdate: (details) {
+            if (details.primaryDelta! < -4) {
+              setState(() => _editFormExpanded = true);
+            } else if (details.primaryDelta! > 4) {
+              setState(() => _editFormExpanded = false);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            height: _editFormExpanded ? expandedHeight : 200,
+            decoration: BoxDecoration(
+              color: WandererTheme.backgroundLight,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Drag handle
-              GestureDetector(
-                onTap: () =>
-                    setState(() => _editFormExpanded = !_editFormExpanded),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Drag handle
+                GestureDetector(
+                  onTap: () =>
+                      setState(() => _editFormExpanded = !_editFormExpanded),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    child: Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    0,
-                    20,
-                    MediaQuery.of(context).viewInsets.bottom,
-                  ),
-                  physics: _editFormExpanded
-                      ? const BouncingScrollPhysics()
-                      : const NeverScrollableScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Name
-                      _buildEditSectionLabel('Plan Name'),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: _editInputDecoration(
-                          'e.g., Weekend Hiking Adventure',
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      0,
+                      20,
+                      MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    physics: _editFormExpanded
+                        ? const BouncingScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Name
+                        _buildEditSectionLabel('Plan Name'),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: _editInputDecoration(
+                            'e.g., Weekend Hiking Adventure',
+                          ),
+                          textCapitalization: TextCapitalization.words,
+                          onTap: () {
+                            if (!_editFormExpanded) {
+                              setState(() => _editFormExpanded = true);
+                            }
+                          },
                         ),
-                        textCapitalization: TextCapitalization.words,
-                        onTap: () {
-                          if (!_editFormExpanded) {
-                            setState(() => _editFormExpanded = true);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      // Plan Type
-                      _buildEditSectionLabel('Plan Type'),
-                      const SizedBox(height: 10),
-                      _buildEditPlanTypeSelector(),
-                      const SizedBox(height: 20),
-                      // Dates
-                      _buildEditSectionLabel('Dates'),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildEditDateButton(
-                              label: 'Start',
-                              date: _startDate,
-                              onTap: _selectDateRange,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildEditDateButton(
-                              label: 'End',
-                              date: _endDate,
-                              onTap: _selectDateRange,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_startDate != null && _endDate != null) ...[
+                        const SizedBox(height: 20),
+                        // Plan Type
+                        _buildEditSectionLabel('Plan Type'),
                         const SizedBox(height: 10),
-                        _buildEditDaysInfo(),
-                      ],
-                      const SizedBox(height: 24),
-                      // Save button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _saveChanges,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: WandererTheme.primaryOrange,
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor: Colors.grey.shade300,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                        _buildEditPlanTypeSelector(),
+                        const SizedBox(height: 20),
+                        // Dates
+                        _buildEditSectionLabel('Dates'),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildEditDateButton(
+                                label: 'Start',
+                                date: _startDate,
+                                onTap: _selectDateRange,
+                              ),
                             ),
-                            elevation: 0,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text(
-                                  'Save Changes',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildEditDateButton(
+                                label: 'End',
+                                date: _endDate,
+                                onTap: _selectDateRange,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+                        if (_startDate != null && _endDate != null) ...[
+                          const SizedBox(height: 10),
+                          _buildEditDaysInfo(),
+                        ],
+                        const SizedBox(height: 24),
+                        // Save button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _saveChanges,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: WandererTheme.primaryOrange,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.grey.shade300,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Save Changes',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
