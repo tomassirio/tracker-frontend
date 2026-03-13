@@ -55,24 +55,17 @@ class MobileLayoutStrategy extends TripDetailLayoutStrategy {
     if (!data.isTripInfoCollapsed &&
         data.isCommentsCollapsed &&
         data.isTripSettingsCollapsed) {
+      // Trip info expanded: give the info card full width.
+      // The settings cog is accessible from the all-collapsed state.
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: constraints.maxHeight * _maxHeightRatio,
-                  ),
-                  child: SingleChildScrollView(child: tripInfoCard),
-                ),
-              ),
-              tripSettingsPanel,
-            ],
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: constraints.maxHeight * _maxHeightRatio,
+            ),
+            child: SingleChildScrollView(child: tripInfoCard),
           ),
           commentsSection,
         ],
