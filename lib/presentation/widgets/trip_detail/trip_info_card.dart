@@ -144,8 +144,9 @@ class TripInfoCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                      height: 28,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: WandererTheme.statusChipDecoration(
                           trip.status.toJson()),
                       child: Text(
@@ -182,7 +183,7 @@ class TripInfoCard extends StatelessWidget {
                         padding: EdgeInsets.zero,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     // Collapse button
                     Container(
                       width: 28,
@@ -204,9 +205,10 @@ class TripInfoCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 // User info row
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: InkWell(
@@ -256,6 +258,39 @@ class TripInfoCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    // Promoted badge on the right side of the user row
+                    if (isPromoted) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 13,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Promoted',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     // Show follow/friend buttons if viewing another user's trip
                     if (onFollowUser != null ||
                         onSendFriendRequest != null) ...[
@@ -349,28 +384,28 @@ class TripInfoCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: 8),
-                // Stats row
+                const SizedBox(height: 6),
+                // Stats row - comments and visibility together, day on the right for multi-day
                 Row(
                   children: [
-                    _buildStatItem(
+                    // Comments
+                    _buildStatChip(
                       Icons.comment_outlined,
-                      '${trip.commentsCount}',
-                      'comments',
+                      '${trip.commentsCount} comments',
                     ),
                     const SizedBox(width: 16),
+                    // Visibility
                     if (onVisibilityChange != null)
                       _buildTappableVisibilityItem(context)
                     else
-                      _buildStatItem(
+                      _buildStatChip(
                         _getVisibilityIcon(trip.visibility.toJson()),
                         trip.visibility.toJson(),
-                        '',
                       ),
-                    // Current day badge for multi-day trips
+                    // Day badge pushed to the right for multi-day trips
                     if (trip.tripModality == TripModality.multiDay &&
                         trip.currentDay != null) ...[
-                      const SizedBox(width: 8),
+                      const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
@@ -388,38 +423,6 @@ class TripInfoCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             color: Colors.deepPurple,
                           ),
-                        ),
-                      ),
-                    ],
-                    if (isPromoted) ...[
-                      const SizedBox(width: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade700,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.star,
-                              size: 13,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Promoted',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],
@@ -499,7 +502,6 @@ class TripInfoCard extends StatelessWidget {
                     ),
                   ),
                 ],
-
               ],
             ),
           ),
@@ -632,6 +634,7 @@ class TripInfoCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               _getVisibilityIcon(trip.visibility.toJson()),
@@ -713,19 +716,21 @@ class TripInfoCard extends StatelessWidget {
     });
   }
 
-  Widget _buildStatItem(IconData icon, String value, String label) {
+  Widget _buildStatChip(IconData icon, String value) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           icon,
-          size: 16,
+          size: 14,
           color: WandererTheme.textSecondary,
         ),
         const SizedBox(width: 4),
         Text(
-          label.isEmpty ? value : '$value $label',
+          value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
             color: WandererTheme.textSecondary,
           ),
         ),

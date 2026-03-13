@@ -74,8 +74,8 @@ class TripLifecycleButtons extends StatelessWidget {
       );
     }
 
-    // Pause (IN_PROGRESS, non-multi-day only)
-    if (currentStatus == TripStatus.inProgress && !_isMultiDay) {
+    // Pause (IN_PROGRESS, all trip types)
+    if (currentStatus == TripStatus.inProgress) {
       if (buttons.isNotEmpty) buttons.add(const SizedBox(height: 8));
       buttons.add(
         _buildCircleButton(
