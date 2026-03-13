@@ -1558,6 +1558,52 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  /// Handles trip deletion with confirmation dialog.
+  /// On success, navigates to the home screen and clears the navigation stack.
+  Future<void> _handleDeleteTrip() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Trip'),
+        content: Text(
+          'Are you sure you want to delete "${_trip.name}"? '
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      await _repository.deleteTrip(_trip.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Trip deleted');
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error deleting trip: $e');
+      }
+    }
+  }
+
   /// Handle "Finish Day N" / "Begin Day N+1" button tap for MULTI_DAY trips.
   /// Calls the backend toggle-day endpoint which handles the status transition.
   /// When finishing a day, shows a confirmation dialog first.
@@ -2422,6 +2468,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
       onVisibilityChange:
           _isLoggedIn && _trip.userId == _userId ? _changeTripVisibility : null,
+      onDeleteTrip:
+          _isLoggedIn && _trip.userId == _userId ? _handleDeleteTrip : null,
       onTogglePlannedWaypoints: _trip.hasPlannedRoute
           ? () {
               setState(() {

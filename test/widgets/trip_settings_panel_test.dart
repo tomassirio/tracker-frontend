@@ -17,6 +17,7 @@ void main() {
       bool isLoading = false,
       TripStatus tripStatus = TripStatus.inProgress,
       bool isWeb = true, // default to web to hide mobile-only sections
+      VoidCallback? onDeleteTrip,
     }) {
       return MaterialApp(
         home: Scaffold(
@@ -34,6 +35,7 @@ void main() {
             onSettingsChange: (_, __, ___) {},
             tripStatus: tripStatus,
             isWeb: isWeb,
+            onDeleteTrip: onDeleteTrip,
           ),
         ),
       );
@@ -160,6 +162,96 @@ void main() {
       ));
 
       expect(find.text('Automatic Updates'), findsNothing);
+    });
+
+    testWidgets('shows delete trip button for owner with editable trip status',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: true,
+        onDeleteTrip: () {},
+      ));
+
+      expect(find.text('Delete Trip'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_forever), findsOneWidget);
+    });
+
+    testWidgets('shows delete trip button for owner when trip is in progress',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.inProgress,
+        isOwner: true,
+        onDeleteTrip: () {},
+      ));
+
+      expect(find.text('Delete Trip'), findsOneWidget);
+    });
+
+    testWidgets('hides delete trip button for non-owner',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: false,
+        tripHasPlannedRoute: true,
+        onTogglePlannedWaypoints: () {},
+        onDeleteTrip: () {},
+      ));
+
+      expect(find.text('Delete Trip'), findsNothing);
+    });
+
+    testWidgets('hides delete trip button when trip is finished',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.finished,
+        isOwner: true,
+        onDeleteTrip: () {},
+      ));
+
+      // Entire panel is hidden for finished trips
+      expect(find.text('Delete Trip'), findsNothing);
+    });
+
+    testWidgets('hides delete trip button when onDeleteTrip is null',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: true,
+        onDeleteTrip: null,
+      ));
+
+      expect(find.text('Delete Trip'), findsNothing);
+    });
+
+    testWidgets('delete trip button calls onDeleteTrip when tapped',
+        (WidgetTester tester) async {
+      bool deleteCalled = false;
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: true,
+        onDeleteTrip: () => deleteCalled = true,
+      ));
+
+      await tester.tap(find.text('Delete Trip'));
+      await tester.pump();
+
+      expect(deleteCalled, isTrue);
+    });
+
+    testWidgets('delete trip button is disabled when isLoading is true',
+        (WidgetTester tester) async {
+      bool deleteCalled = false;
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: true,
+        isLoading: true,
+        onDeleteTrip: () => deleteCalled = true,
+      ));
+
+      await tester.tap(find.text('Delete Trip'));
+      await tester.pump();
+
+      expect(deleteCalled, isFalse);
     });
   });
 }

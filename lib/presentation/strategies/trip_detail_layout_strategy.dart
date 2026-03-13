@@ -70,6 +70,7 @@ class TripDetailLayoutData {
   final bool showPlannedWaypoints; // Toggle for planned waypoints overlay
   final VoidCallback?
       onTogglePlannedWaypoints; // Callback to toggle planned waypoints
+  final VoidCallback? onDeleteTrip; // Callback to delete the trip
 
   const TripDetailLayoutData({
     required this.trip,
@@ -124,6 +125,7 @@ class TripDetailLayoutData {
     this.onSendFriendRequestToTripOwner,
     this.onTestBackgroundUpdate,
     this.onVisibilityChange,
+    this.onDeleteTrip,
   });
 }
 
@@ -185,6 +187,7 @@ abstract class TripDetailLayoutStrategy {
       tripStatus: data.trip.status,
       tripId: data.trip.id,
       onTestBackgroundUpdate: data.onTestBackgroundUpdate,
+      onDeleteTrip: data.onDeleteTrip,
     );
   }
 

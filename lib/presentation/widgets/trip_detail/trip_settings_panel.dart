@@ -48,6 +48,9 @@ class TripSettingsPanel extends StatefulWidget {
   /// Override for tests — defaults to [kIsWeb]
   final bool? isWeb;
 
+  /// Callback to delete the trip (owner only)
+  final VoidCallback? onDeleteTrip;
+
   const TripSettingsPanel({
     super.key,
     required this.isCollapsed,
@@ -65,6 +68,7 @@ class TripSettingsPanel extends StatefulWidget {
     this.tripId,
     this.onTestBackgroundUpdate,
     this.isWeb,
+    this.onDeleteTrip,
   });
 
   @override
@@ -513,6 +517,34 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                       ),
                     ],
                   ],
+                ],
+
+                // Delete Trip — owner only, all statuses except finished
+                if (widget.isOwner &&
+                    widget.onDeleteTrip != null &&
+                    _isEditableStatus) ...[
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: widget.isLoading ? null : widget.onDeleteTrip,
+                      icon: const Icon(Icons.delete_forever, size: 16),
+                      label: const Text(
+                        'Delete Trip',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
