@@ -264,7 +264,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   void _handleTripStatusChanged(TripStatusChangedEvent event) {
     setState(() {
-      _trip = _trip.copyWith(status: event.newStatus);
+      _trip = _trip.copyWith(
+        status: event.newStatus,
+        // Use currentDay from the event if available; when a multi-day trip
+        // is first started and the backend hasn't set currentDay yet, default
+        // to 1 so the "Day 1" badge shows right away.
+        currentDay: event.currentDay ??
+            ((event.newStatus == TripStatus.inProgress &&
+                    event.previousStatus == TripStatus.created &&
+                    _trip.tripModality == TripModality.multiDay &&
+                    _trip.currentDay == null)
+                ? 1
+                : null),
+      );
     });
 
     // Reload timeline to pick up any lifecycle markers
@@ -1428,6 +1440,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
     setState(() => _isChangingStatus = true);
 
+    // Capture previous status before async gap — WebSocket may update _trip
+    // before the optimistic setState below runs.
+    final previousStatus = _trip.status;
+    final isMultiDay = _trip.tripModality == TripModality.multiDay;
+
     try {
       // If starting/resuming with automatic updates, ensure background location
       // permission is granted (shows prominent disclosure on Android).
@@ -1446,7 +1463,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
       // Update local state optimistically - WebSocket will confirm the change
       setState(() {
-        _trip = _trip.copyWith(status: newStatus);
+        _trip = _trip.copyWith(
+          status: newStatus,
+          // When starting a multi-day trip, set currentDay to 1 immediately
+          // so the "Day 1" badge shows right away in the trip info card.
+          currentDay: (newStatus == TripStatus.inProgress &&
+                  previousStatus == TripStatus.created &&
+                  isMultiDay &&
+                  _trip.currentDay == null)
+              ? 1
+              : null,
+        );
         _isChangingStatus = false;
       });
 

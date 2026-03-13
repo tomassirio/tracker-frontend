@@ -9,7 +9,7 @@ import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 const int _minIntervalMinutes = 15;
 
 /// Widget for controlling trip automatic update settings
-/// Only shown on mobile (not web), only for trip owners, and only when trip is in progress
+/// Only shown on mobile (not web), only for trip owners, and only when trip is created or in progress
 class TripSettingsControl extends StatefulWidget {
   final bool automaticUpdates;
   final int? updateRefresh; // in seconds
@@ -20,7 +20,7 @@ class TripSettingsControl extends StatefulWidget {
           bool automaticUpdates, int? updateRefresh, TripModality? tripModality)
       onSettingsChange;
 
-  /// Current trip status - settings only shown when trip is in progress
+  /// Current trip status - settings only shown when trip is created or in progress
   final TripStatus tripStatus;
 
   /// Trip ID for triggering test background updates
@@ -176,8 +176,9 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       return const SizedBox.shrink();
     }
 
-    // Only show when trip is in progress
-    if (widget.tripStatus != TripStatus.inProgress) {
+    // Only show when trip is created or in progress
+    if (widget.tripStatus != TripStatus.inProgress &&
+        widget.tripStatus != TripStatus.created) {
       return const SizedBox.shrink();
     }
 

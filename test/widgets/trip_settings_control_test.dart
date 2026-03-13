@@ -43,7 +43,7 @@ void main() {
       expect(find.byType(Switch), findsNothing);
     });
 
-    testWidgets('does not show when trip is not in progress',
+    testWidgets('shows settings when trip is created (owner on mobile)',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -60,7 +60,8 @@ void main() {
         ),
       );
 
-      expect(find.byType(Switch), findsNothing);
+      expect(find.byType(Switch), findsOneWidget);
+      expect(find.text('Automatic Updates'), findsOneWidget);
     });
 
     testWidgets('does not show when trip is finished',

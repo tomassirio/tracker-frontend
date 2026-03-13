@@ -14,10 +14,10 @@ const int _settingsMaxIntervalMinutes = 9999;
 
 /// Collapsible settings panel shown as a cog-icon bubble when collapsed.
 /// Contains: Show Planned Route toggle (all users, all platforms),
-/// Trip Type selector (owner + in-progress, all platforms), and
-/// Automatic Updates settings (owner + in-progress + mobile only).
+/// Trip Type selector (owner + created/in-progress, all platforms), and
+/// Automatic Updates settings (owner + created/in-progress + mobile only).
 /// Visible when the trip has a planned route OR the current user is the owner
-/// and the trip is in progress.
+/// and the trip is created or in progress.
 class TripSettingsPanel extends StatefulWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
@@ -134,9 +134,13 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
 
   /// Returns true when there is at least one section to display.
   bool get _hasContent {
-    return widget.tripHasPlannedRoute ||
-        (widget.isOwner && widget.tripStatus == TripStatus.inProgress);
+    return widget.tripHasPlannedRoute || (widget.isOwner && _isEditableStatus);
   }
+
+  /// Whether the trip status allows editing settings (created or in-progress).
+  bool get _isEditableStatus =>
+      widget.tripStatus == TripStatus.created ||
+      widget.tripStatus == TripStatus.inProgress;
 
   /// Whether the trip is already multi-day (locked, shown grayed out).
   bool get _isMultiDay => widget.tripModality == TripModality.multiDay;
@@ -347,14 +351,12 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                 if (widget.tripHasPlannedRoute &&
                     widget.onTogglePlannedWaypoints != null) ...[
                   _buildPlannedRouteToggle(),
-                  if (widget.isOwner &&
-                      widget.tripStatus == TripStatus.inProgress)
+                  if (widget.isOwner && _isEditableStatus)
                     const SizedBox(height: 12),
                 ],
 
-                // Owner-only settings — only when trip is in progress
-                if (widget.isOwner &&
-                    widget.tripStatus == TripStatus.inProgress) ...[
+                // Owner-only settings — when trip is created or in progress
+                if (widget.isOwner && _isEditableStatus) ...[
                   // Trip Type selector — available on all platforms when not
                   // already multi-day (irreversible once set).
                   _buildSectionLabel(Icons.route, 'Trip Type'),
