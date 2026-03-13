@@ -8,6 +8,8 @@ class CreateTripRequest {
   final TripModality? tripModality;
   final DateTime? startDate;
   final DateTime? endDate;
+  final bool? automaticUpdates;
+  final int? updateRefresh; // in seconds
 
   CreateTripRequest({
     required this.name,
@@ -16,6 +18,8 @@ class CreateTripRequest {
     this.tripModality,
     this.startDate,
     this.endDate,
+    this.automaticUpdates,
+    this.updateRefresh,
   });
 
   Map<String, dynamic> toJson() => {
@@ -25,5 +29,7 @@ class CreateTripRequest {
         if (tripModality != null) 'tripModality': tripModality!.toJson(),
         if (startDate != null) 'startDate': startDate!.toIso8601String(),
         if (endDate != null) 'endDate': endDate!.toIso8601String(),
+        if (automaticUpdates != null) 'automaticUpdates': automaticUpdates,
+        if (updateRefresh != null) 'updateRefresh': updateRefresh,
       };
 }

@@ -182,6 +182,9 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       return const SizedBox.shrink();
     }
 
+    final bool isTripInProgress =
+        widget.tripStatus == TripStatus.inProgress;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -256,7 +259,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
               const Spacer(),
               Switch(
                 value: _automaticUpdates,
-                onChanged: widget.isLoading
+                onChanged: widget.isLoading || !isTripInProgress
                     ? null
                     : (value) {
                         setState(() {
@@ -276,7 +279,18 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
               ),
             ],
           ),
-          if (_automaticUpdates) ...[
+          if (!isTripInProgress && _automaticUpdates) ...[
+            const SizedBox(height: 4),
+            const Text(
+              'Will activate when the trip is started',
+              style: TextStyle(
+                fontSize: 11,
+                color: WandererTheme.textSecondary,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+          if (_automaticUpdates && isTripInProgress) ...[
             const SizedBox(height: 12),
             Row(
               children: [

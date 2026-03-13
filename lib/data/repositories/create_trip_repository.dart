@@ -18,6 +18,8 @@ class CreateTripRepository {
     TripModality? tripModality,
     DateTime? startDate,
     DateTime? endDate,
+    bool? automaticUpdates,
+    int? updateRefresh,
   }) async {
     final request = CreateTripRequest(
       name: name,
@@ -26,6 +28,8 @@ class CreateTripRepository {
       tripModality: tripModality,
       startDate: startDate,
       endDate: endDate,
+      automaticUpdates: automaticUpdates,
+      updateRefresh: updateRefresh,
     );
 
     return await _tripService.createTrip(request);

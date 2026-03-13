@@ -64,6 +64,83 @@ void main() {
       expect(find.text('Automatic Updates'), findsOneWidget);
     });
 
+    testWidgets(
+        'switch is disabled when trip is in created status',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.created,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      final switchWidget =
+          tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, true);
+      expect(switchWidget.onChanged, isNull);
+    });
+
+    testWidgets(
+        'shows hint message when automatic updates enabled but trip not started',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.created,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.text('Will activate when the trip is started'),
+        findsOneWidget,
+      );
+      // Interval field should not be shown when trip is not in progress
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets(
+        'hides hint message when trip is in progress with automatic updates',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              updateRefresh: 1800,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.text('Will activate when the trip is started'),
+        findsNothing,
+      );
+      // Interval field should be shown when trip is in progress
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
     testWidgets('does not show when trip is finished',
         (WidgetTester tester) async {
       await tester.pumpWidget(

@@ -146,6 +146,9 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
       widget.tripStatus == TripStatus.created ||
       widget.tripStatus == TripStatus.inProgress;
 
+  /// Whether the trip is currently in progress (controls are fully interactive).
+  bool get _isTripInProgress => widget.tripStatus == TripStatus.inProgress;
+
   /// Whether the trip is already multi-day (locked, shown grayed out).
   bool get _isMultiDay => widget.tripModality == TripModality.multiDay;
 
@@ -406,7 +409,7 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         const Spacer(),
                         Switch(
                           value: _automaticUpdates,
-                          onChanged: widget.isLoading
+                          onChanged: widget.isLoading || !_isTripInProgress
                               ? null
                               : (value) {
                                   setState(() {
@@ -428,7 +431,18 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         ),
                       ],
                     ),
-                    if (_automaticUpdates) ...[
+                    if (!_isTripInProgress && _automaticUpdates) ...[
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Will activate when the trip is started',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: WandererTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                    if (_automaticUpdates && _isTripInProgress) ...[
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -475,7 +489,7 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                           color: WandererTheme.textSecondary,
                         ),
                       ),
-                    ] else ...[
+                    ] else if (!_automaticUpdates) ...[
                       const SizedBox(height: 8),
                     ],
 

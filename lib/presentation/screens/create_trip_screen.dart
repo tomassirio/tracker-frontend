@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Visibility;
+import 'package:flutter/services.dart';
 import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/repositories/create_trip_repository.dart';
@@ -28,6 +29,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   TripPlan? _selectedTripPlan;
   List<TripPlan> _tripPlans = [];
   bool _createFromPlan = false;
+  bool _automaticUpdates = false;
+  final _intervalController = TextEditingController(text: '15');
+  static const int _minIntervalMinutes = 15;
   late final TripPlanService _tripPlanService;
   late final TripService _tripService;
 
@@ -43,6 +47,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _intervalController.dispose();
     super.dispose();
   }
 
@@ -86,6 +91,11 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             : _descriptionController.text.trim(),
         visibility: _selectedVisibility,
         tripModality: _selectedModality,
+        automaticUpdates: _automaticUpdates ? true : null,
+        updateRefresh: _automaticUpdates
+            ? (int.tryParse(_intervalController.text) ?? _minIntervalMinutes) *
+                60
+            : null,
       );
 
       final trip = await _repository.getTripById(tripId);
@@ -419,6 +429,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           _buildSectionLabel('Visibility'),
           const SizedBox(height: 10),
           _buildVisibilitySelector(),
+          const SizedBox(height: 24),
+          // Automatic Updates section
+          _buildAutomaticUpdatesSection(),
         ],
       ),
     );
@@ -603,6 +616,125 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         return 'Followers or users with a shared link can view';
       case Visibility.public:
         return 'Everyone can see this trip';
+    }
+  }
+
+  /// Automatic updates toggle with optional interval field
+  Widget _buildAutomaticUpdatesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.update,
+              size: 16,
+              color: _automaticUpdates
+                  ? WandererTheme.primaryOrange
+                  : WandererTheme.textSecondary,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Automatic Updates',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: WandererTheme.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            Switch(
+              value: _automaticUpdates,
+              onChanged: (value) {
+                setState(() {
+                  _automaticUpdates = value;
+                });
+              },
+              activeColor: WandererTheme.primaryOrange,
+            ),
+          ],
+        ),
+        Text(
+          _automaticUpdates
+              ? 'Location will be shared automatically at the set interval'
+              : 'You can enable this later from trip settings',
+          style: TextStyle(
+            fontSize: 12,
+            color: WandererTheme.textTertiary,
+          ),
+        ),
+        if (_automaticUpdates) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _intervalController,
+                  keyboardType: TextInputType.number,
+                  textCapitalization: TextCapitalization.none,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  decoration: InputDecoration(
+                    labelText:
+                        'Update Interval (min $_minIntervalMinutes min)',
+                    hintText: 'e.g., 15',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: WandererTheme.primaryOrange,
+                        width: 1.5,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    isDense: true,
+                    suffixText: 'min',
+                  ),
+                  style: const TextStyle(fontSize: 13),
+                  onEditingComplete: _validateAndClampInterval,
+                  onTapOutside: (_) {
+                    _validateAndClampInterval();
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Validates the interval field, clamping to minimum if needed
+  void _validateAndClampInterval() {
+    final text = _intervalController.text.trim();
+    final parsed = int.tryParse(text);
+    if (text.isEmpty || parsed == null || parsed < _minIntervalMinutes) {
+      setState(() {
+        _intervalController.text = _minIntervalMinutes.toString();
+        _intervalController.selection = TextSelection.collapsed(
+          offset: _intervalController.text.length,
+        );
+      });
+      if (mounted) {
+        UiHelpers.showErrorMessage(
+          context,
+          'Minimum interval is $_minIntervalMinutes minutes',
+        );
+      }
     }
   }
 

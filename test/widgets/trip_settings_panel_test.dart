@@ -153,6 +153,70 @@ void main() {
       expect(find.byType(Switch), findsOneWidget);
     });
 
+    testWidgets(
+        'automatic updates switch is disabled when trip is in created status',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: true,
+        isWeb: false,
+        automaticUpdates: true,
+      ));
+
+      final switchWidget =
+          tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, true);
+      expect(switchWidget.onChanged, isNull);
+    });
+
+    testWidgets(
+        'automatic updates switch is enabled when trip is in progress',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.inProgress,
+        isOwner: true,
+        isWeb: false,
+        automaticUpdates: true,
+      ));
+
+      final switchWidget =
+          tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, true);
+      expect(switchWidget.onChanged, isNotNull);
+    });
+
+    testWidgets(
+        'shows hint message when automatic updates enabled but trip not started',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.created,
+        isOwner: true,
+        isWeb: false,
+        automaticUpdates: true,
+      ));
+
+      expect(
+        find.text('Will activate when the trip is started'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+        'hides hint message when trip is in progress',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildPanel(
+        tripStatus: TripStatus.inProgress,
+        isOwner: true,
+        isWeb: false,
+        automaticUpdates: true,
+      ));
+
+      expect(
+        find.text('Will activate when the trip is started'),
+        findsNothing,
+      );
+    });
+
     testWidgets('hides automatic updates switch on web',
         (WidgetTester tester) async {
       await tester.pumpWidget(buildPanel(

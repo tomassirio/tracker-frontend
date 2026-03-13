@@ -32,6 +32,34 @@ void main() {
         expect(json.containsKey('description'), false);
         expect(json.containsKey('startDate'), false);
         expect(json.containsKey('endDate'), false);
+        expect(json.containsKey('automaticUpdates'), false);
+        expect(json.containsKey('updateRefresh'), false);
+      });
+
+      test('toJson includes automaticUpdates and updateRefresh when set', () {
+        final request = CreateTripRequest(
+          name: 'My Trip',
+          visibility: Visibility.public,
+          automaticUpdates: true,
+          updateRefresh: 900,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json['updateRefresh'], 900);
+      });
+
+      test('toJson excludes automaticUpdates and updateRefresh when null', () {
+        final request = CreateTripRequest(
+          name: 'My Trip',
+          visibility: Visibility.public,
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('automaticUpdates'), false);
+        expect(json.containsKey('updateRefresh'), false);
       });
     });
 
