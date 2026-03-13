@@ -128,19 +128,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// Check if trip update panel should be shown
   /// Only on Android, for trip owner, when trip is in progress
-  /// Also shown when resting for multi-day trips (to access "Begin Day" button)
   bool get _showTripUpdatePanel =>
       _isAndroid &&
       _userId != null &&
       _trip.userId == _userId &&
-      (_trip.status == TripStatus.inProgress ||
-          (_trip.status == TripStatus.resting &&
-              _trip.tripModality == TripModality.multiDay));
+      _trip.status == TripStatus.inProgress;
 
   /// Check if the "Finish Day / Begin Day N" button should be shown
-  /// Only for MULTI_DAY trips on Android, for the trip owner, when IN_PROGRESS or RESTING
+  /// Only for MULTI_DAY trips, for the trip owner, when IN_PROGRESS or RESTING
   bool get _showDayButton =>
-      _isAndroid &&
       _userId != null &&
       _trip.userId == _userId &&
       _trip.tripModality == TripModality.multiDay &&
@@ -2232,6 +2228,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     isOwner: true,
                     isLoading: _isChangingStatus,
                     onStatusChange: _changeTripStatus,
+                    showDayButton: _showDayButton,
+                    currentDay: _currentDay,
+                    isResting: _trip.status == TripStatus.resting,
+                    onDayButtonTap:
+                        _showDayButton ? () => _handleDayButtonTap(null) : null,
                   ),
                 ),
 
@@ -2354,8 +2355,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isChangingStatus: _isChangingStatus,
       isChangingSettings: _isChangingSettings,
       showTripUpdatePanel: _showTripUpdatePanel,
-      showDayButton: _showDayButton,
-      currentDay: _currentDay,
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
       isAlreadyFriends: _isAlreadyFriends,
@@ -2379,7 +2378,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
-      onDayButtonTap: _showDayButton ? _handleDayButtonTap : null,
       onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner: _isLoggedIn && _trip.userId != _userId

@@ -4,15 +4,27 @@ import 'package:wanderer_frontend/core/constants/enums.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
 /// Circular overlay buttons for trip lifecycle management (Start / Pause /
-/// Resume / Finish). Displayed on the right side of the map, above the native
-/// Google Maps zoom controls. Only shown on mobile and only for trip owners
-/// when the trip has not yet finished.
+/// Resume / Finish / Finish Day / Begin Day). Displayed on the right side of
+/// the map, above the native Google Maps zoom controls. Only shown on mobile
+/// and only for trip owners when the trip has not yet finished.
 class TripLifecycleButtons extends StatelessWidget {
   final TripStatus currentStatus;
   final TripModality? tripModality;
   final bool isOwner;
   final bool isLoading;
   final Function(TripStatus) onStatusChange;
+
+  /// Whether to show the "Finish Day / Begin Day" button (multi-day trips only)
+  final bool showDayButton;
+
+  /// Current day number for the day button label
+  final int currentDay;
+
+  /// Whether the trip is in resting state (affects day button label)
+  final bool isResting;
+
+  /// Callback when the day button (Finish Day / Begin Day) is tapped
+  final VoidCallback? onDayButtonTap;
 
   /// Override for tests — defaults to [kIsWeb]
   final bool? isWeb;
@@ -24,6 +36,10 @@ class TripLifecycleButtons extends StatelessWidget {
     required this.isLoading,
     required this.onStatusChange,
     this.tripModality,
+    this.showDayButton = false,
+    this.currentDay = 1,
+    this.isResting = false,
+    this.onDayButtonTap,
     this.isWeb,
   });
 
@@ -84,6 +100,27 @@ class TripLifecycleButtons extends StatelessWidget {
           color: WandererTheme.statusInProgress,
           tooltip: 'Pause',
           onPressed: () => onStatusChange(TripStatus.paused),
+        ),
+      );
+    }
+
+    // Finish Day / Begin Day (multi-day trips only)
+    if (showDayButton && onDayButtonTap != null) {
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(height: 8));
+      final dayIcon =
+          isResting ? Icons.wb_sunny_outlined : Icons.nightlight_round;
+      final dayColor =
+          isResting ? WandererTheme.dayStartColor : WandererTheme.dayEndColor;
+      final dayTooltip =
+          isResting ? 'Begin Day ${currentDay + 1}' : 'Finish Day $currentDay';
+
+      buttons.add(
+        _buildCircleButton(
+          context: context,
+          icon: dayIcon,
+          color: dayColor,
+          tooltip: dayTooltip,
+          onPressed: onDayButtonTap!,
         ),
       );
     }

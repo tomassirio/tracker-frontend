@@ -37,9 +37,6 @@ class TripDetailLayoutData {
   final bool isChangingSettings;
   final bool
       showTripUpdatePanel; // Only show on Android for owner when trip is in progress
-  final bool
-      showDayButton; // Show "Finish Day / Begin Day N" for MULTI_DAY trips
-  final int currentDay; // Current day number for MULTI_DAY trips
   final bool isFollowingTripOwner; // Track if following trip owner
   final bool hasSentFriendRequest; // Track if friend request sent
   final bool isAlreadyFriends; // Track if already friends with trip owner
@@ -66,8 +63,6 @@ class TripDetailLayoutData {
   final Function(bool automaticUpdates, int? updateRefresh,
       TripModality? tripModality)? onSettingsChange;
   final Future<void> Function(String? message) onSendTripUpdate;
-  final Future<bool> Function(String? message)?
-      onDayButtonTap; // "Finish Day / Begin Day N" for MULTI_DAY
   final VoidCallback? onFollowTripOwner;
   final VoidCallback? onSendFriendRequestToTripOwner;
   final VoidCallback? onTestBackgroundUpdate;
@@ -100,8 +95,6 @@ class TripDetailLayoutData {
     this.isChangingStatus = false,
     this.isChangingSettings = false,
     this.showTripUpdatePanel = false,
-    this.showDayButton = false,
-    this.currentDay = 1,
     this.isFollowingTripOwner = false,
     this.hasSentFriendRequest = false,
     this.isAlreadyFriends = false,
@@ -127,7 +120,6 @@ class TripDetailLayoutData {
     this.onStatusChange,
     this.onSettingsChange,
     required this.onSendTripUpdate,
-    this.onDayButtonTap,
     this.onFollowTripOwner,
     this.onSendFriendRequestToTripOwner,
     this.onTestBackgroundUpdate,
@@ -180,8 +172,8 @@ abstract class TripDetailLayoutStrategy {
     return TripSettingsPanel(
       isCollapsed: data.isTripSettingsCollapsed,
       onToggleCollapse: data.onToggleTripSettings,
-      isOwner: data.currentUserId != null &&
-          data.trip.userId == data.currentUserId,
+      isOwner:
+          data.currentUserId != null && data.trip.userId == data.currentUserId,
       tripHasPlannedRoute: data.trip.hasPlannedRoute,
       showPlannedWaypoints: data.showPlannedWaypoints,
       onTogglePlannedWaypoints: data.onTogglePlannedWaypoints,
@@ -245,10 +237,6 @@ abstract class TripDetailLayoutStrategy {
       isLoading: data.isSendingUpdate,
       onToggleCollapse: data.onToggleTripUpdate,
       onSendUpdate: data.onSendTripUpdate,
-      showDayButton: data.showDayButton,
-      currentDay: data.currentDay,
-      isResting: data.trip.status == TripStatus.resting,
-      onDayButtonTap: data.onDayButtonTap,
     );
   }
 }
