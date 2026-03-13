@@ -39,9 +39,8 @@ class TripSettingsPanel extends StatefulWidget {
   final int? updateRefresh; // in seconds
   final TripModality? tripModality;
   final bool isLoading;
-  final Function(
-          bool automaticUpdates, int? updateRefresh, TripModality? tripModality)?
-      onSettingsChange;
+  final Function(bool automaticUpdates, int? updateRefresh,
+      TripModality? tripModality)? onSettingsChange;
   final TripStatus tripStatus;
   final String? tripId;
   final VoidCallback? onTestBackgroundUpdate;
@@ -122,13 +121,15 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
         (widget.isOwner && widget.tripStatus == TripStatus.inProgress);
   }
 
-  /// Whether the trip type can still be changed (irreversible once multi-day).
-  bool get _canChangeTripType => widget.tripModality != TripModality.multiDay;
+  /// Whether the trip is already multi-day (locked, shown grayed out).
+  bool get _isMultiDay => widget.tripModality == TripModality.multiDay;
 
   void _validateAndClampInterval() {
     final text = _intervalController.text.trim();
     final parsed = int.tryParse(text);
-    if (text.isEmpty || parsed == null || parsed < _settingsMinIntervalMinutes) {
+    if (text.isEmpty ||
+        parsed == null ||
+        parsed < _settingsMinIntervalMinutes) {
       setState(() {
         _intervalController.text = _settingsMinIntervalMinutes.toString();
         _intervalController.selection = TextSelection.collapsed(
@@ -152,6 +153,42 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     widget.onSettingsChange?.call(_automaticUpdates, seconds, _tripModality);
   }
 
+  /// Prompts the user to confirm switching to multi-day, then auto-saves.
+  Future<void> _confirmAndSwitchToMultiDay() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Switch to Multi-Day?'),
+        content: const Text(
+          'This action is irreversible. Once a trip is converted to '
+          'multi-day, it cannot be changed back to simple.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WandererTheme.primaryOrange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _tripModality = TripModality.multiDay;
+      });
+      // Auto-save immediately after confirmation
+      _handleSave();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_hasContent) return const SizedBox.shrink();
@@ -165,8 +202,9 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
       secondCurve: Curves.easeInOut,
       sizeCurve: Curves.easeInOut,
       alignment: Alignment.topLeft,
-      crossFadeState:
-          widget.isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: widget.isCollapsed
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
       firstChild: _buildCollapsedBubble(),
       secondChild: _buildExpandedCard(context, effectiveIsWeb),
     );
@@ -297,28 +335,26 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                     widget.tripStatus == TripStatus.inProgress) ...[
                   // Trip Type selector — available on all platforms when not
                   // already multi-day (irreversible once set).
-                  if (_canChangeTripType) ...[
-                    _buildSectionLabel(Icons.route, 'Trip Type'),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildModalityButton(
-                            label: 'Simple',
-                            modality: TripModality.simple,
-                          ),
+                  _buildSectionLabel(Icons.route, 'Trip Type'),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildModalityButton(
+                          label: 'Simple',
+                          modality: TripModality.simple,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildModalityButton(
-                            label: 'Multi-Day',
-                            modality: TripModality.multiDay,
-                          ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildModalityButton(
+                          label: 'Multi-Day',
+                          modality: TripModality.multiDay,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
 
                   // Automatic Updates — mobile only (WorkManager / background
                   // location is an Android concept; not applicable on web).
@@ -406,7 +442,8 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                     ],
 
                     // Debug-only test button
-                    if (kDebugMode && widget.onTestBackgroundUpdate != null) ...[
+                    if (kDebugMode &&
+                        widget.onTestBackgroundUpdate != null) ...[
                       const SizedBox(height: 12),
                       const Divider(),
                       const SizedBox(height: 8),
@@ -441,9 +478,6 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         ),
                       ),
                     ],
-                  ] else if (_canChangeTripType) ...[
-                    // Web: show Save button for Trip Type changes only.
-                    _buildSaveButton(fullWidth: true),
                   ],
                 ],
               ],
@@ -520,20 +554,37 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     required TripModality modality,
   }) {
     final isSelected = _tripModality == modality;
+    final isDisabled = _isMultiDay || widget.isLoading;
     return OutlinedButton(
-      onPressed: widget.isLoading
+      onPressed: isDisabled
           ? null
           : () {
-              setState(() {
-                _tripModality = modality;
-              });
+              if (modality == TripModality.multiDay) {
+                // Confirm before switching to multi-day
+                _confirmAndSwitchToMultiDay();
+              } else {
+                setState(() {
+                  _tripModality = modality;
+                });
+              }
             },
       style: OutlinedButton.styleFrom(
-        backgroundColor: isSelected ? WandererTheme.primaryOrange : null,
-        foregroundColor: isSelected ? Colors.white : null,
+        backgroundColor: isSelected
+            ? (_isMultiDay
+                ? WandererTheme.primaryOrange.withOpacity(0.4)
+                : WandererTheme.primaryOrange)
+            : null,
+        foregroundColor: isSelected
+            ? Colors.white.withOpacity(_isMultiDay ? 0.7 : 1.0)
+            : null,
+        disabledBackgroundColor:
+            isSelected ? WandererTheme.primaryOrange.withOpacity(0.4) : null,
+        disabledForegroundColor: isSelected
+            ? Colors.white.withOpacity(0.7)
+            : WandererTheme.textTertiary,
         side: BorderSide(
           color: isSelected
-              ? WandererTheme.primaryOrange
+              ? WandererTheme.primaryOrange.withOpacity(_isMultiDay ? 0.4 : 1.0)
               : WandererTheme.glassBorderColor,
         ),
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -552,8 +603,7 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
       style: ElevatedButton.styleFrom(
         backgroundColor: WandererTheme.primaryOrange,
         foregroundColor: Colors.white,
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         minimumSize: const Size(0, 32),
       ),
       child: widget.isLoading
