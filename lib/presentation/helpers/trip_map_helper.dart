@@ -754,13 +754,20 @@ class TripMapHelper {
     return const LatLng(40.7128, -74.0060); // Default to NYC
   }
 
-  /// Gets the appropriate zoom level based on whether trip has locations
-  static double getInitialZoom(Trip trip) {
+  /// Gets the appropriate zoom level based on whether trip has locations.
+  ///
+  /// When [userLocation] is provided and the trip has no locations or planned
+  /// route, uses a closer zoom so the map centres meaningfully on the user
+  /// instead of showing a continent-level view.
+  static double getInitialZoom(Trip trip, {LatLng? userLocation}) {
     if (trip.locations != null && trip.locations!.isNotEmpty) {
       return 12;
     }
     if (trip.hasPlannedRoute) {
       return 10;
+    }
+    if (userLocation != null) {
+      return 14;
     }
     return 4;
   }

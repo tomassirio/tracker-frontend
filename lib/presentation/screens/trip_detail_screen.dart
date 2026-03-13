@@ -161,9 +161,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadPromotionInfo();
     _loadTripAchievements();
     _initWebSocket();
-    _fetchUserLocation();
-    // Load trip updates and full trip data together, then set the initial
-    // camera position exactly once (instant jump, no distracting animation).
+    // Load trip updates, full trip data and user location together, then set
+    // the initial camera position exactly once (instant jump, no animation).
+    // _fetchUserLocation is included so that trips with no locations/route can
+    // centre on the user's real position instead of the hardcoded NYC default.
     _initializeMapPosition();
   }
 
@@ -201,10 +202,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   /// the map camera instantly at the latest location. This avoids the jarring
   /// "zoom to stale position → animate to real position" sequence.
   Future<void> _initializeMapPosition() async {
-    // Fire data requests and wait for the map controller in parallel
+    // Fire data requests, user location fetch, and wait for the map controller
+    // in parallel. Including _fetchUserLocation ensures _userLocation is set
+    // before we position the camera — critical for trips with no locations.
     await Future.wait([
       _loadTripUpdates(),
       _refreshTripData(),
+      _fetchUserLocation(),
       _mapControllerCompleter.future,
     ]);
     // Now both the data and the map are ready — jump to latest location
@@ -2097,7 +2101,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 child: TripMapView(
                   initialLocation: TripMapHelper.getInitialLocation(_trip,
                       userLocation: _userLocation),
-                  initialZoom: TripMapHelper.getInitialZoom(_trip),
+                  initialZoom: TripMapHelper.getInitialZoom(_trip,
+                      userLocation: _userLocation),
                   markers: _markers,
                   polylines: _polylines,
                   onMapCreated: (controller) {
