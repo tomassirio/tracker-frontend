@@ -76,6 +76,11 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
   late TextEditingController _intervalController;
   TripModality? _tripModality;
 
+  /// The saved interval text — used to detect whether the user actually
+  /// changed the value so the Save button can be grayed-out when nothing
+  /// has been modified.
+  late String _savedIntervalText;
+
   /// Converts seconds to clamped minutes for display in the interval field.
   int _secondsToMinutes(int? seconds) {
     if (seconds == null) return _settingsMinIntervalMinutes;
@@ -92,6 +97,8 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     _intervalController = TextEditingController(
       text: _secondsToMinutes(widget.updateRefresh).toString(),
     );
+    _savedIntervalText = _intervalController.text;
+    _intervalController.addListener(_onIntervalChanged);
   }
 
   @override
@@ -106,14 +113,24 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     if (oldWidget.updateRefresh != widget.updateRefresh) {
       _intervalController.text =
           _secondsToMinutes(widget.updateRefresh).toString();
+      _savedIntervalText = _intervalController.text;
     }
   }
 
   @override
   void dispose() {
+    _intervalController.removeListener(_onIntervalChanged);
     _intervalController.dispose();
     super.dispose();
   }
+
+  /// Triggers a rebuild so the Save button reacts to interval text changes.
+  void _onIntervalChanged() {
+    setState(() {});
+  }
+
+  /// Whether the interval has been modified from the last-saved value.
+  bool get _isIntervalDirty => _intervalController.text != _savedIntervalText;
 
   /// Returns true when there is at least one section to display.
   bool get _hasContent {
@@ -151,6 +168,11 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     final minutes = int.tryParse(_intervalController.text);
     final seconds = minutes != null ? minutes * 60 : null;
     widget.onSettingsChange?.call(_automaticUpdates, seconds, _tripModality);
+    // After a successful save, update the saved baseline so the button
+    // grays out again until the next edit.
+    setState(() {
+      _savedIntervalText = _intervalController.text;
+    });
   }
 
   /// Prompts the user to confirm switching to multi-day, then auto-saves.
@@ -384,6 +406,17 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                                   setState(() {
                                     _automaticUpdates = value;
                                   });
+                                  // When toggling OFF, auto-save immediately
+                                  // since there is no Save button in the
+                                  // disabled state.
+                                  if (!value) {
+                                    final minutes =
+                                        int.tryParse(_intervalController.text);
+                                    final seconds =
+                                        minutes != null ? minutes * 60 : null;
+                                    widget.onSettingsChange
+                                        ?.call(false, seconds, _tripModality);
+                                  }
                                 },
                           activeColor: WandererTheme.primaryOrange,
                         ),
@@ -438,7 +471,6 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                       ),
                     ] else ...[
                       const SizedBox(height: 8),
-                      _buildSaveButton(fullWidth: true),
                     ],
 
                     // Debug-only test button
@@ -599,10 +631,12 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
 
   Widget _buildSaveButton({bool fullWidth = false}) {
     final button = ElevatedButton(
-      onPressed: widget.isLoading ? null : _handleSave,
+      onPressed: (widget.isLoading || !_isIntervalDirty) ? null : _handleSave,
       style: ElevatedButton.styleFrom(
         backgroundColor: WandererTheme.primaryOrange,
         foregroundColor: Colors.white,
+        disabledBackgroundColor: WandererTheme.primaryOrange.withOpacity(0.4),
+        disabledForegroundColor: Colors.white70,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         minimumSize: const Size(0, 32),
       ),

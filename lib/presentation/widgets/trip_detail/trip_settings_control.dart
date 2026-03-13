@@ -56,6 +56,11 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
   late TextEditingController _intervalController;
   TripModality? _tripModality;
 
+  /// The saved interval text — used to detect whether the user actually
+  /// changed the value so the Save button can be grayed-out when nothing
+  /// has been modified.
+  late String _savedIntervalText;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +73,8 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     _intervalController = TextEditingController(
       text: minutes.toString(),
     );
+    _savedIntervalText = _intervalController.text;
+    _intervalController.addListener(_onIntervalChanged);
   }
 
   @override
@@ -87,14 +94,24 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
               .clamp(_minIntervalMinutes, 9999)
           : _minIntervalMinutes;
       _intervalController.text = minutes.toString();
+      _savedIntervalText = _intervalController.text;
     }
   }
 
   @override
   void dispose() {
+    _intervalController.removeListener(_onIntervalChanged);
     _intervalController.dispose();
     super.dispose();
   }
+
+  /// Triggers a rebuild so the Save button reacts to interval text changes.
+  void _onIntervalChanged() {
+    setState(() {});
+  }
+
+  /// Whether the interval has been modified from the last-saved value.
+  bool get _isIntervalDirty => _intervalController.text != _savedIntervalText;
 
   /// Validates the interval field when the user finishes editing.
   /// If the value is empty or below the minimum, resets to the minimum
@@ -138,6 +155,11 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
     // Convert minutes to seconds for the backend
     final seconds = minutes != null ? minutes * 60 : null;
     widget.onSettingsChange(_automaticUpdates, seconds, _tripModality);
+    // After a successful save, update the saved baseline so the button
+    // grays out again until the next edit.
+    setState(() {
+      _savedIntervalText = _intervalController.text;
+    });
   }
 
   @override
@@ -239,6 +261,15 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                         setState(() {
                           _automaticUpdates = value;
                         });
+                        // When toggling OFF, auto-save immediately since
+                        // there is no Save button in the disabled state.
+                        if (!value) {
+                          final minutes =
+                              int.tryParse(_intervalController.text);
+                          final seconds = minutes != null ? minutes * 60 : null;
+                          widget.onSettingsChange(
+                              false, seconds, _tripModality);
+                        }
                       },
                 activeColor: WandererTheme.primaryOrange,
               ),
@@ -281,10 +312,15 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: widget.isLoading ? null : _handleSave,
+                  onPressed: (widget.isLoading || !_isIntervalDirty)
+                      ? null
+                      : _handleSave,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: WandererTheme.primaryOrange,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor:
+                        WandererTheme.primaryOrange.withOpacity(0.4),
+                    disabledForegroundColor: Colors.white70,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
@@ -318,36 +354,6 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                 fontSize: 11,
                 color: WandererTheme.textSecondary,
               ),
-            ),
-          ] else ...[
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: widget.isLoading ? null : _handleSave,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: WandererTheme.primaryOrange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                minimumSize: const Size(0, 32),
-              ),
-              child: widget.isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Save',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
             ),
           ],
           // Debug-only: Test background update button

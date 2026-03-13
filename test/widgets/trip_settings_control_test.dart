@@ -245,15 +245,43 @@ void main() {
         ),
       );
 
+      // Save is grayed out until the interval changes — modify it first.
+      await tester.enterText(find.byType(TextField), '45');
+      await tester.pump();
+
       await tester.tap(find.text('Save'));
       await tester.pump();
 
       expect(capturedAutomaticUpdates, true);
-      expect(capturedUpdateRefresh, 1800);
+      expect(capturedUpdateRefresh, 2700); // 45 * 60
     });
 
-    testWidgets(
-        'calls onSettingsChange when Save is tapped with automaticUpdates disabled',
+    testWidgets('Save button is grayed out when interval has not changed',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              updateRefresh: 1800,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      // Save should be visible but disabled (interval unchanged)
+      final saveButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
+    });
+
+    testWidgets('auto-saves when toggling automaticUpdates off',
         (WidgetTester tester) async {
       bool? capturedAutomaticUpdates;
       int? capturedUpdateRefresh;
@@ -262,7 +290,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: TripSettingsControl(
-              automaticUpdates: false,
+              automaticUpdates: true,
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
               onSettingsChange:
@@ -277,11 +306,35 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Save'));
+      // Toggle automatic updates OFF — should auto-save immediately
+      await tester.tap(find.byType(Switch));
       await tester.pump();
 
       expect(capturedAutomaticUpdates, false);
-      expect(capturedUpdateRefresh, isNotNull);
+      expect(capturedUpdateRefresh, 1800);
+
+      // Save button should no longer be visible
+      expect(find.text('Save'), findsNothing);
+    });
+
+    testWidgets('does not show Save button when automaticUpdates is disabled',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Save'), findsNothing);
     });
 
     testWidgets('toggles switch value when tapped',
