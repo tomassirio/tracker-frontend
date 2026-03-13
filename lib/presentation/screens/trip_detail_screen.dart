@@ -414,6 +414,51 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  /// Fetches the user's current device location and centres the map on it.
+  /// Called when a trip is started so that the map immediately shows where
+  /// the user is. Falls back to [_animateMapToLatestLocation] when the
+  /// device location cannot be determined.
+  Future<void> _centerMapOnCurrentLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _animateMapToLatestLocation(animate: true);
+        return;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _animateMapToLatestLocation(animate: true);
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        _animateMapToLatestLocation(animate: true);
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      final target = LatLng(position.latitude, position.longitude);
+
+      if (mounted) {
+        setState(() {
+          _userLocation = target;
+        });
+        await _animateMapToLocation(target);
+      }
+    } catch (e) {
+      debugPrint('TripDetailScreen: Could not center on current location: $e');
+      // Gracefully fall back to existing behaviour
+      _animateMapToLatestLocation(animate: true);
+    }
+  }
+
   void _handleTripSettingsUpdated(TripSettingsUpdatedEvent event) {
     // Only update UI state from the server confirmation.
     // Background update management is already handled optimistically
@@ -1419,6 +1464,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Stop automatic updates when trip is paused/finished or automatic updates is disabled
           await backgroundManager.stopAutoUpdates(_trip.id);
         }
+      }
+
+      // When starting a trip, center the map on the user's current location
+      if (newStatus == TripStatus.inProgress) {
+        await _centerMapOnCurrentLocation();
       }
 
       if (mounted) {
