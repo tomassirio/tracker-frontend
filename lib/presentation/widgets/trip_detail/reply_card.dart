@@ -71,8 +71,9 @@ class ReplyCard extends StatelessWidget {
   }
 
   String _formatTimestamp(DateTime timestamp) {
+    final local = timestamp.toLocal();
     final now = DateTime.now();
-    final difference = now.difference(timestamp);
+    final difference = now.difference(local);
 
     if (difference.inMinutes < 1) {
       return 'Just now';
@@ -83,7 +84,7 @@ class ReplyCard extends StatelessWidget {
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d ago';
     } else {
-      return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+      return '${local.day}/${local.month}/${local.year}';
     }
   }
 }

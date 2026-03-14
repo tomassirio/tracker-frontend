@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
-import '../../core/constants/api_endpoints.dart';
 import '../storage/token_storage.dart';
+import '../storage/token_refresh_manager.dart';
 
 /// Exception thrown when user needs to authenticate
 /// This is not an error - it's a signal to redirect to login without showing error messages
@@ -20,8 +20,6 @@ class ApiClient {
   final TokenStorage _tokenStorage;
   final String baseUrl;
 
-  // Future to track ongoing refresh operation (prevents concurrent refresh attempts)
-  Future<bool>? _refreshFuture;
 
   ApiClient({
     required this.baseUrl,
@@ -285,16 +283,13 @@ class ApiClient {
   /// The reload() call ensures background isolates read fresh token data
   Future<void> _ensureValidToken() async {
     try {
-      // Reload SharedPreferences from disk so background isolates
-      // see tokens written by the main isolate
-      await _tokenStorage.reloadFromDisk();
-
-      final isExpired = await _tokenStorage.isAccessTokenExpired();
-      if (isExpired) {
-        debugPrint('ApiClient: Token expired, attempting refresh...');
-        final refreshed = await _refreshTokenIfNeeded();
-        debugPrint('ApiClient: Token refresh result: $refreshed');
-      }
+      // Delegate to the centralized manager so that all ApiClient instances
+      // and the WebSocket client share a single in-flight refresh call.
+      final valid = await TokenRefreshManager.instance.ensureValidToken(
+        tokenStorage: _tokenStorage,
+        httpClient: _httpClient,
+      );
+      debugPrint('ApiClient: ensureValidToken result: $valid');
     } catch (e) {
       debugPrint('ApiClient: Error in _ensureValidToken: $e');
       // Fallback to 401 handling will still work
@@ -302,94 +297,13 @@ class ApiClient {
   }
 
   /// Refresh the access token using refresh token
-  /// Uses a shared Future to prevent concurrent refresh attempts (OAuth2 best practice)
+  /// Uses the centralized TokenRefreshManager to prevent concurrent refresh
+  /// attempts across multiple ApiClient instances (OAuth2 best practice)
   Future<bool> _refreshTokenIfNeeded() async {
-    // If already refreshing, wait for that operation to complete
-    if (_refreshFuture != null) {
-      return await _refreshFuture!;
-    }
-
-    // Start new refresh operation
-    _refreshFuture = _performTokenRefresh();
-
-    try {
-      return await _refreshFuture!;
-    } finally {
-      _refreshFuture = null;
-    }
-  }
-
-  /// Perform the actual token refresh operation
-  Future<bool> _performTokenRefresh() async {
-    try {
-      final refreshToken = await _tokenStorage.getRefreshToken();
-      if (refreshToken == null) {
-        debugPrint('ApiClient: No refresh token available — clearing tokens');
-        await _tokenStorage.clearTokens();
-        return false;
-      }
-
-      debugPrint('ApiClient: Refreshing token with refresh token '
-          '${refreshToken.substring(0, (refreshToken.length).clamp(0, 10))}...');
-
-      final uri = Uri.parse(
-        '${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}',
-      );
-
-      // Use raw HTTP client to avoid recursion (don't call our own post method)
-      final response = await _httpClient.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'refreshToken': refreshToken}),
-      );
-
-      debugPrint('ApiClient: Refresh response status: ${response.statusCode}');
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-        // Get new tokens from response
-        final newAccessToken = data['accessToken'] ?? data['access_token'];
-        final newRefreshToken =
-            data['refreshToken'] ?? data['refresh_token'] ?? refreshToken;
-        final tokenType = data['tokenType'] ?? data['token_type'] ?? 'Bearer';
-        final expiresIn = data['expiresIn'] ?? data['expires_in'] ?? 3600;
-
-        if (newAccessToken == null) {
-          debugPrint(
-              'ApiClient: Refresh response missing accessToken — clearing tokens');
-          // Invalid response format
-          await _tokenStorage.clearTokens();
-          return false;
-        }
-
-        await _tokenStorage.saveTokens(
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-          tokenType: tokenType,
-          expiresIn: expiresIn is int
-              ? expiresIn
-              : int.tryParse(expiresIn.toString()) ?? 3600,
-        );
-        debugPrint('ApiClient: ✅ Token refreshed successfully');
-        return true;
-      } else {
-        debugPrint(
-            'ApiClient: Refresh failed with status ${response.statusCode}: '
-            '${response.body.substring(0, (response.body.length).clamp(0, 200))}');
-        // Refresh failed, clear tokens
-        await _tokenStorage.clearTokens();
-        return false;
-      }
-    } catch (e) {
-      debugPrint('ApiClient: ❌ Token refresh exception: $e');
-      // On any error, clear tokens to force re-login
-      await _tokenStorage.clearTokens();
-      return false;
-    }
+    return TokenRefreshManager.instance.refreshIfNeeded(
+      tokenStorage: _tokenStorage,
+      httpClient: _httpClient,
+    );
   }
 
   /// Handle unauthorized access

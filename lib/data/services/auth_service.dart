@@ -1,6 +1,7 @@
 import '../models/auth_models.dart';
 import '../client/clients.dart';
 import '../storage/token_storage.dart';
+import '../storage/token_refresh_manager.dart';
 
 /// Service for authentication operations
 class AuthService {
@@ -162,32 +163,10 @@ class AuthService {
 
   /// Refresh access token using refresh token
   /// Returns true if refresh was successful, false otherwise
-  /// Automatically called by ApiClient when tokens expire
+  /// Delegates to the centralized TokenRefreshManager to prevent race
+  /// conditions when multiple components try to refresh simultaneously.
   Future<bool> refreshAccessToken() async {
-    try {
-      final refreshToken = await _tokenStorage.getRefreshToken();
-      if (refreshToken == null) {
-        await _tokenStorage.clearTokens();
-        return false;
-      }
-
-      final request = RefreshTokenRequest(refreshToken: refreshToken);
-      final authResponse = await _authClient.refresh(request);
-
-      // Save new tokens
-      await _tokenStorage.saveTokens(
-        accessToken: authResponse.accessToken,
-        refreshToken: authResponse.refreshToken,
-        tokenType: authResponse.tokenType,
-        expiresIn: authResponse.expiresIn,
-      );
-
-      return true;
-    } catch (e) {
-      // Refresh failed, clear tokens
-      await _tokenStorage.clearTokens();
-      return false;
-    }
+    return TokenRefreshManager.instance.refreshIfNeeded();
   }
 
   /// Check if the current access token is expired

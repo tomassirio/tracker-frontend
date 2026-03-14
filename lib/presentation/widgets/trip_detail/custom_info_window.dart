@@ -208,9 +208,10 @@ class CustomInfoWindow extends StatelessWidget {
   }
 
   static String _formatTimestamp(DateTime timestamp) {
-    final day = '${timestamp.day}/${timestamp.month}/${timestamp.year}';
-    final hour = timestamp.hour.toString();
-    final minute = timestamp.minute.toString().padLeft(2, '0');
+    final local = timestamp.toLocal();
+    final day = '${local.day}/${local.month}/${local.year}';
+    final hour = local.hour.toString();
+    final minute = local.minute.toString().padLeft(2, '0');
     return '$day  $hour:$minute';
   }
 }
