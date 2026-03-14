@@ -81,7 +81,6 @@ class _NotificationsDropdownContentState
   int _currentPage = 0;
   bool _hasMore = true;
   int _unreadCount = 0;
-  bool _didRead = false;
 
   @override
   void initState() {
@@ -182,7 +181,6 @@ class _NotificationsDropdownContentState
 
     try {
       await _notificationService.markAsRead(notification.id);
-      _didRead = true;
 
       if (mounted) {
         setState(() {
@@ -212,7 +210,6 @@ class _NotificationsDropdownContentState
   Future<void> _markAllAsRead() async {
     try {
       await _notificationService.markAllAsRead();
-      _didRead = true;
 
       if (mounted) {
         setState(() {
