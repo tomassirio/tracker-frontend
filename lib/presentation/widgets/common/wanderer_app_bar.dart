@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:wanderer_frontend/data/services/notification_api_service.dart';
+import 'package:wanderer_frontend/presentation/screens/notifications_screen.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/wanderer_logo.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/search_bar_widget.dart';
-import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 
 /// Reusable AppBar for the Wanderer application
 class WandererAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -43,6 +44,41 @@ class WandererAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _WandererAppBarState extends State<WandererAppBar> {
   bool _isSearchExpanded = false;
+  int _unreadCount = 0;
+  final NotificationApiService _notificationService = NotificationApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isLoggedIn) {
+      _fetchUnreadCount();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant WandererAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoggedIn && !oldWidget.isLoggedIn) {
+      _fetchUnreadCount();
+    } else if (!widget.isLoggedIn && oldWidget.isLoggedIn) {
+      setState(() {
+        _unreadCount = 0;
+      });
+    }
+  }
+
+  Future<void> _fetchUnreadCount() async {
+    try {
+      final count = await _notificationService.getUnreadCount();
+      if (mounted) {
+        setState(() {
+          _unreadCount = count;
+        });
+      }
+    } catch (_) {
+      // Silently fail - badge just won't show
+    }
+  }
 
   /// Get the initial letter for the avatar, preferring displayName over username
   String get _avatarInitial {
@@ -61,11 +97,18 @@ class _WandererAppBarState extends State<WandererAppBar> {
     });
   }
 
-  void _showNotImplementedMessage() {
-    UiHelpers.showInfoMessage(
+  void _navigateToNotifications() {
+    Navigator.push(
       context,
-      'Notifications feature not yet implemented',
-    );
+      MaterialPageRoute(
+        builder: (context) => const NotificationsScreen(),
+      ),
+    ).then((_) {
+      // Refresh unread count when returning from notifications screen
+      if (mounted && widget.isLoggedIn) {
+        _fetchUnreadCount();
+      }
+    });
   }
 
   @override
@@ -120,12 +163,19 @@ class _WandererAppBarState extends State<WandererAppBar> {
             tooltip: 'Search',
             onPressed: _toggleSearch,
           ),
-        // Notifications icon (only for logged in users)
+        // Notifications icon with badge (only for logged in users)
         if (widget.isLoggedIn)
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: Badge(
+              isLabelVisible: _unreadCount > 0,
+              label: Text(
+                _unreadCount > 99 ? '99+' : '$_unreadCount',
+                style: const TextStyle(fontSize: 10),
+              ),
+              child: const Icon(Icons.notifications_outlined),
+            ),
             tooltip: 'Notifications',
-            onPressed: _showNotImplementedMessage,
+            onPressed: _navigateToNotifications,
           ),
         if (!widget.isLoggedIn && widget.onLoginPressed != null)
           Padding(
