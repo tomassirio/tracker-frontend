@@ -45,10 +45,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _togglePushNotifications(bool value) async {
+    final previousValue = _pushEnabled;
     setState(() {
       _pushEnabled = value;
     });
-    await _pushNotificationManager.setEnabled(value);
+    try {
+      await _pushNotificationManager.setEnabled(value);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _pushEnabled = previousValue;
+        });
+        UiHelpers.showErrorMessage(
+          context,
+          'Failed to update notification preference',
+        );
+      }
+    }
   }
 
   // --- Account Actions ---
