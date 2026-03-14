@@ -532,8 +532,9 @@ class TripTimeline extends StatelessWidget {
   }
 
   String _formatTimestamp(DateTime timestamp) {
+    final local = timestamp.toLocal();
     final now = DateTime.now();
-    final difference = now.difference(timestamp);
+    final difference = now.difference(local);
 
     if (difference.inMinutes < 1) {
       return 'Just now';
@@ -544,7 +545,7 @@ class TripTimeline extends StatelessWidget {
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d ago';
     } else {
-      return '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+      return '${local.day}/${local.month}/${local.year} ${local.hour}:${local.minute.toString().padLeft(2, '0')}';
     }
   }
 }

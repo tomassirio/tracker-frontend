@@ -798,9 +798,10 @@ class TripMapHelper {
 
   /// Formats a timestamp for display in a marker InfoWindow
   static String _formatMarkerTimestamp(DateTime timestamp) {
-    final day = '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+    final local = timestamp.toLocal();
+    final day = '${local.day}/${local.month}/${local.year}';
     final time =
-        '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+        '${local.hour}:${local.minute.toString().padLeft(2, '0')}';
     return '$day  $time';
   }
 }
