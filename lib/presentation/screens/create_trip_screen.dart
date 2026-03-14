@@ -100,12 +100,24 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
       final trip = await _repository.getTripById(tripId);
 
+      // Apply creation settings that the backend may not have propagated yet
+      // into the query model (e.g. automaticUpdates / updateRefresh).
+      final effectiveTrip = _automaticUpdates
+          ? trip.copyWith(
+              automaticUpdates: true,
+              updateRefresh:
+                  (int.tryParse(_intervalController.text) ??
+                          _minIntervalMinutes) *
+                      60,
+            )
+          : trip;
+
       if (mounted) {
         UiHelpers.showSuccessMessage(context, 'Trip created successfully!');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => TripDetailScreen(trip: trip),
+            builder: (context) => TripDetailScreen(trip: effectiveTrip),
           ),
         );
       }

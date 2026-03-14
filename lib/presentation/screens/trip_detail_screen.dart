@@ -296,7 +296,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final updatedTrip = await _repository.getTripById(_trip.id);
       if (mounted) {
         setState(() {
-          _trip = updatedTrip;
+          // Preserve automaticUpdates / updateRefresh when the backend query
+          // model hasn't propagated them yet (CQRS eventual consistency).
+          // If the backend returns false/null but we already know the user
+          // enabled automatic updates, keep the local value.
+          _trip = updatedTrip.copyWith(
+            automaticUpdates: updatedTrip.automaticUpdates ||
+                _trip.automaticUpdates,
+            updateRefresh:
+                updatedTrip.updateRefresh ?? _trip.updateRefresh,
+          );
         });
         _updateMapData();
         // Only animate the camera on subsequent refreshes (e.g. after a

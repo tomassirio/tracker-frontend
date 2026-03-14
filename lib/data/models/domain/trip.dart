@@ -174,11 +174,17 @@ class Trip {
         ((tripSettings?['tripStatus'] ?? json['status']) as String?) ??
             'CREATED',
       ),
-      updateRefresh: tripSettings?['updateRefresh'] as int?,
-      automaticUpdates: (tripSettings?['automaticUpdates'] as bool?) ?? false,
-      tripModality: tripSettings?['tripModality'] != null
+      updateRefresh:
+          (tripSettings?['updateRefresh'] ?? json['updateRefresh']) as int?,
+      automaticUpdates:
+          ((tripSettings?['automaticUpdates'] ?? json['automaticUpdates'])
+                  as bool?) ??
+              false,
+      tripModality: (tripSettings?['tripModality'] ??
+                  json['tripModality']) !=
+              null
           ? TripModality.fromJson(
-              tripSettings!['tripModality'] as String,
+              (tripSettings?['tripModality'] ?? json['tripModality']) as String,
             )
           : null,
       startDate: json['startDate'] != null
