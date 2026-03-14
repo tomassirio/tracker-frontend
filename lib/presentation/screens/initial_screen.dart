@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wanderer_frontend/data/storage/token_storage.dart';
+import 'package:wanderer_frontend/data/storage/token_refresh_manager.dart';
 import 'package:wanderer_frontend/presentation/screens/home_screen.dart';
 
 /// Initial screen that checks auth state and shows appropriate content
@@ -19,8 +21,26 @@ class _InitialScreenState extends State<InitialScreen> {
   }
 
   Future<void> _checkAuthState() async {
-    // Small delay to show splash-like effect
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Proactively refresh the access token if it has expired while the app
+    // was closed.  This prevents the user from appearing "logged out" when
+    // they still have a valid refresh token.
+    try {
+      final tokenStorage = TokenStorage();
+      final isLoggedIn = await tokenStorage.isLoggedIn();
+
+      if (isLoggedIn) {
+        final isExpired = await tokenStorage.isAccessTokenExpired();
+        if (isExpired) {
+          debugPrint('InitialScreen: Access token expired, refreshing...');
+          final refreshed =
+              await TokenRefreshManager.instance.ensureValidToken();
+          debugPrint('InitialScreen: Token refresh result: $refreshed');
+        }
+      }
+    } catch (e) {
+      debugPrint('InitialScreen: Error during startup token check: $e');
+      // Continue to HomeScreen regardless — it handles guest mode gracefully
+    }
 
     if (mounted) {
       setState(() {

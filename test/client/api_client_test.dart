@@ -703,7 +703,7 @@ void main() {
         verify(mockTokenStorage.clearTokens()).called(1);
       });
 
-      test('refresh token fails with exception', () async {
+      test('refresh token fails with exception does not clear tokens', () async {
         when(
           mockTokenStorage.isAccessTokenExpired(),
         ).thenAnswer((_) async => true);
@@ -732,7 +732,9 @@ void main() {
 
         await apiClient.get('/test', requireAuth: true);
 
-        verify(mockTokenStorage.clearTokens()).called(1);
+        // Tokens should NOT be cleared on transient/network errors
+        // to avoid logging out users due to temporary connectivity issues
+        verifyNever(mockTokenStorage.clearTokens());
       });
 
       test(

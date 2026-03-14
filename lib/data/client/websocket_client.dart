@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../storage/token_storage.dart';
+import '../storage/token_refresh_manager.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/config/api_endpoints_stub.dart'
     if (dart.library.js_interop) '../../core/config/api_endpoints_web.dart'
@@ -40,7 +41,6 @@ class WebSocketClient {
   static const Duration _pingInterval = Duration(seconds: 30);
 
   bool _shouldReconnect = true;
-  bool _isRefreshingToken = false;
 
   // Track subscription IDs for STOMP protocol
   int _nextSubscriptionId = 0;
@@ -154,81 +154,17 @@ class WebSocketClient {
   /// Ensure access token is valid, refreshing proactively if expired
   Future<void> _ensureValidToken() async {
     try {
-      final isExpired = await _tokenStorage.isAccessTokenExpired();
-      if (isExpired) {
-        debugPrint('WebSocket: Token expired, refreshing before connect');
-        await _refreshToken();
-      }
+      await TokenRefreshManager.instance
+          .ensureValidToken(httpClient: _httpClient);
     } catch (e) {
       debugPrint('WebSocket: Error checking token expiration: $e');
     }
   }
 
-  /// Refresh the access token using refresh token
+  /// Refresh the access token using the centralized TokenRefreshManager
   Future<bool> _refreshToken() async {
-    if (_isRefreshingToken) {
-      // Wait a bit for the other refresh to complete
-      await Future.delayed(const Duration(milliseconds: 500));
-      return await _tokenStorage.getAccessToken() != null;
-    }
-
-    _isRefreshingToken = true;
-    try {
-      final refreshToken = await _tokenStorage.getRefreshToken();
-      if (refreshToken == null) {
-        debugPrint('WebSocket: No refresh token available');
-        return false;
-      }
-
-      final uri = Uri.parse(
-        '${ApiEndpoints.authBaseUrl}${ApiEndpoints.authRefresh}',
-      );
-
-      debugPrint('WebSocket: Refreshing token...');
-      final response = await _httpClient.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'refreshToken': refreshToken}),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-        final newAccessToken = data['accessToken'] ?? data['access_token'];
-        final newRefreshToken =
-            data['refreshToken'] ?? data['refresh_token'] ?? refreshToken;
-        final tokenType = data['tokenType'] ?? data['token_type'] ?? 'Bearer';
-        final expiresIn = data['expiresIn'] ?? data['expires_in'] ?? 3600;
-
-        if (newAccessToken == null) {
-          debugPrint('WebSocket: Invalid refresh response');
-          return false;
-        }
-
-        await _tokenStorage.saveTokens(
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-          tokenType: tokenType,
-          expiresIn: expiresIn is int
-              ? expiresIn
-              : int.tryParse(expiresIn.toString()) ?? 3600,
-        );
-        debugPrint('WebSocket: Token refreshed successfully');
-        return true;
-      } else {
-        debugPrint(
-            'WebSocket: Token refresh failed with ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      debugPrint('WebSocket: Token refresh error: $e');
-      return false;
-    } finally {
-      _isRefreshingToken = false;
-    }
+    return TokenRefreshManager.instance
+        .refreshIfNeeded(httpClient: _httpClient);
   }
 
   String _buildWebSocketUrl(String? token) {
