@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/data/services/notification_api_service.dart';
-import 'package:wanderer_frontend/presentation/screens/notifications_screen.dart';
+import 'package:wanderer_frontend/presentation/widgets/common/notifications_dropdown.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/wanderer_logo.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/search_bar_widget.dart';
 
@@ -97,15 +97,31 @@ class _WandererAppBarState extends State<WandererAppBar> {
     });
   }
 
-  void _navigateToNotifications() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const NotificationsScreen(),
+  final GlobalKey _notificationButtonKey = GlobalKey();
+
+  void _showNotificationsDropdown() {
+    final renderBox =
+        _notificationButtonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final buttonPosition = renderBox.localToGlobal(Offset.zero);
+    final buttonSize = renderBox.size;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final position = RelativeRect.fromRect(
+      Rect.fromLTWH(
+        buttonPosition.dx,
+        buttonPosition.dy + buttonSize.height,
+        buttonSize.width,
+        0,
       ),
-    ).then((_) {
-      // Refresh unread count when returning from notifications screen
-      if (mounted && widget.isLoggedIn) {
+      Offset.zero & overlay.size,
+    );
+
+    showNotificationsDropdown(context: context, position: position).then((
+      didRead,
+    ) {
+      if (didRead && mounted && widget.isLoggedIn) {
         _fetchUnreadCount();
       }
     });
@@ -166,6 +182,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
         // Notifications icon with badge (only for logged in users)
         if (widget.isLoggedIn)
           IconButton(
+            key: _notificationButtonKey,
             icon: Badge(
               isLabelVisible: _unreadCount > 0,
               label: Text(
@@ -175,7 +192,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
               child: const Icon(Icons.notifications_outlined),
             ),
             tooltip: 'Notifications',
-            onPressed: _navigateToNotifications,
+            onPressed: _showNotificationsDropdown,
           ),
         if (!widget.isLoggedIn && widget.onLoginPressed != null)
           Padding(
@@ -194,8 +211,8 @@ class _WandererAppBarState extends State<WandererAppBar> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 backgroundImage:
                     widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
-                        ? NetworkImage(widget.avatarUrl!)
-                        : null,
+                    ? NetworkImage(widget.avatarUrl!)
+                    : null,
                 child: widget.avatarUrl == null || widget.avatarUrl!.isEmpty
                     ? Text(
                         _avatarInitial,
@@ -235,11 +252,13 @@ class _WandererAppBarState extends State<WandererAppBar> {
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.primary,
-                              backgroundImage: widget.avatarUrl != null &&
+                              backgroundImage:
+                                  widget.avatarUrl != null &&
                                       widget.avatarUrl!.isNotEmpty
                                   ? NetworkImage(widget.avatarUrl!)
                                   : null,
-                              child: widget.avatarUrl == null ||
+                              child:
+                                  widget.avatarUrl == null ||
                                       widget.avatarUrl!.isEmpty
                                   ? Text(
                                       _avatarInitial,

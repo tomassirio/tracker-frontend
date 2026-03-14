@@ -10,26 +10,78 @@ import 'package:wanderer_frontend/presentation/helpers/auth_navigation_helper.da
 import 'package:wanderer_frontend/presentation/helpers/page_transitions.dart';
 import 'package:wanderer_frontend/presentation/screens/trip_deep_link_screen.dart';
 
-/// Screen displaying paginated notifications for the current user
-class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
-
-  @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+/// Shows a notifications dropdown anchored below a given button.
+///
+/// Returns `true` if any notification was read (so the caller can refresh
+/// the unread badge).
+Future<bool> showNotificationsDropdown({
+  required BuildContext context,
+  required RelativeRect position,
+}) async {
+  final result = await Navigator.push<bool>(
+    context,
+    _NotificationsDropdownRoute(position: position),
+  );
+  return result ?? false;
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
-  final NotificationApiService _notificationService = NotificationApiService();
+class _NotificationsDropdownRoute extends PopupRoute<bool> {
+  _NotificationsDropdownRoute({required this.position});
 
+  final RelativeRect position;
+
+  @override
+  Color? get barrierColor => Colors.black12;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  String? get barrierLabel => 'Dismiss notifications';
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 200);
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return _NotificationsDropdownContent(
+      position: position,
+      animation: animation,
+    );
+  }
+}
+
+class _NotificationsDropdownContent extends StatefulWidget {
+  const _NotificationsDropdownContent({
+    required this.position,
+    required this.animation,
+  });
+
+  final RelativeRect position;
+  final Animation<double> animation;
+
+  @override
+  State<_NotificationsDropdownContent> createState() =>
+      _NotificationsDropdownContentState();
+}
+
+class _NotificationsDropdownContentState
+    extends State<_NotificationsDropdownContent> {
+  final NotificationApiService _notificationService = NotificationApiService();
   final List<NotificationDto> _notifications = [];
+  final ScrollController _scrollController = ScrollController();
+
   bool _isLoading = false;
   bool _isLoadingMore = false;
   String? _error;
   int _currentPage = 0;
   bool _hasMore = true;
   int _unreadCount = 0;
-
-  final ScrollController _scrollController = ScrollController();
+  bool _didRead = false;
 
   @override
   void initState() {
@@ -130,11 +182,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     try {
       await _notificationService.markAsRead(notification.id);
+      _didRead = true;
 
       if (mounted) {
         setState(() {
-          final index =
-              _notifications.indexWhere((n) => n.id == notification.id);
+          final index = _notifications.indexWhere(
+            (n) => n.id == notification.id,
+          );
           if (index != -1) {
             _notifications[index] = NotificationDto(
               id: notification.id,
@@ -158,6 +212,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _markAllAsRead() async {
     try {
       await _notificationService.markAllAsRead();
+      _didRead = true;
 
       if (mounted) {
         setState(() {
@@ -180,16 +235,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to mark all as read')),
-        );
-      }
+      // Silently fail
     }
   }
 
   void _onNotificationTap(NotificationDto notification) {
     _markAsRead(notification);
+    Navigator.pop(context, true);
     _navigateToTarget(notification);
   }
 
@@ -220,7 +272,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         break;
       case NotificationType.replyToComment:
       case NotificationType.commentReaction:
-        // referenceId is a comment ID; no direct navigation available
         break;
       case NotificationType.newFollower:
         AuthNavigationHelper.navigateToUserProfile(context, referenceId);
@@ -291,48 +342,88 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text(
-          'Notifications',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    final mediaQuery = MediaQuery.of(context);
+    final dropdownWidth = min(360.0, mediaQuery.size.width - 16);
+
+    return FadeTransition(
+      opacity: widget.animation,
+      child: CustomSingleChildLayout(
+        delegate: _DropdownLayoutDelegate(
+          position: widget.position,
+          dropdownWidth: dropdownWidth,
+          screenPadding: mediaQuery.padding,
         ),
-        actions: [
+        child: Material(
+          elevation: 8,
+          borderRadius: BorderRadius.circular(12),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: dropdownWidth,
+              maxHeight: min(440.0, mediaQuery.size.height * 0.6),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(),
+                const Divider(height: 1),
+                Flexible(child: _buildBody()),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+      child: Row(
+        children: [
+          const Text(
+            'Notifications',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
           if (_unreadCount > 0)
             TextButton.icon(
               onPressed: _markAllAsRead,
-              icon: const Icon(Icons.done_all, color: Colors.white),
-              label: const Text(
-                'Read all',
-                style: TextStyle(color: Colors.white),
+              icon: const Icon(Icons.done_all, size: 18),
+              label: const Text('Read all', style: TextStyle(fontSize: 13)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                visualDensity: VisualDensity.compact,
               ),
             ),
         ],
       ),
-      body: _buildBody(),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_error != null) {
-      return Center(
+      return Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
-            const SizedBox(height: 16),
+            Icon(Icons.error_outline, size: 36, color: Colors.grey[400]),
+            const SizedBox(height: 8),
             Text(
               _error!,
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: 8),
+            TextButton(
               onPressed: _loadNotifications,
               child: const Text('Retry'),
             ),
@@ -342,28 +433,25 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     if (_notifications.isEmpty) {
-      return Center(
+      return Padding(
+        padding: const EdgeInsets.all(32),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.notifications_none,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
+            Icon(Icons.notifications_none, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 12),
             Text(
               'No notifications yet',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[600],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
-              'When you receive notifications, they\'ll appear here',
-              style: TextStyle(color: Colors.grey[500]),
+              'When you receive notifications,\nthey\'ll appear here',
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
           ],
@@ -371,21 +459,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadNotifications,
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: _notifications.length + (_isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index >= _notifications.length) {
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return _buildNotificationTile(_notifications[index]);
-        },
-      ),
+    return ListView.separated(
+      controller: _scrollController,
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      itemCount: _notifications.length + (_isLoadingMore ? 1 : 0),
+      separatorBuilder: (_, __) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        if (index >= _notifications.length) {
+          return const Padding(
+            padding: EdgeInsets.all(12),
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        return _buildNotificationTile(_notifications[index]);
+      },
     );
   }
 
@@ -397,28 +491,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return InkWell(
       onTap: () => _onNotificationTap(notification),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: notification.read ? null : Colors.orange.withAlpha(15),
-          border: Border(
-            bottom: BorderSide(color: Colors.grey.withAlpha(51)),
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        color: notification.read ? null : Colors.orange.withAlpha(15),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon
             Container(
-              width: 40,
-              height: 40,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: color.withAlpha(26),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: color, size: 16),
             ),
-            const SizedBox(width: 12),
-            // Content
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,30 +513,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Text(
                     notification.message,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: notification.read
                           ? FontWeight.normal
                           : FontWeight.w600,
                       color: Colors.black87,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     timeAgo,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[500],
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                   ),
                 ],
               ),
             ),
-            // Unread indicator
             if (!notification.read)
               Container(
                 width: 8,
                 height: 8,
-                margin: const EdgeInsets.only(top: 6),
+                margin: const EdgeInsets.only(top: 4, left: 4),
                 decoration: BoxDecoration(
                   color: WandererTheme.primaryOrange,
                   shape: BoxShape.circle,
@@ -459,5 +544,41 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       ),
     );
+  }
+}
+
+/// Layout delegate that positions the dropdown below the anchor button,
+/// aligned to the right edge of the screen.
+class _DropdownLayoutDelegate extends SingleChildLayoutDelegate {
+  _DropdownLayoutDelegate({
+    required this.position,
+    required this.dropdownWidth,
+    required this.screenPadding,
+  });
+
+  final RelativeRect position;
+  final double dropdownWidth;
+  final EdgeInsets screenPadding;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints.loose(
+      Size(dropdownWidth, constraints.maxHeight - position.top - 8),
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    // Position the dropdown below the anchor, right-aligned
+    double left = size.width - position.right - childSize.width;
+    // Clamp to stay within screen bounds
+    left = left.clamp(8.0, size.width - childSize.width - 8);
+    return Offset(left, position.top);
+  }
+
+  @override
+  bool shouldRelayout(_DropdownLayoutDelegate oldDelegate) {
+    return position != oldDelegate.position ||
+        dropdownWidth != oldDelegate.dropdownWidth;
   }
 }
