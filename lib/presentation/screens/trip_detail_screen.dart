@@ -128,19 +128,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// Check if trip update panel should be shown
   /// Only on Android, for trip owner, when trip is in progress
-  /// Also shown when resting for multi-day trips (to access "Begin Day" button)
   bool get _showTripUpdatePanel =>
       _isAndroid &&
       _userId != null &&
       _trip.userId == _userId &&
-      (_trip.status == TripStatus.inProgress ||
-          (_trip.status == TripStatus.resting &&
-              _trip.tripModality == TripModality.multiDay));
+      _trip.status == TripStatus.inProgress;
 
   /// Check if the "Finish Day / Begin Day N" button should be shown
-  /// Only for MULTI_DAY trips on Android, for the trip owner, when IN_PROGRESS or RESTING
+  /// Only for MULTI_DAY trips, for the trip owner, when IN_PROGRESS or RESTING
   bool get _showDayButton =>
-      _isAndroid &&
       _userId != null &&
       _trip.userId == _userId &&
       _trip.tripModality == TripModality.multiDay &&
@@ -165,9 +161,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _loadPromotionInfo();
     _loadTripAchievements();
     _initWebSocket();
-    _fetchUserLocation();
-    // Load trip updates and full trip data together, then set the initial
-    // camera position exactly once (instant jump, no distracting animation).
+    // Load trip updates, full trip data and user location together, then set
+    // the initial camera position exactly once (instant jump, no animation).
+    // _fetchUserLocation is included so that trips with no locations/route can
+    // centre on the user's real position instead of the hardcoded NYC default.
     _initializeMapPosition();
   }
 
@@ -205,10 +202,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   /// the map camera instantly at the latest location. This avoids the jarring
   /// "zoom to stale position → animate to real position" sequence.
   Future<void> _initializeMapPosition() async {
-    // Fire data requests and wait for the map controller in parallel
+    // Fire data requests, user location fetch, and wait for the map controller
+    // in parallel. Including _fetchUserLocation ensures _userLocation is set
+    // before we position the camera — critical for trips with no locations.
     await Future.wait([
       _loadTripUpdates(),
       _refreshTripData(),
+      _fetchUserLocation(),
       _mapControllerCompleter.future,
     ]);
     // Now both the data and the map are ready — jump to latest location
@@ -264,7 +264,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   void _handleTripStatusChanged(TripStatusChangedEvent event) {
     setState(() {
-      _trip = _trip.copyWith(status: event.newStatus);
+      _trip = _trip.copyWith(
+        status: event.newStatus,
+        // Use currentDay from the event if available; when a multi-day trip
+        // is first started and the backend hasn't set currentDay yet, default
+        // to 1 so the "Day 1" badge shows right away.
+        currentDay: event.currentDay ??
+            ((event.newStatus == TripStatus.inProgress &&
+                    event.previousStatus == TripStatus.created &&
+                    _trip.tripModality == TripModality.multiDay &&
+                    _trip.currentDay == null)
+                ? 1
+                : null),
+      );
     });
 
     // Reload timeline to pick up any lifecycle markers
@@ -284,7 +296,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final updatedTrip = await _repository.getTripById(_trip.id);
       if (mounted) {
         setState(() {
-          _trip = updatedTrip;
+          // Preserve automaticUpdates / updateRefresh when the backend query
+          // model hasn't propagated them yet (CQRS eventual consistency).
+          // If the backend returns false/null but we already know the user
+          // enabled automatic updates, keep the local value.
+          _trip = updatedTrip.copyWith(
+            automaticUpdates: updatedTrip.automaticUpdates ||
+                _trip.automaticUpdates,
+            updateRefresh:
+                updatedTrip.updateRefresh ?? _trip.updateRefresh,
+          );
         });
         _updateMapData();
         // Only animate the camera on subsequent refreshes (e.g. after a
@@ -411,6 +432,51 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       final initialLoc =
           TripMapHelper.getInitialLocation(_trip, userLocation: _userLocation);
       _animateMapToLocation(initialLoc, animate: animate);
+    }
+  }
+
+  /// Fetches the user's current device location and centres the map on it.
+  /// Called when a trip is started so that the map immediately shows where
+  /// the user is. Falls back to [_animateMapToLatestLocation] when the
+  /// device location cannot be determined.
+  Future<void> _centerMapOnCurrentLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _animateMapToLatestLocation(animate: true);
+        return;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _animateMapToLatestLocation(animate: true);
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        _animateMapToLatestLocation(animate: true);
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      final target = LatLng(position.latitude, position.longitude);
+
+      if (mounted) {
+        setState(() {
+          _userLocation = target;
+        });
+        await _animateMapToLocation(target);
+      }
+    } catch (e) {
+      debugPrint('TripDetailScreen: Could not center on current location: $e');
+      // Gracefully fall back to existing behaviour
+      _animateMapToLatestLocation(animate: true);
     }
   }
 
@@ -1383,6 +1449,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
     setState(() => _isChangingStatus = true);
 
+    // Capture previous status before async gap — WebSocket may update _trip
+    // before the optimistic setState below runs.
+    final previousStatus = _trip.status;
+    final isMultiDay = _trip.tripModality == TripModality.multiDay;
+
     try {
       // If starting/resuming with automatic updates, ensure background location
       // permission is granted (shows prominent disclosure on Android).
@@ -1401,7 +1472,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
       // Update local state optimistically - WebSocket will confirm the change
       setState(() {
-        _trip = _trip.copyWith(status: newStatus);
+        _trip = _trip.copyWith(
+          status: newStatus,
+          // When starting a multi-day trip, set currentDay to 1 immediately
+          // so the "Day 1" badge shows right away in the trip info card.
+          currentDay: (newStatus == TripStatus.inProgress &&
+                  previousStatus == TripStatus.created &&
+                  isMultiDay &&
+                  _trip.currentDay == null)
+              ? 1
+              : null,
+        );
         _isChangingStatus = false;
       });
 
@@ -1419,6 +1500,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           // Stop automatic updates when trip is paused/finished or automatic updates is disabled
           await backgroundManager.stopAutoUpdates(_trip.id);
         }
+      }
+
+      // When starting a trip, center the map on the user's current location
+      if (newStatus == TripStatus.inProgress) {
+        await _centerMapOnCurrentLocation();
       }
 
       if (mounted) {
@@ -1477,6 +1563,52 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     } catch (e) {
       if (mounted) {
         UiHelpers.showErrorMessage(context, 'Error changing visibility: $e');
+      }
+    }
+  }
+
+  /// Handles trip deletion with confirmation dialog.
+  /// On success, navigates to the home screen and clears the navigation stack.
+  Future<void> _handleDeleteTrip() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Trip'),
+        content: Text(
+          'Are you sure you want to delete "${_trip.name}"? '
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      await _repository.deleteTrip(_trip.id);
+      if (mounted) {
+        UiHelpers.showSuccessMessage(context, 'Trip deleted');
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showErrorMessage(context, 'Error deleting trip: $e');
       }
     }
   }
@@ -2051,7 +2183,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 child: TripMapView(
                   initialLocation: TripMapHelper.getInitialLocation(_trip,
                       userLocation: _userLocation),
-                  initialZoom: TripMapHelper.getInitialZoom(_trip),
+                  initialZoom: TripMapHelper.getInitialZoom(_trip,
+                      userLocation: _userLocation),
                   markers: _markers,
                   polylines: _polylines,
                   onMapCreated: (controller) {
@@ -2182,6 +2315,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     isOwner: true,
                     isLoading: _isChangingStatus,
                     onStatusChange: _changeTripStatus,
+                    showDayButton: _showDayButton,
+                    currentDay: _currentDay,
+                    isResting: _trip.status == TripStatus.resting,
+                    onDayButtonTap:
+                        _showDayButton ? () => _handleDayButtonTap(null) : null,
                   ),
                 ),
 
@@ -2304,8 +2442,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       isChangingStatus: _isChangingStatus,
       isChangingSettings: _isChangingSettings,
       showTripUpdatePanel: _showTripUpdatePanel,
-      showDayButton: _showDayButton,
-      currentDay: _currentDay,
       isFollowingTripOwner: _isFollowingTripOwner,
       hasSentFriendRequest: _hasSentFriendRequest,
       isAlreadyFriends: _isAlreadyFriends,
@@ -2329,7 +2465,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       onSendComment: _addComment,
       onCancelReply: () => setState(() => _replyingToCommentId = null),
       onStatusChange: _changeTripStatus,
-      onDayButtonTap: _showDayButton ? _handleDayButtonTap : null,
       onSettingsChange: _handleSettingsChange,
       onSendTripUpdate: _sendManualUpdate,
       onFollowTripOwner: _isLoggedIn && _trip.userId != _userId
@@ -2342,6 +2477,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _isAndroid ? () => _triggerTestBackgroundUpdate() : null,
       onVisibilityChange:
           _isLoggedIn && _trip.userId == _userId ? _changeTripVisibility : null,
+      onDeleteTrip:
+          _isLoggedIn && _trip.userId == _userId ? _handleDeleteTrip : null,
       onTogglePlannedWaypoints: _trip.hasPlannedRoute
           ? () {
               setState(() {

@@ -32,6 +32,34 @@ void main() {
         expect(json.containsKey('description'), false);
         expect(json.containsKey('startDate'), false);
         expect(json.containsKey('endDate'), false);
+        expect(json.containsKey('automaticUpdates'), false);
+        expect(json.containsKey('updateRefresh'), false);
+      });
+
+      test('toJson includes automaticUpdates and updateRefresh when set', () {
+        final request = CreateTripRequest(
+          name: 'My Trip',
+          visibility: Visibility.public,
+          automaticUpdates: true,
+          updateRefresh: 900,
+        );
+
+        final json = request.toJson();
+
+        expect(json['automaticUpdates'], true);
+        expect(json['updateRefresh'], 900);
+      });
+
+      test('toJson excludes automaticUpdates and updateRefresh when null', () {
+        final request = CreateTripRequest(
+          name: 'My Trip',
+          visibility: Visibility.public,
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('automaticUpdates'), false);
+        expect(json.containsKey('updateRefresh'), false);
       });
     });
 
@@ -435,6 +463,57 @@ void main() {
 
         expect(trip.automaticUpdates, false);
         expect(trip.updateRefresh, null);
+      });
+
+      test(
+          'fromJson parses automaticUpdates and updateRefresh from top-level keys',
+          () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'username': 'testuser',
+          'name': 'Test Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'automaticUpdates': true,
+          'updateRefresh': 900,
+          'tripModality': 'SIMPLE',
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        expect(trip.automaticUpdates, true);
+        expect(trip.updateRefresh, 900);
+        expect(trip.tripModality, TripModality.simple);
+      });
+
+      test(
+          'fromJson prefers tripSettings over top-level keys for automaticUpdates',
+          () {
+        final json = {
+          'id': 'trip123',
+          'userId': 'user456',
+          'username': 'testuser',
+          'name': 'Test Trip',
+          'visibility': 'PUBLIC',
+          'status': 'IN_PROGRESS',
+          'automaticUpdates': false,
+          'updateRefresh': 300,
+          'tripSettings': {
+            'automaticUpdates': true,
+            'updateRefresh': 1800,
+          },
+          'createdAt': '2024-01-01T00:00:00.000Z',
+          'updatedAt': '2024-01-02T00:00:00.000Z',
+        };
+
+        final trip = Trip.fromJson(json);
+
+        // tripSettings should take priority over top-level
+        expect(trip.automaticUpdates, true);
+        expect(trip.updateRefresh, 1800);
       });
 
       test('toJson includes automaticUpdates and updateRefresh', () {

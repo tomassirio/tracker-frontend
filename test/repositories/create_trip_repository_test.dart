@@ -128,6 +128,30 @@ void main() {
           throwsA(predicate((e) => e.toString().contains('Network error'))),
         );
       });
+
+      test('creates trip with automatic updates enabled', () async {
+        await repository.createTrip(
+          name: 'Auto Update Trip',
+          visibility: Visibility.public,
+          automaticUpdates: true,
+          updateRefresh: 900,
+        );
+
+        expect(mockTripService.createTripCalled, true);
+        expect(mockTripService.lastCreateRequest?.automaticUpdates, true);
+        expect(mockTripService.lastCreateRequest?.updateRefresh, 900);
+      });
+
+      test('creates trip without automatic updates by default', () async {
+        await repository.createTrip(
+          name: 'No Auto Update Trip',
+          visibility: Visibility.public,
+        );
+
+        expect(mockTripService.createTripCalled, true);
+        expect(mockTripService.lastCreateRequest?.automaticUpdates, null);
+        expect(mockTripService.lastCreateRequest?.updateRefresh, null);
+      });
     });
 
     group('CreateTripRepository initialization', () {

@@ -123,6 +123,12 @@ class TripDetailRepository {
     return await _tripService.changeSettings(tripId, request);
   }
 
+  /// Deletes a trip
+  /// Returns the trip ID. Deletion will be confirmed via WebSocket.
+  Future<String> deleteTrip(String tripId) async {
+    return await _tripService.deleteTrip(tripId);
+  }
+
   /// Checks if user is logged in
   Future<bool> isLoggedIn() async {
     return await _authService.isLoggedIn();

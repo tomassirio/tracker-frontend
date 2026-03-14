@@ -3,6 +3,15 @@ allprojects {
         google()
         mavenCentral()
     }
+    // Keep kotlin-stdlib aligned with the Kotlin plugin version declared in
+    // settings.gradle.kts so that pre-compiled library metadata is readable.
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-stdlib")) {
+                useVersion("2.3.0")
+            }
+        }
+    }
 }
 
 val newBuildDir: Directory =

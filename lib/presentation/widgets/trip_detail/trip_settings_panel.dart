@@ -14,10 +14,10 @@ const int _settingsMaxIntervalMinutes = 9999;
 
 /// Collapsible settings panel shown as a cog-icon bubble when collapsed.
 /// Contains: Show Planned Route toggle (all users, all platforms),
-/// Trip Type selector (owner + in-progress, all platforms), and
-/// Automatic Updates settings (owner + in-progress + mobile only).
+/// Trip Type selector (owner + created/in-progress, all platforms), and
+/// Automatic Updates settings (owner + created/in-progress + mobile only).
 /// Visible when the trip has a planned route OR the current user is the owner
-/// and the trip is in progress.
+/// and the trip is created or in progress.
 class TripSettingsPanel extends StatefulWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
@@ -39,15 +39,17 @@ class TripSettingsPanel extends StatefulWidget {
   final int? updateRefresh; // in seconds
   final TripModality? tripModality;
   final bool isLoading;
-  final Function(
-          bool automaticUpdates, int? updateRefresh, TripModality? tripModality)?
-      onSettingsChange;
+  final Function(bool automaticUpdates, int? updateRefresh,
+      TripModality? tripModality)? onSettingsChange;
   final TripStatus tripStatus;
   final String? tripId;
   final VoidCallback? onTestBackgroundUpdate;
 
   /// Override for tests — defaults to [kIsWeb]
   final bool? isWeb;
+
+  /// Callback to delete the trip (owner only)
+  final VoidCallback? onDeleteTrip;
 
   const TripSettingsPanel({
     super.key,
@@ -66,6 +68,7 @@ class TripSettingsPanel extends StatefulWidget {
     this.tripId,
     this.onTestBackgroundUpdate,
     this.isWeb,
+    this.onDeleteTrip,
   });
 
   @override
@@ -76,6 +79,11 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
   late bool _automaticUpdates;
   late TextEditingController _intervalController;
   TripModality? _tripModality;
+
+  /// The saved interval text — used to detect whether the user actually
+  /// changed the value so the Save button can be grayed-out when nothing
+  /// has been modified.
+  late String _savedIntervalText;
 
   /// Converts seconds to clamped minutes for display in the interval field.
   int _secondsToMinutes(int? seconds) {
@@ -93,6 +101,8 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     _intervalController = TextEditingController(
       text: _secondsToMinutes(widget.updateRefresh).toString(),
     );
+    _savedIntervalText = _intervalController.text;
+    _intervalController.addListener(_onIntervalChanged);
   }
 
   @override
@@ -107,28 +117,47 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     if (oldWidget.updateRefresh != widget.updateRefresh) {
       _intervalController.text =
           _secondsToMinutes(widget.updateRefresh).toString();
+      _savedIntervalText = _intervalController.text;
     }
   }
 
   @override
   void dispose() {
+    _intervalController.removeListener(_onIntervalChanged);
     _intervalController.dispose();
     super.dispose();
   }
 
-  /// Returns true when there is at least one section to display.
-  bool get _hasContent {
-    return widget.tripHasPlannedRoute ||
-        (widget.isOwner && widget.tripStatus == TripStatus.inProgress);
+  /// Triggers a rebuild so the Save button reacts to interval text changes.
+  void _onIntervalChanged() {
+    setState(() {});
   }
 
-  /// Whether the trip type can still be changed (irreversible once multi-day).
-  bool get _canChangeTripType => widget.tripModality != TripModality.multiDay;
+  /// Whether the interval has been modified from the last-saved value.
+  bool get _isIntervalDirty => _intervalController.text != _savedIntervalText;
+
+  /// Returns true when there is at least one section to display.
+  bool get _hasContent {
+    return widget.tripHasPlannedRoute || (widget.isOwner && _isEditableStatus);
+  }
+
+  /// Whether the trip status allows editing settings (created or in-progress).
+  bool get _isEditableStatus =>
+      widget.tripStatus == TripStatus.created ||
+      widget.tripStatus == TripStatus.inProgress;
+
+  /// Whether the trip is currently in progress (controls are fully interactive).
+  bool get _isTripInProgress => widget.tripStatus == TripStatus.inProgress;
+
+  /// Whether the trip is already multi-day (locked, shown grayed out).
+  bool get _isMultiDay => widget.tripModality == TripModality.multiDay;
 
   void _validateAndClampInterval() {
     final text = _intervalController.text.trim();
     final parsed = int.tryParse(text);
-    if (text.isEmpty || parsed == null || parsed < _settingsMinIntervalMinutes) {
+    if (text.isEmpty ||
+        parsed == null ||
+        parsed < _settingsMinIntervalMinutes) {
       setState(() {
         _intervalController.text = _settingsMinIntervalMinutes.toString();
         _intervalController.selection = TextSelection.collapsed(
@@ -150,6 +179,47 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     final minutes = int.tryParse(_intervalController.text);
     final seconds = minutes != null ? minutes * 60 : null;
     widget.onSettingsChange?.call(_automaticUpdates, seconds, _tripModality);
+    // After a successful save, update the saved baseline so the button
+    // grays out again until the next edit.
+    setState(() {
+      _savedIntervalText = _intervalController.text;
+    });
+  }
+
+  /// Prompts the user to confirm switching to multi-day, then auto-saves.
+  Future<void> _confirmAndSwitchToMultiDay() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Switch to Multi-Day?'),
+        content: const Text(
+          'This action is irreversible. Once a trip is converted to '
+          'multi-day, it cannot be changed back to simple.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WandererTheme.primaryOrange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _tripModality = TripModality.multiDay;
+      });
+      // Auto-save immediately after confirmation
+      _handleSave();
+    }
   }
 
   @override
@@ -165,8 +235,9 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
       secondCurve: Curves.easeInOut,
       sizeCurve: Curves.easeInOut,
       alignment: Alignment.topLeft,
-      crossFadeState:
-          widget.isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: widget.isCollapsed
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
       firstChild: _buildCollapsedBubble(),
       secondChild: _buildExpandedCard(context, effectiveIsWeb),
     );
@@ -287,38 +358,34 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                 if (widget.tripHasPlannedRoute &&
                     widget.onTogglePlannedWaypoints != null) ...[
                   _buildPlannedRouteToggle(),
-                  if (widget.isOwner &&
-                      widget.tripStatus == TripStatus.inProgress)
+                  if (widget.isOwner && _isEditableStatus)
                     const SizedBox(height: 12),
                 ],
 
-                // Owner-only settings — only when trip is in progress
-                if (widget.isOwner &&
-                    widget.tripStatus == TripStatus.inProgress) ...[
+                // Owner-only settings — when trip is created or in progress
+                if (widget.isOwner && _isEditableStatus) ...[
                   // Trip Type selector — available on all platforms when not
                   // already multi-day (irreversible once set).
-                  if (_canChangeTripType) ...[
-                    _buildSectionLabel(Icons.route, 'Trip Type'),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildModalityButton(
-                            label: 'Simple',
-                            modality: TripModality.simple,
-                          ),
+                  _buildSectionLabel(Icons.route, 'Trip Type'),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildModalityButton(
+                          label: 'Simple',
+                          modality: TripModality.simple,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildModalityButton(
-                            label: 'Multi-Day',
-                            modality: TripModality.multiDay,
-                          ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildModalityButton(
+                          label: 'Multi-Day',
+                          modality: TripModality.multiDay,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
 
                   // Automatic Updates — mobile only (WorkManager / background
                   // location is an Android concept; not applicable on web).
@@ -342,18 +409,40 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         const Spacer(),
                         Switch(
                           value: _automaticUpdates,
-                          onChanged: widget.isLoading
+                          onChanged: widget.isLoading || !_isTripInProgress
                               ? null
                               : (value) {
                                   setState(() {
                                     _automaticUpdates = value;
                                   });
+                                  // When toggling OFF, auto-save immediately
+                                  // since there is no Save button in the
+                                  // disabled state.
+                                  if (!value) {
+                                    final minutes =
+                                        int.tryParse(_intervalController.text);
+                                    final seconds =
+                                        minutes != null ? minutes * 60 : null;
+                                    widget.onSettingsChange
+                                        ?.call(false, seconds, _tripModality);
+                                  }
                                 },
                           activeColor: WandererTheme.primaryOrange,
                         ),
                       ],
                     ),
-                    if (_automaticUpdates) ...[
+                    if (!_isTripInProgress && _automaticUpdates) ...[
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Will activate when the trip is started',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: WandererTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                    if (_automaticUpdates && _isTripInProgress) ...[
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -400,13 +489,13 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                           color: WandererTheme.textSecondary,
                         ),
                       ),
-                    ] else ...[
+                    ] else if (!_automaticUpdates) ...[
                       const SizedBox(height: 8),
-                      _buildSaveButton(fullWidth: true),
                     ],
 
                     // Debug-only test button
-                    if (kDebugMode && widget.onTestBackgroundUpdate != null) ...[
+                    if (kDebugMode &&
+                        widget.onTestBackgroundUpdate != null) ...[
                       const SizedBox(height: 12),
                       const Divider(),
                       const SizedBox(height: 8),
@@ -441,10 +530,35 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         ),
                       ),
                     ],
-                  ] else if (_canChangeTripType) ...[
-                    // Web: show Save button for Trip Type changes only.
-                    _buildSaveButton(fullWidth: true),
                   ],
+                ],
+
+                // Delete Trip — owner only, all statuses except finished
+                if (widget.isOwner &&
+                    widget.onDeleteTrip != null &&
+                    _isEditableStatus) ...[
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: widget.isLoading ? null : widget.onDeleteTrip,
+                      icon: const Icon(Icons.delete_forever, size: 16),
+                      label: const Text(
+                        'Delete Trip',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -520,20 +634,37 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
     required TripModality modality,
   }) {
     final isSelected = _tripModality == modality;
+    final isDisabled = _isMultiDay || widget.isLoading;
     return OutlinedButton(
-      onPressed: widget.isLoading
+      onPressed: isDisabled
           ? null
           : () {
-              setState(() {
-                _tripModality = modality;
-              });
+              if (modality == TripModality.multiDay) {
+                // Confirm before switching to multi-day
+                _confirmAndSwitchToMultiDay();
+              } else {
+                setState(() {
+                  _tripModality = modality;
+                });
+              }
             },
       style: OutlinedButton.styleFrom(
-        backgroundColor: isSelected ? WandererTheme.primaryOrange : null,
-        foregroundColor: isSelected ? Colors.white : null,
+        backgroundColor: isSelected
+            ? (_isMultiDay
+                ? WandererTheme.primaryOrange.withOpacity(0.4)
+                : WandererTheme.primaryOrange)
+            : null,
+        foregroundColor: isSelected
+            ? Colors.white.withOpacity(_isMultiDay ? 0.7 : 1.0)
+            : null,
+        disabledBackgroundColor:
+            isSelected ? WandererTheme.primaryOrange.withOpacity(0.4) : null,
+        disabledForegroundColor: isSelected
+            ? Colors.white.withOpacity(0.7)
+            : WandererTheme.textTertiary,
         side: BorderSide(
           color: isSelected
-              ? WandererTheme.primaryOrange
+              ? WandererTheme.primaryOrange.withOpacity(_isMultiDay ? 0.4 : 1.0)
               : WandererTheme.glassBorderColor,
         ),
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -548,12 +679,13 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
 
   Widget _buildSaveButton({bool fullWidth = false}) {
     final button = ElevatedButton(
-      onPressed: widget.isLoading ? null : _handleSave,
+      onPressed: (widget.isLoading || !_isIntervalDirty) ? null : _handleSave,
       style: ElevatedButton.styleFrom(
         backgroundColor: WandererTheme.primaryOrange,
         foregroundColor: Colors.white,
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        disabledBackgroundColor: WandererTheme.primaryOrange.withOpacity(0.4),
+        disabledForegroundColor: Colors.white70,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         minimumSize: const Size(0, 32),
       ),
       child: widget.isLoading

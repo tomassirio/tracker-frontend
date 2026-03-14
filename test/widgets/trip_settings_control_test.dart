@@ -43,7 +43,7 @@ void main() {
       expect(find.byType(Switch), findsNothing);
     });
 
-    testWidgets('does not show when trip is not in progress',
+    testWidgets('shows settings when trip is created (owner on mobile)',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -60,7 +60,85 @@ void main() {
         ),
       );
 
-      expect(find.byType(Switch), findsNothing);
+      expect(find.byType(Switch), findsOneWidget);
+      expect(find.text('Automatic Updates'), findsOneWidget);
+    });
+
+    testWidgets(
+        'switch is disabled when trip is in created status',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.created,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      final switchWidget =
+          tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, true);
+      expect(switchWidget.onChanged, isNull);
+    });
+
+    testWidgets(
+        'shows hint message when automatic updates enabled but trip not started',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.created,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.text('Will activate when the trip is started'),
+        findsOneWidget,
+      );
+      // Interval field should not be shown when trip is not in progress
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets(
+        'hides hint message when trip is in progress with automatic updates',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              updateRefresh: 1800,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.text('Will activate when the trip is started'),
+        findsNothing,
+      );
+      // Interval field should be shown when trip is in progress
+      expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('does not show when trip is finished',
@@ -245,15 +323,43 @@ void main() {
         ),
       );
 
+      // Save is grayed out until the interval changes — modify it first.
+      await tester.enterText(find.byType(TextField), '45');
+      await tester.pump();
+
       await tester.tap(find.text('Save'));
       await tester.pump();
 
       expect(capturedAutomaticUpdates, true);
-      expect(capturedUpdateRefresh, 1800);
+      expect(capturedUpdateRefresh, 2700); // 45 * 60
     });
 
-    testWidgets(
-        'calls onSettingsChange when Save is tapped with automaticUpdates disabled',
+    testWidgets('Save button is grayed out when interval has not changed',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: true,
+              updateRefresh: 1800,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      // Save should be visible but disabled (interval unchanged)
+      final saveButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
+    });
+
+    testWidgets('auto-saves when toggling automaticUpdates off',
         (WidgetTester tester) async {
       bool? capturedAutomaticUpdates;
       int? capturedUpdateRefresh;
@@ -262,7 +368,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: TripSettingsControl(
-              automaticUpdates: false,
+              automaticUpdates: true,
+              updateRefresh: 1800,
               isOwner: true,
               isLoading: false,
               onSettingsChange:
@@ -277,11 +384,35 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Save'));
+      // Toggle automatic updates OFF — should auto-save immediately
+      await tester.tap(find.byType(Switch));
       await tester.pump();
 
       expect(capturedAutomaticUpdates, false);
-      expect(capturedUpdateRefresh, isNotNull);
+      expect(capturedUpdateRefresh, 1800);
+
+      // Save button should no longer be visible
+      expect(find.text('Save'), findsNothing);
+    });
+
+    testWidgets('does not show Save button when automaticUpdates is disabled',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TripSettingsControl(
+              automaticUpdates: false,
+              isOwner: true,
+              isLoading: false,
+              onSettingsChange: (_, __, ___) {},
+              tripStatus: TripStatus.inProgress,
+              isWeb: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Save'), findsNothing);
     });
 
     testWidgets('toggles switch value when tapped',
