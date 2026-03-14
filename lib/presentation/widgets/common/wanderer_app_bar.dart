@@ -46,6 +46,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
   bool _isSearchExpanded = false;
   int _unreadCount = 0;
   final NotificationApiService _notificationService = NotificationApiService();
+  final GlobalKey _notificationButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -96,8 +97,6 @@ class _WandererAppBarState extends State<WandererAppBar> {
       }
     });
   }
-
-  final GlobalKey _notificationButtonKey = GlobalKey();
 
   void _showNotificationsDropdown() {
     final renderBox =

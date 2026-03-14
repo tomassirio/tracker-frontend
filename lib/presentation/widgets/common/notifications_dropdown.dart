@@ -332,7 +332,7 @@ class _NotificationsDropdownContentState
     final now = DateTime.now();
     final diff = now.difference(dateTime);
 
-    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.isNegative || diff.inMinutes < 1) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
@@ -492,7 +492,9 @@ class _NotificationsDropdownContentState
       onTap: () => _onNotificationTap(notification),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        color: notification.read ? null : Colors.orange.withAlpha(15),
+        color: notification.read
+            ? null
+            : WandererTheme.primaryOrange.withAlpha(15),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
