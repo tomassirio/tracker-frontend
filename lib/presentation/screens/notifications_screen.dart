@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/models/notification_models.dart';
@@ -144,7 +146,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               read: true,
               createdAt: notification.createdAt,
             );
-            _unreadCount = (_unreadCount - 1).clamp(0, _unreadCount);
+            _unreadCount = max(0, _unreadCount - 1);
           }
         });
       }

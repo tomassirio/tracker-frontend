@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/material.dart';
 import 'package:wanderer_frontend/data/services/notification_api_service.dart';
 import 'package:wanderer_frontend/presentation/screens/notifications_screen.dart';
@@ -75,8 +76,8 @@ class _WandererAppBarState extends State<WandererAppBar> {
           _unreadCount = count;
         });
       }
-    } catch (_) {
-      // Silently fail - badge just won't show
+    } catch (e) {
+      debugPrint('WandererAppBar: Failed to fetch unread count: $e');
     }
   }
 
