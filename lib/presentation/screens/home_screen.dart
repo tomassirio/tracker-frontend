@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:wanderer_frontend/core/constants/enums.dart'
     show TripModality, TripStatus, Visibility;
+import 'package:wanderer_frontend/core/services/push_notification_manager.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 import 'package:wanderer_frontend/data/client/api_client.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
@@ -40,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen>
   final TripService _tripService = TripService();
   final AdminService _adminService = AdminService();
   final WebSocketService _webSocketService = WebSocketService();
+  final PushNotificationManager _pushNotificationManager =
+      PushNotificationManager();
   final TextEditingController _searchController = TextEditingController();
   StreamSubscription<WebSocketEvent>? _wsSubscription;
 
@@ -230,6 +233,7 @@ class _HomeScreenState extends State<HomeScreen>
     routeObserver.unsubscribe(this);
     _wsSubscription?.cancel();
     _webSocketService.unsubscribeFromAllTrips();
+    _pushNotificationManager.stop();
     _searchController.dispose();
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
@@ -249,6 +253,13 @@ class _HomeScreenState extends State<HomeScreen>
 
     final displayName = await _repository.getCurrentDisplayName();
     final avatarUrl = await _repository.getCurrentAvatarUrl();
+
+    // Start push notification listener when logged in with a valid userId
+    if (isLoggedIn && userId != null) {
+      _pushNotificationManager.start(userId);
+    } else {
+      _pushNotificationManager.stop();
+    }
 
     setState(() {
       _username = username;
@@ -296,7 +307,8 @@ class _HomeScreenState extends State<HomeScreen>
         final freshIds = trips.map((t) => t.id).toSet();
         final preservedTrips = _allTrips.where((t) {
           if (freshIds.contains(t.id)) return false;
-          final isActive = t.status == TripStatus.inProgress ||
+          final isActive =
+              t.status == TripStatus.inProgress ||
               t.status == TripStatus.resting ||
               t.status == TripStatus.paused;
           final isPublic = t.visibility == Visibility.public;
@@ -363,8 +375,9 @@ class _HomeScreenState extends State<HomeScreen>
   /// trips with status `created` which the public trips endpoint excludes).
   Future<void> _fetchMissingPromotedTrips(List<PromotedTrip> promoted) async {
     final existingIds = _allTrips.map((t) => t.id).toSet();
-    final missingPromoted =
-        promoted.where((p) => !existingIds.contains(p.tripId)).toList();
+    final missingPromoted = promoted
+        .where((p) => !existingIds.contains(p.tripId))
+        .toList();
 
     if (missingPromoted.isEmpty) return;
 
@@ -403,7 +416,8 @@ class _HomeScreenState extends State<HomeScreen>
 
     for (final trip in _allTrips) {
       final isPublic = trip.visibility == Visibility.public;
-      final isActive = trip.status == TripStatus.inProgress ||
+      final isActive =
+          trip.status == TripStatus.inProgress ||
           trip.status == TripStatus.resting ||
           trip.status == TripStatus.paused;
       final isPromoted = _promotedTripIds.contains(trip.id);
@@ -446,7 +460,8 @@ class _HomeScreenState extends State<HomeScreen>
     final feedTrips = <Trip>[];
 
     for (final trip in _allTrips) {
-      final isActive = trip.status == TripStatus.inProgress ||
+      final isActive =
+          trip.status == TripStatus.inProgress ||
           trip.status == TripStatus.resting ||
           trip.status == TripStatus.paused;
       if (!isActive) continue;
@@ -514,7 +529,8 @@ class _HomeScreenState extends State<HomeScreen>
     return trips.where((trip) {
       // Apply search filter
       if (query.isNotEmpty) {
-        final matchesQuery = trip.name.toLowerCase().contains(query) ||
+        final matchesQuery =
+            trip.name.toLowerCase().contains(query) ||
             trip.username.toLowerCase().contains(query);
         if (!matchesQuery) return false;
       }
@@ -753,8 +769,11 @@ class _HomeScreenState extends State<HomeScreen>
                   value: TripStatus.finished,
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle_outline,
-                          size: 18, color: Colors.blue),
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 18,
+                        color: Colors.blue,
+                      ),
                       const SizedBox(width: 8),
                       const Text('Completed'),
                     ],
@@ -929,15 +948,21 @@ class _HomeScreenState extends State<HomeScreen>
     // Group trips by status
     // Resting trips are shown alongside active trips (like live, but with a resting badge)
     final activeTrips = filteredTrips
-        .where((t) =>
-            t.status == TripStatus.inProgress || t.status == TripStatus.resting)
+        .where(
+          (t) =>
+              t.status == TripStatus.inProgress ||
+              t.status == TripStatus.resting,
+        )
         .toList();
-    final pausedTrips =
-        filteredTrips.where((t) => t.status == TripStatus.paused).toList();
-    final draftTrips =
-        filteredTrips.where((t) => t.status == TripStatus.created).toList();
-    final completedTrips =
-        filteredTrips.where((t) => t.status == TripStatus.finished).toList();
+    final pausedTrips = filteredTrips
+        .where((t) => t.status == TripStatus.paused)
+        .toList();
+    final draftTrips = filteredTrips
+        .where((t) => t.status == TripStatus.created)
+        .toList();
+    final completedTrips = filteredTrips
+        .where((t) => t.status == TripStatus.finished)
+        .toList();
 
     if (filteredTrips.isEmpty) {
       return Center(
@@ -1023,21 +1048,28 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Group by live (including resting) and other
     final liveTrips = filteredTrips
-        .where((t) =>
-            t.status == TripStatus.inProgress || t.status == TripStatus.resting)
+        .where(
+          (t) =>
+              t.status == TripStatus.inProgress ||
+              t.status == TripStatus.resting,
+        )
         .toList();
     final friendsTrips = filteredTrips
-        .where((t) =>
-            _friendIds.contains(t.userId) &&
-            t.status != TripStatus.inProgress &&
-            t.status != TripStatus.resting)
+        .where(
+          (t) =>
+              _friendIds.contains(t.userId) &&
+              t.status != TripStatus.inProgress &&
+              t.status != TripStatus.resting,
+        )
         .toList();
     final followingTrips = filteredTrips
-        .where((t) =>
-            _followingIds.contains(t.userId) &&
-            !_friendIds.contains(t.userId) &&
-            t.status != TripStatus.inProgress &&
-            t.status != TripStatus.resting)
+        .where(
+          (t) =>
+              _followingIds.contains(t.userId) &&
+              !_friendIds.contains(t.userId) &&
+              t.status != TripStatus.inProgress &&
+              t.status != TripStatus.resting,
+        )
         .toList();
 
     if (filteredTrips.isEmpty) {
@@ -1091,9 +1123,11 @@ class _HomeScreenState extends State<HomeScreen>
               subtitle: 'From your friends',
             ),
             const SizedBox(height: 12),
-            _buildTripGrid(friendsTrips,
-                showRelationship: true,
-                defaultRelationship: RelationshipType.friend),
+            _buildTripGrid(
+              friendsTrips,
+              showRelationship: true,
+              defaultRelationship: RelationshipType.friend,
+            ),
             const SizedBox(height: 24),
           ],
           if (followingTrips.isNotEmpty) ...[
@@ -1104,9 +1138,11 @@ class _HomeScreenState extends State<HomeScreen>
               subtitle: 'From users you follow',
             ),
             const SizedBox(height: 12),
-            _buildTripGrid(followingTrips,
-                showRelationship: true,
-                defaultRelationship: RelationshipType.following),
+            _buildTripGrid(
+              followingTrips,
+              showRelationship: true,
+              defaultRelationship: RelationshipType.following,
+            ),
           ],
         ],
       ),
@@ -1119,10 +1155,12 @@ class _HomeScreenState extends State<HomeScreen>
     // Separate promoted trips (featured) from regular public trips.
     // Both come from the same _discoverTrips list which already applies the
     // correct inclusion criteria in _categorizeTrips().
-    final promotedTripsList =
-        filteredTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
-    final nonPromotedTrips =
-        filteredTrips.where((t) => !_promotedTripIds.contains(t.id)).toList();
+    final promotedTripsList = filteredTrips
+        .where((t) => _promotedTripIds.contains(t.id))
+        .toList();
+    final nonPromotedTrips = filteredTrips
+        .where((t) => !_promotedTripIds.contains(t.id))
+        .toList();
 
     if (nonPromotedTrips.isEmpty && promotedTripsList.isEmpty) {
       return Center(
@@ -1188,10 +1226,12 @@ class _HomeScreenState extends State<HomeScreen>
     final filteredTrips = _getFilteredTrips(_discoverTrips);
 
     // Separate promoted trips (featured) from regular public trips.
-    final promotedTripsList =
-        filteredTrips.where((t) => _promotedTripIds.contains(t.id)).toList();
-    final nonPromotedTrips =
-        filteredTrips.where((t) => !_promotedTripIds.contains(t.id)).toList();
+    final promotedTripsList = filteredTrips
+        .where((t) => _promotedTripIds.contains(t.id))
+        .toList();
+    final nonPromotedTrips = filteredTrips
+        .where((t) => !_promotedTripIds.contains(t.id))
+        .toList();
 
     if (filteredTrips.isEmpty) {
       return Center(
@@ -1342,303 +1382,292 @@ class _HomeScreenState extends State<HomeScreen>
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline,
-                          size: 64, color: Colors.red[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error loading trips',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _error!,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadTrips,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading trips',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-                )
-              : !_isLoggedIn
-                  ? SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          // Hero section with better visuals
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 48, horizontal: 24),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Theme.of(context)
-                                      .primaryColor
-                                      .withOpacity(0.1),
-                                  Theme.of(context)
-                                      .primaryColor
-                                      .withOpacity(0.05),
-                                ],
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 10),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: WandererLogo(size: 64),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                const Text(
-                                  'Welcome to Wanderer',
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -1,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Track your adventures, share your journeys',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 32),
-                                ElevatedButton(
-                                  onPressed: _navigateToAuth,
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 40,
-                                      vertical: 16,
-                                    ),
-                                    elevation: 2,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Log In',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Discover section with better header
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .primaryColor
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(
-                                        Icons.public,
-                                        color: Theme.of(context).primaryColor,
-                                        size: 24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Explore Public Trips',
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: -0.5,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Discover adventures from the community',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                                // Build trip grid directly for guest users (no ListView wrapper)
-                                _buildGuestDiscoverSection(),
-                              ],
-                            ),
-                          ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _error!,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadTrips,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            )
+          : !_isLoggedIn
+          ? SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Hero section with better visuals
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 48,
+                      horizontal: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Theme.of(context).primaryColor.withOpacity(0.1),
+                          Theme.of(context).primaryColor.withOpacity(0.05),
                         ],
                       ),
-                    )
-                  : Stack(
+                    ),
+                    child: Column(
                       children: [
-                        Column(
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: WandererLogo(size: 64),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Welcome to Wanderer',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -1,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Track your adventures, share your journeys',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: _navigateToAuth,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40,
+                              vertical: 16,
+                            ),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Log In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Discover section with better header
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            _buildFilterChips(),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.public,
+                                color: Theme.of(context).primaryColor,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
                             Expanded(
-                              child: TabBarView(
-                                controller: _tabController,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _buildMyTripsTab(),
-                                  _buildFeedTab(),
-                                  _buildDiscoverTab(),
+                                  const Text(
+                                    'Explore Public Trips',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Discover adventures from the community',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        if (_isLoggedIn)
-                          Positioned(
-                            left: 16,
-                            right: 16,
-                            bottom: 16 + MediaQuery.of(context).padding.bottom,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
-                                borderRadius: BorderRadius.circular(28),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.12),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(28),
-                                child: SizedBox(
-                                  height: 64,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: List.generate(3, (index) {
-                                      final isSelected =
-                                          _tabController.index == index;
-                                      final icons = [
-                                        Icons.person_outline,
-                                        Icons.dynamic_feed_outlined,
-                                        Icons.explore_outlined,
-                                      ];
-                                      final selectedIcons = [
-                                        Icons.person,
-                                        Icons.dynamic_feed,
-                                        Icons.explore,
-                                      ];
-                                      final labels = [
-                                        'My Trips',
-                                        'Feed',
-                                        'Discover',
-                                      ];
-                                      return Expanded(
-                                        child: InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              _tabController.animateTo(index);
-                                            });
-                                          },
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                isSelected
-                                                    ? selectedIcons[index]
-                                                    : icons[index],
-                                                color: isSelected
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .primary
-                                                    : Theme.of(context)
-                                                        .colorScheme
-                                                        .onSurfaceVariant,
-                                                size: 24,
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                labels[index],
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: isSelected
-                                                      ? Theme.of(context)
-                                                          .colorScheme
-                                                          .primary
-                                                      : Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurfaceVariant,
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.w600
-                                                      : FontWeight.normal,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (_username != null)
-                          Positioned(
-                            right: 16,
-                            bottom: 92 + MediaQuery.of(context).padding.bottom,
-                            child: FloatingActionButton.extended(
-                              onPressed: _navigateToCreateTrip,
-                              icon: const Icon(Icons.add),
-                              label: const Text('New Trip'),
-                            ),
-                          ),
+                        const SizedBox(height: 24),
+                        // Build trip grid directly for guest users (no ListView wrapper)
+                        _buildGuestDiscoverSection(),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            )
+          : Stack(
+              children: [
+                Column(
+                  children: [
+                    _buildFilterChips(),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildMyTripsTab(),
+                          _buildFeedTab(),
+                          _buildDiscoverTab(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (_isLoggedIn)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16 + MediaQuery.of(context).padding.bottom,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: SizedBox(
+                          height: 64,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: List.generate(3, (index) {
+                              final isSelected = _tabController.index == index;
+                              final icons = [
+                                Icons.person_outline,
+                                Icons.dynamic_feed_outlined,
+                                Icons.explore_outlined,
+                              ];
+                              final selectedIcons = [
+                                Icons.person,
+                                Icons.dynamic_feed,
+                                Icons.explore,
+                              ];
+                              final labels = ['My Trips', 'Feed', 'Discover'];
+                              return Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _tabController.animateTo(index);
+                                    });
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        isSelected
+                                            ? selectedIcons[index]
+                                            : icons[index],
+                                        color: isSelected
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        labels[index],
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isSelected
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                              : Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_username != null)
+                  Positioned(
+                    right: 16,
+                    bottom: 92 + MediaQuery.of(context).padding.bottom,
+                    child: FloatingActionButton.extended(
+                      onPressed: _navigateToCreateTrip,
+                      icon: const Icon(Icons.add),
+                      label: const Text('New Trip'),
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 }

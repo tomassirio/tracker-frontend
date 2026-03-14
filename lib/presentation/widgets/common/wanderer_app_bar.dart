@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:wanderer_frontend/data/models/websocket/websocket_event.dart';
 import 'package:wanderer_frontend/data/services/notification_api_service.dart';
+import 'package:wanderer_frontend/data/services/websocket_service.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/notifications_dropdown.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/wanderer_logo.dart';
 import 'package:wanderer_frontend/presentation/widgets/common/search_bar_widget.dart';
@@ -46,13 +50,16 @@ class _WandererAppBarState extends State<WandererAppBar> {
   bool _isSearchExpanded = false;
   int _unreadCount = 0;
   final NotificationApiService _notificationService = NotificationApiService();
+  final WebSocketService _webSocketService = WebSocketService();
   final GlobalKey _notificationButtonKey = GlobalKey();
+  StreamSubscription<WebSocketEvent>? _wsSubscription;
 
   @override
   void initState() {
     super.initState();
     if (widget.isLoggedIn) {
       _fetchUnreadCount();
+      _subscribeToNotificationEvents();
     }
   }
 
@@ -61,11 +68,29 @@ class _WandererAppBarState extends State<WandererAppBar> {
     super.didUpdateWidget(oldWidget);
     if (widget.isLoggedIn && !oldWidget.isLoggedIn) {
       _fetchUnreadCount();
+      _subscribeToNotificationEvents();
     } else if (!widget.isLoggedIn && oldWidget.isLoggedIn) {
+      _wsSubscription?.cancel();
+      _wsSubscription = null;
       setState(() {
         _unreadCount = 0;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _wsSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _subscribeToNotificationEvents() {
+    _wsSubscription?.cancel();
+    _wsSubscription = _webSocketService.events.listen((event) {
+      if (event.type == WebSocketEventType.notificationCreated && mounted) {
+        _fetchUnreadCount();
+      }
+    });
   }
 
   Future<void> _fetchUnreadCount() async {
