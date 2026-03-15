@@ -1,13 +1,16 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Visibility;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wanderer_frontend/core/constants/api_endpoints.dart';
 import 'package:wanderer_frontend/data/client/google_directions_api_client.dart';
 import 'package:wanderer_frontend/data/client/polyline_codec.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/data/services/trip_plan_service.dart';
+import 'package:wanderer_frontend/data/services/trip_service.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/helpers/trip_plan_map_helper.dart';
+import 'package:wanderer_frontend/presentation/screens/trip_detail_screen.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_from_plan_dialog.dart';
 import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_plan_info_card.dart';
 import 'package:wanderer_frontend/core/theme/wanderer_theme.dart';
 
@@ -26,6 +29,7 @@ class TripPlanDetailScreen extends StatefulWidget {
 
 class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
   final TripPlanService _tripPlanService = TripPlanService();
+  final TripService _tripService = TripService();
   late final GoogleDirectionsApiClient _directionsClient;
   late TripPlan _tripPlan;
   bool _isEditing = false;
@@ -472,6 +476,47 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
     }
   }
 
+  Future<void> _createTripFromPlan() async {
+    final request = await showDialog<TripFromPlanRequest>(
+      context: context,
+      builder: (context) => TripFromPlanDialog(
+          planName: _tripPlan.name, planType: _tripPlan.planType),
+    );
+
+    if (request == null || !mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final tripId =
+          await _tripService.createTripFromPlan(_tripPlan.id, request);
+      final trip = await _tripService.getTripById(tripId);
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        UiHelpers.showSuccessMessage(
+          context,
+          'Trip created successfully from plan!',
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TripDetailScreen(trip: trip),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        UiHelpers.showErrorMessage(context, 'Error creating trip: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasMapData = _markers.isNotEmpty;
@@ -490,6 +535,11 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.play_arrow_rounded),
+            onPressed: _createTripFromPlan,
+            tooltip: 'Create Trip',
+          ),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
@@ -587,6 +637,7 @@ class _TripPlanDetailScreenState extends State<TripPlanDetailScreen> {
                     });
                   },
                   onDelete: _deleteTripPlan,
+                  onCreateTrip: _createTripFromPlan,
                 ),
               ),
             ),

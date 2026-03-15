@@ -1,4 +1,3 @@
-import '../../core/constants/enums.dart';
 import '../models/trip_models.dart';
 import '../client/clients.dart';
 
@@ -111,8 +110,8 @@ class TripService {
   /// Create trip from trip plan
   /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
   Future<String> createTripFromPlan(
-      String tripPlanId, Visibility visibility) async {
-    return await _tripCommandClient.createTripFromPlan(tripPlanId, visibility);
+      String tripPlanId, TripFromPlanRequest request) async {
+    return await _tripCommandClient.createTripFromPlan(tripPlanId, request);
   }
 
   /// Send trip update (location, message)

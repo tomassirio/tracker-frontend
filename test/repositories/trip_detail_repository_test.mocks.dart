@@ -7,11 +7,10 @@ import 'dart:async' as _i6;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
-import 'package:wanderer_frontend/core/constants/enums.dart' as _i9;
 import 'package:wanderer_frontend/data/models/auth_models.dart' as _i4;
 import 'package:wanderer_frontend/data/models/comment_models.dart' as _i2;
 import 'package:wanderer_frontend/data/models/trip_models.dart' as _i3;
-import 'package:wanderer_frontend/data/services/auth_service.dart' as _i10;
+import 'package:wanderer_frontend/data/services/auth_service.dart' as _i9;
 import 'package:wanderer_frontend/data/services/comment_service.dart' as _i5;
 import 'package:wanderer_frontend/data/services/trip_service.dart' as _i8;
 
@@ -224,6 +223,21 @@ class MockTripService extends _i1.Mock implements _i8.TripService {
       ) as _i6.Future<_i3.Trip>);
 
   @override
+  _i6.Future<_i3.Trip> getPublicTripById(String? tripId) => (super.noSuchMethod(
+        Invocation.method(
+          #getPublicTripById,
+          [tripId],
+        ),
+        returnValue: _i6.Future<_i3.Trip>.value(_FakeTrip_1(
+          this,
+          Invocation.method(
+            #getPublicTripById,
+            [tripId],
+          ),
+        )),
+      ) as _i6.Future<_i3.Trip>);
+
+  @override
   _i6.Future<List<_i3.Trip>> getAllTrips() => (super.noSuchMethod(
         Invocation.method(
           #getAllTrips,
@@ -409,14 +423,14 @@ class MockTripService extends _i1.Mock implements _i8.TripService {
   @override
   _i6.Future<String> createTripFromPlan(
     String? tripPlanId,
-    _i9.Visibility? visibility,
+    _i3.TripFromPlanRequest? request,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
           #createTripFromPlan,
           [
             tripPlanId,
-            visibility,
+            request,
           ],
         ),
         returnValue: _i6.Future<String>.value(_i7.dummyValue<String>(
@@ -425,7 +439,7 @@ class MockTripService extends _i1.Mock implements _i8.TripService {
             #createTripFromPlan,
             [
               tripPlanId,
-              visibility,
+              request,
             ],
           ),
         )),
@@ -527,7 +541,7 @@ class MockTripService extends _i1.Mock implements _i8.TripService {
 /// A class which mocks [AuthService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthService extends _i1.Mock implements _i10.AuthService {
+class MockAuthService extends _i1.Mock implements _i9.AuthService {
   MockAuthService() {
     _i1.throwOnMissingStub(this);
   }

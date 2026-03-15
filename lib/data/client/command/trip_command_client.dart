@@ -1,5 +1,4 @@
 import '../../../core/constants/api_endpoints.dart';
-import '../../../core/constants/enums.dart';
 import '../../models/trip_models.dart';
 import '../api_client.dart';
 
@@ -104,10 +103,10 @@ class TripCommandClient {
   /// Requires authentication (USER, ADMIN - owner only)
   /// Returns the trip ID immediately. Full trip data will be delivered via WebSocket.
   Future<String> createTripFromPlan(
-      String tripPlanId, Visibility visibility) async {
-    final response = await _apiClient.postRaw(
+      String tripPlanId, TripFromPlanRequest request) async {
+    final response = await _apiClient.post(
       ApiEndpoints.tripFromPlan(tripPlanId),
-      body: visibility.toJson(),
+      body: request.toJson(),
       requireAuth: true,
     );
     return _apiClient.handleAcceptedResponse(response);
