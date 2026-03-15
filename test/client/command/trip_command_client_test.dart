@@ -236,6 +236,11 @@ void main() {
     });
 
     group('createTripFromPlan', () {
+      final request = TripFromPlanRequest(
+        visibility: Visibility.public,
+        tripModality: TripModality.simple,
+      );
+
       test('successful trip creation from plan returns trip ID', () async {
         final responseBody = {
           'id': 'trip-456',
@@ -244,7 +249,7 @@ void main() {
 
         final result = await tripCommandClient.createTripFromPlan(
           'plan-123',
-          Visibility.public,
+          request,
         );
 
         expect(result, 'trip-456');
@@ -265,8 +270,7 @@ void main() {
         };
         mockHttpClient.response = http.Response(jsonEncode(responseBody), 202);
 
-        await tripCommandClient.createTripFromPlan(
-            'plan-123', Visibility.public);
+        await tripCommandClient.createTripFromPlan('plan-123', request);
 
         expect(mockHttpClient.lastHeaders?['Authorization'], isNotNull);
       });
@@ -278,8 +282,7 @@ void main() {
         );
 
         expect(
-          () => tripCommandClient.createTripFromPlan(
-              'plan-123', Visibility.public),
+          () => tripCommandClient.createTripFromPlan('plan-123', request),
           throwsException,
         );
       });
@@ -293,8 +296,7 @@ void main() {
           );
 
           expect(
-            () => tripCommandClient.createTripFromPlan(
-                'plan-123', Visibility.public),
+            () => tripCommandClient.createTripFromPlan('plan-123', request),
             throwsException,
           );
         },
