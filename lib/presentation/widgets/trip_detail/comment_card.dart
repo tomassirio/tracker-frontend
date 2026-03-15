@@ -115,7 +115,10 @@ class CommentCard extends StatelessWidget {
                       _formatTimestamp(comment.createdAt),
                       style: TextStyle(
                           fontSize: 11,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6)),
                     ),
                   ],
                 ),

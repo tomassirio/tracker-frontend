@@ -70,7 +70,7 @@ void main() {
         find.textContaining('Receive alerts for friend requests'),
         findsOneWidget,
       );
-      expect(find.byType(SwitchListTile), findsOneWidget);
+      expect(find.byType(Switch), findsNWidgets(2));
     });
 
     testWidgets('renders Support section header', (WidgetTester tester) async {
@@ -364,8 +364,7 @@ void main() {
     ) async {
       await tester.pumpWidget(buildTestWidget());
 
-      final switchFinder = find.byType(Switch);
-      expect(switchFinder, findsOneWidget);
+      final switchFinder = find.byType(Switch).first;
       final switchWidget = tester.widget<Switch>(switchFinder);
       expect(switchWidget.value, isFalse);
     });
@@ -379,8 +378,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      final switchFinder = find.byType(Switch);
-      expect(switchFinder, findsOneWidget);
+      final switchFinder = find.byType(Switch).first;
       final switchWidget = tester.widget<Switch>(switchFinder);
       expect(switchWidget.value, isTrue);
     });
@@ -390,7 +388,7 @@ void main() {
     ) async {
       await tester.pumpWidget(buildTestWidget());
 
-      final switchFinder = find.byType(Switch);
+      final switchFinder = find.byType(Switch).first;
       expect(tester.widget<Switch>(switchFinder).value, isFalse);
 
       await tester.tap(switchFinder);

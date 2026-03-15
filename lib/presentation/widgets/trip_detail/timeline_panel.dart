@@ -148,7 +148,10 @@ class TimelinePanel extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.08),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(WandererTheme.glassRadius),
                       topRight: Radius.circular(WandererTheme.glassRadius),
@@ -187,14 +190,20 @@ class TimelinePanel extends StatelessWidget {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: IconButton(
                           icon: Icon(
                             Icons.remove,
                             size: 18,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                           ),
                           onPressed: onToggleCollapse,
                           tooltip: 'Minimize',

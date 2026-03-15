@@ -139,7 +139,10 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.08),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(WandererTheme.glassRadius),
                       topRight: Radius.circular(WandererTheme.glassRadius),
@@ -174,7 +177,10 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         onPressed: widget.onToggleCollapse,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
                       ),
                     ],
                   ),
@@ -192,7 +198,10 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                           Icon(
                             Icons.info_outline,
                             size: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
@@ -200,7 +209,10 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                               'Your location and battery level will be shared',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.6),
                               ),
                             ),
                           ),
@@ -214,11 +226,17 @@ class _TripUpdatePanelState extends State<TripUpdatePanel> {
                         decoration: InputDecoration(
                           hintText: 'Add a message (optional)',
                           hintStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.45),
                             fontSize: 14,
                           ),
                           filled: true,
-                          fillColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                          fillColor: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.08),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(

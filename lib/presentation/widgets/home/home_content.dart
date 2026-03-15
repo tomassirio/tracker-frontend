@@ -215,8 +215,7 @@ class HomeContent extends StatelessWidget {
             'Please log in to see personalized content',
             style: TextStyle(
               fontSize: 14,
-              color:
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -250,8 +249,7 @@ class HomeContent extends StatelessWidget {
             'Or explore public trips:',
             style: TextStyle(
               fontSize: 13,
-              color:
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
             ),
           ),
         ],

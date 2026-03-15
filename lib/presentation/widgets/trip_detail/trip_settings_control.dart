@@ -204,7 +204,8 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
                 Icon(
                   Icons.route,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -398,7 +399,8 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
               '(same code path as periodic, no 15 min wait)',
               style: TextStyle(
                 fontSize: 10,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
                 fontStyle: FontStyle.italic,
               ),
             ),

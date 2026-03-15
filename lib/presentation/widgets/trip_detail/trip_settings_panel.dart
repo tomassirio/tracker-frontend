@@ -335,14 +335,20 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: IconButton(
                         icon: Icon(
                           Icons.remove,
                           size: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                         onPressed: widget.onToggleCollapse,
                         tooltip: 'Minimize',
@@ -395,7 +401,10 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         Icon(
                           Icons.update,
                           size: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -437,7 +446,10 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         'Will activate when the trip is started',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -486,7 +498,10 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         'Location will be automatically updated at this interval when trip is active',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                       ),
                     ] else if (!_automaticUpdates) ...[
@@ -525,7 +540,10 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
                         '(same code path as periodic, no 15 min wait)',
                         style: TextStyle(
                           fontSize: 10,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.45),
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -615,7 +633,9 @@ class _TripSettingsPanelState extends State<TripSettingsPanel> {
   Widget _buildSectionLabel(IconData icon, String label) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+        Icon(icon,
+            size: 16,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
         const SizedBox(width: 8),
         Text(
           label,

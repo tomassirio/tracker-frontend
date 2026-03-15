@@ -131,8 +131,10 @@ class _TripShareDialogState extends State<TripShareDialog> {
                       widget.tripName,
                       style: TextStyle(
                         fontSize: 14,
-                        color:
-                            Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -212,8 +214,7 @@ class _TripShareDialogState extends State<TripShareDialog> {
         children: [
           Icon(icon,
               size: 16,
-              color:
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           const SizedBox(width: 6),
           Expanded(
             child: Text(

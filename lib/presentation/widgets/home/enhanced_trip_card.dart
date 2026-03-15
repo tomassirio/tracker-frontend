@@ -530,7 +530,9 @@ class _EnhancedTripCardState extends State<EnhancedTripCard> {
                           end: Alignment.bottomRight,
                           colors: [
                             Theme.of(context).colorScheme.surface,
-                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                            Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                           ],
                         ),
                       ),

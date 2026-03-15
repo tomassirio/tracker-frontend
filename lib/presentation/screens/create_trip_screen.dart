@@ -555,7 +555,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? WandererTheme.primaryOrange
+          color: isSelected
+              ? WandererTheme.primaryOrange
               : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
@@ -570,7 +571,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.white
+              color: isSelected
+                  ? Colors.white
                   : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
             const SizedBox(width: 6),
@@ -579,7 +581,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white
+                color: isSelected
+                    ? Colors.white
                     : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
@@ -664,14 +667,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
                             .withOpacity(0.3),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
                             .withOpacity(0.3),
                       ),
                     ),
@@ -746,9 +753,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 if (i < _tripPlans.length - 1)
                   Divider(
                     height: 1,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     indent: 16,
                     endIndent: 16,
                   ),
@@ -814,7 +820,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     _formatPlanType(plan.planType),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
                           .withOpacity(0.45),
                     ),
                   ),
@@ -880,8 +888,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 'Dates: ${_formatDate(plan.startDate!)} \u2013 ${_formatDate(plan.endDate!)}',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Theme.of(context).colorScheme.onSurface
-                      .withOpacity(0.6),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ),

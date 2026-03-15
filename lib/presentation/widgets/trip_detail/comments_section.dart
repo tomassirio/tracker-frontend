@@ -180,7 +180,10 @@ class CommentsSection extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.08),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(WandererTheme.glassRadius),
                       topRight: Radius.circular(WandererTheme.glassRadius),
@@ -213,7 +216,10 @@ class CommentsSection extends StatelessWidget {
                         icon: Icon(
                           Icons.sort,
                           size: 20,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                         onSelected: onSortChanged,
                         itemBuilder: (context) => [
@@ -238,14 +244,20 @@ class CommentsSection extends StatelessWidget {
                       const SizedBox(width: 4),
                       Container(
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: IconButton(
                           icon: Icon(
                             Icons.remove,
                             size: 18,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                           ),
                           onPressed: onToggleCollapse,
                           tooltip: 'Minimize',
@@ -314,7 +326,10 @@ class CommentsSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.08),
                       border: Border(
                         top: BorderSide(
                           color: WandererTheme.glassBorderColorFor(context),
@@ -388,7 +403,8 @@ class CommentsSection extends StatelessWidget {
                   : 'Log in to add a comment',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
               ),
             ),
           ],

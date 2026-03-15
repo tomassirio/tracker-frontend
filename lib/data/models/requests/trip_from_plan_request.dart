@@ -21,4 +21,3 @@ class TripFromPlanRequest {
         if (updateRefresh != null) 'updateRefresh': updateRefresh,
       };
 }
-

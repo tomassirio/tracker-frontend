@@ -44,7 +44,8 @@ class CommentInput extends StatelessWidget {
                 Icon(
                   Icons.reply,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -52,7 +53,10 @@ class CommentInput extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.6),
                   ),
                 ),
                 const Spacer(),
@@ -60,7 +64,10 @@ class CommentInput extends StatelessWidget {
                   icon: Icon(
                     Icons.close,
                     size: 16,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.6),
                   ),
                   onPressed: onCancelReply,
                   tooltip: 'Cancel reply',
@@ -78,7 +85,10 @@ class CommentInput extends StatelessWidget {
                     hintText:
                         isReplyMode ? 'Write a reply...' : 'Write a comment...',
                     hintStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.45),
                     ),
                     filled: true,
                     fillColor: Theme.of(context).colorScheme.surface,

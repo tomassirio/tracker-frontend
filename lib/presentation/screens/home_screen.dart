@@ -1268,10 +1268,8 @@ class _HomeScreenState extends State<HomeScreen>
                 'No public trips found',
                 style: TextStyle(
                   fontSize: 18,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.6),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1279,10 +1277,8 @@ class _HomeScreenState extends State<HomeScreen>
                 'Check back later for new adventures!',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.5),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                 ),
               ),
             ],
@@ -1428,9 +1424,9 @@ class _HomeScreenState extends State<HomeScreen>
                         style: TextStyle(
                           fontSize: 18,
                           color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.6),
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1439,9 +1435,9 @@ class _HomeScreenState extends State<HomeScreen>
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.5),
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.5),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1486,9 +1482,8 @@ class _HomeScreenState extends State<HomeScreen>
                                   width: 120,
                                   height: 120,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surface,
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(

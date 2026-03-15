@@ -165,7 +165,10 @@ class TripInfoCard extends StatelessWidget {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: IconButton(
@@ -189,14 +192,20 @@ class TripInfoCard extends StatelessWidget {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: IconButton(
                         icon: Icon(
                           Icons.remove,
                           size: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                         onPressed: onToggleCollapse,
                         tooltip: 'Minimize',
@@ -301,7 +310,10 @@ class TripInfoCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isFollowing
                                 ? Colors.blue.withOpacity(0.7)
-                                : Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.08),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: IconButton(
@@ -327,7 +339,10 @@ class TripInfoCard extends StatelessWidget {
                                 ? Colors.green.withOpacity(0.7)
                                 : hasSentFriendRequest
                                     ? Colors.orange.withOpacity(0.7)
-                                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.08),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: isAlreadyFriends
@@ -438,7 +453,10 @@ class TripInfoCard extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: WandererTheme.glassBorderColorFor(context),
@@ -449,7 +467,10 @@ class TripInfoCard extends StatelessWidget {
                       trip.description!,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
                         height: 1.3,
                       ),
                     ),
@@ -462,7 +483,10 @@ class TripInfoCard extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: WandererTheme.glassBorderColorFor(context),
@@ -485,7 +509,10 @@ class TripInfoCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.6),
                               ),
                             ),
                           ],

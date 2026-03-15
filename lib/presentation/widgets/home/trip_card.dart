@@ -449,8 +449,7 @@ class _TripCardState extends State<TripCard> {
             const SizedBox(width: 4),
             Text(
               _formatDate(widget.trip.createdAt),
-              style:
-                  TextStyle(fontSize: 11, color: onSurface.withOpacity(0.5)),
+              style: TextStyle(fontSize: 11, color: onSurface.withOpacity(0.5)),
             ),
             const SizedBox(width: 12),
             Icon(Icons.chat_bubble_outline,
@@ -458,8 +457,7 @@ class _TripCardState extends State<TripCard> {
             const SizedBox(width: 4),
             Text(
               '${widget.trip.commentsCount}',
-              style:
-                  TextStyle(fontSize: 11, color: onSurface.withOpacity(0.5)),
+              style: TextStyle(fontSize: 11, color: onSurface.withOpacity(0.5)),
             ),
           ],
         ),

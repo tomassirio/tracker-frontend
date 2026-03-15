@@ -133,14 +133,20 @@ class TripPlanInfoCard extends StatelessWidget {
                     // Collapse button
                     Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
                         icon: Icon(
                           Icons.remove,
                           size: 18,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                         onPressed: onToggleCollapse,
                         tooltip: 'Minimize',
@@ -263,7 +269,8 @@ class TripPlanInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationItem(BuildContext context, String label, PlanLocation? location, Color color) {
+  Widget _buildLocationItem(
+      BuildContext context, String label, PlanLocation? location, Color color) {
     final hasLocation =
         location != null && location.lat != 0 && location.lon != 0;
 

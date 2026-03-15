@@ -151,8 +151,7 @@ class CreateTripForm extends StatelessWidget {
               subtitle,
               style: TextStyle(
                 fontSize: 11,
-                color:
-                    Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],

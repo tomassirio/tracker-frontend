@@ -379,12 +379,11 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               title: const Text('Re-place on map'),
               subtitle: Text(
                 'Tap the map to set a new position',
-                style:
-                    TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface
-                          .withOpacity(0.45),
-                    ),
+                style: TextStyle(
+                  fontSize: 12,
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -920,7 +919,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surface
                           .withOpacity(0.4),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(WandererTheme.glassRadius),
@@ -953,7 +954,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface
                                 .withOpacity(0.5),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -961,7 +964,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                             icon: Icon(
                               Icons.remove,
                               size: 18,
-                              color: Theme.of(context).colorScheme.onSurface
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
                                   .withOpacity(0.6),
                             ),
                             onPressed: () =>
@@ -1060,9 +1065,10 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: WandererTheme.primaryOrange,
                                   foregroundColor: Colors.white,
-                                  disabledBackgroundColor:
-                                      Theme.of(context).colorScheme.onSurface
-                                          .withOpacity(0.12),
+                                  disabledBackgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -1363,7 +1369,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
             Icon(
               isSet ? Icons.check_circle : icon,
               size: 14,
-              color: isActive || isSet ? color
+              color: isActive || isSet
+                  ? color
                   : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             ),
             const SizedBox(width: 4),
@@ -1372,7 +1379,8 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive || isSet ? color
+                color: isActive || isSet
+                    ? color
                     : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
@@ -1419,7 +1427,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                   'Drag to reorder',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context).colorScheme.onSurface
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
                         .withOpacity(0.45),
                   ),
                 ),
@@ -1428,7 +1438,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                   icon: Icon(
                     Icons.close_rounded,
                     size: 20,
-                    color: Theme.of(context).colorScheme.onSurface
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
                         .withOpacity(0.45),
                   ),
                   onPressed: () => setState(() => _showWaypointsList = false),
@@ -1700,9 +1712,10 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: WandererTheme.primaryOrange,
                                 foregroundColor: Colors.white,
-                                disabledBackgroundColor:
-                                    Theme.of(context).colorScheme.onSurface
-                                        .withOpacity(0.12),
+                                disabledBackgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -1788,7 +1801,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                       size: 20,
                       color: isSelected
                           ? WandererTheme.primaryOrange
-                          : Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
                               .withOpacity(0.45),
                     ),
                     const SizedBox(height: 4),
@@ -1799,7 +1814,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                         fontWeight: FontWeight.w600,
                         color: isSelected
                             ? WandererTheme.primaryOrange
-                            : Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
                                 .withOpacity(0.6),
                       ),
                       textAlign: TextAlign.center,
@@ -1852,7 +1869,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                     label,
                     style: TextStyle(
                       fontSize: 11,
-                      color: Theme.of(context).colorScheme.onSurface
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
                           .withOpacity(0.45),
                     ),
                   ),
@@ -1864,7 +1883,9 @@ class _CreateTripPlanScreenState extends State<CreateTripPlanScreen> {
                       fontWeight: hasDate ? FontWeight.w600 : FontWeight.w400,
                       color: hasDate
                           ? Theme.of(context).colorScheme.onSurface
-                          : Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
                               .withOpacity(0.45),
                     ),
                   ),

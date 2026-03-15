@@ -357,8 +357,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 minHeight: 8,
                 backgroundColor:
                     Theme.of(context).colorScheme.surfaceContainerHighest,
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Colors.amber),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
               ),
             ),
           ],
@@ -571,7 +570,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: unlocked ? null : colorScheme.onSurface.withOpacity(0.5),
+                  color:
+                      unlocked ? null : colorScheme.onSurface.withOpacity(0.5),
                 ),
               ),
               const SizedBox(height: 12),
