@@ -8,6 +8,7 @@ import 'package:wanderer_frontend/data/services/trip_service.dart';
 import 'package:wanderer_frontend/data/models/trip_models.dart';
 import 'package:wanderer_frontend/presentation/helpers/ui_helpers.dart';
 import 'package:wanderer_frontend/presentation/screens/trip_detail_screen.dart';
+import 'package:wanderer_frontend/presentation/widgets/trip_plans/trip_from_plan_dialog.dart';
 
 /// Screen for creating a new trip with a clean, modern design
 class CreateTripScreen extends StatefulWidget {
@@ -134,55 +135,21 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   Future<void> _createTripFromPlan() async {
     if (_selectedTripPlan == null) return;
 
-    final visibility = await showDialog<Visibility>(
+    final request = await showDialog<TripFromPlanRequest>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
-        ),
-        title: const Text('Select Visibility'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildVisibilityDialogOption(
-              icon: Icons.public,
-              title: 'Public',
-              subtitle: 'Visible to everyone',
-              visibility: Visibility.public,
-            ),
-            const SizedBox(height: 4),
-            _buildVisibilityDialogOption(
-              icon: Icons.group,
-              title: 'Protected',
-              subtitle: 'Visible to friends only',
-              visibility: Visibility.protected,
-            ),
-            const SizedBox(height: 4),
-            _buildVisibilityDialogOption(
-              icon: Icons.lock,
-              title: 'Private',
-              subtitle: 'Only visible to you',
-              visibility: Visibility.private,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, null),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
+      builder: (context) => TripFromPlanDialog(
+          planName: _selectedTripPlan!.name,
+          planType: _selectedTripPlan!.planType),
     );
 
-    if (visibility == null || !mounted) return;
+    if (request == null || !mounted) return;
 
     setState(() => _isLoading = true);
 
     try {
       final tripId = await _tripService.createTripFromPlan(
         _selectedTripPlan!.id,
-        visibility,
+        request,
       );
       final trip = await _tripService.getTripById(tripId);
 
@@ -207,23 +174,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         setState(() => _isLoading = false);
       }
     }
-  }
-
-  Widget _buildVisibilityDialogOption({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Visibility visibility,
-  }) {
-    return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      leading: Icon(icon, color: WandererTheme.primaryOrange),
-      title: Text(title),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-      onTap: () => Navigator.pop(context, visibility),
-    );
   }
 
   @override

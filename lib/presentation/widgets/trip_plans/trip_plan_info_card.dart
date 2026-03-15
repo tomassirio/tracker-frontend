@@ -13,6 +13,7 @@ class TripPlanInfoCard extends StatelessWidget {
   final bool isEditing;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onCreateTrip;
 
   const TripPlanInfoCard({
     super.key,
@@ -22,6 +23,7 @@ class TripPlanInfoCard extends StatelessWidget {
     this.isEditing = false,
     this.onEdit,
     this.onDelete,
+    this.onCreateTrip,
   });
 
   @override
@@ -168,7 +170,10 @@ class TripPlanInfoCard extends StatelessWidget {
                 // Route summary
                 _buildRouteSection(),
                 // Action buttons when not editing
-                if (!isEditing && (onEdit != null || onDelete != null)) ...[
+                if (!isEditing &&
+                    (onEdit != null ||
+                        onDelete != null ||
+                        onCreateTrip != null)) ...[
                   const SizedBox(height: 16),
                   _buildActionButtons(),
                 ],
@@ -295,26 +300,43 @@ class TripPlanInfoCard extends StatelessWidget {
   }
 
   Widget _buildActionButtons() {
-    return Row(
+    return Column(
       children: [
-        if (onEdit != null)
-          Expanded(
-            child: _buildGlassButton(
-              icon: Icons.edit_outlined,
-              label: 'Edit',
-              onTap: onEdit!,
+        if (onCreateTrip != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: _buildGlassButton(
+                icon: Icons.play_arrow_rounded,
+                label: 'Create Trip',
+                onTap: onCreateTrip!,
+                isPrimary: true,
+              ),
             ),
           ),
-        if (onEdit != null && onDelete != null) const SizedBox(width: 8),
-        if (onDelete != null)
-          Expanded(
-            child: _buildGlassButton(
-              icon: Icons.delete_outline,
-              label: 'Delete',
-              onTap: onDelete!,
-              isDestructive: true,
-            ),
-          ),
+        Row(
+          children: [
+            if (onEdit != null)
+              Expanded(
+                child: _buildGlassButton(
+                  icon: Icons.edit_outlined,
+                  label: 'Edit',
+                  onTap: onEdit!,
+                ),
+              ),
+            if (onEdit != null && onDelete != null) const SizedBox(width: 8),
+            if (onDelete != null)
+              Expanded(
+                child: _buildGlassButton(
+                  icon: Icons.delete_outline,
+                  label: 'Delete',
+                  onTap: onDelete!,
+                  isDestructive: true,
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -324,6 +346,7 @@ class TripPlanInfoCard extends StatelessWidget {
     required String label,
     required VoidCallback onTap,
     bool isDestructive = false,
+    bool isPrimary = false,
   }) {
     final color = isDestructive
         ? WandererTheme.statusCancelled
@@ -337,24 +360,24 @@ class TripPlanInfoCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: isPrimary ? color : color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: isPrimary ? color : color.withOpacity(0.3),
               width: 1,
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 18, color: color),
+              Icon(icon, size: 18, color: isPrimary ? Colors.white : color),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: color,
+                  color: isPrimary ? Colors.white : color,
                 ),
               ),
             ],
