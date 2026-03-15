@@ -435,7 +435,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   Text(
                     '$_totalElements total users',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
                       fontSize: isMobile ? 12 : 14,
                     ),
                   ),
@@ -568,7 +571,11 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             padding: const EdgeInsets.all(32),
             child: Text(
               'No users found',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.6)),
             ),
           ),
         ),
@@ -678,17 +685,17 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.shade100,
+                                  color: Colors.amber.withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(4),
                                   border:
                                       Border.all(color: Colors.amber.shade700),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'ADMIN',
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.orange,
+                                    color: Colors.amber.shade700,
                                   ),
                                 ),
                               ),
@@ -700,7 +707,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                           Text(
                             '@${user.username}',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
                               fontSize: 13,
                             ),
                             maxLines: 1,
@@ -717,12 +727,22 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               // Email
               Row(
                 children: [
-                  Icon(Icons.email_outlined, size: 14, color: Colors.grey[600]),
+                  Icon(Icons.email_outlined,
+                      size: 14,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6)),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       user.email,
-                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -735,17 +755,32 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildCompactStat(Icons.map, '${user.tripsCount}', 'Trips'),
-                    Container(width: 1, height: 24, color: Colors.grey[300]),
+                    Container(
+                        width: 1,
+                        height: 24,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.12)),
                     _buildCompactStat(
                         Icons.people, '${user.followersCount}', 'Followers'),
-                    Container(width: 1, height: 24, color: Colors.grey[300]),
+                    Container(
+                        width: 1,
+                        height: 24,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.12)),
                     _buildCompactStat(
                         Icons.handshake, '${user.friendsCount}', 'Friends'),
                   ],
@@ -756,11 +791,21 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               // Join date
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 12, color: Colors.grey[500]),
+                  Icon(Icons.calendar_today,
+                      size: 12,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.5)),
                   const SizedBox(width: 4),
                   Text(
                     'Joined ${_formatDate(user.createdAt)}',
-                    style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.5)),
                   ),
                 ],
               ),
@@ -852,20 +897,21 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   Widget _buildCompactStat(IconData icon, String value, String label) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: Colors.grey[700]),
+            Icon(icon, size: 14, color: onSurface.withOpacity(0.7)),
             const SizedBox(width: 4),
             Text(
               value,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: onSurface.withOpacity(0.8),
               ),
             ),
           ],
@@ -875,7 +921,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           label,
           style: TextStyle(
             fontSize: 10,
-            color: Colors.grey[600],
+            color: onSurface.withOpacity(0.6),
           ),
         ),
       ],
@@ -913,7 +959,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             Flexible(
               child: Text(
                 '@${user.username}',
-                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.6),
+                    fontSize: 13),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -923,16 +974,16 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.amber.shade100,
+                color: Colors.amber.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(color: Colors.amber.shade400),
               ),
-              child: const Text(
+              child: Text(
                 'ADMIN',
                 style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange),
+                    color: Colors.amber.shade700),
               ),
             ),
           ],
@@ -953,7 +1004,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               const SizedBox(width: 12),
               Text(
                 'Joined ${_formatDate(user.createdAt)}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.5)),
               ),
             ],
           ),
@@ -1012,14 +1068,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   Widget _buildStatBadge(IconData icon, String value) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
+        Icon(icon, size: 14, color: onSurface.withOpacity(0.6)),
         const SizedBox(width: 2),
         Text(
           value,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 12, color: onSurface.withOpacity(0.6)),
         ),
       ],
     );

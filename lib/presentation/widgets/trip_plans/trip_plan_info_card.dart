@@ -36,13 +36,13 @@ class TripPlanInfoCard extends StatelessWidget {
       alignment: Alignment.bottomLeft,
       crossFadeState:
           isCollapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      firstChild: _buildCollapsedBubble(),
+      firstChild: _buildCollapsedBubble(context),
       secondChild: _buildExpandedCard(context),
     );
   }
 
   /// Collapsed state - floating bubble with info icon
-  Widget _buildCollapsedBubble() {
+  Widget _buildCollapsedBubble(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -56,10 +56,10 @@ class TripPlanInfoCard extends StatelessWidget {
             sigmaY: WandererTheme.glassBlurSigma,
           ),
           child: Material(
-            color: WandererTheme.glassBackground,
+            color: WandererTheme.glassBackgroundFor(context),
             shape: CircleBorder(
               side: BorderSide(
-                color: WandererTheme.glassBorderColor,
+                color: WandererTheme.glassBorderColorFor(context),
                 width: 1,
               ),
             ),
@@ -104,10 +104,10 @@ class TripPlanInfoCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: WandererTheme.glassBackground,
+              color: WandererTheme.glassBackgroundFor(context),
               borderRadius: BorderRadius.circular(WandererTheme.glassRadius),
               border: Border.all(
-                color: WandererTheme.glassBorderColor,
+                color: WandererTheme.glassBorderColorFor(context),
                 width: 1,
               ),
             ),
@@ -122,10 +122,10 @@ class TripPlanInfoCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         tripPlan.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: WandererTheme.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -133,14 +133,20 @@ class TripPlanInfoCard extends StatelessWidget {
                     // Collapse button
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
                         icon: Icon(
                           Icons.remove,
                           size: 18,
-                          color: WandererTheme.textSecondary,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                         onPressed: onToggleCollapse,
                         tooltip: 'Minimize',
@@ -156,6 +162,7 @@ class TripPlanInfoCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 // Plan type
                 _buildInfoRow(
+                  context,
                   _getPlanTypeIcon(tripPlan.planType),
                   _formatPlanType(tripPlan.planType),
                 ),
@@ -163,12 +170,13 @@ class TripPlanInfoCard extends StatelessWidget {
                 // Dates
                 if (tripPlan.startDate != null || tripPlan.endDate != null)
                   _buildInfoRow(
+                    context,
                     Icons.calendar_today,
                     _formatDateRange(),
                   ),
                 const SizedBox(height: 12),
                 // Route summary
-                _buildRouteSection(),
+                _buildRouteSection(context),
                 // Action buttons when not editing
                 if (!isEditing &&
                     (onEdit != null ||
@@ -185,7 +193,7 @@ class TripPlanInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
     return Row(
       children: [
         Icon(
@@ -199,7 +207,7 @@ class TripPlanInfoCard extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: 14,
-              color: WandererTheme.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ),
@@ -207,14 +215,14 @@ class TripPlanInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRouteSection() {
+  Widget _buildRouteSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: WandererTheme.glassBorderColor,
+          color: WandererTheme.glassBorderColorFor(context),
           width: 0.5,
         ),
       ),
@@ -225,12 +233,13 @@ class TripPlanInfoCard extends StatelessWidget {
             'Route',
             style: TextStyle(
               fontSize: 12,
-              color: WandererTheme.textTertiary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
           _buildLocationItem(
+            context,
             'Start',
             tripPlan.startLocation,
             WandererTheme.statusCreated,
@@ -250,6 +259,7 @@ class TripPlanInfoCard extends StatelessWidget {
           ],
           const SizedBox(height: 4),
           _buildLocationItem(
+            context,
             'End',
             tripPlan.endLocation,
             WandererTheme.statusCancelled,
@@ -259,7 +269,8 @@ class TripPlanInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationItem(String label, PlanLocation? location, Color color) {
+  Widget _buildLocationItem(
+      BuildContext context, String label, PlanLocation? location, Color color) {
     final hasLocation =
         location != null && location.lat != 0 && location.lon != 0;
 
@@ -279,7 +290,7 @@ class TripPlanInfoCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: WandererTheme.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Expanded(
@@ -290,8 +301,8 @@ class TripPlanInfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               color: hasLocation
-                  ? WandererTheme.textSecondary
-                  : WandererTheme.textTertiary,
+                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
             ),
           ),
         ),

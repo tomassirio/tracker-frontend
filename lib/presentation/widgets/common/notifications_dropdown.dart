@@ -374,13 +374,18 @@ class _NotificationsDropdownContentState
   }
 
   Widget _buildHeader() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Notifications',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
           const Spacer(),
           if (_unreadCount > 0)
@@ -407,16 +412,21 @@ class _NotificationsDropdownContentState
     }
 
     if (_error != null) {
+      final theme = Theme.of(context);
       return Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 36, color: Colors.grey[400]),
+            Icon(Icons.error_outline,
+                size: 36,
+                color: theme.colorScheme.onSurface.withOpacity(0.4)),
             const SizedBox(height: 8),
             Text(
               _error!,
-              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 13),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -430,25 +440,30 @@ class _NotificationsDropdownContentState
     }
 
     if (_notifications.isEmpty) {
+      final theme = Theme.of(context);
       return Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.notifications_none, size: 48, color: Colors.grey[400]),
+            Icon(Icons.notifications_none,
+                size: 48,
+                color: theme.colorScheme.onSurface.withOpacity(0.4)),
             const SizedBox(height: 12),
             Text(
               'No notifications yet',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'When you receive notifications,\nthey\'ll appear here',
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface.withOpacity(0.5)),
               textAlign: TextAlign.center,
             ),
           ],
@@ -484,6 +499,7 @@ class _NotificationsDropdownContentState
     final icon = _getNotificationIcon(notification.type);
     final color = _getNotificationColor(notification.type);
     final timeAgo = _formatTimeAgo(notification.createdAt);
+    final theme = Theme.of(context);
 
     return InkWell(
       onTap: () => _onNotificationTap(notification),
@@ -516,7 +532,7 @@ class _NotificationsDropdownContentState
                       fontWeight: notification.read
                           ? FontWeight.normal
                           : FontWeight.w600,
-                      color: Colors.black87,
+                      color: theme.colorScheme.onSurface.withOpacity(0.87),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -524,7 +540,10 @@ class _NotificationsDropdownContentState
                   const SizedBox(height: 2),
                   Text(
                     timeAgo,
-                    style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color:
+                            theme.colorScheme.onSurface.withOpacity(0.5)),
                   ),
                 ],
               ),
