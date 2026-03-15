@@ -146,11 +146,11 @@ class WebSocketEvent {
   }
 
   Map<String, dynamic> toJson() => {
-    'type': type.name,
-    'tripId': tripId,
-    'payload': payload,
-    'timestamp': timestamp.toIso8601String(),
-  };
+        'type': type.name,
+        'tripId': tripId,
+        'payload': payload,
+        'timestamp': timestamp.toIso8601String(),
+      };
 }
 
 /// Event for trip status changes
@@ -318,13 +318,13 @@ class CommentReactionEvent extends WebSocketEvent {
     required super.payload,
     super.timestamp,
   }) : super(
-         type: previousReactionType != null
-             ? WebSocketEventType.commentReactionReplaced
-             : (isRemoval
-                   ? WebSocketEventType.commentReactionRemoved
-                   : WebSocketEventType.commentReactionAdded),
-         tripId: tripId,
-       );
+          type: previousReactionType != null
+              ? WebSocketEventType.commentReactionReplaced
+              : (isRemoval
+                  ? WebSocketEventType.commentReactionRemoved
+                  : WebSocketEventType.commentReactionAdded),
+          tripId: tripId,
+        );
 
   factory CommentReactionEvent.fromJson(
     Map<String, dynamic> json, {
@@ -743,8 +743,7 @@ class NotificationCreatedEvent extends WebSocketEvent {
     final payload = json['payload'] as Map<String, dynamic>? ?? json;
 
     return NotificationCreatedEvent(
-      notificationId:
-          payload['id'] as String? ??
+      notificationId: payload['id'] as String? ??
           payload['notificationId'] as String? ??
           '',
       recipientId: payload['recipientId'] as String? ?? '',

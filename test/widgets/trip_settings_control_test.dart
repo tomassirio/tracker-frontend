@@ -64,8 +64,7 @@ void main() {
       expect(find.text('Automatic Updates'), findsOneWidget);
     });
 
-    testWidgets(
-        'switch is disabled when trip is in created status',
+    testWidgets('switch is disabled when trip is in created status',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -82,8 +81,7 @@ void main() {
         ),
       );
 
-      final switchWidget =
-          tester.widget<Switch>(find.byType(Switch));
+      final switchWidget = tester.widget<Switch>(find.byType(Switch));
       expect(switchWidget.value, true);
       expect(switchWidget.onChanged, isNull);
     });

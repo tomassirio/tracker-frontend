@@ -103,11 +103,17 @@ class _WandererAppBarState extends State<WandererAppBar> {
     _wsSubscription = null;
     _subscribedUserId = userId;
 
-    // Subscribe to the user's WebSocket topic so notification events arrive
-    // on all platforms (web + mobile). This is necessary because
-    // PushNotificationManager only subscribes on Android.
-    final userStream = _webSocketService.subscribeToUser(userId);
-    _wsSubscription = userStream.listen((event) {
+    // Ensure the WebSocket is connected (idempotent if already connected)
+    _webSocketService.connect();
+
+    // Subscribe to the user's WebSocket topic so NOTIFICATION_CREATED events
+    // arrive on all platforms (PushNotificationManager only subscribes on Android)
+    _webSocketService.subscribeToUser(userId);
+
+    // Listen on the global events stream — it receives ALL events from every
+    // subscribed topic, so it works even if the user-specific routing
+    // (recipientId matching) has an issue.
+    _wsSubscription = _webSocketService.events.listen((event) {
       if (event.type == WebSocketEventType.notificationCreated && mounted) {
         // Increment count directly for instant real-time feedback
         setState(() {
@@ -166,10 +172,11 @@ class _WandererAppBarState extends State<WandererAppBar> {
       Offset.zero & overlay.size,
     );
 
-    showNotificationsDropdown(context: context, position: position).then((
-      didRead,
-    ) {
-      if (didRead && mounted && widget.isLoggedIn) {
+    showNotificationsDropdown(context: context, position: position).then((_) {
+      // Always refresh the unread count when the dropdown closes,
+      // regardless of how it was dismissed (notification tap, "Read all",
+      // or barrier tap). This ensures the badge stays in sync.
+      if (mounted && widget.isLoggedIn) {
         _fetchUnreadCount();
       }
     });
@@ -259,8 +266,8 @@ class _WandererAppBarState extends State<WandererAppBar> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 backgroundImage:
                     widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty
-                    ? NetworkImage(widget.avatarUrl!)
-                    : null,
+                        ? NetworkImage(widget.avatarUrl!)
+                        : null,
                 child: widget.avatarUrl == null || widget.avatarUrl!.isEmpty
                     ? Text(
                         _avatarInitial,
@@ -300,13 +307,11 @@ class _WandererAppBarState extends State<WandererAppBar> {
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.primary,
-                              backgroundImage:
-                                  widget.avatarUrl != null &&
+                              backgroundImage: widget.avatarUrl != null &&
                                       widget.avatarUrl!.isNotEmpty
                                   ? NetworkImage(widget.avatarUrl!)
                                   : null,
-                              child:
-                                  widget.avatarUrl == null ||
+                              child: widget.avatarUrl == null ||
                                       widget.avatarUrl!.isEmpty
                                   ? Text(
                                       _avatarInitial,

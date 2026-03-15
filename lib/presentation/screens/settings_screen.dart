@@ -390,8 +390,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.notifications_outlined,
                   iconColor: WandererTheme.primaryOrange,
                   title: 'Push Notifications',
-                  subtitle:
-                      'Receive alerts for friend requests, comments, '
+                  subtitle: 'Receive alerts for friend requests, comments, '
                       'achievements, and other activity',
                   value: _pushEnabled,
                   onChanged: _togglePushNotifications,

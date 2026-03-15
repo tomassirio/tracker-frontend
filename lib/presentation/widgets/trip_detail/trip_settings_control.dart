@@ -182,8 +182,7 @@ class _TripSettingsControlState extends State<TripSettingsControl> {
       return const SizedBox.shrink();
     }
 
-    final bool isTripInProgress =
-        widget.tripStatus == TripStatus.inProgress;
+    final bool isTripInProgress = widget.tripStatus == TripStatus.inProgress;
 
     return Container(
       padding: const EdgeInsets.all(12),
