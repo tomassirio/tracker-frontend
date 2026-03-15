@@ -53,6 +53,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
   final WebSocketService _webSocketService = WebSocketService();
   final GlobalKey _notificationButtonKey = GlobalKey();
   StreamSubscription<WebSocketEvent>? _wsSubscription;
+  String? _subscribedUserId;
 
   @override
   void initState() {
@@ -72,9 +73,16 @@ class _WandererAppBarState extends State<WandererAppBar> {
     } else if (!widget.isLoggedIn && oldWidget.isLoggedIn) {
       _wsSubscription?.cancel();
       _wsSubscription = null;
+      _subscribedUserId = null;
       setState(() {
         _unreadCount = 0;
       });
+    } else if (widget.isLoggedIn &&
+        widget.userId != oldWidget.userId &&
+        widget.userId != null) {
+      // User ID changed while still logged in — resubscribe
+      _fetchUnreadCount();
+      _subscribeToNotificationEvents();
     }
   }
 
@@ -85,10 +93,26 @@ class _WandererAppBarState extends State<WandererAppBar> {
   }
 
   void _subscribeToNotificationEvents() {
+    final userId = widget.userId;
+    if (userId == null) return;
+
+    // Already subscribed to this user — skip
+    if (_subscribedUserId == userId && _wsSubscription != null) return;
+
     _wsSubscription?.cancel();
-    _wsSubscription = _webSocketService.events.listen((event) {
+    _wsSubscription = null;
+    _subscribedUserId = userId;
+
+    // Subscribe to the user's WebSocket topic so notification events arrive
+    // on all platforms (web + mobile). This is necessary because
+    // PushNotificationManager only subscribes on Android.
+    final userStream = _webSocketService.subscribeToUser(userId);
+    _wsSubscription = userStream.listen((event) {
       if (event.type == WebSocketEventType.notificationCreated && mounted) {
-        _fetchUnreadCount();
+        // Increment count directly for instant real-time feedback
+        setState(() {
+          _unreadCount++;
+        });
       }
     });
   }
