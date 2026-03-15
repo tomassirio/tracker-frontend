@@ -296,5 +296,78 @@ void main() {
 
       searchController.dispose();
     });
+
+    testWidgets('cleans up timers on dispose without errors', (
+      WidgetTester tester,
+    ) async {
+      final searchController = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: WandererAppBar(
+              searchController: searchController,
+              isLoggedIn: true,
+              username: 'testuser',
+              userId: 'user-123',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Replace with a different widget to trigger dispose
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: Text('replaced')),
+        ),
+      );
+      await tester.pump();
+
+      // Should not throw any errors
+      expect(find.text('replaced'), findsOneWidget);
+
+      searchController.dispose();
+    });
+
+    testWidgets('resubscribes when userId changes while logged in', (
+      WidgetTester tester,
+    ) async {
+      final searchController = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: WandererAppBar(
+              searchController: searchController,
+              isLoggedIn: true,
+              username: 'user1',
+              userId: 'user-1',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Change user ID
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: WandererAppBar(
+              searchController: searchController,
+              isLoggedIn: true,
+              username: 'user2',
+              userId: 'user-2',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Should still show notification icon (still logged in)
+      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+
+      searchController.dispose();
+    });
   });
 }

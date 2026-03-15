@@ -54,6 +54,24 @@ class _WandererAppBarState extends State<WandererAppBar> {
   final GlobalKey _notificationButtonKey = GlobalKey();
   StreamSubscription<WebSocketEvent>? _wsSubscription;
   String? _subscribedUserId;
+  Timer? _pollTimer;
+  Timer? _debounceTimer;
+
+  /// Event types that typically generate a notification on the backend.
+  /// When any of these arrive we debounce-refresh the unread count from the API.
+  static const _notificationTriggerEvents = {
+    WebSocketEventType.commentAdded,
+    WebSocketEventType.userFollowed,
+    WebSocketEventType.friendRequestSent,
+    WebSocketEventType.friendRequestAccepted,
+    WebSocketEventType.friendRequestDeclined,
+    WebSocketEventType.friendshipCreated,
+    WebSocketEventType.tripStatusChanged,
+    WebSocketEventType.tripUpdateCreated,
+    WebSocketEventType.commentReactionAdded,
+    WebSocketEventType.commentReactionReplaced,
+    WebSocketEventType.commentReaction,
+  };
 
   @override
   void initState() {
@@ -71,9 +89,7 @@ class _WandererAppBarState extends State<WandererAppBar> {
       _fetchUnreadCount();
       _subscribeToNotificationEvents();
     } else if (!widget.isLoggedIn && oldWidget.isLoggedIn) {
-      _wsSubscription?.cancel();
-      _wsSubscription = null;
-      _subscribedUserId = null;
+      _cancelSubscriptions();
       setState(() {
         _unreadCount = 0;
       });
@@ -88,8 +104,18 @@ class _WandererAppBarState extends State<WandererAppBar> {
 
   @override
   void dispose() {
-    _wsSubscription?.cancel();
+    _cancelSubscriptions();
     super.dispose();
+  }
+
+  void _cancelSubscriptions() {
+    _wsSubscription?.cancel();
+    _wsSubscription = null;
+    _pollTimer?.cancel();
+    _pollTimer = null;
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _subscribedUserId = null;
   }
 
   void _subscribeToNotificationEvents() {
@@ -101,24 +127,61 @@ class _WandererAppBarState extends State<WandererAppBar> {
 
     _wsSubscription?.cancel();
     _wsSubscription = null;
+    _pollTimer?.cancel();
+    _debounceTimer?.cancel();
     _subscribedUserId = userId;
 
-    // Ensure the WebSocket is connected (idempotent if already connected)
-    _webSocketService.connect();
+    // Start periodic polling as a reliable fallback.
+    // This ensures the badge updates even when the WebSocket connection
+    // is unavailable (e.g. dev server, firewall, or backend doesn't send
+    // NOTIFICATION_CREATED events).
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted && widget.isLoggedIn) {
+        _fetchUnreadCount();
+      }
+    });
+
+    // Kick off WebSocket connect + subscribe asynchronously
+    _connectAndSubscribe(userId);
+  }
+
+  Future<void> _connectAndSubscribe(String userId) async {
+    // Ensure the WebSocket is connected before subscribing.
+    // Awaiting avoids the race where subscribeToUser runs before the
+    // connection is established and _handleConnectionStateChange has
+    // already fired for pending subscriptions.
+    await _webSocketService.connect();
+
+    if (!mounted || _subscribedUserId != userId) return;
 
     // Subscribe to the user's WebSocket topic so NOTIFICATION_CREATED events
     // arrive on all platforms (PushNotificationManager only subscribes on Android)
     _webSocketService.subscribeToUser(userId);
 
     // Listen on the global events stream — it receives ALL events from every
-    // subscribed topic, so it works even if the user-specific routing
-    // (recipientId matching) has an issue.
+    // subscribed topic.
     _wsSubscription = _webSocketService.events.listen((event) {
-      if (event.type == WebSocketEventType.notificationCreated && mounted) {
-        // Increment count directly for instant real-time feedback
+      if (!mounted) return;
+
+      if (event.type == WebSocketEventType.notificationCreated) {
+        // Explicit notification event → increment immediately
         setState(() {
           _unreadCount++;
         });
+      } else if (_notificationTriggerEvents.contains(event.type)) {
+        // Other events that typically create a notification on the backend.
+        // Debounce an API refresh so we don't fire for every single event.
+        _debounceFetchUnreadCount();
+      }
+    });
+  }
+
+  /// Debounce the unread count fetch so rapid-fire events only trigger one call.
+  void _debounceFetchUnreadCount() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted && widget.isLoggedIn) {
+        _fetchUnreadCount();
       }
     });
   }
