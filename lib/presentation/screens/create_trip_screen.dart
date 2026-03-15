@@ -261,7 +261,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.surface : Colors.transparent,
+          color: isSelected
+              ? Theme.of(context).colorScheme.surface
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           boxShadow: isSelected
               ? [
@@ -314,16 +316,22 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             controller: _titleController,
             decoration: InputDecoration(
               hintText: 'e.g., European Summer Adventure',
-              hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+              hintStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+              ),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -354,16 +362,22 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             controller: _descriptionController,
             decoration: InputDecoration(
               hintText: 'Tell us about your trip... (optional)',
-              hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+              hintStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+              ),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -404,7 +418,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+        ),
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -539,11 +555,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? WandererTheme.primaryOrange : Theme.of(context).colorScheme.surface,
+          color: isSelected ? WandererTheme.primaryOrange
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color:
-                isSelected ? WandererTheme.primaryOrange : Theme.of(context).colorScheme.outline,
+            color: isSelected
+                ? WandererTheme.primaryOrange
+                : Theme.of(context).colorScheme.outline,
           ),
         ),
         child: Row(
@@ -552,7 +570,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: isSelected ? Colors.white
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
             const SizedBox(width: 6),
             Text(
@@ -560,7 +579,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: isSelected ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
@@ -643,11 +663,17 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     fillColor: Theme.of(context).colorScheme.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outline
+                            .withOpacity(0.3),
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outline
+                            .withOpacity(0.3),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -709,7 +735,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            ),
           ),
           child: Column(
             children: [
@@ -718,7 +746,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 if (i < _tripPlans.length - 1)
                   Divider(
                     height: 1,
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
                     indent: 16,
                     endIndent: 16,
                   ),
@@ -773,7 +803,10 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                           isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: isSelected
                           ? Theme.of(context).colorScheme.onSurface
-                          : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -781,7 +814,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     _formatPlanType(plan.planType),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                      color: Theme.of(context).colorScheme.onSurface
+                          .withOpacity(0.45),
                     ),
                   ),
                 ],
@@ -846,7 +880,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 'Dates: ${_formatDate(plan.startDate!)} \u2013 ${_formatDate(plan.endDate!)}',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface
+                      .withOpacity(0.6),
                 ),
               ),
             ),
@@ -875,7 +910,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+          ),
         ),
       ),
       child: SizedBox(
@@ -886,7 +923,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: WandererTheme.primaryOrange,
             foregroundColor: Colors.white,
-            disabledBackgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+            disabledBackgroundColor:
+                Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
